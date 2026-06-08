@@ -1,0 +1,10 @@
+# Frontline papers for smartphone-decimeter-2022.
+# These anchor the task around smartphone GNSS positioning, sensor fusion, and robust trajectory estimation.
+# Their combined reference lists form the prompt for the proposal model.
+
+# Humphreys et al. 2020 - Design and Implementation of a High-Accuracy Positioning System Using RTK on Smartphones
+2002.05857
+# Luo et al. 2021 - Supporting GNSS Baseband Using Smartphone IMU and Ultra-Tight Integration
+2111.02613
+# Han et al. 2022 - Multi-layer VI-GNSS Global Positioning Framework with Numerical Solution aided MAP Initialization
+2201.01561

@@ -1,0 +1,20 @@
+[
+  {
+    "arxiv_id": "1607.01759",
+    "title": "Bag of Tricks for Efficient Text Classification",
+    "year": 2016,
+    "abstract": "This paper explores a simple and efficient baseline for text classification. The method uses a bag of words and bag of n-grams representation, followed by a linear classifier, and can be trained very quickly while achieving competitive performance on standard text classification and sentiment analysis benchmarks. The approach is implemented in fastText and demonstrates that carefully engineered shallow models remain strong baselines for many supervised text classification tasks."
+  },
+  {
+    "arxiv_id": "1801.06146",
+    "title": "Universal Language Model Fine-tuning for Text Classification",
+    "year": 2018,
+    "abstract": "Inductive transfer learning has greatly impacted computer vision, but existing NLP approaches often require task-specific architectures and large labeled datasets. Universal Language Model Fine-tuning (ULMFiT) introduces techniques for fine-tuning a pretrained language model for text classification, including discriminative fine-tuning, slanted triangular learning rates, and gradual unfreezing. It achieves strong results across text classification tasks with much less labeled data."
+  },
+  {
+    "arxiv_id": "1908.10084",
+    "title": "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
+    "year": 2019,
+    "abstract": "BERT and RoBERTa provide strong token-level representations but are computationally expensive for semantic similarity search. Sentence-BERT modifies pretrained BERT networks with siamese and triplet structures to derive semantically meaningful sentence embeddings that can be compared with cosine similarity. The resulting embeddings enable efficient semantic textual similarity, clustering, and retrieval while maintaining strong accuracy."
+  }
+]

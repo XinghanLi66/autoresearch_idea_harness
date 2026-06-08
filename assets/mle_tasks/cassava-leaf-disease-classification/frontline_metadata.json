@@ -1,0 +1,20 @@
+[
+  {
+    "arxiv_id": "1908.02900",
+    "title": "iCassava 2019Fine-Grained Visual Categorization Challenge",
+    "year": 2019,
+    "abstract": "Viral diseases are major sources of poor yields for cassava, the 2nd largest provider of carbohydrates in this http URL least 80% of small-holder farmer households in Sub-Saharan Africa grow cassava. Since many of these farmers have smart phones, they can easily obtain photos of dis-eased and healthy cassava leaves in their farms, allowing the opportunity to use computer vision techniques to monitor the disease type and severity and increase yields. How-ever, annotating these images is extremely difficult as ex-perts who are able to distinguish between highly similar dis-eases need to be employed. We provide a dataset of labeled and unlabeled cassava leaves and formulate a Kaggle challenge to encourage participants to improve the performance of their algorithms using semi-supervised approaches. This paper describes our dataset and challenge which is part of the Fine-Grained Visual Categorization workshop at CVPR2019."
+  },
+  {
+    "arxiv_id": "1905.11946",
+    "title": "EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",
+    "year": 2019,
+    "abstract": "Convolutional Neural Networks (ConvNets) are commonly developed at a fixed resource budget, and then scaled up for better accuracy if more resources are available. In this paper, we systematically study model scaling and identify that carefully balancing network depth, width, and resolution can lead to better performance. Based on this observation, we propose a new scaling method that uniformly scales all dimensions of depth/width/resolution using a simple yet highly effective compound coefficient. We demonstrate the effectiveness of this method on scaling up MobileNets and ResNet. \nTo go even further, we use neural architecture search to design a new baseline network and scale it up to obtain a family of models, called EfficientNets, which achieve much better accuracy and efficiency than previous ConvNets. In particular, our EfficientNet-B7 achieves state-of-the-art 84.4% top-1 / 97.1% top-5 accuracy on ImageNet, while being 8.4x smaller and 6.1x faster on inference than the best existing ConvNet. Our EfficientNets also transfer well and achieve state-of-the-art accuracy on CIFAR-100 (91.7%), Flowers (98.8%), and 3 other transfer learning datasets, with an order of magnitude fewer parameters. Source code is at this https URL."
+  },
+  {
+    "arxiv_id": "2103.14030",
+    "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+    "year": 2021,
+    "abstract": "This paper presents a new vision Transformer, called Swin Transformer, that capably serves as a general-purpose backbone for computer vision. Challenges in adapting Transformer from language to vision arise from differences between the two domains, such as large variations in the scale of visual entities and the high resolution of pixels in images compared to words in text. To address these differences, we propose a hierarchical Transformer whose representation is computed with shifted windows. The shifted windowing scheme brings greater efficiency by limiting self-attention computation to non-overlapping local windows while also allowing for cross-window connection. This hierarchical architecture has the flexibility to model at various scales and has linear computational complexity with respect to image size. These qualities of Swin Transformer make it compatible with a broad range of vision tasks, including image classification, object detection, and semantic segmentation. Its performance surpasses the previous state-of-the-art by a large margin, demonstrating the potential of Transformer-based models as vision backbones."
+  }
+]

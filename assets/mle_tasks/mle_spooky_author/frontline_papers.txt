@@ -1,0 +1,10 @@
+# Frontline papers for mle_spooky_author (NLP text classification).
+# These are the papers behind modern text classification baselines.
+# Their combined reference lists form the prompt for the proposal model.
+
+# Joulin et al. 2016 - Bag of Tricks for Efficient Text Classification (fastText)
+1607.01759
+# Howard & Ruder 2018 - Universal Language Model Fine-Tuning (ULMFiT)
+1801.06146
+# Reimers & Gurevych 2019 - Sentence-BERT: Sentence Embeddings using Siamese Networks
+1908.10084

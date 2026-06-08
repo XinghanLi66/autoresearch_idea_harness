@@ -1,0 +1,10 @@
+# Frontline papers for jigsaw-unintended-bias-in-toxicity-classification.
+# These anchor the task around bias-aware toxicity metrics and modern text classifiers.
+# Their combined reference lists form the prompt for the proposal model.
+
+# Borkan et al. 2019 - Nuanced Metrics for Measuring Unintended Bias with Real Data for Text Classification
+1903.04561
+# Devlin et al. 2018 - BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
+1810.04805
+# Liu et al. 2019 - RoBERTa: A Robustly Optimized BERT Pretraining Approach
+1907.11692

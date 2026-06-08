@@ -1,0 +1,10 @@
+# Frontline papers for petfinder-pawpularity-score.
+# These anchor the task around image regression, metadata fusion, and strong pretrained vision backbones.
+# Their combined reference lists form the prompt for the proposal model.
+
+# Tan & Le 2019 - EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks
+1905.11946
+# Liu et al. 2021 - Swin Transformer: Hierarchical Vision Transformer using Shifted Windows
+2103.14030
+# Wang & Liu 2022 - PETS-SWINF: Image and metadata neural regression for PetFinder Pawpularity
+2201.06061

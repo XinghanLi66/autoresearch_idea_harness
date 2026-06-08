@@ -1,0 +1,130 @@
+project_root: /newcpfs/lxh/agentic-training/autoresearch_idea_harness
+repo_root: /newcpfs/lxh/agentic-training
+proposal_rl_root: /newcpfs/lxh/agentic-training/proposal_rl
+mls_bench_root: /newcpfs/lxh/MLS-Bench
+mle_data_dir: /newcpfs/lxh/LoongFlow/output/mlebench
+benchmark_python: /newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python
+
+classified_papers: /newcpfs/lxh/agentic-training/data/arxiv_tex_classified/v1/papers.jsonl
+dataset_dir: /newcpfs/lxh/agentic-training/proposal_rl/runs/dataset
+arxiv_root: /newcpfs/lxh/agentic-training/data/arxiv/papers
+runs_dir: /newcpfs/lxh/agentic-training/autoresearch_idea_harness/runs
+scan_arxiv_metadata: false
+
+llm:
+  runway_base_url: https://runway.devops.rednote.life
+  chat_api_version: 2024-12-01-preview
+  timeout: 300
+  proposal_temperature: 0.7
+  proposal_max_tokens: 2600
+  expert_temperature: 0.2
+  expert_max_tokens: 1600
+
+paper_bank:
+  splits: [train, val, test]
+  max_ref_tex_chars: 12000
+  max_snippets_per_ref: 4
+  snippet_char_limit: 1800
+
+evidence_packets:
+  version: v1
+  route: tex_target_with_ref_detail
+  paper_types: [method_algorithm, system_tooling]
+  top_k_refs: 5
+  min_refs: 1
+  require_ref_tex: true
+  min_ref_tex_snippets: 1
+  max_ref_snippets_per_packet: 12
+  default_limit: 100
+
+proposal_batches:
+  proposals_per_packet: 4
+  generators:
+    - runway_opus47_proposal
+  runway_generators:
+    runway_opus47_proposal:
+      key_env: RUNWAY_OPUS47_API_KEY
+      model_env: RUNWAY_OPUS47_MODEL
+      model: claude-opus-4-7
+      endpoint: google_anthropic
+      temperature: null
+      max_tokens: 2600
+    runway_opus48_proposal:
+      key_env: RUNWAY_OPUS48_API_KEY
+      model_env: RUNWAY_OPUS48_MODEL
+      model: claude-opus-4-8
+      endpoint: google_anthropic
+      temperature: null
+      max_tokens: 2600
+
+market:
+  success_definition: >
+    Probability that, if implemented by a competent worker, this proposal would
+    exceed the stated baseline or produce a clear measurable improvement on the
+    relevant task/metric.
+  llm_experts:
+    - id: opus47
+      key_env: RUNWAY_OPUS47_API_KEY
+      model_env: RUNWAY_OPUS47_MODEL
+      model: claude-opus-4-7
+      endpoint: google_anthropic
+      temperature: null
+      max_tokens: 1600
+    - id: gpt55
+      key_env: RUNWAY_GPT55_API_KEY
+      model_env: RUNWAY_GPT55_MODEL
+      model: gpt-5.5
+      endpoint: responses
+      temperature: null
+      max_tokens: 1600
+
+end_to_end:
+  gate_threshold: 0.5
+  default_task: dl_activation_function
+  default_subtask: resnet20-cifar10
+  default_n_proposals: 3
+  default_experts: [opus47, gpt55]
+  claude_cmd: /newcpfs/lxh/claude-home-agent1/run_claude.sh
+  worker_timeout: 7200
+  max_turns: 30
+  max_master_advice: 1
+
+v2_3:
+  formal_sweep_root: /newcpfs/lxh/agentic-training/autoresearch_idea_harness/runs/formal_sweeps/v2_3_mls10_modules9
+  tasks:
+    - dl_lr_schedule
+    - dl_activation_function
+    - cv_data_augmentation
+    - dl_weight_initialization
+    - cv_classification_loss
+    - cv_sample_weighting
+    - cv_pooling_aggregation
+    - cv_multitask_loss
+    - dl_regularization
+    - dl_residual_connection
+  modules:
+    - empty_worker_only
+    - opus47_master
+    - qwen25_7b_base_with_research_question
+    - exp09_top_k_related_work
+    - exp11_top_k_related_work
+    - exp12_with_research_question
+    - exp13_top_k_refs
+    - exp16_top_k_refs
+    - exp17_with_research_question
+  task_thresholds:
+    dl_lr_schedule:
+      resnet20-cifar10:
+        baseline_metric: 92.71
+        pass_metric: 93.19
+        source: redoc_260605_worker_only_best
+    dl_activation_function:
+      resnet20-cifar10:
+        baseline_metric: 92.97
+        pass_metric: 93.35
+        source: redoc_260605_worker_only_best
+    cv_data_augmentation:
+      resnet20-cifar10:
+        baseline_metric: 93.67
+        pass_metric: 93.76
+        source: redoc_260605_worker_only_best

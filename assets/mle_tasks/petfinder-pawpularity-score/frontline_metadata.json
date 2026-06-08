@@ -1,0 +1,20 @@
+[
+  {
+    "arxiv_id": "1905.11946",
+    "title": "EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",
+    "year": 2019,
+    "abstract": "Convolutional Neural Networks (ConvNets) are commonly developed at a fixed resource budget, and then scaled up for better accuracy if more resources are available. In this paper, we systematically study model scaling and identify that carefully balancing network depth, width, and resolution can lead to better performance. Based on this observation, we propose a new scaling method that uniformly scales all dimensions of depth/width/resolution using a simple yet highly effective compound coefficient. We demonstrate the effectiveness of this method on scaling up MobileNets and ResNet. \nTo go even further, we use neural architecture search to design a new baseline network and scale it up to obtain a family of models, called EfficientNets, which achieve much better accuracy and efficiency than previous ConvNets. In particular, our EfficientNet-B7 achieves state-of-the-art 84.4% top-1 / 97.1% top-5 accuracy on ImageNet, while being 8.4x smaller and 6.1x faster on inference than the best existing ConvNet. Our EfficientNets also transfer well and achieve state-of-the-art accuracy on CIFAR-100 (91.7%), Flowers (98.8%), and 3 other transfer learning datasets, with an order of magnitude fewer parameters. Source code is at this https URL."
+  },
+  {
+    "arxiv_id": "2103.14030",
+    "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+    "year": 2021,
+    "abstract": "This paper presents a new vision Transformer, called Swin Transformer, that capably serves as a general-purpose backbone for computer vision. Challenges in adapting Transformer from language to vision arise from differences between the two domains, such as large variations in the scale of visual entities and the high resolution of pixels in images compared to words in text. To address these differences, we propose a hierarchical Transformer whose representation is computed with shifted windows. The shifted windowing scheme brings greater efficiency by limiting self-attention computation to non-overlapping local windows while also allowing for cross-window connection. This hierarchical architecture has the flexibility to model at various scales and has linear computational complexity with respect to image size. These qualities of Swin Transformer make it compatible with a broad range of vision tasks, including image classification, object detection, and semantic segmentation. Its performance surpasses the previous state-of-the-art by a large margin, demonstrating the potential of Transformer-based models as vision backbones."
+  },
+  {
+    "arxiv_id": "2201.06061",
+    "title": "PETS-SWINF: A regression method that considers images with metadata based Neural Network for pawpularity prediction on 2021 Kaggle Competition \"PetFinder.my\"",
+    "year": 2022,
+    "abstract": "Millions of stray animals suffer on the streets or are euthanized in shelters every day around the world. In order to better adopt stray animals, scoring the pawpularity of stray animals is very important, but evaluating the pawpularity of animals is a very labor-intensive thing. Consequently, there has been an urgent surge of interest to develop an algorithm that scores pawpularity of animals. However, the dataset in Kaggle not only has images, but also metadata describing images. Most methods basically focus on the most advanced image regression methods in recent years, but there is no good method to deal with the metadata of images. To address the above challenges, the paper proposes an image regression model called PETS-SWINF that considers metadata of the images. Results on the Kaggle PetFinder.my dataset show that PETS-SWINF has an advantage over image-only models by adaptively combining low-order and high-order metadata features with image predictions."
+  }
+]
