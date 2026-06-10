@@ -1,0 +1,9 @@
+# Frontline papers for dl-weight-initialization task.
+# These are the papers behind the reference baselines (kaiming_normal, orthogonal, fixup).
+# Their combined reference lists form the prompt for the proposal model.
+# He et al. 2015 - Delving Deep into Rectifiers / Kaiming initialization
+1502.01852
+# Saxe et al. 2013 - Exact solutions in deep linear networks / orthogonal initialization
+1312.6120
+# Zhang et al. 2019 - Fixup Initialization: Residual Learning Without Normalization
+1901.09321

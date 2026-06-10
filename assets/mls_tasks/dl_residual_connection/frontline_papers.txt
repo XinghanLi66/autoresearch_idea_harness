@@ -1,0 +1,9 @@
+# Frontline papers for dl-residual-connection task.
+# These are the papers behind residual, pre-activation, and stochastic-depth baselines.
+# Their combined reference lists form the prompt for the proposal model.
+# He et al. 2015 - Deep Residual Learning for Image Recognition
+1512.03385
+# He et al. 2016 - Identity Mappings in Deep Residual Networks
+1603.05027
+# Huang et al. 2016 - Deep Networks with Stochastic Depth
+1603.09382

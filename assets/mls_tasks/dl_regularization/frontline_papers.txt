@@ -1,0 +1,9 @@
+# Frontline papers for dl-regularization task.
+# These are the papers behind spatial, output-confidence, and weight-spectrum regularizers.
+# Their combined reference lists form the prompt for the proposal model.
+# Ghiasi et al. 2018 - DropBlock: A regularization method for convolutional networks
+1810.12890
+# Pereyra et al. 2017 - Regularizing Neural Networks by Penalizing Confident Output Distributions
+1701.06548
+# Miyato et al. 2018 - Spectral Normalization for Generative Adversarial Networks
+1802.05957

@@ -1,0 +1,9 @@
+# Frontline papers for cv-pooling-aggregation task.
+# These papers cover trainable pooling and attention-style feature aggregation.
+# Their combined reference lists form the prompt for the proposal model.
+# Radenovic et al. 2017 - Fine-tuning CNN Image Retrieval / GeM pooling
+1711.02512
+# Hu et al. 2017 - Squeeze-and-Excitation Networks
+1709.01507
+# Woo et al. 2018 - CBAM: Convolutional Block Attention Module
+1807.06521

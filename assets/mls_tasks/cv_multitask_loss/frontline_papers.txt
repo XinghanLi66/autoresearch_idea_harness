@@ -1,0 +1,9 @@
+# Frontline papers for cv-multitask-loss task.
+# These are the papers behind loss weighting and gradient-conflict baselines.
+# Their combined reference lists form the prompt for the proposal model.
+# Kendall et al. 2017 - Multi-Task Learning Using Uncertainty to Weigh Losses
+1705.07115
+# Liu et al. 2018 - End-to-End Multi-Task Learning with Attention
+1803.10704
+# Yu et al. 2020 - Gradient Surgery for Multi-Task Learning / PCGrad
+2001.06782

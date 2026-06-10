@@ -1,0 +1,9 @@
+# Frontline papers for cv-classification-loss task.
+# These are the papers behind the reference baselines (label smoothing, focal loss, PolyLoss).
+# Their combined reference lists form the prompt for the proposal model.
+# Szegedy et al. 2015 - Rethinking the Inception Architecture / label smoothing
+1512.00567
+# Lin et al. 2017 - Focal Loss for Dense Object Detection
+1708.02002
+# Leng et al. 2022 - PolyLoss: A Polynomial Expansion Perspective of Classification Loss Functions
+2204.12511

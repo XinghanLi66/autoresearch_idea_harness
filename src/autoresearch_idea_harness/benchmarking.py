@@ -721,6 +721,36 @@ def frontline_ids_from_asset(group: str, task_name: str) -> list[str]:
     ]
 
 
+def frontline_hints_from_asset(group: str, task_name: str) -> dict[str, dict[str, Any]]:
+    path = asset_dir(group, task_name) / "frontline_papers.txt"
+    if not path.exists():
+        return {}
+    hints: dict[str, dict[str, Any]] = {}
+    pending_comment = ""
+    for raw_line in path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if line.startswith("#"):
+            pending_comment = line.lstrip("#").strip()
+            continue
+        if not pending_comment:
+            continue
+        hint: dict[str, Any] = {}
+        m = re.search(r"\b(19|20)\d{2}\b", pending_comment)
+        if m:
+            hint["year"] = int(m.group(0))
+        if " - " in pending_comment:
+            title = pending_comment.rsplit(" - ", 1)[-1].strip()
+            if title:
+                hint["title"] = title
+        elif pending_comment:
+            hint["title"] = pending_comment
+        if hint:
+            hints[line] = hint
+    return hints
+
+
 def load_frontline_papers(task_name: str, cfg: dict[str, Any]) -> list[dict[str, Any]]:
     group = "mle_tasks" if task_name in {
         "mle_spooky_author",
@@ -738,14 +768,16 @@ def load_frontline_papers(task_name: str, cfg: dict[str, Any]) -> list[dict[str,
                     metadata[row["arxiv_id"]] = row
         except Exception:
             metadata = {}
+    hints = frontline_hints_from_asset(group, task_name)
     out = []
     for arxiv_id in frontline_ids_from_asset(group, task_name):
         meta = metadata.get(arxiv_id) or find_arxiv_metadata(arxiv_id, cfg)
+        hint = hints.get(arxiv_id) or {}
         out.append({
             "arxiv_id": arxiv_id,
-            "title": meta.get("title") or f"[{arxiv_id}]",
+            "title": meta.get("title") or hint.get("title") or f"[{arxiv_id}]",
             "abstract": short_text(meta.get("abstract", ""), 1200),
-            "year": meta.get("year") or year_from_metadata(meta),
+            "year": meta.get("year") or year_from_metadata(meta) or hint.get("year"),
         })
     return out
 
