@@ -219,7 +219,7 @@ class V3TrainingDashboard(App):
         if item.get("kind") == "precomputed_worker_eval_plan":
             return f"dry={int(bool(item.get('ready_to_dry_run')))} submit={int(bool(item.get('ready_to_submit')))}"
         if item.get("kind") == "precomputed_worker_eval_result":
-            return f"passed={item.get('passed')} pass_metric={item.get('pass_metric', '-')}"
+            return f"{item.get('result_kind', 'unknown')} passed={item.get('passed')} pass_metric={item.get('pass_metric', '-')}"
         return ""
 
     def _item_status(self, item: dict[str, Any]) -> str:
@@ -301,6 +301,8 @@ class V3TrainingDashboard(App):
                 return "needs-quota"
             return "planned"
         if item.get("kind") == "precomputed_worker_eval_result":
+            if item.get("result_kind") in {"error", "fixture", "skipped", "incomplete"}:
+                return str(item.get("result_kind"))
             if item.get("error"):
                 return "error"
             return str(item.get("worker_status") or "present")
@@ -321,6 +323,7 @@ class V3TrainingDashboard(App):
                 },
                 "proposal_batch_qualities": self.status.get("proposal_batch_qualities"),
                 "precomputed_worker_eval_plans": self.status.get("precomputed_worker_eval_plans"),
+                "precomputed_worker_eval_real_results": self.status.get("precomputed_worker_eval_real_results"),
                 "precomputed_worker_eval_results": self.status.get("precomputed_worker_eval_results"),
                 "next_actions": self.status.get("next_actions"),
                 "training_data_root": str(self.training_data_root),

@@ -512,12 +512,30 @@ def summarize_precomputed_worker_eval_result(path: Path) -> dict[str, Any] | Non
     if not summary:
         return None
     worker = summary.get("worker_result") or {}
-    result = _load_json(path / "result.json")
+    result_path = path / "result.json"
+    result = _load_json(result_path)
     parsed = result.get("_parsed") or {}
+    raw_result = parsed.get("raw_result") or {}
+    worker_status = worker.get("status") or parsed.get("status")
+    fixture = bool(result.get("fixture") or raw_result.get("fixture"))
+    if fixture:
+        result_kind = "fixture"
+    elif worker_status == "skipped" or "skip_smoke" in path.parts:
+        result_kind = "skipped"
+    elif worker_status == "error" or (path / "error.json").exists():
+        result_kind = "error"
+    elif not result_path.exists() and not worker_status:
+        result_kind = "incomplete"
+    elif "fixture_smoke" in path.parts:
+        result_kind = "fixture"
+    else:
+        result_kind = "real"
     return {
         "kind": "precomputed_worker_eval_result",
         "name": path.name,
         "path": str(path),
+        "result_kind": result_kind,
+        "fixture": fixture,
         "run_id": summary.get("run_id"),
         "sample_id": summary.get("sample_id") or path.name,
         "task": summary.get("task"),
@@ -529,7 +547,7 @@ def summarize_precomputed_worker_eval_result(path: Path) -> dict[str, Any] | Non
         "pass_metric": summary.get("pass_metric"),
         "source_quality_score": summary.get("source_quality_score"),
         "source_quality_verdict": summary.get("source_quality_verdict"),
-        "worker_status": worker.get("status") or parsed.get("status"),
+        "worker_status": worker_status,
         "val_metric": worker.get("val_metric") or parsed.get("val_metric"),
         "improvement": worker.get("improvement") or parsed.get("improvement"),
         "passed": worker.get("passed") if "passed" in worker else parsed.get("passed"),
@@ -708,6 +726,9 @@ def collect_v3_status(
             item = summarize_precomputed_worker_eval_result(summary_path.parent)
             if item:
                 precomputed_worker_eval_results.append(item)
+    precomputed_worker_eval_real_results = [
+        item for item in precomputed_worker_eval_results if item.get("result_kind") == "real"
+    ]
 
     registry_status = _base_model_registry_status(cfg)
     discovery_path = discovery_report_path or runs_root / "reports" / "v3_base_model_candidates.json"
@@ -730,6 +751,7 @@ def collect_v3_status(
             "proposal_batch_qualities": len(proposal_batch_qualities),
             "precomputed_worker_eval_plans": len(precomputed_worker_eval_plans),
             "precomputed_worker_eval_results": len(precomputed_worker_eval_results),
+            "precomputed_worker_eval_real_results": len(precomputed_worker_eval_real_results),
             "v2_3_first_reports": int(bool(v2_3_first_report.get("exists"))),
         },
         "base_model_registry": registry_status,
@@ -747,6 +769,7 @@ def collect_v3_status(
         "proposal_batch_qualities": proposal_batch_qualities,
         "precomputed_worker_eval_plans": precomputed_worker_eval_plans,
         "precomputed_worker_eval_results": precomputed_worker_eval_results,
+        "precomputed_worker_eval_real_results": precomputed_worker_eval_real_results,
         "next_actions": infer_next_actions(
             manifests,
             targets,
@@ -1021,7 +1044,7 @@ def render_v3_markdown(status: dict[str, Any]) -> str:
     for item in status.get("precomputed_worker_eval_results") or []:
         lines.append(
             f"- Result `{item['name']}`: task={item.get('task')}/{item.get('subtask')} "
-            f"status={item.get('worker_status')} passed={item.get('passed')} "
+            f"kind={item.get('result_kind')} status={item.get('worker_status')} passed={item.get('passed')} "
             f"metric={item.get('val_metric')} pass_metric={item.get('pass_metric')} "
             f"source_quality={item.get('source_quality_verdict')}:{item.get('source_quality_score')}"
         )
