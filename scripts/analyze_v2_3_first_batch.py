@@ -12,6 +12,33 @@ from statistics import mean, median
 from typing import Any
 
 
+EXPECTED_TASKS = [
+    "dl_lr_schedule",
+    "dl_activation_function",
+    "cv_data_augmentation",
+    "dl_weight_initialization",
+    "cv_classification_loss",
+    "cv_sample_weighting",
+    "cv_pooling_aggregation",
+    "cv_multitask_loss",
+    "dl_regularization",
+    "dl_residual_connection",
+]
+
+
+EXPECTED_MODULES = [
+    "empty_worker_only",
+    "opus47_master",
+    "qwen25_7b_base_with_research_question",
+    "exp09_top_k_related_work",
+    "exp11_top_k_related_work",
+    "exp12_with_research_question",
+    "exp13_top_k_refs",
+    "exp16_top_k_refs",
+    "exp17_with_research_question",
+]
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -55,15 +82,21 @@ def fmt_pct(value: float | None) -> str:
 
 
 def sample_sort_key(path: Path) -> tuple[str, str, int]:
-    parts = path.name.split("__")
-    sample = parts[-1] if parts else "s00"
+    task, _subtask, module, sample = parse_sample_name(path.name)
     try:
         idx = int(sample.lstrip("s"))
     except Exception:
         idx = 0
-    task = parts[0] if parts else ""
-    module = parts[2] if len(parts) > 2 else ""
     return task, module, idx
+
+
+def parse_sample_name(name: str) -> tuple[str, str, str, str]:
+    parts = name.split("__")
+    task = parts[0] if parts else ""
+    subtask = parts[1] if len(parts) > 1 else ""
+    sample = parts[-1] if parts else "s00"
+    module = "__".join(parts[2:-1]) if len(parts) >= 4 else ""
+    return task, subtask, module, sample
 
 
 def infer_latest_events(root: Path) -> dict[str, dict[str, Any]]:
@@ -93,24 +126,28 @@ def eval_progress(sample_dir: Path) -> tuple[int | None, float | None]:
 def collect_samples(root: Path) -> list[dict[str, Any]]:
     latest_events = infer_latest_events(root)
     rows = []
-    for sample_dir in sorted(root.glob("*__s*"), key=sample_sort_key):
+    for sample_dir in sorted(
+        [p for p in root.iterdir() if p.is_dir() and "__" in p.name and re.search(r"__s\d+$", p.name)],
+        key=sample_sort_key,
+    ):
         if not sample_dir.is_dir():
             continue
         summary = read_json(sample_dir / "summary.json")
         task_packet = read_json(sample_dir / "task_packet.json")
-        worker = summary.get("worker_result") or {}
+        result = read_json(sample_dir / "result.json")
+        result_parsed = result.get("_parsed") or {}
+        worker = summary.get("worker_result") or result_parsed or {}
         sample_id = sample_dir.name
-        task = summary.get("task") or task_packet.get("task") or sample_id.split("__")[0]
-        subtask = summary.get("subtask") or task_packet.get("subtask") or ""
-        module = summary.get("module_id") or task_packet.get("module_id") or ""
-        status = worker.get("status")
-        if not status:
-            if (sample_dir / "error.json").exists():
-                status = "error"
-            elif (sample_dir / "result.json").exists():
-                status = "done"
-            else:
-                status = "running"
+        name_task, name_subtask, name_module, _sample = parse_sample_name(sample_id)
+        task = summary.get("task") or task_packet.get("task") or name_task
+        subtask = summary.get("subtask") or task_packet.get("subtask") or name_subtask
+        module = summary.get("module_id") or task_packet.get("module_id") or name_module
+        if (sample_dir / "result.json").exists():
+            status = "done"
+        elif (sample_dir / "error.json").exists():
+            status = "error"
+        else:
+            status = worker.get("status") or "running"
         epoch, acc = eval_progress(sample_dir)
         rows.append({
             "sample_id": sample_id,
@@ -131,6 +168,7 @@ def collect_samples(root: Path) -> list[dict[str, Any]]:
             "epoch": epoch,
             "latest_acc": acc,
             "error": (read_json(sample_dir / "error.json").get("error") or worker.get("error")),
+            "has_settlement": (sample_dir / "settlement.json").exists(),
         })
     return rows
 
@@ -161,6 +199,93 @@ def aggregate_by(rows: list[dict[str, Any]], key: str) -> list[dict[str, Any]]:
     return out
 
 
+def build_cell_matrix(rows: list[dict[str, Any]]) -> dict[tuple[str, str], dict[str, Any]]:
+    matrix: dict[tuple[str, str], dict[str, Any]] = {}
+    for task in EXPECTED_TASKS:
+        for module in EXPECTED_MODULES:
+            matrix[(task, module)] = {
+                "samples": 0,
+                "done": 0,
+                "running": 0,
+                "errors": 0,
+                "passed": 0,
+                "failed": 0,
+                "best_metric": None,
+            }
+    for row in rows:
+        key = (str(row.get("task") or ""), str(row.get("module") or ""))
+        cell = matrix.setdefault(key, {
+            "samples": 0,
+            "done": 0,
+            "running": 0,
+            "errors": 0,
+            "passed": 0,
+            "failed": 0,
+            "best_metric": None,
+        })
+        cell["samples"] += 1
+        status = row.get("status")
+        if status == "done":
+            cell["done"] += 1
+            if row.get("passed"):
+                cell["passed"] += 1
+            else:
+                cell["failed"] += 1
+            metric = row.get("metric")
+            if metric is not None:
+                metric = float(metric)
+                if cell["best_metric"] is None or metric > cell["best_metric"]:
+                    cell["best_metric"] = metric
+        elif status == "error":
+            cell["errors"] += 1
+        else:
+            cell["running"] += 1
+    return matrix
+
+
+def cell_text(cell: dict[str, Any]) -> str:
+    text = f"{cell['running']}/{cell['passed']}/{cell['failed']}"
+    if cell["errors"]:
+        text += f" +e{cell['errors']}"
+    done = cell["passed"] + cell["failed"]
+    if done >= 10 and cell["passed"] / done >= 0.5:
+        text = f"**{text}**"
+    return text
+
+
+def render_cell_matrix(rows: list[dict[str, Any]]) -> list[str]:
+    matrix = build_cell_matrix(rows)
+    lines = [
+        "Cell format: `running/pass/fail`; `+eN` means worker/error artifacts. Bold cells have pass rate >= 50% among completed non-error samples.",
+        "",
+    ]
+    headers = ["Task"] + EXPECTED_MODULES
+    table_rows = []
+    for task in EXPECTED_TASKS:
+        table_rows.append([task] + [cell_text(matrix[(task, module)]) for module in EXPECTED_MODULES])
+    lines.extend(render_table(headers, table_rows))
+    return lines
+
+
+def top_cells(rows: list[dict[str, Any]], min_done: int = 10) -> list[dict[str, Any]]:
+    matrix = build_cell_matrix(rows)
+    out = []
+    for (task, module), cell in matrix.items():
+        done = cell["passed"] + cell["failed"]
+        if done < min_done:
+            continue
+        out.append({
+            "task": task,
+            "module": module,
+            "done": done,
+            "passed": cell["passed"],
+            "errors": cell["errors"],
+            "pass_rate": cell["passed"] / done if done else None,
+            "best_metric": cell["best_metric"],
+        })
+    return sorted(out, key=lambda x: (x["pass_rate"] or 0.0, x["best_metric"] or -1e9), reverse=True)
+
+
 def expert_rows(root: Path) -> list[dict[str, Any]]:
     rows = []
     for settlement in root.glob("*__s*/settlement.json"):
@@ -187,6 +312,27 @@ def aggregate_experts(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "empirical_pass_rate": mean(outcomes) if outcomes else None,
             "mean_brier": mean(briers) if briers else None,
             "mean_log": mean(logs) if logs else None,
+            "threshold_accuracy": mean([float((p >= 0.5) == bool(o)) for p, o in zip(probs, outcomes)]) if probs else None,
+        })
+    return out
+
+
+def aggregate_expert_buckets(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        expert = str(row.get("expert_id") or "")
+        bucket = str(row.get("calibration_bucket") or "")
+        groups[(expert, bucket)].append(row)
+    out = []
+    for (expert, bucket), items in sorted(groups.items()):
+        probs = [float(x.get("success_probability", 0.0)) for x in items]
+        outcomes = [float(x.get("outcome", 0.0)) for x in items]
+        out.append({
+            "expert": expert,
+            "bucket": bucket,
+            "n": len(items),
+            "mean_probability": mean(probs) if probs else None,
+            "empirical_pass_rate": mean(outcomes) if outcomes else None,
         })
     return out
 
@@ -208,9 +354,14 @@ def render_report(root: Path, out_path: Path) -> dict[str, Any]:
     by_task = aggregate_by(samples, "task")
     by_module = aggregate_by(samples, "module")
     by_expert = aggregate_experts(expert_settled)
+    by_bucket = aggregate_expert_buckets(expert_settled)
+    settled_samples = sum(1 for x in samples if x.get("has_settlement"))
+    observed_modules = sorted({str(x.get("module") or "") for x in samples})
+    expected_module_set = set(EXPECTED_MODULES)
+    unexpected_modules = [x for x in observed_modules if x and x not in expected_module_set]
 
     lines = [
-        "# V2.3 First-Batch Analysis",
+        "# V2.3 Formal Sweep Analysis",
         "",
         f"- Generated at: `{utc_now()}`",
         f"- Root: `{root}`",
@@ -219,6 +370,7 @@ def render_report(root: Path, out_path: Path) -> dict[str, Any]:
         f"- Completed: `{len(done)}`",
         f"- Running: `{len(running)}`",
         f"- Errors: `{len(errors)}`",
+        f"- Samples with settlement: `{settled_samples}`",
         "",
         "## Read First",
         "",
@@ -229,10 +381,26 @@ def render_report(root: Path, out_path: Path) -> dict[str, Any]:
         pass_rate = sum(1 for x in done if x.get("passed")) / len(done)
         best = max(done, key=lambda x: float(x.get("metric") or -1e9))
         lines.extend([
-            f"- Completed sample pass rate so far: `{fmt_pct(pass_rate)}`.",
+            f"- Current completed sample pass rate: `{fmt_pct(pass_rate)}` over `{len(done)}` completed samples.",
             f"- Best completed metric so far: `{fmt_float(best.get('metric'))}` from `{best['sample_id']}`.",
-            "- Treat these numbers as early evidence only; first-batch coverage is not yet balanced across all 9 modules.",
+            "- This is already large enough for a first reliable read on expert calibration and module/task difficulty, but the remaining error cells should be audited before treating pass rates as final.",
         ])
+        if unexpected_modules:
+            lines.append(f"- Naming anomaly to clean up: unexpected module ids `{', '.join(unexpected_modules)}`.")
+
+    lines.extend(["", "## 10x9 Progress Matrix", ""])
+    lines.extend(render_cell_matrix(samples))
+
+    ranked_cells = top_cells(samples)
+    if ranked_cells:
+        lines.extend(["", "## Strong Cells So Far", ""])
+        lines.extend(render_table(
+            ["Task", "Module", "Done", "Pass", "Err", "Pass Rate", "Best"],
+            [[
+                row["task"], row["module"], row["done"], row["passed"], row["errors"],
+                fmt_pct(row["pass_rate"]), fmt_float(row["best_metric"]),
+            ] for row in ranked_cells[:20]],
+        ))
 
     lines.extend(["", "## Progress By Module", ""])
     lines.extend(render_table(
@@ -277,7 +445,19 @@ def render_report(root: Path, out_path: Path) -> dict[str, Any]:
             ] for row in by_expert],
         ))
         lines.append("")
-        lines.append("Note: early reliability is noisy until there are enough passed and failed samples per module/task.")
+        lines.append(
+            "Readout: lower Brier/log score is better. At this snapshot, both experts are useful but visibly overconfident in high-probability buckets; treat forecast probabilities as ranking signals, not calibrated pass probabilities."
+        )
+
+    if by_bucket:
+        lines.extend(["", "## Expert Calibration Buckets", ""])
+        lines.extend(render_table(
+            ["Expert", "Bucket", "N", "Mean P", "Empirical Pass"],
+            [[
+                row["expert"], row["bucket"], row["n"],
+                fmt_float(row["mean_probability"], 3), fmt_pct(row["empirical_pass_rate"]),
+            ] for row in by_bucket],
+        ))
 
     if running:
         stage_counts = Counter(x.get("latest_event") or "unknown" for x in running)
@@ -294,14 +474,15 @@ def render_report(root: Path, out_path: Path) -> dict[str, Any]:
         lines.extend(["", "## Errors To Inspect", ""])
         lines.extend(render_table(
             ["Sample", "Error"],
-            [[x["sample_id"], " ".join(str(x.get("error") or "")[:240].split())] for x in errors[:30]],
+            [[x["sample_id"], " ".join(str(x.get("error") or "")[:240].split())] for x in errors[:50]],
         ))
 
     lines.extend(["", "## Suggested Next Checks", ""])
     lines.extend([
-        "- Confirm whether first-batch results are mostly `empty_worker_only`; do not compare modules until at least one non-control module has enough completed samples.",
-        "- Watch for repeated API retry failures or worker timeout/background failures.",
-        "- Once two or more modules have completed cells on the same task, compare expert probabilities against realized pass/fail by module.",
+        "- Audit repeated `opus47_master` failures separately from model quality; many are execution/protocol errors, not necessarily bad ideas.",
+        "- Normalize the stray `exp16-top_k_refs` sample directory into the expected `exp16_top_k_refs` accounting before the final report.",
+        "- Use expert probabilities mainly for relative ranking until calibration is repaired; high-confidence buckets currently underperform their stated probability.",
+        "- Rerun only the small set of pending/error cells needed to make per-cell denominators comparable; avoid disturbing active agents/monitors.",
     ])
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
