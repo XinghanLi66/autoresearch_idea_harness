@@ -129,6 +129,8 @@ def _invoke_claude_worker(
     gpu: str,
     max_turns: int,
     worker_timeout: int,
+    silent_timeout: int,
+    events_path: Path,
 ) -> None:
     workspace = sample_dir / "workspace"
     prompt_file = sample_dir / "worker_prompt.txt"
@@ -152,12 +154,25 @@ def _invoke_claude_worker(
     }
     with prompt_file.open() as stdin_f, log_file.open("a") as log_f:
         proc = subprocess.Popen(cmd, stdin=stdin_f, stdout=log_f, stderr=subprocess.STDOUT, cwd=workspace, env=env)
-        try:
-            proc.wait(timeout=worker_timeout)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            proc.wait()
-            log_f.write(f"\n[runner] worker timeout after {worker_timeout}s\n")
+        started = time.time()
+        while proc.poll() is None:
+            elapsed = time.time() - started
+            log_size = log_file.stat().st_size if log_file.exists() else 0
+            if silent_timeout > 0 and log_size == 0 and elapsed >= silent_timeout:
+                _event(events_path, "worker_silent_timeout", elapsed_s=round(elapsed, 3), silent_timeout=silent_timeout)
+                proc.kill()
+                proc.wait()
+                log_f.write(f"\n[runner] worker produced no log output after {silent_timeout}s\n")
+                return
+            if elapsed >= worker_timeout:
+                _event(events_path, "worker_timeout", elapsed_s=round(elapsed, 3), worker_timeout=worker_timeout)
+                proc.kill()
+                proc.wait()
+                log_f.write(f"\n[runner] worker timeout after {worker_timeout}s\n")
+                return
+            time.sleep(5)
+        if proc.returncode:
+            _event(events_path, "worker_process_exited_nonzero", returncode=proc.returncode)
 
 
 def run_worker(args: argparse.Namespace) -> dict[str, Any]:
@@ -230,7 +245,15 @@ def run_worker(args: argparse.Namespace) -> dict[str, Any]:
     else:
         _event(events_path, "worker_started", proposal_id=proposal_id, gpu=args.gpu)
         started = time.time()
-        _invoke_claude_worker(cfg, sample_dir, gpu=args.gpu, max_turns=args.max_turns, worker_timeout=args.worker_timeout)
+        _invoke_claude_worker(
+            cfg,
+            sample_dir,
+            gpu=args.gpu,
+            max_turns=args.max_turns,
+            worker_timeout=args.worker_timeout,
+            silent_timeout=args.no_eval_wait_timeout,
+            events_path=events_path,
+        )
         _wait_for_result(
             sample_dir,
             events_path,

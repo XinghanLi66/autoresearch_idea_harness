@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import sys
 import time
@@ -19,6 +20,7 @@ from autoresearch_idea_harness.io import load_config, write_json
 
 DEFAULT_BATCH_ROOT = ROOT / "runs" / "v3_checkpoint_proposal_batch" / "dlc_mls10_strict1000" / "output"
 DEFAULT_TASKS = ["dl_lr_schedule", "dl_activation_function"]
+DEFAULT_CLAUDE_REAL_BIN = "/newcpfs/lxh/.local/share/claude/versions/2.1.172"
 
 
 def _quote_cmd(args: list[str | Path]) -> str:
@@ -30,6 +32,23 @@ def _read_json(path: Path) -> dict[str, Any]:
         return json.loads(path.read_text())
     except Exception:
         return {}
+
+
+def _validate_claude_real_bin(path: str) -> list[str]:
+    errors: list[str] = []
+    raw = Path(path)
+    resolved = raw.resolve(strict=False)
+    if "claude-agent-proxy" in str(resolved):
+        errors.append(
+            "claude_real_bin must point to the real Claude Code binary, not the claude-agent-proxy wrapper"
+        )
+    if not raw.exists():
+        errors.append(f"claude_real_bin does not exist on this filesystem: {path}")
+    elif not raw.is_file():
+        errors.append(f"claude_real_bin is not a file: {path}")
+    elif not os.access(raw, os.X_OK):
+        errors.append(f"claude_real_bin is not executable: {path}")
+    return errors
 
 
 def _load_summary_rows(batch_root: Path) -> list[dict[str, Any]]:
@@ -232,7 +251,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     )
     submit_file.chmod(0o755)
 
-    errors = []
+    errors = _validate_claude_real_bin(args.claude_real_bin)
     if not any(ds.get("mount") == "/newcpfs" and ds.get("id") for ds in dlc.get("data_sources") or []):
         errors.append("DLC data_sources must include /newcpfs with an id")
     for key in ("endpoint", "workspace_id", "resource_id", "image"):
@@ -309,7 +328,7 @@ def main() -> int:
     parser.add_argument("--result-wait-timeout", type=int, default=7200)
     parser.add_argument("--no-eval-wait-timeout", type=int, default=300)
     parser.add_argument("--max-turns", type=int, default=30)
-    parser.add_argument("--claude-real-bin", default="/newcpfs/lxh/.local/bin/claude")
+    parser.add_argument("--claude-real-bin", default=DEFAULT_CLAUDE_REAL_BIN)
     args = parser.parse_args()
     summary = prepare(args)
     print(json.dumps(summary, indent=2, ensure_ascii=False))
