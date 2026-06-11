@@ -137,9 +137,12 @@ def prepare_v3_sft_run(
     max_samples_per_phase: int | None = None,
     limit: int | None = None,
     train_overrides: dict[str, Any] | None = None,
+    dlc_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     train_cfg = dict(cfg.get("v3_training", {}).get("sft", {}))
     train_cfg.update(train_overrides or {})
+    dlc_cfg = dict(cfg.get("v3_training", {}).get("dlc", {}))
+    dlc_cfg.update({k: v for k, v in (dlc_overrides or {}).items() if v is not None})
     sft_dir = sft_dir.resolve()
     run_dir = (output_dir / run_id).resolve()
     train_file = sft_dir / "train.jsonl"
@@ -231,7 +234,7 @@ def prepare_v3_sft_run(
                 "continued tuning only after regression checks on master advice behavior."
             ),
         },
-        "dlc": dict(cfg.get("v3_training", {}).get("dlc", {})),
+        "dlc": dlc_cfg,
         "phases": phase_specs,
         "launcher": str(launcher),
     }

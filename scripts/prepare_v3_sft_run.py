@@ -39,6 +39,10 @@ def main() -> None:
     p.add_argument("--gradient-accumulation-steps", type=int, default=None)
     p.add_argument("--max-seq-length", type=int, default=None)
     p.add_argument("--lora-r", type=int, default=None)
+    p.add_argument("--dlc-workspace-id", default=None)
+    p.add_argument("--dlc-resource-id", default=None)
+    p.add_argument("--dlc-gpus", type=int, default=None)
+    p.add_argument("--dlc-priority", type=int, default=None)
     p.add_argument("--allow-missing-model", action="store_true")
     p.add_argument("--allow-non-32b", action="store_true", help="Only for smoke/debug runs.")
     p.add_argument("--allow-smoke-model", action="store_true", help="Allow registry entries marked smoke_only.")
@@ -59,6 +63,12 @@ def main() -> None:
             overrides[cfg_name] = value
 
     cfg = load_config(args.config)
+    dlc_overrides = {
+        "workspace_id": args.dlc_workspace_id,
+        "resource_id": args.dlc_resource_id,
+        "gpus": args.dlc_gpus,
+        "priority": args.dlc_priority,
+    }
     base_model = resolve_base_model(
         cfg,
         model_id=args.base_model_id,
@@ -81,6 +91,7 @@ def main() -> None:
         max_samples_per_phase=args.max_samples_per_phase,
         limit=args.limit,
         train_overrides=overrides,
+        dlc_overrides=dlc_overrides,
     )
     print(summary)
 
