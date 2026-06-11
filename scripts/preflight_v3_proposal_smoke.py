@@ -24,7 +24,7 @@ DEFAULT_RUN_DIR = ROOT / "runs" / "v3_checkpoint_proposal_smoke" / "dlc_activati
 SUBMIT_GUARD_ENV = "CONFIRM_FRESH_QUOTA_FOR_V3_PROPOSAL_SMOKE"
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|secret|token|authorization)\s*[:=]\s*[A-Za-z0-9_./+=-]{16,}"),
-    re.compile(r"sk-[A-Za-z0-9_-]{20,}"),
+    re.compile(r"(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}"),
     re.compile(r"AKIA[0-9A-Z]{16}"),
 ]
 

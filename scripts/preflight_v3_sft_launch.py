@@ -26,7 +26,7 @@ CHECK_QUOTA = ROOT / "scripts" / "check_dlc_quota.py"
 DEFAULT_RUN_DIR = ROOT / "runs" / "training" / "v3_sft_qwen25_32b" / "v3_sft_200_smoke"
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|secret|token|credential|authorization)\s*[:=]\s*[A-Za-z0-9_./+=-]{16,}"),
-    re.compile(r"sk-[A-Za-z0-9_-]{20,}"),
+    re.compile(r"(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}"),
     re.compile(r"AKIA[0-9A-Z]{16}"),
 ]
 
