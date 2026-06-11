@@ -32,7 +32,7 @@ SYSTEM_PROMPT = (
 )
 
 PROPOSAL_FORMAT = """\
-Output one proposal. Prefer this XML schema when possible:
+Output one proposal using this XML schema:
 <proposal>
 <title>...</title>
 <problem>...</problem>

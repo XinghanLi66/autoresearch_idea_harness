@@ -57,7 +57,7 @@ def build_messages(task_packet: dict[str, Any]) -> list[dict[str, str]]:
         f"{PROPOSAL_FORMAT}\n"
         "Use only the task packet below. The output should be one proposal, not a "
         "list of alternatives. Keep the proposal at worker-implementable granularity. "
-        "Answer the `research_question` field directly.\n\n"
+        "Answer the `research_question` field directly and use the XML tags exactly.\n\n"
         "Task packet JSON:\n"
         f"{json.dumps(task_packet, ensure_ascii=False, indent=2)}"
     )

@@ -50,6 +50,38 @@ def _file_info(path: Path) -> dict[str, Any]:
     }
 
 
+def _text_preview(path: Path, max_chars: int = 4000) -> str:
+    if not path.exists():
+        return ""
+    try:
+        return path.read_text(errors="replace")[:max_chars]
+    except Exception:
+        return ""
+
+
+def _latest_by_mtime(items: list[dict[str, Any]], file_key: str) -> dict[str, Any] | None:
+    if not items:
+        return None
+    return max(
+        items,
+        key=lambda item: float(((item.get("files") or {}).get(file_key) or {}).get("mtime") or 0.0),
+    )
+
+
+def _matches_strict1000(item: dict[str, Any]) -> bool:
+    haystack = f"{item.get('name') or ''} {item.get('path') or ''}".lower()
+    return "strict_batch1000" in haystack or "strict1000" in haystack
+
+
+def _infer_runs_root(training_root: Path) -> Path:
+    """Accept either runs/training or a nested training run path."""
+    root = training_root.resolve()
+    for candidate in (root, *root.parents):
+        if candidate.name == "runs":
+            return candidate
+    return training_root.parent
+
+
 def _checkpoint_dir_info(path: Path) -> dict[str, Any]:
     info: dict[str, Any] = {
         "path": str(path),
@@ -257,6 +289,7 @@ def summarize_run_plan(path: Path) -> dict[str, Any] | None:
             "job_id": submission.get("job_id"),
             "result": submission.get("result"),
             "finished_at": submission.get("finished_at"),
+            "finished_at_cst": submission.get("finished_at_cst"),
             "workspace_id": submission.get("workspace_id"),
             "resource_id": submission.get("resource_id"),
             "priority": submission.get("priority"),
@@ -356,6 +389,204 @@ def summarize_proposal_packet_matrix(path: Path) -> dict[str, Any] | None:
     }
 
 
+def summarize_proposal_batch_quality_dir(path: Path) -> dict[str, Any] | None:
+    summary = _load_json(path / "summary.json")
+    if not summary:
+        return None
+    rows = list(summary.get("rows") or [])
+    quality_rows = [row for row in rows if row.get("quality")]
+    verdicts = Counter(str((row.get("quality") or {}).get("verdict") or "unknown") for row in quality_rows)
+    hard_failures = Counter()
+    for row in quality_rows:
+        for failure in (row.get("quality") or {}).get("hard_failures") or []:
+            hard_failures[str(failure)] += 1
+    run_root = path.parent if path.name == "output" else path
+    submission = _load_json(run_root / "submission.json")
+    return {
+        "kind": "proposal_batch_quality",
+        "name": run_root.name if path.name == "output" else path.name,
+        "path": str(path),
+        "run_root": str(run_root),
+        "task_count": summary.get("task_count") or len(rows),
+        "ok_count": summary.get("ok_count"),
+        "error_count": summary.get("error_count"),
+        "quality_pass_count": summary.get("quality_pass_count"),
+        "quality_mean_score": summary.get("quality_mean_score"),
+        "quality_verdicts": dict(verdicts),
+        "hard_failures": dict(hard_failures),
+        "load": summary.get("load") or {},
+        "rows": rows[:20],
+        "submission": {
+            "exists": bool(submission),
+            "job_id": submission.get("job_id"),
+            "job_name": submission.get("job_name"),
+            "submitted_at": submission.get("submitted_at"),
+            "latest_status": (submission.get("latest_status") or {}).get("status"),
+            "latest_reason_code": (submission.get("latest_status") or {}).get("reason_code"),
+            "result": submission.get("result"),
+        },
+        "files": {
+            "summary_json": _file_info(path / "summary.json"),
+            "summary_md": _file_info(path / "summary.md"),
+            "summary_rows": _file_info(path / "summary_rows.jsonl"),
+            "run_plan": _file_info(run_root / "run_plan.json"),
+            "submission": _file_info(run_root / "submission.json"),
+        },
+    }
+
+
+def summarize_v2_3_first_report(root: Path) -> dict[str, Any]:
+    candidates = [
+        (root / "first_batch_latest.json", root / "first_batch_latest.md"),
+        (root / "analysis_reports" / "first_batch_latest.json", root / "analysis_reports" / "first_batch_latest.md"),
+    ]
+    latest_json, latest_md = max(
+        candidates,
+        key=lambda pair: max(
+            pair[0].stat().st_mtime if pair[0].exists() else 0.0,
+            pair[1].stat().st_mtime if pair[1].exists() else 0.0,
+        ),
+    )
+    summary = _load_json(latest_json)
+    return {
+        "kind": "v2_3_first_report",
+        "name": root.name,
+        "path": str(root),
+        "exists": bool(summary or latest_md.exists()),
+        "generated_at": summary.get("generated_at"),
+        "samples": summary.get("samples"),
+        "done": summary.get("done"),
+        "running": summary.get("running"),
+        "errors": summary.get("errors"),
+        "out": summary.get("out"),
+        "latest": summary.get("latest") or str(latest_md),
+        "preview": _text_preview(latest_md),
+        "files": {
+            "latest_json": _file_info(latest_json),
+            "latest_md": _file_info(latest_md),
+        },
+    }
+
+
+def summarize_precomputed_worker_eval_plan(path: Path) -> dict[str, Any] | None:
+    plan = _load_json(path / "run_plan.json")
+    if not plan:
+        return None
+    selected = list(plan.get("selected") or [])
+    quality_rows = [row for row in selected if row.get("quality")]
+    verdicts = Counter(str((row.get("quality") or {}).get("verdict") or "unknown") for row in quality_rows)
+    submission = _load_json(path / "submission.json")
+    return {
+        "kind": "precomputed_worker_eval_plan",
+        "name": path.name,
+        "path": str(path),
+        "prepared_at": plan.get("prepared_at"),
+        "job_name": plan.get("job_name"),
+        "ready_to_dry_run": bool(plan.get("ready_to_dry_run")),
+        "ready_to_submit": bool(plan.get("ready_to_submit")),
+        "submit_guard_env": plan.get("submit_guard_env"),
+        "errors": plan.get("errors") or [],
+        "batch_root": plan.get("batch_root"),
+        "output_dir": plan.get("output_dir"),
+        "selected_count": len(selected),
+        "quality_verdicts": dict(verdicts),
+        "selected": selected[:20],
+        "submission": {
+            "exists": bool(submission),
+            "job_id": submission.get("job_id"),
+            "job_name": submission.get("job_name"),
+            "submitted_at": submission.get("submitted_at"),
+            "latest_status": (submission.get("latest_status") or {}).get("status"),
+            "latest_reason_code": (submission.get("latest_status") or {}).get("reason_code"),
+            "result": submission.get("result"),
+        },
+        "files": {
+            "run_plan": _file_info(path / "run_plan.json"),
+            "submission": _file_info(path / "submission.json"),
+        },
+    }
+
+
+def summarize_precomputed_worker_eval_result(path: Path) -> dict[str, Any] | None:
+    summary = _load_json(path / "summary.json")
+    if not summary:
+        return None
+    worker = summary.get("worker_result") or {}
+    result = _load_json(path / "result.json")
+    parsed = result.get("_parsed") or {}
+    return {
+        "kind": "precomputed_worker_eval_result",
+        "name": path.name,
+        "path": str(path),
+        "run_id": summary.get("run_id"),
+        "sample_id": summary.get("sample_id") or path.name,
+        "task": summary.get("task"),
+        "subtask": summary.get("subtask"),
+        "module_id": summary.get("module_id"),
+        "proposal_id": summary.get("proposal_id"),
+        "precomputed": summary.get("precomputed"),
+        "baseline_metric": summary.get("baseline_metric"),
+        "pass_metric": summary.get("pass_metric"),
+        "source_quality_score": summary.get("source_quality_score"),
+        "source_quality_verdict": summary.get("source_quality_verdict"),
+        "worker_status": worker.get("status") or parsed.get("status"),
+        "val_metric": worker.get("val_metric") or parsed.get("val_metric"),
+        "improvement": worker.get("improvement") or parsed.get("improvement"),
+        "passed": worker.get("passed") if "passed" in worker else parsed.get("passed"),
+        "elapsed_s": worker.get("elapsed_s") or parsed.get("elapsed_s"),
+        "error": worker.get("error") or parsed.get("error"),
+        "files": {
+            "summary": _file_info(path / "summary.json"),
+            "result": _file_info(path / "result.json"),
+            "proposal": _file_info(path / "proposal.txt"),
+            "task_packet": _file_info(path / "task_packet.json"),
+            "eval_log": _file_info(path / "eval.log"),
+            "worker_log": _file_info(path / "worker.log"),
+        },
+    }
+
+
+def summarize_strict1000_status(
+    targets: list[dict[str, Any]],
+    target_cache_audits: list[dict[str, Any]],
+    sfts: list[dict[str, Any]],
+    sft_target_qualities: list[dict[str, Any]],
+    plans: list[dict[str, Any]],
+) -> dict[str, Any]:
+    target = _latest_by_mtime([x for x in targets if _matches_strict1000(x)], "targets")
+    audit = _latest_by_mtime([x for x in target_cache_audits if _matches_strict1000(x)], "summary_json")
+    sft = _latest_by_mtime([x for x in sfts if _matches_strict1000(x)], "summary")
+    quality = _latest_by_mtime([x for x in sft_target_qualities if _matches_strict1000(x)], "summary_json")
+    plan = _latest_by_mtime([x for x in plans if _matches_strict1000(x)], "run_plan")
+    submission = (plan or {}).get("submission") or {}
+    final_ready_count = sum(
+        int(
+            bool(((phase.get("final_checkpoint") or {}).get("config_exists")))
+            and int(((phase.get("final_checkpoint") or {}).get("model_shard_count") or 0)) > 0
+        )
+        for phase in (plan or {}).get("phase_status") or []
+    )
+    return {
+        "kind": "strict1000_sft_status",
+        "name": "strict1000_sft",
+        "target_cache": target,
+        "target_cache_audit": audit,
+        "sft_dataset": sft,
+        "sft_target_quality": quality,
+        "run_plan": plan,
+        "collated_count": ((sft or {}).get("summary") or {}).get("collated_count"),
+        "missing_target_count": ((sft or {}).get("summary") or {}).get("missing_target_count"),
+        "sft_counts": (sft or {}).get("counts") or {},
+        "quality_score": (quality or {}).get("score") or {},
+        "training_result": submission.get("result") or submission.get("latest_status"),
+        "job_id": submission.get("job_id"),
+        "finished_at": submission.get("finished_at") or submission.get("finished_at_cst"),
+        "final_ready_count": final_ready_count,
+        "phase_count": (plan or {}).get("phase_count"),
+        "exists": bool(target or audit or sft or quality or plan),
+    }
+
+
 def _base_model_registry_status(cfg: dict[str, Any] | None) -> dict[str, Any]:
     registry = ((cfg or {}).get("base_models") or {}).get("registry") or {}
     if not isinstance(registry, dict):
@@ -407,6 +638,10 @@ def collect_v3_status(
     cfg: dict[str, Any] | None = None,
     discovery_report_path: Path | None = None,
 ) -> dict[str, Any]:
+    runs_root = _infer_runs_root(training_root)
+    training_scan_root = runs_root / "training"
+    if not training_scan_root.exists():
+        training_scan_root = training_root
     manifests = []
     targets = []
     target_cache_audits = []
@@ -415,6 +650,9 @@ def collect_v3_status(
     plans = []
     proposal_smokes = []
     proposal_packet_matrices = []
+    proposal_batch_qualities = []
+    precomputed_worker_eval_plans = []
+    precomputed_worker_eval_results = []
 
     if training_data_root.exists():
         for child in sorted(training_data_root.iterdir()):
@@ -436,13 +674,13 @@ def collect_v3_status(
             if item:
                 sft_target_qualities.append(item)
 
-    if training_root.exists():
-        for plan_path in sorted(training_root.rglob("run_plan.json")):
+    if training_scan_root.exists():
+        for plan_path in sorted(training_scan_root.rglob("run_plan.json")):
             item = summarize_run_plan(plan_path.parent)
             if item:
                 plans.append(item)
 
-    proposal_smoke_root = training_root.parent / "v3_checkpoint_proposal_smoke"
+    proposal_smoke_root = runs_root / "v3_checkpoint_proposal_smoke"
     if proposal_smoke_root.exists():
         for plan_path in sorted(proposal_smoke_root.rglob("run_plan.json")):
             item = summarize_proposal_smoke_dir(plan_path.parent)
@@ -453,9 +691,29 @@ def collect_v3_status(
             if item:
                 proposal_packet_matrices.append(item)
 
+    proposal_batch_root = runs_root / "v3_checkpoint_proposal_batch"
+    if proposal_batch_root.exists():
+        for summary_path in sorted(proposal_batch_root.rglob("summary.json")):
+            item = summarize_proposal_batch_quality_dir(summary_path.parent)
+            if item:
+                proposal_batch_qualities.append(item)
+
+    worker_eval_root = runs_root / "v3_precomputed_worker_eval"
+    if worker_eval_root.exists():
+        for plan_path in sorted(worker_eval_root.rglob("run_plan.json")):
+            item = summarize_precomputed_worker_eval_plan(plan_path.parent)
+            if item:
+                precomputed_worker_eval_plans.append(item)
+        for summary_path in sorted(worker_eval_root.rglob("summary.json")):
+            item = summarize_precomputed_worker_eval_result(summary_path.parent)
+            if item:
+                precomputed_worker_eval_results.append(item)
+
     registry_status = _base_model_registry_status(cfg)
-    discovery_path = discovery_report_path or training_root.parent / "reports" / "v3_base_model_candidates.json"
+    discovery_path = discovery_report_path or runs_root / "reports" / "v3_base_model_candidates.json"
     discovery_status = _base_model_discovery_status(discovery_path)
+    strict1000_status = summarize_strict1000_status(targets, target_cache_audits, sfts, sft_target_qualities, plans)
+    v2_3_first_report = summarize_v2_3_first_report(runs_root / "formal_sweeps" / "v2_3_mls10_modules9")
 
     return {
         "training_data_root": str(training_data_root),
@@ -469,9 +727,15 @@ def collect_v3_status(
             "run_plans": len(plans),
             "proposal_smokes": len(proposal_smokes),
             "proposal_packet_matrices": len(proposal_packet_matrices),
+            "proposal_batch_qualities": len(proposal_batch_qualities),
+            "precomputed_worker_eval_plans": len(precomputed_worker_eval_plans),
+            "precomputed_worker_eval_results": len(precomputed_worker_eval_results),
+            "v2_3_first_reports": int(bool(v2_3_first_report.get("exists"))),
         },
         "base_model_registry": registry_status,
         "base_model_discovery": discovery_status,
+        "strict1000_status": strict1000_status,
+        "v2_3_first_report": v2_3_first_report,
         "manifests": manifests,
         "target_caches": targets,
         "target_cache_audits": target_cache_audits,
@@ -480,6 +744,9 @@ def collect_v3_status(
         "run_plans": plans,
         "proposal_smokes": proposal_smokes,
         "proposal_packet_matrices": proposal_packet_matrices,
+        "proposal_batch_qualities": proposal_batch_qualities,
+        "precomputed_worker_eval_plans": precomputed_worker_eval_plans,
+        "precomputed_worker_eval_results": precomputed_worker_eval_results,
         "next_actions": infer_next_actions(
             manifests,
             targets,
@@ -582,6 +849,10 @@ def render_v3_markdown(status: dict[str, Any]) -> str:
         f"- Run plans: {status.get('counts', {}).get('run_plans', 0)}",
         f"- Proposal smoke plans: {status.get('counts', {}).get('proposal_smokes', 0)}",
         f"- Proposal packet matrices: {status.get('counts', {}).get('proposal_packet_matrices', 0)}",
+        f"- Proposal batch quality reports: {status.get('counts', {}).get('proposal_batch_qualities', 0)}",
+        f"- Precomputed worker eval plans: {status.get('counts', {}).get('precomputed_worker_eval_plans', 0)}",
+        f"- Precomputed worker eval results: {status.get('counts', {}).get('precomputed_worker_eval_results', 0)}",
+        f"- V2.3 first report available: {status.get('counts', {}).get('v2_3_first_reports', 0)}",
         f"- Registered formal 32B base models: {status.get('base_model_registry', {}).get('formal_32b_ready_count', 0)}",
         f"- Discovered 30B-40B candidates: {status.get('base_model_discovery', {}).get('candidate_count', 0)}",
         "",
@@ -603,6 +874,38 @@ def render_v3_markdown(status: dict[str, Any]) -> str:
         )
         for item in discovery.get("candidates") or []:
             lines.append(f"- Candidate `{item.get('model_id_guess')}`: {item.get('size_b')}B, `{item.get('path')}`")
+
+    lines.extend(["", "## Strict1000 SFT Focus", ""])
+    strict = status.get("strict1000_status") or {}
+    if not strict.get("exists"):
+        lines.append("- No strict1000 SFT artifacts found.")
+    else:
+        lines.append(
+            f"- Dataset `{((strict.get('sft_dataset') or {}).get('name') or '-')}`: "
+            f"collated={strict.get('collated_count')} missing={strict.get('missing_target_count')} "
+            f"counts={strict.get('sft_counts')}"
+        )
+        lines.append(
+            f"- Quality `{((strict.get('sft_target_quality') or {}).get('name') or '-')}`: "
+            f"score={strict.get('quality_score')}"
+        )
+        lines.append(
+            f"- Training `{((strict.get('run_plan') or {}).get('name') or '-')}`: "
+            f"job={strict.get('job_id') or '-'} result={strict.get('training_result') or '-'} "
+            f"final_ready={strict.get('final_ready_count')}/{strict.get('phase_count') or 0}"
+        )
+
+    lines.extend(["", "## V2.3 Formal Sweep First Report", ""])
+    v2_report = status.get("v2_3_first_report") or {}
+    if not v2_report.get("exists"):
+        lines.append(f"- No first report found under `{v2_report.get('path')}`.")
+    else:
+        lines.append(
+            f"- `{v2_report.get('name')}` generated={v2_report.get('generated_at')} "
+            f"samples={v2_report.get('samples')} done={v2_report.get('done')} "
+            f"running={v2_report.get('running')} errors={v2_report.get('errors')} "
+            f"latest=`{v2_report.get('latest')}`"
+        )
 
     lines.extend(["", "## Manifests", ""])
     for item in status.get("manifests") or []:
@@ -696,6 +999,31 @@ def render_v3_markdown(status: dict[str, Any]) -> str:
             f"- `{item['name']}`: tasks={item.get('task_count')} ok={item.get('ok_count')} "
             f"warnings={item.get('warning_count')} errors={item.get('error_count')} "
             f"min_refs={item.get('min_frontline_refs')} max_prompt_tokens={item.get('max_prompt_tokens')}"
+        )
+    lines.extend(["", "## Proposal Batch Quality", ""])
+    for item in status.get("proposal_batch_qualities") or []:
+        submission = item.get("submission") or {}
+        lines.append(
+            f"- `{item['name']}`: tasks={item.get('task_count')} ok={item.get('ok_count')} "
+            f"errors={item.get('error_count')} quality_pass={item.get('quality_pass_count')} "
+            f"mean_score={item.get('quality_mean_score')} verdicts={item.get('quality_verdicts')} "
+            f"job={submission.get('job_id') or '-'} result={submission.get('result') or submission.get('latest_status') or '-'}"
+        )
+    lines.extend(["", "## Precomputed Worker Eval", ""])
+    for item in status.get("precomputed_worker_eval_plans") or []:
+        submission = item.get("submission") or {}
+        lines.append(
+            f"- Plan `{item['name']}`: selected={item.get('selected_count')} "
+            f"dry={item.get('ready_to_dry_run')} submit={item.get('ready_to_submit')} "
+            f"verdicts={item.get('quality_verdicts')} job={submission.get('job_id') or '-'} "
+            f"result={submission.get('result') or submission.get('latest_status') or '-'}"
+        )
+    for item in status.get("precomputed_worker_eval_results") or []:
+        lines.append(
+            f"- Result `{item['name']}`: task={item.get('task')}/{item.get('subtask')} "
+            f"status={item.get('worker_status')} passed={item.get('passed')} "
+            f"metric={item.get('val_metric')} pass_metric={item.get('pass_metric')} "
+            f"source_quality={item.get('source_quality_verdict')}:{item.get('source_quality_score')}"
         )
     lines.append("")
     return "\n".join(lines)
