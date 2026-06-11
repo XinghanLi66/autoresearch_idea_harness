@@ -281,6 +281,11 @@ bash {summary['launcher']}
         dry_run_path = run_dir / "pai_create_job_dry_run.sh"
         dry_run_path.write_text(dry_run)
         dry_run_path.chmod(0o755)
+    submit = _pai_create_job_text(run_dir, summary, dry_run=False)
+    if submit:
+        submit_path = run_dir / "pai_create_job.sh"
+        submit_path.write_text(submit)
+        submit_path.chmod(0o755)
 
 
 def _write_pai_job_config(run_dir: Path, summary: dict[str, Any]) -> Path | None:
@@ -323,11 +328,20 @@ def _pai_create_job_text(run_dir: Path, summary: dict[str, Any], *, dry_run: boo
     if dry_run:
         args.append("--dry-run")
     quoted = " ".join(shlex.quote(arg) for arg in args)
-    return "\n".join([
+    lines = [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
         "# Uses the local DSW credential provider; do not write credentials to disk.",
         "export ALIBABA_CLOUD_CREDENTIALS_URI=${ALIBABA_CLOUD_CREDENTIALS_URI:-http://localhost:7002/api/v1/credentials/0}",
-        quoted,
-        "",
-    ])
+    ]
+    if not dry_run:
+        lines.extend([
+            "# Run only after a fresh quota snapshot confirms no queue and enough free GPUs.",
+            ': "${CONFIRM_FRESH_QUOTA_FOR_V3_SFT:?Set this to 1 only after a fresh quota snapshot confirms no queue and enough free GPUs.}"',
+            'if [[ "${CONFIRM_FRESH_QUOTA_FOR_V3_SFT}" != "1" ]]; then',
+            '  echo "CONFIRM_FRESH_QUOTA_FOR_V3_SFT must equal 1" >&2',
+            "  exit 2",
+            "fi",
+        ])
+    lines.extend([quoted, ""])
+    return "\n".join(lines)
