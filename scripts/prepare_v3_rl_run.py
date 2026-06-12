@@ -141,8 +141,11 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         "--kl-coeff", str(args.kl_coeff),
         "--max-prompt-length", str(args.max_prompt_length),
         "--max-response-length", str(args.max_response_length),
+        "--ppo-max-token-len", str(args.ppo_max_token_len),
+        "--vllm-gpu-memory-utilization", str(args.vllm_gpu_memory_utilization),
         "--save-steps", str(args.save_steps),
         "--lora-r", str(args.lora_r),
+        "--lora-alpha", str(args.lora_alpha),
     ]
     launcher = " ".join(shlex.quote(x) for x in rl_cmd) + f" 2>&1 | tee {shlex.quote(str(run_dir / 'rl.log'))}"
     dlc = dict((cfg.get("v3_training") or {}).get("dlc") or {})
@@ -176,8 +179,11 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
             "learning_rate": args.learning_rate,
             "kl_coeff": args.kl_coeff,
             "lora_r": args.lora_r,
+            "lora_alpha": args.lora_alpha,
             "max_prompt_length": args.max_prompt_length,
             "max_response_length": args.max_response_length,
+            "ppo_max_token_len": args.ppo_max_token_len,
+            "vllm_gpu_memory_utilization": args.vllm_gpu_memory_utilization,
             "rollout_tensor_parallel_size": args.rollout_tensor_parallel_size,
         },
         "leakage_policy": parquet_summary["leakage_policy"],
@@ -205,8 +211,11 @@ def main() -> None:
     p.add_argument("--kl-coeff", type=float, default=0.02)
     p.add_argument("--max-prompt-length", type=int, default=4096)
     p.add_argument("--max-response-length", type=int, default=1800)
+    p.add_argument("--ppo-max-token-len", type=int, default=8192)
+    p.add_argument("--vllm-gpu-memory-utilization", type=float, default=0.35)
     p.add_argument("--save-steps", type=int, default=40)
     p.add_argument("--lora-r", type=int, default=64)
+    p.add_argument("--lora-alpha", type=int, default=128)
     p.add_argument("--gpus", type=int, default=8)
     p.add_argument("--rollout-tensor-parallel-size", type=int, default=8)
     p.add_argument("--priority", type=int, default=6)

@@ -19,6 +19,7 @@ def _setup_env() -> None:
         "VLLM_PLUGINS": "",
         "SYMPY_GROUND_TYPES": "python",
         "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
     }
     libcuda = "/usr/lib/x86_64-linux-gnu/libcuda.so.1"
     if os.path.exists(libcuda):
