@@ -7,7 +7,14 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from .io import iter_jsonl, load_dataset_records, short_text, stable_id, write_json, write_jsonl
+from .io import iter_jsonl, load_dataset_records, stable_id, write_json, write_jsonl
+from .prompt_properties import (
+    KeyValueCache,
+    build_v3_condition_prompt,
+    compact_research_question,
+    load_prompt_property_caches,
+    select_refs_for_prompt,
+)
 
 
 TARGET_SCHEMA_VERSION = "proposal_xml_v3_0"
@@ -101,13 +108,8 @@ def _load_key_value_cache(path: Path) -> dict[str, Any]:
     return values
 
 
-def _load_prompt_caches(dataset_dir: Path) -> dict[str, dict[str, Any]]:
-    cache_dir = dataset_dir / "prompt_cache"
-    return {
-        "research_question": _load_key_value_cache(cache_dir / "research_question.jsonl"),
-        "top_k_indices": _load_key_value_cache(cache_dir / "top_k_5_index.jsonl"),
-        "top_k_related_work": _load_key_value_cache(cache_dir / "top_k_5_related_work.jsonl"),
-    }
+def _load_prompt_caches(cfg: dict[str, Any]) -> dict[str, KeyValueCache]:
+    return load_prompt_property_caches(cfg)
 
 
 def _load_target_cache(paths: list[Path]) -> dict[str, dict[str, Any]]:
@@ -248,61 +250,24 @@ def _required_tex_features_ok(row: dict[str, Any], required: list[str]) -> bool:
     return all(bool(tex.get(key)) for key in required)
 
 
-def _trim_ref(ref: dict[str, Any], abstract_limit: int) -> dict[str, Any]:
-    return {
-        "ref_key": _ref_key(ref),
-        "arxiv_id": ref.get("arxiv_id"),
-        "title": ref.get("title"),
-        "year": ref.get("year"),
-        "abstract": short_text(ref.get("abstract"), abstract_limit),
-        "reference_tex_evidence_status": "pending",
-    }
-
-
 def _select_refs(
     arxiv_id: str,
     refs: list[dict[str, Any]],
-    prompt_caches: dict[str, dict[str, Any]],
+    prompt_caches: dict[str, KeyValueCache],
     top_k: int,
-    abstract_limit: int,
+    abstract_token_limit: int,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    raw_indices = prompt_caches["top_k_indices"].get(arxiv_id)
-    selected: list[dict[str, Any]] = []
-    source = "first_k_after_leakage_filter"
-    if isinstance(raw_indices, list):
-        source = "cached_top_k_indices"
-        for idx in raw_indices:
-            try:
-                ref = refs[int(idx)]
-            except Exception:
-                continue
-            selected.append(ref)
-    if not selected:
-        selected = refs[:top_k]
-    selected = selected[:top_k]
-    return [_trim_ref(ref, abstract_limit) for ref in selected], {
-        "top_k_source": source,
-        "cached_top_k_indices": raw_indices if isinstance(raw_indices, list) else None,
-    }
+    return select_refs_for_prompt(
+        arxiv_id,
+        refs,
+        prompt_caches,
+        top_k=top_k,
+        max_abstract_tokens=abstract_token_limit,
+    )
 
 
 def _build_condition_prompt(selected_refs: list[dict[str, Any]], research_question: str | None) -> str:
-    ref_block = "\n\n".join(
-        (
-            f"[{idx}] {ref.get('title') or 'Unknown'} ({ref.get('year') or 'n.d.'})\n"
-            f"Abstract: {ref.get('abstract') or '(no abstract available)'}"
-        )
-        for idx, ref in enumerate(selected_refs, start=1)
-    )
-    question = research_question or "(research question cache missing; synthesize one from the references before training)"
-    return (
-        f"Below are {len(selected_refs)} papers from a researcher's reading list. "
-        "Based on these references, propose a novel research direction.\n\n"
-        f"{ref_block}\n\n"
-        "The researcher has identified the following open question as their primary motivation:\n"
-        f"\"{question}\"\n\n"
-        f"{PROPOSAL_FORMAT}"
-    )
+    return build_v3_condition_prompt(selected_refs, research_question, PROPOSAL_FORMAT)
 
 
 def _target_payload(arxiv_id: str, target_cache: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -375,7 +340,7 @@ def build_v3_training_manifest(
     max_date = _parse_date(through_date) if through_date else None
 
     dataset_records = load_dataset_records(Path(cfg["dataset_dir"]), ["train", "val", "test"])
-    prompt_caches = _load_prompt_caches(Path(cfg["dataset_dir"]))
+    prompt_caches = _load_prompt_caches(cfg)
     target_cache = _load_target_cache(target_cache_paths or [Path(cfg["dataset_dir"]) / "demo_tex_impl_targets.jsonl"])
 
     allowed_types = set(tm_cfg.get("paper_types", ["method_algorithm"]))
@@ -386,7 +351,7 @@ def build_v3_training_manifest(
     required_tex = list(tm_cfg.get("required_tex_features", ["has_method", "has_implementation", "has_evaluation"]))
     min_refs = int(tm_cfg.get("min_refs", 3))
     top_k = int(tm_cfg.get("top_k_refs", 5))
-    abstract_limit = int(tm_cfg.get("reference_abstract_chars", 700))
+    abstract_token_limit = int(tm_cfg.get("reference_abstract_tokens", 200))
     require_research_question = bool(tm_cfg.get("require_research_question", True))
     train_ratio = float(tm_cfg.get("train_ratio", 0.8))
     val_ratio = float(tm_cfg.get("val_ratio", 0.1))
@@ -443,16 +408,18 @@ def build_v3_training_manifest(
             skipped["quality_score_below_min"] += 1
             continue
 
-        selected_refs, ref_selection = _select_refs(arxiv_id, refs, prompt_caches, top_k, abstract_limit)
+        selected_refs, ref_selection = _select_refs(arxiv_id, refs, prompt_caches, top_k, abstract_token_limit)
         if len(selected_refs) < min_refs:
             skipped["not_enough_selected_refs"] += 1
             continue
-        research_question = prompt_caches["research_question"].get(arxiv_id)
-        if require_research_question and not (isinstance(research_question, str) and research_question.strip()):
+        raw_research_question = prompt_caches["research_question"].get(arxiv_id)
+        question_info = compact_research_question(arxiv_id, raw_research_question, prompt_caches)
+        research_question = question_info["text"]
+        if require_research_question and not research_question.strip():
             skipped["missing_research_question"] += 1
             continue
         target = _target_payload(arxiv_id, target_cache)
-        condition_prompt = _build_condition_prompt(selected_refs, research_question if isinstance(research_question, str) else None)
+        condition_prompt = _build_condition_prompt(selected_refs, research_question)
         sample = {
             "sample_id": stable_id("v3s", arxiv_id, row.get("created"), row.get("paper_type"), length=14),
             "manifest_version": tm_cfg.get("version", "v3_0_manifest"),
@@ -484,7 +451,11 @@ def build_v3_training_manifest(
             "condition_packet": {
                 "strategy": "with_research_question",
                 "research_question": research_question,
-                "research_question_status": "cached" if isinstance(research_question, str) and research_question.strip() else "missing",
+                "research_question_raw": raw_research_question,
+                "research_question_status": "cached" if research_question.strip() else "missing",
+                "research_question_source": question_info["source"],
+                "research_question_tokens": question_info["tokens"],
+                "research_question_complete": question_info["complete"],
                 "selected_refs": selected_refs,
                 "related_work_cache": prompt_caches["top_k_related_work"].get(arxiv_id),
                 "ref_selection": ref_selection,
@@ -563,6 +534,9 @@ def build_v3_training_manifest(
             "categories": sorted(allowed_categories),
             "required_tex_features": required_tex,
             "min_refs": min_refs,
+            "top_k_refs": top_k,
+            "reference_abstract_tokens": abstract_token_limit,
+            "legacy_reference_abstract_chars": tm_cfg.get("reference_abstract_chars"),
             "require_research_question": require_research_question,
             "min_quality_score": min_quality,
         },
@@ -578,6 +552,12 @@ def build_v3_training_manifest(
         "by_detail_support_level": dict(Counter(s.get("detail_support_level") for s in candidates)),
         "target_status": dict(Counter(s["target"]["target_status"] for s in candidates)),
         "research_question_status": dict(Counter(s["condition_packet"]["research_question_status"] for s in candidates)),
+        "research_question_source": dict(Counter(s["condition_packet"].get("research_question_source") for s in candidates)),
+        "selected_ref_abstract_sources": dict(Counter(
+            ref.get("abstract_source")
+            for sample in candidates
+            for ref in sample["condition_packet"]["selected_refs"]
+        )),
         "skipped": dict(skipped),
         "target_schema": {
             "schema_version": TARGET_SCHEMA_VERSION,

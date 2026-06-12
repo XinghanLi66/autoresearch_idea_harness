@@ -13,15 +13,36 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal
-from textual.widgets import DataTable, Footer, Header, Static
+from textual.containers import Horizontal, Vertical
+from textual.widgets import DataTable, Footer, Header, Input, Static
 
+from autoresearch_idea_harness.article_cache_inspector import (
+    inspect_article_cache,
+    render_article_cache_markdown,
+)
 from autoresearch_idea_harness.io import load_config
 from autoresearch_idea_harness.v3_report import collect_v3_status, render_v3_markdown
 
 
 def _fmt(obj: Any) -> str:
     return json.dumps(obj, indent=2, ensure_ascii=False)
+
+
+def _read(path: str | Path | None, limit: int | None = None) -> str:
+    if not path:
+        return ""
+    p = Path(path)
+    if not p.exists():
+        return f"(missing: {p})"
+    text = p.read_text(errors="replace")
+    return text if limit is None else text[:limit]
+
+
+def _file_path(item: dict[str, Any], key: str) -> str | None:
+    info = (item.get("files") or {}).get(key) or {}
+    if isinstance(info, dict):
+        return info.get("path")
+    return None
 
 
 def _copy_to_clipboard(text: str) -> str:
@@ -43,12 +64,16 @@ def _copy_to_clipboard(text: str) -> str:
 
 class V3TrainingDashboard(App):
     CSS = """
+    #article {
+        height: 3;
+        border-bottom: solid $accent;
+    }
     DataTable {
-        width: 46%;
+        width: 48%;
         height: 100%;
     }
     #content {
-        width: 54%;
+        width: 52%;
         height: 100%;
         overflow: auto;
         border-left: solid $accent;
@@ -58,9 +83,13 @@ class V3TrainingDashboard(App):
     BINDINGS = [
         Binding("r", "refresh", "Refresh"),
         Binding("c", "copy", "Copy"),
-        Binding("1", "panel('overview')", "Overview"),
-        Binding("2", "panel('detail')", "Detail"),
-        Binding("3", "panel('report')", "Report"),
+        Binding("1", "panel('summary')", "Summary"),
+        Binding("2", "panel('prompt')", "Prompt"),
+        Binding("3", "panel('messages')", "Messages"),
+        Binding("4", "panel('proposal')", "Proposal"),
+        Binding("5", "panel('worker')", "Worker/Eval"),
+        Binding("6", "panel('report')", "Report"),
+        Binding("7", "panel('article')", "Article Cache"),
         Binding("q", "quit", "Quit"),
     ]
 
@@ -73,22 +102,37 @@ class V3TrainingDashboard(App):
         self.status: dict[str, Any] = {}
         self.items: list[dict[str, Any]] = []
         self.current_index = 0
-        self.current_panel = "overview"
+        self.current_panel = "summary"
         self.current_text = ""
+        self.article_report: dict[str, Any] | None = None
 
     def compose(self) -> ComposeResult:
         yield Header()
-        with Horizontal():
-            yield DataTable(id="items")
-            yield Static(id="content", markup=False)
+        with Vertical():
+            yield Input(placeholder="Enter arXiv id and press Enter to inspect caches/prompts/TeX details", id="article")
+            with Horizontal():
+                yield DataTable(id="items")
+                yield Static(id="content", markup=False)
         yield Footer()
 
     def on_mount(self) -> None:
         table = self.query_one("#items", DataTable)
         table.cursor_type = "row"
-        table.add_columns("Kind", "Name", "Rows", "Ready", "Status")
+        table.add_columns("Run", "Kind", "Task", "Status", "Artifacts")
         self.refresh_status()
         self.set_interval(self.refresh_s, self.refresh_status)
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        value = event.value.strip()
+        if not value:
+            return
+        try:
+            self.article_report = inspect_article_cache(self.cfg, value)
+            self.current_panel = "article"
+            self.render_panel()
+        except Exception as exc:
+            self.current_text = f"Article cache inspection failed for {value}: {exc}"
+            self.query_one("#content", Static).update(self.current_text)
 
     def action_refresh(self) -> None:
         self.refresh_status()
@@ -105,252 +149,193 @@ class V3TrainingDashboard(App):
             self.current_index = int(getattr(event.row_key, "value", str(event.row_key)))
         except Exception:
             self.current_index = 0
-        self.current_panel = "detail"
+        self.current_panel = "summary"
         self.render_panel()
 
     def refresh_status(self) -> None:
         self.status = collect_v3_status(self.training_data_root, self.training_root, cfg=self.cfg)
-        self.items = []
-        for key in (
-            "strict1000_status_items",
-            "manifests",
-            "target_caches",
-            "target_cache_audits",
-            "sft_datasets",
-            "sft_target_qualities",
-            "run_plans",
-            "proposal_smokes",
-            "proposal_packet_matrices",
-            "proposal_batch_qualities",
-            "proposal_master_prompts",
-            "v2_3_first_report_items",
-            "precomputed_worker_eval_plans",
-            "precomputed_worker_eval_results",
-        ):
-            if key == "strict1000_status_items":
-                self.items.append(self.status.get("strict1000_status") or {"kind": "strict1000_sft_status", "name": "strict1000_sft"})
-            elif key == "v2_3_first_report_items":
-                self.items.append(self.status.get("v2_3_first_report") or {"kind": "v2_3_first_report", "name": "v2_3_mls10_modules9"})
-            else:
-                self.items.extend(self.status.get(key) or [])
+        self.items = self._build_run_items()
         table = self.query_one("#items", DataTable)
         table.clear()
         for idx, item in enumerate(self.items):
             table.add_row(
-                str(item.get("kind")),
-                str(item.get("name")),
-                self._item_rows(item),
-                self._item_ready(item),
-                self._item_status(item),
+                str(item.get("name") or ""),
+                str(item.get("kind") or ""),
+                self._task_label(item),
+                self._status_label(item),
+                self._artifact_label(item),
                 key=str(idx),
             )
         if self.current_index >= len(self.items):
             self.current_index = 0
         self.render_panel()
 
-    def _item_rows(self, item: dict[str, Any]) -> str:
-        if item.get("kind") == "manifest":
-            return str(item.get("candidate_count") or 0)
-        if item.get("kind") == "strict1000_sft_status":
-            counts = item.get("sft_counts") or {}
-            return str(counts.get("train") or item.get("collated_count") or 0)
-        if item.get("kind") == "target_cache":
-            return str(item.get("row_count") or 0)
-        if item.get("kind") == "target_cache_audit":
-            return str(item.get("row_count") or 0)
-        if item.get("kind") == "sft":
-            return str((item.get("counts") or {}).get("train", 0))
-        if item.get("kind") == "sft_target_quality":
-            return str(item.get("row_count") or 0)
-        if item.get("kind") == "run_plan":
-            return str(item.get("train_row_count") or 0)
-        if item.get("kind") == "proposal_smoke":
-            resources = item.get("resources") or {}
-            return f"gpu={resources.get('gpus') or 0}"
-        if item.get("kind") == "proposal_packet_matrix":
-            return str(item.get("task_count") or 0)
-        if item.get("kind") == "proposal_batch_quality":
-            return str(item.get("task_count") or 0)
-        if item.get("kind") == "proposal_master_prompt":
-            return str(item.get("prompt_tokens") or "")
-        if item.get("kind") == "v2_3_first_report":
-            return str(item.get("samples") or 0)
-        if item.get("kind") == "precomputed_worker_eval_plan":
-            return str(item.get("selected_count") or 0)
-        if item.get("kind") == "precomputed_worker_eval_result":
-            return str(item.get("val_metric") or "")
-        return ""
+    def _build_run_items(self) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        strict = self.status.get("strict1000_status")
+        if strict:
+            items.append({**strict, "kind": "training_status", "name": "strict1000_sft"})
+        for key in (
+            "run_plans",
+            "proposal_master_prompts",
+            "proposal_batch_qualities",
+            "proposal_smokes",
+            "precomputed_worker_eval_plans",
+            "precomputed_worker_eval_results",
+            "v2_3_first_report_items",
+        ):
+            if key == "v2_3_first_report_items":
+                report = self.status.get("v2_3_first_report")
+                if report:
+                    items.append(report)
+            else:
+                items.extend(self.status.get(key) or [])
+        return items
 
-    def _item_ready(self, item: dict[str, Any]) -> str:
-        if item.get("kind") == "manifest":
-            return str(item.get("ready_sft_count") or 0)
-        if item.get("kind") == "strict1000_sft_status":
-            return f"result={item.get('training_result') or '-'} final={item.get('final_ready_count') or 0}/{item.get('phase_count') or 0}"
-        if item.get("kind") == "target_cache":
-            q = item.get("quality", {}).get("quality_true_counts", {})
-            return f"v3={q.get('has_all_v3_required_tags', 0)} tags={q.get('has_all_required_tags', 0)}"
-        if item.get("kind") == "target_cache_audit":
-            return f"acc={item.get('accepted_count') or 0}/{item.get('row_count') or 0}"
-        if item.get("kind") == "sft":
-            counts = item.get("counts") or {}
-            return f"val={counts.get('val', 0)} test={counts.get('test', 0)}"
-        if item.get("kind") == "sft_target_quality":
-            score = item.get("score") or {}
-            return f"mean={score.get('mean', '-')}"
-        if item.get("kind") == "run_plan":
-            ready = 0
-            for phase in item.get("phase_status") or []:
-                final = phase.get("final_checkpoint") or {}
-                ready += int(bool(final.get("config_exists")) and int(final.get("model_shard_count") or 0) > 0)
-            return f"final={ready}/{item.get('phase_count') or 0}"
-        if item.get("kind") == "proposal_smoke":
-            quality = item.get("proposal_quality") or {}
-            if quality:
-                return f"q={quality.get('score', '-')}/{quality.get('max_score', 100)} {quality.get('verdict', '-')}"
-            preflight = item.get("preflight") or {}
-            artifact = preflight.get("artifact_ready")
-            launch = preflight.get("launch_ready")
-            if artifact is None and launch is None:
-                return f"dry={int(bool(item.get('ready_to_dry_run')))} submit={int(bool(item.get('ready_to_submit')))}"
-            return f"artifact={int(bool(artifact))} launch={int(bool(launch))}"
-        if item.get("kind") == "proposal_packet_matrix":
-            return f"ok={item.get('ok_count') or 0}/{item.get('task_count') or 0}"
-        if item.get("kind") == "proposal_batch_quality":
-            return f"qpass={item.get('quality_pass_count') or 0}/{item.get('task_count') or 0} mean={item.get('quality_mean_score', '-')}"
-        if item.get("kind") == "proposal_master_prompt":
-            files = item.get("files") or {}
-            return f"prompt={int(bool((files.get('prompt') or {}).get('exists')))} messages={item.get('message_count') or 0}"
-        if item.get("kind") == "v2_3_first_report":
-            return f"done={item.get('done') or 0} run={item.get('running') or 0} err={item.get('errors') or 0}"
-        if item.get("kind") == "precomputed_worker_eval_plan":
-            return f"dry={int(bool(item.get('ready_to_dry_run')))} submit={int(bool(item.get('ready_to_submit')))}"
-        if item.get("kind") == "precomputed_worker_eval_result":
-            return f"{item.get('result_kind', 'unknown')} passed={item.get('passed')} pass_metric={item.get('pass_metric', '-')}"
-        return ""
+    def _task_label(self, item: dict[str, Any]) -> str:
+        task = item.get("task")
+        subtask = item.get("subtask")
+        if task and subtask:
+            return f"{task}/{subtask}"
+        return str(task or item.get("run_id") or "")
 
-    def _item_status(self, item: dict[str, Any]) -> str:
-        if item.get("kind") == "target_cache":
-            q = item.get("quality", {}).get("quality_true_counts", {})
-            if q.get("mock", 0):
-                return "mock"
-            if int(q.get("has_all_v3_required_tags", 0) or 0) < int(item.get("row_count") or 0):
-                return "not-v3-strict"
-            return "real-or-empty"
-        if item.get("kind") == "target_cache_audit":
-            if int(item.get("accepted_count") or 0) == 0 and int(item.get("row_count") or 0) > 0:
-                return "reject-all"
-            failures = item.get("hard_failures") or {}
-            if failures:
-                return "needs-review"
-            return "ok"
-        if item.get("kind") == "manifest":
-            if item.get("base_model_release_date") == "2025-01-01":
-                return "smoke-date"
-            return "ok"
-        if item.get("kind") == "strict1000_sft_status":
-            if not item.get("exists"):
-                return "missing"
-            result = str(item.get("training_result") or "")
-            if result == "Succeeded" and int(item.get("final_ready_count") or 0) > 0:
-                return "succeeded"
-            return result or "present"
-        if item.get("kind") == "run_plan":
+    def _status_label(self, item: dict[str, Any]) -> str:
+        kind = item.get("kind")
+        if kind == "training_status":
+            return str(item.get("training_result") or "present")
+        if kind == "run_plan":
             submission = item.get("submission") or {}
             return str(submission.get("result") or submission.get("latest_status") or "planned")
-        if item.get("kind") == "sft_target_quality":
-            failures = item.get("hard_failures") or {}
-            if failures:
-                return "needs-review"
-            return "ok"
-        if item.get("kind") == "proposal_smoke":
+        if kind == "proposal_master_prompt":
+            return "ready" if (_file_path(item, "prompt") and Path(_file_path(item, "prompt")).exists()) else "missing-prompt"
+        if kind == "proposal_batch_quality":
             submission = item.get("submission") or {}
-            if submission.get("latest_status"):
-                return str(submission.get("latest_status"))
-            preflight = item.get("preflight") or {}
-            if preflight and not preflight.get("artifact_ready"):
-                return "preflight-error"
-            if preflight and preflight.get("launch_ready"):
-                return "launch-ready"
-            if item.get("errors"):
-                return "error"
-            if item.get("proposal_generated"):
-                return "generated"
-            if item.get("ready_to_submit"):
-                return "ready"
-            if item.get("ready_to_dry_run"):
-                return "needs-quota"
-            return "planned"
-        if item.get("kind") == "proposal_packet_matrix":
-            if int(item.get("error_count") or 0):
-                return "error"
-            if int(item.get("warning_count") or 0):
-                return "warning"
-            return "ok"
-        if item.get("kind") == "proposal_batch_quality":
+            return str(submission.get("result") or submission.get("latest_status") or "summarized")
+        if kind == "proposal_smoke":
             submission = item.get("submission") or {}
-            if int(item.get("error_count") or 0):
-                return "error"
-            if submission.get("result") or submission.get("latest_status"):
-                return str(submission.get("result") or submission.get("latest_status"))
-            return "ok"
-        if item.get("kind") == "proposal_master_prompt":
-            files = item.get("files") or {}
-            if not (files.get("prompt") or {}).get("exists"):
-                return "missing-prompt"
-            return "ready"
-        if item.get("kind") == "v2_3_first_report":
+            return str(submission.get("latest_status") or ("generated" if item.get("proposal_generated") else "planned"))
+        if kind == "precomputed_worker_eval_plan":
+            submission = item.get("submission") or {}
+            return str(submission.get("result") or submission.get("latest_status") or "planned")
+        if kind == "precomputed_worker_eval_result":
+            return f"{item.get('result_kind')} passed={item.get('passed')}"
+        if kind == "v2_3_first_report":
             return "present" if item.get("exists") else "missing"
-        if item.get("kind") == "precomputed_worker_eval_plan":
-            submission = item.get("submission") or {}
-            if item.get("errors"):
-                return "error"
-            if submission.get("result") or submission.get("latest_status"):
-                return str(submission.get("result") or submission.get("latest_status"))
-            if item.get("ready_to_submit"):
-                return "ready"
-            if item.get("ready_to_dry_run"):
-                return "needs-quota"
-            return "planned"
-        if item.get("kind") == "precomputed_worker_eval_result":
-            if item.get("result_kind") in {"error", "fixture", "skipped", "incomplete"}:
-                return str(item.get("result_kind"))
-            if item.get("error"):
-                return "error"
-            return str(item.get("worker_status") or "present")
         return "ok"
+
+    def _artifact_label(self, item: dict[str, Any]) -> str:
+        files = item.get("files") or {}
+        names = [k for k, v in files.items() if isinstance(v, dict) and v.get("exists")]
+        if names:
+            return ",".join(names[:4])
+        if item.get("kind") == "proposal_batch_quality":
+            return f"tasks={item.get('task_count')} qpass={item.get('quality_pass_count')}"
+        if item.get("kind") == "training_status":
+            return f"final={item.get('final_ready_count')}/{item.get('phase_count')}"
+        return ""
 
     def render_panel(self) -> None:
         content = self.query_one("#content", Static)
-        if self.current_panel == "overview":
-            text = _fmt({
-                "counts": self.status.get("counts"),
-                "base_model_registry": self.status.get("base_model_registry"),
-                "base_model_discovery": self.status.get("base_model_discovery"),
-                "strict1000_status": self.status.get("strict1000_status"),
-                "v2_3_first_report": {
-                    k: v
-                    for k, v in (self.status.get("v2_3_first_report") or {}).items()
-                    if k != "preview"
-                },
-                "proposal_batch_qualities": self.status.get("proposal_batch_qualities"),
-                "precomputed_worker_eval_plans": self.status.get("precomputed_worker_eval_plans"),
-                "precomputed_worker_eval_real_results": self.status.get("precomputed_worker_eval_real_results"),
-                "precomputed_worker_eval_results": self.status.get("precomputed_worker_eval_results"),
-                "next_actions": self.status.get("next_actions"),
-                "training_data_root": str(self.training_data_root),
-                "training_root": str(self.training_root),
-            })
+        item = self.items[self.current_index] if self.items else {}
+        if self.current_panel == "summary":
+            text = self._panel_summary(item)
+        elif self.current_panel == "prompt":
+            text = self._panel_prompt(item)
+        elif self.current_panel == "messages":
+            text = self._panel_messages(item)
+        elif self.current_panel == "proposal":
+            text = self._panel_proposal(item)
+        elif self.current_panel == "worker":
+            text = self._panel_worker(item)
         elif self.current_panel == "report":
-            text = render_v3_markdown(self.status)
+            text = self._panel_report(item)
+        elif self.current_panel == "article":
+            text = self._panel_article()
         else:
-            item = self.items[self.current_index] if self.items else {}
             text = _fmt(item)
         self.current_text = text
-        content.update(f"V3 {self.current_panel}\n\n{text}")
+        content.update(text)
+
+    def _panel_summary(self, item: dict[str, Any]) -> str:
+        lines = [
+            f"# {item.get('name') or '(no run selected)'}",
+            "",
+            f"- kind: `{item.get('kind')}`",
+            f"- status: `{self._status_label(item)}`",
+            f"- task: `{self._task_label(item)}`",
+            f"- path: `{item.get('path') or item.get('run_root') or ''}`",
+            "",
+            "## Key Fields",
+            "```json",
+            _fmt({k: v for k, v in item.items() if k not in {"rows", "selected", "preview", "prompt_preview"}})[:12000],
+            "```",
+        ]
+        if item.get("prompt_preview"):
+            lines.extend(["", "## Prompt Preview", "```text", str(item.get("prompt_preview")), "```"])
+        return "\n".join(lines)
+
+    def _panel_prompt(self, item: dict[str, Any]) -> str:
+        candidates = [
+            _file_path(item, "prompt"),
+            str(Path(str(item.get("path") or "")) / "prompt.txt") if item.get("path") else None,
+            str(Path(str(item.get("path") or "")) / "output" / "prompt.txt") if item.get("path") else None,
+        ]
+        for path in candidates:
+            if path and Path(path).exists():
+                return f"# Master Prompt\n`{path}`\n\n```text\n{_read(path)}\n```"
+        return "(no master prompt file found for this row)"
+
+    def _panel_messages(self, item: dict[str, Any]) -> str:
+        path = _file_path(item, "messages")
+        if not path and item.get("path"):
+            candidates = [Path(str(item["path"])) / "messages.json", Path(str(item["path"])) / "output" / "messages.json"]
+            path = str(next((p for p in candidates if p.exists()), ""))
+        if not path:
+            return "(no messages.json found for this row)"
+        return f"# Messages\n`{path}`\n\n```json\n{_read(path)}\n```"
+
+    def _panel_proposal(self, item: dict[str, Any]) -> str:
+        candidates = [
+            _file_path(item, "proposal"),
+            str(Path(str(item.get("path") or "")) / "proposal.txt") if item.get("path") else None,
+            str(Path(str(item.get("path") or "")) / "output" / "proposal.txt") if item.get("path") else None,
+        ]
+        for path in candidates:
+            if path and Path(path).exists():
+                return f"# Proposal\n`{path}`\n\n```text\n{_read(path)}\n```"
+        return "(no proposal file found for this row)"
+
+    def _panel_worker(self, item: dict[str, Any]) -> str:
+        base = Path(str(item.get("path") or ""))
+        sections = []
+        for label, path in [
+            ("Worker Prompt", _file_path(item, "worker_prompt") or str(base / "worker_prompt.txt")),
+            ("Worker Log", _file_path(item, "worker_log") or str(base / "worker.log")),
+            ("Eval Log", _file_path(item, "eval_log") or str(base / "eval.log")),
+            ("Result", _file_path(item, "result") or str(base / "result.json")),
+        ]:
+            if path and Path(path).exists():
+                fence = "json" if str(path).endswith(".json") else "text"
+                sections.append(f"# {label}\n`{path}`\n\n```{fence}\n{_read(path)}\n```")
+        return "\n\n".join(sections) if sections else "(no worker/eval artifacts found for this row)"
+
+    def _panel_report(self, item: dict[str, Any]) -> str:
+        for key in ("summary_md", "latest_md", "report", "summary"):
+            path = _file_path(item, key)
+            if path and Path(path).exists():
+                return f"# Report\n`{path}`\n\n{_read(path)}"
+        if item.get("preview"):
+            return str(item.get("preview"))
+        return render_v3_markdown(self.status)
+
+    def _panel_article(self) -> str:
+        if not self.article_report:
+            return "Enter an arXiv id above and press Enter. Example: 2504.00302"
+        return render_article_cache_markdown(self.article_report, include_prompts=True)
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="Read-only V3 training data/run dashboard.")
+    p = argparse.ArgumentParser(description="Read-only V3 run/prompt/cache dashboard.")
     p.add_argument("--config", default=str(ROOT / "configs" / "default.yaml"))
     p.add_argument("--training-data-root", default=str(ROOT / "runs" / "training_data"))
     p.add_argument("--training-root", default=str(ROOT / "runs" / "training"))
