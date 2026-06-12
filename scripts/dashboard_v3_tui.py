@@ -5,6 +5,7 @@ import argparse
 import json
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -13,36 +14,70 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical
-from textual.widgets import DataTable, Footer, Header, Input, Static
+from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.screen import Screen
+from textual.widgets import DataTable, Footer, Header, Input, Select, Static
 
-from autoresearch_idea_harness.article_cache_inspector import (
-    inspect_article_cache,
-    render_article_cache_markdown,
-)
+from autoresearch_idea_harness.article_cache_inspector import inspect_article_cache
 from autoresearch_idea_harness.io import load_config
-from autoresearch_idea_harness.v3_report import collect_v3_status, render_v3_markdown
+
+MAX_TEXT_CHARS = 1_500_000
+
+
+@dataclass
+class DashboardItem:
+    item_type: str
+    name: str
+    status: str
+    summary: str
+    scope_type: str
+    scope_id: str
+    path: Path | None = None
+    content: str | None = None
+    files: dict[str, Path] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class RunTab:
+    key: str
+    title: str
+    paths: list[Path] = field(default_factory=list)
+    inline: str | None = None
 
 
 def _fmt(obj: Any) -> str:
-    return json.dumps(obj, indent=2, ensure_ascii=False)
+    return json.dumps(obj, indent=2, ensure_ascii=False, sort_keys=True)
 
 
-def _read(path: str | Path | None, limit: int | None = None) -> str:
+def _read(path: Path | None, *, max_chars: int = MAX_TEXT_CHARS) -> str:
     if not path:
-        return ""
-    p = Path(path)
-    if not p.exists():
-        return f"(missing: {p})"
-    text = p.read_text(errors="replace")
-    return text if limit is None else text[:limit]
+        return "(missing)"
+    if not path.exists():
+        return f"(missing: {path})"
+    text = path.read_text(errors="replace")
+    if len(text) > max_chars:
+        return text[:max_chars] + f"\n\n... truncated at {max_chars} chars; open file for full content: {path}\n"
+    return text
 
 
-def _file_path(item: dict[str, Any], key: str) -> str | None:
-    info = (item.get("files") or {}).get(key) or {}
-    if isinstance(info, dict):
-        return info.get("path")
-    return None
+def _read_json(path: Path | None) -> dict[str, Any]:
+    if not path or not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(errors="replace"))
+    except Exception:
+        return {}
+
+
+def _file_status(path: Path | None) -> str:
+    if not path:
+        return "missing"
+    return "ready" if path.exists() else "missing"
+
+
+def _first_existing(paths: list[Path]) -> Path | None:
+    return next((p for p in paths if p.exists()), None)
 
 
 def _copy_to_clipboard(text: str) -> str:
@@ -62,34 +97,559 @@ def _copy_to_clipboard(text: str) -> str:
     return "no clipboard backend"
 
 
-class V3TrainingDashboard(App):
+def _normalize_query(value: str) -> str:
+    value = value.strip()
+    if value.startswith("arxiv:"):
+        return value.split(":", 1)[1].strip()
+    if value.startswith("mls:"):
+        return value.split(":", 1)[1].strip()
+    return value
+
+
+def _task_from_packet(path: Path) -> tuple[str | None, str | None, dict[str, Any]]:
+    packet = _read_json(path)
+    task = packet.get("task") or packet.get("task_id")
+    subtask = packet.get("subtask") or packet.get("subtask_id")
+    return (str(task) if task else None, str(subtask) if subtask else None, packet)
+
+
+def _task_matches(task: str | None, subtask: str | None, query: str) -> bool:
+    q = query.lower()
+    candidates = [str(task or "").lower(), str(subtask or "").lower(), f"{task or ''}/{subtask or ''}".lower()]
+    return any(q == c or q in c for c in candidates if c)
+
+
+def _artifact_files(base: Path) -> dict[str, Path]:
+    candidates = {
+        "task_packet": [base / "task_packet.json"],
+        "master_prompt": [base / "prompt.txt", base / "master_prompt.txt", base / "output" / "prompt.txt"],
+        "messages": [base / "messages.json", base / "output" / "messages.json"],
+        "proposal": [base / "proposal.txt", base / "output" / "proposal.txt"],
+        "expert": [
+            base / "expert_forecasts.jsonl",
+            base / "forecasts.jsonl",
+            base / "market" / "forecasts.jsonl",
+            base / "expert_responses.jsonl",
+        ],
+        "worker_prompt": [base / "worker_prompt.txt", base / "output" / "worker_prompt.txt"],
+        "worker_log": [base / "worker.log", base / "output" / "worker.log"],
+        "eval_log": [base / "eval.log", base / "workspace" / "eval.log", base / "output" / "eval.log"],
+        "result": [base / "result.json", base / "workspace" / "result.json", base / "output" / "result.json"],
+        "settlement": [base / "settlement.json", base / "market" / "settlement.json"],
+        "summary": [base / "summary.json", base / "report.md", base / "meta.json", base / "proposal_quality.json"],
+        "error": [base / "error.json"],
+    }
+    files: dict[str, Path] = {}
+    for name, paths in candidates.items():
+        first = _first_existing(paths)
+        files[name] = first or paths[0]
+    return files
+
+
+def _has_run_artifacts(files: dict[str, Path]) -> bool:
+    return any(files[key].exists() for key in ("worker_prompt", "worker_log", "eval_log", "result", "settlement", "error"))
+
+
+def _artifact_summary(files: dict[str, Path]) -> str:
+    ready = [name for name, path in files.items() if path.exists()]
+    return ",".join(ready[:8]) if ready else "no files"
+
+
+def _status_from_files(files: dict[str, Path]) -> str:
+    if files.get("result") and files["result"].exists():
+        result = _read_json(files["result"])
+        passed = result.get("passed")
+        parsed = result.get("_parsed") or {}
+        if passed is None:
+            passed = parsed.get("passed")
+        if passed is not None:
+            return f"result pass={passed}"
+        return "result"
+    if files.get("error") and files["error"].exists():
+        return "error"
+    if files.get("worker_log") and files["worker_log"].exists():
+        return "running/logged"
+    if files.get("proposal") and files["proposal"].exists():
+        return "proposal"
+    if files.get("master_prompt") and files["master_prompt"].exists():
+        return "prompt"
+    if files.get("task_packet") and files["task_packet"].exists():
+        return "packet"
+    return "missing"
+
+
+def _run_title(path: Path, task: str | None, subtask: str | None) -> str:
+    task_label = task or "unknown_task"
+    if subtask:
+        task_label = f"{task_label}/{subtask}"
+    parent = path.parent.name
+    if parent == "output":
+        parent = path.parent.parent.name
+    return f"{task_label} :: {parent}/{path.name}"
+
+
+def _iter_task_packet_paths(runs_root: Path) -> list[Path]:
+    patterns = [
+        "formal_sweeps/*/*/task_packet.json",
+        "v3_precomputed_worker_eval/*/output/*/task_packet.json",
+        "v3_precomputed_worker_eval/*/*/task_packet.json",
+        "v3_checkpoint_proposal_smoke/*/task_packet.json",
+        "v3_checkpoint_proposal_smoke/*/output/task_packet.json",
+        "v3_checkpoint_proposal_smoke/task_packet_matrix/*/task_packet.json",
+        "v3_checkpoint_proposal_batch/*/*/task_packet.json",
+        "v3_checkpoint_proposal_batch/*/output/*/task_packet.json",
+        "end_to_end/*/task_packet.json",
+    ]
+    paths: list[Path] = []
+    for pattern in patterns:
+        paths.extend(runs_root.glob(pattern))
+    return sorted(set(paths))
+
+
+def _make_run_item(base: Path, query: str) -> DashboardItem | None:
+    packet_path = base / "task_packet.json"
+    if not packet_path.exists():
+        return None
+    task, subtask, packet = _task_from_packet(packet_path)
+    if not _task_matches(task, subtask, query):
+        return None
+    files = _artifact_files(base)
+    item_type = "run" if _has_run_artifacts(files) else "cache"
+    module = packet.get("module_id") or packet.get("proposal_module") or packet.get("generator") or ""
+    status = _status_from_files(files)
+    summary = _artifact_summary(files)
+    if module:
+        summary = f"{module} | {summary}"
+    return DashboardItem(
+        item_type=item_type,
+        name=_run_title(base, task, subtask),
+        status=status,
+        summary=summary,
+        scope_type="mls",
+        scope_id=str(task or query),
+        path=base,
+        files=files,
+        metadata={"task": task, "subtask": subtask, "module": module},
+    )
+
+
+def discover_mls_items(runs_root: Path, training_data_root: Path, training_root: Path, cfg: dict[str, Any], query: str) -> list[DashboardItem]:
+    items: list[DashboardItem] = []
+    seen: set[Path] = set()
+
+    for packet_path in _iter_task_packet_paths(runs_root):
+        base = packet_path.parent.resolve()
+        if base in seen:
+            continue
+        item = _make_run_item(base, query)
+        if item:
+            seen.add(base)
+            items.append(item)
+
+    items.sort(key=lambda item: (0 if item.item_type == "cache" else 1, item.name, str(item.path or "")))
+    return items
+
+
+def _article_status(item: dict[str, Any]) -> str:
+    status = item.get("status")
+    if status:
+        return str(status)
+    text = item.get("text") or item.get("prompt")
+    return "ready" if text else "missing"
+
+
+def discover_article_items(cfg: dict[str, Any], arxiv_id: str) -> list[DashboardItem]:
+    cached_report = ROOT / "runs" / "reports" / f"article_cache_{arxiv_id}.full_cache.json"
+    report = _read_json(cached_report) if cached_report.exists() else inspect_article_cache(cfg, arxiv_id)
+    items: list[DashboardItem] = []
+    metadata = report.get("metadata") or {}
+    overview = "\n".join(
+        [
+            f"# Article Overview: {arxiv_id}",
+            "",
+            "## Metadata",
+            "```json",
+            _fmt(metadata),
+            "```",
+            "",
+            "## Cache Completeness",
+            "```json",
+            _fmt(_article_completeness(report)),
+            "```",
+        ]
+    )
+    items.append(
+        DashboardItem(
+            item_type="cache",
+            name="overview",
+            status="ready" if report.get("found_dataset_record") or report.get("found_classified_row") else "missing",
+            summary=str(metadata.get("title") or ""),
+            scope_type="arxiv",
+            scope_id=arxiv_id,
+            content=overview,
+            metadata={"component": "overview", "cached_report": str(cached_report) if cached_report.exists() else None},
+        )
+    )
+
+    q = report.get("open_question") or {}
+    question_text = "\n".join(
+        [
+            f"# Open Question: {arxiv_id}",
+            "",
+            f"- source: `{q.get('source')}`",
+            f"- tokens: `{q.get('tokens')}`",
+            f"- complete: `{q.get('complete')}`",
+            "",
+            "## Compact Question",
+            q.get("text") or "(missing)",
+            "",
+            "## Raw Cache",
+            "```text",
+            q.get("raw") or "(missing)",
+            "```",
+        ]
+    )
+    items.append(
+        DashboardItem(
+            item_type="cache",
+            name="open_question",
+            status="ready" if q.get("text") else "missing",
+            summary=f"{q.get('tokens')} tokens complete={q.get('complete')}",
+            scope_type="arxiv",
+            scope_id=arxiv_id,
+            content=question_text,
+            metadata={"component": "open_question"},
+        )
+    )
+
+    for strategy, prompt in (report.get("prompt_variants") or {}).items():
+        meta = prompt.get("metadata") or {}
+        counts = meta.get("abstract_source_counts") or {}
+        text = "\n".join(
+            [
+                f"# Prompt Cache: {arxiv_id}/{strategy}",
+                "",
+                f"- status: `{prompt.get('status') or 'missing'}`",
+                f"- chars: `{prompt.get('chars')}`",
+                f"- abstract sources cached/raw/fallback: `{counts.get('cached_abstract_summary', 0)}/{counts.get('raw_abstract_under_limit', 0)}/{counts.get('fallback_token_trimmed_abstract', 0)}`",
+                "",
+                "## Metadata",
+                "```json",
+                _fmt(meta),
+                "```",
+                "",
+                "## Prompt",
+                "```text",
+                prompt.get("prompt") or "(missing)",
+                "```",
+            ]
+        )
+        items.append(
+            DashboardItem(
+                item_type="cache",
+                name=f"prompt/{strategy}",
+                status=str(prompt.get("status") or "missing"),
+                summary=f"chars={prompt.get('chars')} abs={counts.get('cached_abstract_summary', 0)}/{counts.get('raw_abstract_under_limit', 0)}/{counts.get('fallback_token_trimmed_abstract', 0)}",
+                scope_type="arxiv",
+                scope_id=arxiv_id,
+                content=text,
+                metadata={"component": strategy},
+            )
+        )
+
+    tex = report.get("tex_details") or {}
+    snippets_by_kind = tex.get("snippets_by_kind") or {}
+    expected_tex = ["abstract", "problem", "method", "implementation", "algorithm_or_system", "training_or_data_recipe", "evaluation", "results", "risks_and_limitations"]
+    for kind in expected_tex:
+        snippets = snippets_by_kind.get(kind) or []
+        lines = [
+            f"# TeX Detail Cache: {arxiv_id}/{kind}",
+            "",
+            f"- tex_status: `{tex.get('tex_status')}`",
+            f"- snippets: `{len(snippets)}`",
+            "",
+        ]
+        if snippets:
+            for idx, snippet in enumerate(snippets, start=1):
+                lines.extend(
+                    [
+                        f"## {idx}. {snippet.get('heading') or '(no heading)'}",
+                        f"`{snippet.get('source') or ''}`",
+                        "",
+                        snippet.get("text") or "",
+                        "",
+                    ]
+                )
+        else:
+            lines.append("(missing)")
+        items.append(
+            DashboardItem(
+                item_type="cache",
+                name=f"tex/{kind}",
+                status="ready" if snippets else "missing",
+                summary=f"snippets={len(snippets)}",
+                scope_type="arxiv",
+                scope_id=arxiv_id,
+                content="\n".join(lines).rstrip() + "\n",
+                metadata={"component": kind},
+            )
+        )
+
+    cache_files = "\n".join(
+        [
+            f"# Cache Files: {arxiv_id}",
+            "",
+            "```json",
+            _fmt(report.get("cache_files") or {}),
+            "```",
+        ]
+    )
+    items.append(
+        DashboardItem(
+            item_type="cache",
+            name="cache_files",
+            status="ready",
+            summary="prompt/detail cache locations",
+            scope_type="arxiv",
+            scope_id=arxiv_id,
+            content=cache_files,
+            metadata={"component": "cache_files"},
+        )
+    )
+    return items
+
+
+def _article_completeness(report: dict[str, Any]) -> dict[str, Any]:
+    variants = report.get("prompt_variants") or {}
+    fallback_counts = {}
+    for strategy, item in variants.items():
+        counts = (item.get("metadata") or {}).get("abstract_source_counts") or {}
+        fallback_counts[strategy] = counts.get("fallback_token_trimmed_abstract", 0)
+    tex_kinds = sorted(((report.get("tex_details") or {}).get("snippets_by_kind") or {}).keys())
+    return {
+        "found_dataset_record": report.get("found_dataset_record"),
+        "found_classified_row": report.get("found_classified_row"),
+        "open_question_complete": (report.get("open_question") or {}).get("complete"),
+        "prompt_status": {k: v.get("status") for k, v in variants.items()},
+        "fallback_abstract_counts": fallback_counts,
+        "tex_status": (report.get("tex_details") or {}).get("tex_status"),
+        "tex_kinds": tex_kinds,
+    }
+
+
+def _tab_text(tab: RunTab) -> str:
+    if tab.inline is not None:
+        return tab.inline
+    lines = [f"# {tab.title}", ""]
+    existing = [p for p in tab.paths if p.exists()]
+    if not existing:
+        lines.extend(["(missing)", "", "Expected paths:", "```text", "\n".join(str(p) for p in tab.paths), "```"])
+        return "\n".join(lines)
+    for path in existing:
+        suffix = path.suffix.lower()
+        fence = "json" if suffix == ".json" else "text"
+        lines.extend([f"`{path}`", "", f"```{fence}", _read(path), "```", ""])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _cache_item_text(item: DashboardItem) -> str:
+    if item.content is not None:
+        return item.content
+    lines = [
+        f"# Cache: {item.name}",
+        "",
+        f"- scope: `{item.scope_type}:{item.scope_id}`",
+        f"- status: `{item.status}`",
+        f"- path: `{item.path or ''}`",
+        "",
+        "## Metadata",
+        "```json",
+        _fmt(item.metadata),
+        "```",
+        "",
+    ]
+    if not item.files:
+        lines.append("(missing)")
+        return "\n".join(lines)
+    for label in ("task_packet", "master_prompt", "messages", "proposal", "summary", "error"):
+        path = item.files.get(label)
+        if not path:
+            continue
+        title = label.replace("_", " ").title()
+        lines.extend([f"## {title}", f"`{path}`", ""])
+        if path.exists():
+            fence = "json" if path.suffix == ".json" else "text"
+            lines.extend([f"```{fence}", _read(path), "```", ""])
+        else:
+            lines.extend([f"(missing: {path})", ""])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _run_tabs(item: DashboardItem) -> list[RunTab]:
+    base = item.path or Path()
+    files = item.files or _artifact_files(base)
+    overview = "\n".join(
+        [
+            "# Run Overview",
+            "",
+            f"- name: `{item.name}`",
+            f"- status: `{item.status}`",
+            f"- scope: `{item.scope_type}:{item.scope_id}`",
+            f"- path: `{item.path or ''}`",
+            "",
+            "## Metadata",
+            "```json",
+            _fmt(item.metadata),
+            "```",
+            "",
+            "## Files",
+            "```json",
+            _fmt({name: {"path": str(path), "exists": path.exists()} for name, path in files.items()}),
+            "```",
+        ]
+    )
+    return [
+        RunTab("overview", "Overview", inline=overview),
+        RunTab("packet", "1 Packet", [files.get("task_packet") or base / "task_packet.json"]),
+        RunTab("master", "2 Master Prompt", [files.get("master_prompt") or base / "prompt.txt", files.get("messages") or base / "messages.json"]),
+        RunTab("expert", "3 Expert / Market", [files.get("expert") or base / "expert_forecasts.jsonl", files.get("settlement") or base / "settlement.json"]),
+        RunTab("worker_prompt", "4 Worker Prompt", [files.get("worker_prompt") or base / "worker_prompt.txt"]),
+        RunTab("worker_log", "5 Worker Log", [files.get("worker_log") or base / "worker.log"]),
+        RunTab("eval_log", "6 Eval Log", [files.get("eval_log") or base / "eval.log"]),
+        RunTab("result", "7 Result", [files.get("result") or base / "result.json"]),
+        RunTab("summary", "8 Summary / Report", [files.get("summary") or base / "summary.json", files.get("error") or base / "error.json"]),
+        RunTab("artifacts", "9 Artifact Index", inline=overview),
+    ]
+
+
+class CacheDetailScreen(Screen[None]):
+    BINDINGS = [
+        Binding("escape", "back", "Back"),
+        Binding("b", "back", "Back"),
+        Binding("c", "copy", "Copy"),
+        Binding("q", "back", "Back"),
+    ]
+
+    def __init__(self, item: DashboardItem) -> None:
+        super().__init__()
+        self.item = item
+        self.text = _cache_item_text(item)
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Static(f"{self.item.scope_type}:{self.item.scope_id} / {self.item.name} [{self.item.status}]", id="detail-title")
+        with VerticalScroll(id="detail-scroll"):
+            yield Static(self.text, id="detail-body", markup=False)
+        yield Footer()
+
+    def action_back(self) -> None:
+        self.app.pop_screen()
+
+    def action_copy(self) -> None:
+        self.notify(_copy_to_clipboard(self.text))
+
+
+class RunDetailScreen(Screen[None]):
+    BINDINGS = [
+        Binding("escape", "back", "Back"),
+        Binding("b", "back", "Back"),
+        Binding("c", "copy", "Copy"),
+        Binding("1", "tab(1)", "Packet"),
+        Binding("2", "tab(2)", "Master"),
+        Binding("3", "tab(3)", "Expert"),
+        Binding("4", "tab(4)", "Worker Prompt"),
+        Binding("5", "tab(5)", "Worker Log"),
+        Binding("6", "tab(6)", "Eval Log"),
+        Binding("7", "tab(7)", "Result"),
+        Binding("8", "tab(8)", "Summary"),
+        Binding("9", "tab(9)", "Artifacts"),
+        Binding("q", "back", "Back"),
+    ]
+
+    def __init__(self, item: DashboardItem) -> None:
+        super().__init__()
+        self.item = item
+        self.tabs = _run_tabs(item)
+        self.index = 1 if len(self.tabs) > 1 else 0
+        self.current_text = ""
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Static("", id="run-title")
+        yield Static("", id="run-tabs", markup=False)
+        with VerticalScroll(id="run-scroll"):
+            yield Static("", id="run-body", markup=False)
+        yield Footer()
+
+    def on_mount(self) -> None:
+        self._render()
+
+    def action_back(self) -> None:
+        self.app.pop_screen()
+
+    def action_copy(self) -> None:
+        self.notify(_copy_to_clipboard(self.current_text))
+
+    def action_tab(self, number: int) -> None:
+        if number == 9:
+            self.index = min(8, len(self.tabs) - 1)
+        else:
+            self.index = min(max(1, number), len(self.tabs) - 1)
+        self._render()
+
+    def _render(self) -> None:
+        tab = self.tabs[self.index]
+        tab_labels = []
+        for idx, candidate in enumerate(self.tabs):
+            label = candidate.title
+            if idx == self.index:
+                label = f"[{label}]"
+            tab_labels.append(label)
+        self.current_text = _tab_text(tab)
+        self.query_one("#run-title", Static).update(f"{self.item.name} / {tab.title}")
+        self.query_one("#run-tabs", Static).update("  ".join(tab_labels[1:]))
+        self.query_one("#run-body", Static).update(self.current_text)
+
+
+class V3ScopedDashboard(App[None]):
     CSS = """
-    #article {
+    #search-bar {
         height: 3;
         border-bottom: solid $accent;
     }
-    DataTable {
-        width: 48%;
-        height: 100%;
+    #mode {
+        width: 16;
+        margin: 0 1 0 0;
     }
-    #content {
-        width: 52%;
-        height: 100%;
-        overflow: auto;
-        border-left: solid $accent;
+    #query {
+        width: 1fr;
+    }
+    #hint {
+        height: 3;
+        padding: 1;
+    }
+    DataTable {
+        height: 1fr;
+        width: 100%;
+    }
+    #detail-title, #run-title {
+        height: auto;
+        padding: 1;
+        border-bottom: solid $accent;
+    }
+    #run-tabs {
+        height: auto;
+        padding: 0 1 1 1;
+        border-bottom: solid $accent;
+    }
+    #detail-scroll, #run-scroll {
+        height: 1fr;
         padding: 1;
     }
     """
     BINDINGS = [
         Binding("r", "refresh", "Refresh"),
-        Binding("c", "copy", "Copy"),
-        Binding("1", "panel('summary')", "Summary"),
-        Binding("2", "panel('prompt')", "Prompt"),
-        Binding("3", "panel('messages')", "Messages"),
-        Binding("4", "panel('proposal')", "Proposal"),
-        Binding("5", "panel('worker')", "Worker/Eval"),
-        Binding("6", "panel('report')", "Report"),
-        Binding("7", "panel('article')", "Article Cache"),
+        Binding("c", "copy_row", "Copy Row"),
         Binding("q", "quit", "Quit"),
     ]
 
@@ -97,435 +657,144 @@ class V3TrainingDashboard(App):
         self,
         training_data_root: Path,
         training_root: Path,
-        cfg: dict[str, Any] | None = None,
-        refresh_s: float = 10.0,
-        article_id: str | None = None,
+        runs_root: Path,
+        cfg: dict[str, Any],
+        mode: str = "mls",
+        query: str | None = None,
     ) -> None:
         super().__init__()
         self.training_data_root = training_data_root
         self.training_root = training_root
-        self.cfg = cfg or {}
-        self.refresh_s = refresh_s
-        self.article_id = article_id
-        self.status: dict[str, Any] = {}
-        self.items: list[dict[str, Any]] = []
-        self.current_index = 0
-        self.current_panel = "summary"
-        self.current_text = ""
-        self.article_report: dict[str, Any] | None = None
+        self.runs_root = runs_root
+        self.cfg = cfg
+        self.mode = mode
+        self.query = query or ""
+        self.items: list[DashboardItem] = []
+        self.current_row = 0
 
     def compose(self) -> ComposeResult:
         yield Header()
         with Vertical():
-            yield Input(placeholder="Enter arXiv id and press Enter to inspect caches/prompts/TeX details", id="article")
-            with Horizontal():
-                yield DataTable(id="items")
-                yield Static(id="content", markup=False)
+            with Horizontal(id="search-bar"):
+                yield Select([("MLS", "mls"), ("arXiv", "arxiv")], value=self.mode, id="mode")
+                yield Input(value=self.query, placeholder="MLS: task id (dl_lr_schedule) | arXiv: 2504.00302, then Enter", id="query")
+            yield Static("Choose MLS or arXiv, enter one ID, press Enter. Results below are scoped only to that task/paper.", id="hint")
+            yield DataTable(id="results")
         yield Footer()
 
     def on_mount(self) -> None:
-        table = self.query_one("#items", DataTable)
+        table = self.query_one("#results", DataTable)
         table.cursor_type = "row"
-        table.add_columns("Run", "Kind", "Task", "Status", "Artifacts")
-        if self.article_id:
-            article_input = self.query_one("#article", Input)
-            article_input.value = self.article_id
-            self.article_report = inspect_article_cache(self.cfg, self.article_id)
-        self.refresh_status()
-        self.set_interval(self.refresh_s, self.refresh_status)
+        table.add_columns("Type", "Name", "Status", "Summary", "Path")
+        if self.query:
+            self._search()
+
+    def on_select_changed(self, event: Select.Changed) -> None:
+        if event.select.id == "mode":
+            self.mode = str(event.value)
+            self.query_one("#query", Input).focus()
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        value = event.value.strip()
-        if not value:
+        if event.input.id != "query":
             return
-        try:
-            self.article_report = inspect_article_cache(self.cfg, value)
-            self.current_index = 0
-            self.current_panel = "summary"
-            self.refresh_status()
-        except Exception as exc:
-            self.current_text = f"Article cache inspection failed for {value}: {exc}"
-            self.query_one("#content", Static).update(self.current_text)
-
-    def action_refresh(self) -> None:
-        self.refresh_status()
-
-    def action_copy(self) -> None:
-        self.notify(_copy_to_clipboard(self.current_text))
-
-    def action_panel(self, panel: str) -> None:
-        self.current_panel = panel
-        self.render_panel()
+        self.query = _normalize_query(event.value)
+        self._search()
 
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
         try:
-            self.current_index = int(getattr(event.row_key, "value", str(event.row_key)))
+            self.current_row = int(getattr(event.row_key, "value", str(event.row_key)))
         except Exception:
-            self.current_index = 0
-        self.current_panel = "summary"
-        self.render_panel()
+            self.current_row = 0
+        if self.current_row >= len(self.items):
+            return
+        item = self.items[self.current_row]
+        if item.item_type == "run":
+            self.push_screen(RunDetailScreen(item))
+        else:
+            self.push_screen(CacheDetailScreen(item))
 
-    def refresh_status(self) -> None:
-        self.status = collect_v3_status(self.training_data_root, self.training_root, cfg=self.cfg)
-        self.items = self._build_run_items()
-        table = self.query_one("#items", DataTable)
+    def action_refresh(self) -> None:
+        self.query = _normalize_query(self.query_one("#query", Input).value)
+        self._search()
+
+    def action_copy_row(self) -> None:
+        if not self.items:
+            self.notify("no row")
+            return
+        item = self.items[min(self.current_row, len(self.items) - 1)]
+        self.notify(_copy_to_clipboard(_fmt({
+            "type": item.item_type,
+            "name": item.name,
+            "status": item.status,
+            "summary": item.summary,
+            "path": str(item.path or ""),
+        })))
+
+    def _search(self) -> None:
+        query = _normalize_query(self.query)
+        table = self.query_one("#results", DataTable)
         table.clear()
+        self.items = []
+        if not query:
+            self.query_one("#hint", Static).update("Enter one MLS task id or one arXiv id.")
+            return
+        try:
+            if self.mode == "arxiv":
+                self.items = discover_article_items(self.cfg, query)
+            else:
+                self.items = discover_mls_items(self.runs_root, self.training_data_root, self.training_root, self.cfg, query)
+        except Exception as exc:
+            self.items = [
+                DashboardItem(
+                    item_type="cache",
+                    name="search_error",
+                    status="error",
+                    summary=str(exc),
+                    scope_type=self.mode,
+                    scope_id=query,
+                    content=f"# Search Error\n\n```text\n{exc}\n```",
+                )
+            ]
+        self.current_row = 0
+        self.query_one("#hint", Static).update(
+            f"{self.mode}:{query} | {len(self.items)} scoped rows. Enter opens details; cache pages scroll; run pages use tabs 1-9."
+        )
         for idx, item in enumerate(self.items):
             table.add_row(
-                str(item.get("name") or ""),
-                str(item.get("kind") or ""),
-                self._task_label(item),
-                self._status_label(item),
-                self._artifact_label(item),
+                item.item_type,
+                item.name,
+                item.status,
+                item.summary,
+                str(item.path or ""),
                 key=str(idx),
             )
-        if self.current_index >= len(self.items):
-            self.current_index = 0
-        self.render_panel()
-
-    def _build_run_items(self) -> list[dict[str, Any]]:
-        items: list[dict[str, Any]] = []
-        if self.article_report:
-            items.extend(self._build_article_items(self.article_report))
-        strict = self.status.get("strict1000_status")
-        if strict:
-            items.append({**strict, "kind": "training_status", "name": "strict1000_sft"})
-        for key in (
-            "run_plans",
-            "proposal_master_prompts",
-            "proposal_batch_qualities",
-            "proposal_smokes",
-            "precomputed_worker_eval_plans",
-            "precomputed_worker_eval_results",
-            "v2_3_first_report_items",
-        ):
-            if key == "v2_3_first_report_items":
-                report = self.status.get("v2_3_first_report")
-                if report:
-                    items.append(report)
-            else:
-                items.extend(self.status.get(key) or [])
-        return items
-
-    def _build_article_items(self, report: dict[str, Any]) -> list[dict[str, Any]]:
-        aid = str(report.get("arxiv_id") or "article")
-        rows: list[dict[str, Any]] = [
-            {
-                "kind": "article_overview",
-                "name": f"{aid}/overview",
-                "article": report,
-                "component": "overview",
-            },
-            {
-                "kind": "article_open_question",
-                "name": f"{aid}/open_question",
-                "article": report,
-                "component": "open_question",
-            },
-        ]
-        for strategy, prompt in (report.get("prompt_variants") or {}).items():
-            rows.append({
-                "kind": "article_prompt",
-                "name": f"{aid}/{strategy}",
-                "article": report,
-                "component": strategy,
-                "prompt_variant": prompt,
-            })
-        for kind, snippets in ((report.get("tex_details") or {}).get("snippets_by_kind") or {}).items():
-            rows.append({
-                "kind": "article_tex",
-                "name": f"{aid}/tex_{kind}",
-                "article": report,
-                "component": kind,
-                "snippets": snippets,
-            })
-        rows.append({
-            "kind": "article_cache_files",
-            "name": f"{aid}/cache_files",
-            "article": report,
-            "component": "cache_files",
-        })
-        return rows
-
-    def _task_label(self, item: dict[str, Any]) -> str:
-        if str(item.get("kind") or "").startswith("article_"):
-            return "article cache"
-        task = item.get("task")
-        subtask = item.get("subtask")
-        if task and subtask:
-            return f"{task}/{subtask}"
-        return str(task or item.get("run_id") or "")
-
-    def _status_label(self, item: dict[str, Any]) -> str:
-        kind = item.get("kind")
-        if str(kind or "").startswith("article_"):
-            if kind == "article_prompt":
-                return str((item.get("prompt_variant") or {}).get("status") or "unknown")
-            if kind == "article_tex":
-                return str(((item.get("article") or {}).get("tex_details") or {}).get("tex_status") or "unknown")
-            return "ready"
-        if kind == "training_status":
-            return str(item.get("training_result") or "present")
-        if kind == "run_plan":
-            submission = item.get("submission") or {}
-            return str(submission.get("result") or submission.get("latest_status") or "planned")
-        if kind == "proposal_master_prompt":
-            return "ready" if (_file_path(item, "prompt") and Path(_file_path(item, "prompt")).exists()) else "missing-prompt"
-        if kind == "proposal_batch_quality":
-            submission = item.get("submission") or {}
-            return str(submission.get("result") or submission.get("latest_status") or "summarized")
-        if kind == "proposal_smoke":
-            submission = item.get("submission") or {}
-            return str(submission.get("latest_status") or ("generated" if item.get("proposal_generated") else "planned"))
-        if kind == "precomputed_worker_eval_plan":
-            submission = item.get("submission") or {}
-            return str(submission.get("result") or submission.get("latest_status") or "planned")
-        if kind == "precomputed_worker_eval_result":
-            return f"{item.get('result_kind')} passed={item.get('passed')}"
-        if kind == "v2_3_first_report":
-            return "present" if item.get("exists") else "missing"
-        return "ok"
-
-    def _artifact_label(self, item: dict[str, Any]) -> str:
-        kind = item.get("kind")
-        if kind == "article_prompt":
-            prompt = item.get("prompt_variant") or {}
-            meta = prompt.get("metadata") or {}
-            counts = meta.get("abstract_source_counts") or {}
-            cached = counts.get("cached_abstract_summary", 0)
-            raw = counts.get("raw_abstract_under_limit", 0)
-            fallback = counts.get("fallback_token_trimmed_abstract", 0)
-            return f"chars={prompt.get('chars')} abs={cached}/{raw}/{fallback}"
-        if kind == "article_open_question":
-            q = (item.get("article") or {}).get("open_question") or {}
-            return f"{q.get('tokens')}tok complete={q.get('complete')}"
-        if kind == "article_tex":
-            return f"snippets={len(item.get('snippets') or [])}"
-        if str(kind or "").startswith("article_"):
-            return str(item.get("component") or "")
-        files = item.get("files") or {}
-        names = [k for k, v in files.items() if isinstance(v, dict) and v.get("exists")]
-        if names:
-            return ",".join(names[:4])
-        if item.get("kind") == "proposal_batch_quality":
-            return f"tasks={item.get('task_count')} qpass={item.get('quality_pass_count')}"
-        if item.get("kind") == "training_status":
-            return f"final={item.get('final_ready_count')}/{item.get('phase_count')}"
-        return ""
-
-    def render_panel(self) -> None:
-        content = self.query_one("#content", Static)
-        item = self.items[self.current_index] if self.items else {}
-        if str(item.get("kind") or "").startswith("article_") and self.current_panel != "report":
-            text = self._panel_article_item(item)
-        elif self.current_panel == "summary":
-            text = self._panel_summary(item)
-        elif self.current_panel == "prompt":
-            text = self._panel_prompt(item)
-        elif self.current_panel == "messages":
-            text = self._panel_messages(item)
-        elif self.current_panel == "proposal":
-            text = self._panel_proposal(item)
-        elif self.current_panel == "worker":
-            text = self._panel_worker(item)
-        elif self.current_panel == "report":
-            text = self._panel_report(item)
-        elif self.current_panel == "article":
-            text = self._panel_article()
-        else:
-            text = _fmt(item)
-        self.current_text = text
-        content.update(text)
-
-    def _panel_summary(self, item: dict[str, Any]) -> str:
-        lines = [
-            f"# {item.get('name') or '(no run selected)'}",
-            "",
-            f"- kind: `{item.get('kind')}`",
-            f"- status: `{self._status_label(item)}`",
-            f"- task: `{self._task_label(item)}`",
-            f"- path: `{item.get('path') or item.get('run_root') or ''}`",
-            "",
-            "## Key Fields",
-            "```json",
-            _fmt({k: v for k, v in item.items() if k not in {"rows", "selected", "preview", "prompt_preview"}})[:12000],
-            "```",
-        ]
-        if item.get("prompt_preview"):
-            lines.extend(["", "## Prompt Preview", "```text", str(item.get("prompt_preview")), "```"])
-        return "\n".join(lines)
-
-    def _panel_prompt(self, item: dict[str, Any]) -> str:
-        candidates = [
-            _file_path(item, "prompt"),
-            str(Path(str(item.get("path") or "")) / "prompt.txt") if item.get("path") else None,
-            str(Path(str(item.get("path") or "")) / "output" / "prompt.txt") if item.get("path") else None,
-        ]
-        for path in candidates:
-            if path and Path(path).exists():
-                return f"# Master Prompt\n`{path}`\n\n```text\n{_read(path)}\n```"
-        return "(no master prompt file found for this row)"
-
-    def _panel_messages(self, item: dict[str, Any]) -> str:
-        path = _file_path(item, "messages")
-        if not path and item.get("path"):
-            candidates = [Path(str(item["path"])) / "messages.json", Path(str(item["path"])) / "output" / "messages.json"]
-            path = str(next((p for p in candidates if p.exists()), ""))
-        if not path:
-            return "(no messages.json found for this row)"
-        return f"# Messages\n`{path}`\n\n```json\n{_read(path)}\n```"
-
-    def _panel_proposal(self, item: dict[str, Any]) -> str:
-        candidates = [
-            _file_path(item, "proposal"),
-            str(Path(str(item.get("path") or "")) / "proposal.txt") if item.get("path") else None,
-            str(Path(str(item.get("path") or "")) / "output" / "proposal.txt") if item.get("path") else None,
-        ]
-        for path in candidates:
-            if path and Path(path).exists():
-                return f"# Proposal\n`{path}`\n\n```text\n{_read(path)}\n```"
-        return "(no proposal file found for this row)"
-
-    def _panel_worker(self, item: dict[str, Any]) -> str:
-        base = Path(str(item.get("path") or ""))
-        sections = []
-        for label, path in [
-            ("Worker Prompt", _file_path(item, "worker_prompt") or str(base / "worker_prompt.txt")),
-            ("Worker Log", _file_path(item, "worker_log") or str(base / "worker.log")),
-            ("Eval Log", _file_path(item, "eval_log") or str(base / "eval.log")),
-            ("Result", _file_path(item, "result") or str(base / "result.json")),
-        ]:
-            if path and Path(path).exists():
-                fence = "json" if str(path).endswith(".json") else "text"
-                sections.append(f"# {label}\n`{path}`\n\n```{fence}\n{_read(path)}\n```")
-        return "\n\n".join(sections) if sections else "(no worker/eval artifacts found for this row)"
-
-    def _panel_report(self, item: dict[str, Any]) -> str:
-        for key in ("summary_md", "latest_md", "report", "summary"):
-            path = _file_path(item, key)
-            if path and Path(path).exists():
-                return f"# Report\n`{path}`\n\n{_read(path)}"
-        if item.get("preview"):
-            return str(item.get("preview"))
-        return render_v3_markdown(self.status)
-
-    def _panel_article(self) -> str:
-        if not self.article_report:
-            return "Enter an arXiv id above and press Enter. Example: 2504.00302"
-        return render_article_cache_markdown(self.article_report, include_prompts=True)
-
-    def _panel_article_item(self, item: dict[str, Any]) -> str:
-        report = item.get("article") or {}
-        kind = item.get("kind")
-        aid = report.get("arxiv_id")
-        if kind == "article_overview":
-            return "\n".join([
-                f"# Article Overview: {aid}",
-                "",
-                "## Metadata",
-                "```json",
-                _fmt(report.get("metadata") or {}),
-                "```",
-                "",
-                "## Cache Completeness",
-                "```json",
-                _fmt(self._article_cache_completeness(report)),
-                "```",
-            ])
-        if kind == "article_open_question":
-            q = report.get("open_question") or {}
-            return "\n".join([
-                f"# Open Question: {aid}",
-                "",
-                f"- source: `{q.get('source')}`",
-                f"- tokens: `{q.get('tokens')}`",
-                f"- complete: `{q.get('complete')}`",
-                "",
-                "## Compact Question",
-                q.get("text") or "(missing)",
-                "",
-                "## Raw Cache",
-                "```text",
-                q.get("raw") or "",
-                "```",
-            ])
-        if kind == "article_prompt":
-            strategy = item.get("component")
-            prompt = item.get("prompt_variant") or {}
-            return "\n".join([
-                f"# Prompt: {aid}/{strategy}",
-                "",
-                f"- status: `{prompt.get('status')}`",
-                f"- chars: `{prompt.get('chars')}`",
-                "",
-                "## Metadata",
-                "```json",
-                _fmt(prompt.get("metadata") or {}),
-                "```",
-                "",
-                "## Prompt",
-                "```text",
-                prompt.get("prompt") or "",
-                "```",
-            ])
-        if kind == "article_tex":
-            lines = [f"# TeX Details: {aid}/{item.get('component')}", ""]
-            for idx, snippet in enumerate(item.get("snippets") or [], start=1):
-                lines.extend([
-                    f"## {idx}. {snippet.get('heading') or '(no heading)'}",
-                    f"`{snippet.get('source') or ''}`",
-                    "",
-                    snippet.get("text") or "",
-                    "",
-                ])
-            return "\n".join(lines).rstrip()
-        if kind == "article_cache_files":
-            return "\n".join([
-                f"# Cache Files: {aid}",
-                "",
-                "```json",
-                _fmt(report.get("cache_files") or {}),
-                "```",
-            ])
-        return render_article_cache_markdown(report, include_prompts=True)
-
-    @staticmethod
-    def _article_cache_completeness(report: dict[str, Any]) -> dict[str, Any]:
-        variants = report.get("prompt_variants") or {}
-        prompt_status = {name: item.get("status") for name, item in variants.items()}
-        abstract_fallbacks = {}
-        for name, item in variants.items():
-            counts = (item.get("metadata") or {}).get("abstract_source_counts") or {}
-            if counts:
-                abstract_fallbacks[name] = counts.get("fallback_token_trimmed_abstract", 0)
-        tex_kinds = sorted(((report.get("tex_details") or {}).get("snippets_by_kind") or {}).keys())
-        return {
-            "open_question_complete": (report.get("open_question") or {}).get("complete"),
-            "prompt_status": prompt_status,
-            "fallback_abstract_counts": abstract_fallbacks,
-            "all_prompt_ref_abstracts_cached_or_raw_under_limit": all(v == 0 for v in abstract_fallbacks.values()),
-            "tex_status": (report.get("tex_details") or {}).get("tex_status"),
-            "tex_kinds": tex_kinds,
-            "has_method_implementation_evaluation_results": all(
-                key in tex_kinds for key in ["method", "implementation", "evaluation", "results"]
-            ),
-        }
+        if self.items:
+            table.move_cursor(row=0)
+        self.call_after_refresh(lambda: self.set_focus(table))
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="Read-only V3 run/prompt/cache dashboard.")
-    p.add_argument("--config", default=str(ROOT / "configs" / "default.yaml"))
-    p.add_argument("--training-data-root", default=str(ROOT / "runs" / "training_data"))
-    p.add_argument("--training-root", default=str(ROOT / "runs" / "training"))
-    p.add_argument("--article-id", default=None, help="Preload one arXiv article cache inspector.")
-    p.add_argument("--refresh", type=float, default=10.0)
-    args = p.parse_args()
-    V3TrainingDashboard(
+    parser = argparse.ArgumentParser(description="Read-only scoped V3 dashboard for MLS tasks and arXiv article caches.")
+    parser.add_argument("--config", default=str(ROOT / "configs" / "default.yaml"))
+    parser.add_argument("--training-data-root", default=str(ROOT / "runs" / "training_data"))
+    parser.add_argument("--training-root", default=str(ROOT / "runs" / "training"))
+    parser.add_argument("--runs-root", default=str(ROOT / "runs"))
+    parser.add_argument("--mode", choices=["mls", "arxiv"], default="mls")
+    parser.add_argument("--query", default=None)
+    parser.add_argument("--article-id", default=None, help="Back-compat alias for --mode arxiv --query ID.")
+    args = parser.parse_args()
+    mode = args.mode
+    query = args.query
+    if args.article_id:
+        mode = "arxiv"
+        query = args.article_id
+    V3ScopedDashboard(
         training_data_root=Path(args.training_data_root),
         training_root=Path(args.training_root),
+        runs_root=Path(args.runs_root),
         cfg=load_config(args.config),
-        refresh_s=args.refresh,
-        article_id=args.article_id,
+        mode=mode,
+        query=query,
     ).run()
 
 
