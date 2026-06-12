@@ -435,6 +435,44 @@ def summarize_proposal_batch_quality_dir(path: Path) -> dict[str, Any] | None:
     }
 
 
+def summarize_proposal_master_prompt_dir(path: Path) -> dict[str, Any] | None:
+    prompt_path = path / "prompt.txt"
+    messages_path = path / "messages.json"
+    if not prompt_path.exists() and not messages_path.exists():
+        return None
+    meta = _load_json(path / "meta.json")
+    task_packet = _load_json(path / "task_packet.json")
+    task = task_packet.get("task") or meta.get("task") or path.name
+    subtask = task_packet.get("subtask") or meta.get("subtask")
+    prompt_text = _text_preview(prompt_path, max_chars=12000)
+    messages = _load_json(messages_path)
+    if isinstance(messages, dict):
+        message_count = len(messages.get("messages") or [])
+    elif isinstance(messages, list):
+        message_count = len(messages)
+    else:
+        message_count = 0
+    return {
+        "kind": "proposal_master_prompt",
+        "name": f"{path.parent.name}/{path.name}",
+        "path": str(path),
+        "task": task,
+        "subtask": subtask,
+        "prompt_preview": prompt_text,
+        "prompt_preview_truncated": prompt_path.exists() and prompt_path.stat().st_size > len(prompt_text.encode(errors="replace")),
+        "prompt_chars": len(prompt_text),
+        "prompt_tokens": meta.get("prompt_tokens"),
+        "message_count": message_count,
+        "files": {
+            "prompt": _file_info(prompt_path),
+            "messages": _file_info(messages_path),
+            "task_packet": _file_info(path / "task_packet.json"),
+            "proposal": _file_info(path / "proposal.txt"),
+            "meta": _file_info(path / "meta.json"),
+        },
+    }
+
+
 def summarize_v2_3_first_report(root: Path) -> dict[str, Any]:
     candidates = [
         (root / "first_batch_latest.json", root / "first_batch_latest.md"),
@@ -669,6 +707,7 @@ def collect_v3_status(
     proposal_smokes = []
     proposal_packet_matrices = []
     proposal_batch_qualities = []
+    proposal_master_prompts = []
     precomputed_worker_eval_plans = []
     precomputed_worker_eval_results = []
 
@@ -708,6 +747,10 @@ def collect_v3_status(
             item = summarize_proposal_packet_matrix(summary_path.parent)
             if item:
                 proposal_packet_matrices.append(item)
+        for prompt_path in sorted(proposal_smoke_root.rglob("prompt.txt")):
+            item = summarize_proposal_master_prompt_dir(prompt_path.parent)
+            if item:
+                proposal_master_prompts.append(item)
 
     proposal_batch_root = runs_root / "v3_checkpoint_proposal_batch"
     if proposal_batch_root.exists():
@@ -715,6 +758,10 @@ def collect_v3_status(
             item = summarize_proposal_batch_quality_dir(summary_path.parent)
             if item:
                 proposal_batch_qualities.append(item)
+        for prompt_path in sorted(proposal_batch_root.rglob("prompt.txt")):
+            item = summarize_proposal_master_prompt_dir(prompt_path.parent)
+            if item:
+                proposal_master_prompts.append(item)
 
     worker_eval_root = runs_root / "v3_precomputed_worker_eval"
     if worker_eval_root.exists():
@@ -749,6 +796,7 @@ def collect_v3_status(
             "proposal_smokes": len(proposal_smokes),
             "proposal_packet_matrices": len(proposal_packet_matrices),
             "proposal_batch_qualities": len(proposal_batch_qualities),
+            "proposal_master_prompts": len(proposal_master_prompts),
             "precomputed_worker_eval_plans": len(precomputed_worker_eval_plans),
             "precomputed_worker_eval_results": len(precomputed_worker_eval_results),
             "precomputed_worker_eval_real_results": len(precomputed_worker_eval_real_results),
@@ -767,6 +815,7 @@ def collect_v3_status(
         "proposal_smokes": proposal_smokes,
         "proposal_packet_matrices": proposal_packet_matrices,
         "proposal_batch_qualities": proposal_batch_qualities,
+        "proposal_master_prompts": proposal_master_prompts,
         "precomputed_worker_eval_plans": precomputed_worker_eval_plans,
         "precomputed_worker_eval_results": precomputed_worker_eval_results,
         "precomputed_worker_eval_real_results": precomputed_worker_eval_real_results,

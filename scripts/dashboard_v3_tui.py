@@ -122,6 +122,7 @@ class V3TrainingDashboard(App):
             "proposal_smokes",
             "proposal_packet_matrices",
             "proposal_batch_qualities",
+            "proposal_master_prompts",
             "v2_3_first_report_items",
             "precomputed_worker_eval_plans",
             "precomputed_worker_eval_results",
@@ -170,6 +171,8 @@ class V3TrainingDashboard(App):
             return str(item.get("task_count") or 0)
         if item.get("kind") == "proposal_batch_quality":
             return str(item.get("task_count") or 0)
+        if item.get("kind") == "proposal_master_prompt":
+            return str(item.get("prompt_tokens") or "")
         if item.get("kind") == "v2_3_first_report":
             return str(item.get("samples") or 0)
         if item.get("kind") == "precomputed_worker_eval_plan":
@@ -214,6 +217,9 @@ class V3TrainingDashboard(App):
             return f"ok={item.get('ok_count') or 0}/{item.get('task_count') or 0}"
         if item.get("kind") == "proposal_batch_quality":
             return f"qpass={item.get('quality_pass_count') or 0}/{item.get('task_count') or 0} mean={item.get('quality_mean_score', '-')}"
+        if item.get("kind") == "proposal_master_prompt":
+            files = item.get("files") or {}
+            return f"prompt={int(bool((files.get('prompt') or {}).get('exists')))} messages={item.get('message_count') or 0}"
         if item.get("kind") == "v2_3_first_report":
             return f"done={item.get('done') or 0} run={item.get('running') or 0} err={item.get('errors') or 0}"
         if item.get("kind") == "precomputed_worker_eval_plan":
@@ -287,6 +293,11 @@ class V3TrainingDashboard(App):
             if submission.get("result") or submission.get("latest_status"):
                 return str(submission.get("result") or submission.get("latest_status"))
             return "ok"
+        if item.get("kind") == "proposal_master_prompt":
+            files = item.get("files") or {}
+            if not (files.get("prompt") or {}).get("exists"):
+                return "missing-prompt"
+            return "ready"
         if item.get("kind") == "v2_3_first_report":
             return "present" if item.get("exists") else "missing"
         if item.get("kind") == "precomputed_worker_eval_plan":
