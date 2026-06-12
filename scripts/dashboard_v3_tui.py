@@ -128,8 +128,9 @@ class V3TrainingDashboard(App):
             return
         try:
             self.article_report = inspect_article_cache(self.cfg, value)
-            self.current_panel = "article"
-            self.render_panel()
+            self.current_index = 0
+            self.current_panel = "summary"
+            self.refresh_status()
         except Exception as exc:
             self.current_text = f"Article cache inspection failed for {value}: {exc}"
             self.query_one("#content", Static).update(self.current_text)
@@ -172,6 +173,8 @@ class V3TrainingDashboard(App):
 
     def _build_run_items(self) -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
+        if self.article_report:
+            items.extend(self._build_article_items(self.article_report))
         strict = self.status.get("strict1000_status")
         if strict:
             items.append({**strict, "kind": "training_status", "name": "strict1000_sft"})
@@ -192,7 +195,49 @@ class V3TrainingDashboard(App):
                 items.extend(self.status.get(key) or [])
         return items
 
+    def _build_article_items(self, report: dict[str, Any]) -> list[dict[str, Any]]:
+        aid = str(report.get("arxiv_id") or "article")
+        rows: list[dict[str, Any]] = [
+            {
+                "kind": "article_overview",
+                "name": f"{aid}/overview",
+                "article": report,
+                "component": "overview",
+            },
+            {
+                "kind": "article_open_question",
+                "name": f"{aid}/open_question",
+                "article": report,
+                "component": "open_question",
+            },
+        ]
+        for strategy, prompt in (report.get("prompt_variants") or {}).items():
+            rows.append({
+                "kind": "article_prompt",
+                "name": f"{aid}/{strategy}",
+                "article": report,
+                "component": strategy,
+                "prompt_variant": prompt,
+            })
+        for kind, snippets in ((report.get("tex_details") or {}).get("snippets_by_kind") or {}).items():
+            rows.append({
+                "kind": "article_tex",
+                "name": f"{aid}/tex_{kind}",
+                "article": report,
+                "component": kind,
+                "snippets": snippets,
+            })
+        rows.append({
+            "kind": "article_cache_files",
+            "name": f"{aid}/cache_files",
+            "article": report,
+            "component": "cache_files",
+        })
+        return rows
+
     def _task_label(self, item: dict[str, Any]) -> str:
+        if str(item.get("kind") or "").startswith("article_"):
+            return "article cache"
         task = item.get("task")
         subtask = item.get("subtask")
         if task and subtask:
@@ -201,6 +246,12 @@ class V3TrainingDashboard(App):
 
     def _status_label(self, item: dict[str, Any]) -> str:
         kind = item.get("kind")
+        if str(kind or "").startswith("article_"):
+            if kind == "article_prompt":
+                return str((item.get("prompt_variant") or {}).get("status") or "unknown")
+            if kind == "article_tex":
+                return str(((item.get("article") or {}).get("tex_details") or {}).get("tex_status") or "unknown")
+            return "ready"
         if kind == "training_status":
             return str(item.get("training_result") or "present")
         if kind == "run_plan":
@@ -224,6 +275,22 @@ class V3TrainingDashboard(App):
         return "ok"
 
     def _artifact_label(self, item: dict[str, Any]) -> str:
+        kind = item.get("kind")
+        if kind == "article_prompt":
+            prompt = item.get("prompt_variant") or {}
+            meta = prompt.get("metadata") or {}
+            counts = meta.get("abstract_source_counts") or {}
+            cached = counts.get("cached_abstract_summary", 0)
+            raw = counts.get("raw_abstract_under_limit", 0)
+            fallback = counts.get("fallback_token_trimmed_abstract", 0)
+            return f"chars={prompt.get('chars')} abs={cached}/{raw}/{fallback}"
+        if kind == "article_open_question":
+            q = (item.get("article") or {}).get("open_question") or {}
+            return f"{q.get('tokens')}tok complete={q.get('complete')}"
+        if kind == "article_tex":
+            return f"snippets={len(item.get('snippets') or [])}"
+        if str(kind or "").startswith("article_"):
+            return str(item.get("component") or "")
         files = item.get("files") or {}
         names = [k for k, v in files.items() if isinstance(v, dict) and v.get("exists")]
         if names:
@@ -237,7 +304,9 @@ class V3TrainingDashboard(App):
     def render_panel(self) -> None:
         content = self.query_one("#content", Static)
         item = self.items[self.current_index] if self.items else {}
-        if self.current_panel == "summary":
+        if str(item.get("kind") or "").startswith("article_") and self.current_panel != "report":
+            text = self._panel_article_item(item)
+        elif self.current_panel == "summary":
             text = self._panel_summary(item)
         elif self.current_panel == "prompt":
             text = self._panel_prompt(item)
@@ -332,6 +401,103 @@ class V3TrainingDashboard(App):
         if not self.article_report:
             return "Enter an arXiv id above and press Enter. Example: 2504.00302"
         return render_article_cache_markdown(self.article_report, include_prompts=True)
+
+    def _panel_article_item(self, item: dict[str, Any]) -> str:
+        report = item.get("article") or {}
+        kind = item.get("kind")
+        aid = report.get("arxiv_id")
+        if kind == "article_overview":
+            return "\n".join([
+                f"# Article Overview: {aid}",
+                "",
+                "## Metadata",
+                "```json",
+                _fmt(report.get("metadata") or {}),
+                "```",
+                "",
+                "## Cache Completeness",
+                "```json",
+                _fmt(self._article_cache_completeness(report)),
+                "```",
+            ])
+        if kind == "article_open_question":
+            q = report.get("open_question") or {}
+            return "\n".join([
+                f"# Open Question: {aid}",
+                "",
+                f"- source: `{q.get('source')}`",
+                f"- tokens: `{q.get('tokens')}`",
+                f"- complete: `{q.get('complete')}`",
+                "",
+                "## Compact Question",
+                q.get("text") or "(missing)",
+                "",
+                "## Raw Cache",
+                "```text",
+                q.get("raw") or "",
+                "```",
+            ])
+        if kind == "article_prompt":
+            strategy = item.get("component")
+            prompt = item.get("prompt_variant") or {}
+            return "\n".join([
+                f"# Prompt: {aid}/{strategy}",
+                "",
+                f"- status: `{prompt.get('status')}`",
+                f"- chars: `{prompt.get('chars')}`",
+                "",
+                "## Metadata",
+                "```json",
+                _fmt(prompt.get("metadata") or {}),
+                "```",
+                "",
+                "## Prompt",
+                "```text",
+                prompt.get("prompt") or "",
+                "```",
+            ])
+        if kind == "article_tex":
+            lines = [f"# TeX Details: {aid}/{item.get('component')}", ""]
+            for idx, snippet in enumerate(item.get("snippets") or [], start=1):
+                lines.extend([
+                    f"## {idx}. {snippet.get('heading') or '(no heading)'}",
+                    f"`{snippet.get('source') or ''}`",
+                    "",
+                    snippet.get("text") or "",
+                    "",
+                ])
+            return "\n".join(lines).rstrip()
+        if kind == "article_cache_files":
+            return "\n".join([
+                f"# Cache Files: {aid}",
+                "",
+                "```json",
+                _fmt(report.get("cache_files") or {}),
+                "```",
+            ])
+        return render_article_cache_markdown(report, include_prompts=True)
+
+    @staticmethod
+    def _article_cache_completeness(report: dict[str, Any]) -> dict[str, Any]:
+        variants = report.get("prompt_variants") or {}
+        prompt_status = {name: item.get("status") for name, item in variants.items()}
+        abstract_fallbacks = {}
+        for name, item in variants.items():
+            counts = (item.get("metadata") or {}).get("abstract_source_counts") or {}
+            if counts:
+                abstract_fallbacks[name] = counts.get("fallback_token_trimmed_abstract", 0)
+        tex_kinds = sorted(((report.get("tex_details") or {}).get("snippets_by_kind") or {}).keys())
+        return {
+            "open_question_complete": (report.get("open_question") or {}).get("complete"),
+            "prompt_status": prompt_status,
+            "fallback_abstract_counts": abstract_fallbacks,
+            "all_prompt_ref_abstracts_cached_or_raw_under_limit": all(v == 0 for v in abstract_fallbacks.values()),
+            "tex_status": (report.get("tex_details") or {}).get("tex_status"),
+            "tex_kinds": tex_kinds,
+            "has_method_implementation_evaluation_results": all(
+                key in tex_kinds for key in ["method", "implementation", "evaluation", "results"]
+            ),
+        }
 
 
 def main() -> None:
