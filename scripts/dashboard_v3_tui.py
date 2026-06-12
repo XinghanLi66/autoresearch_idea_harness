@@ -93,12 +93,20 @@ class V3TrainingDashboard(App):
         Binding("q", "quit", "Quit"),
     ]
 
-    def __init__(self, training_data_root: Path, training_root: Path, cfg: dict[str, Any] | None = None, refresh_s: float = 10.0) -> None:
+    def __init__(
+        self,
+        training_data_root: Path,
+        training_root: Path,
+        cfg: dict[str, Any] | None = None,
+        refresh_s: float = 10.0,
+        article_id: str | None = None,
+    ) -> None:
         super().__init__()
         self.training_data_root = training_data_root
         self.training_root = training_root
         self.cfg = cfg or {}
         self.refresh_s = refresh_s
+        self.article_id = article_id
         self.status: dict[str, Any] = {}
         self.items: list[dict[str, Any]] = []
         self.current_index = 0
@@ -119,6 +127,10 @@ class V3TrainingDashboard(App):
         table = self.query_one("#items", DataTable)
         table.cursor_type = "row"
         table.add_columns("Run", "Kind", "Task", "Status", "Artifacts")
+        if self.article_id:
+            article_input = self.query_one("#article", Input)
+            article_input.value = self.article_id
+            self.article_report = inspect_article_cache(self.cfg, self.article_id)
         self.refresh_status()
         self.set_interval(self.refresh_s, self.refresh_status)
 
@@ -505,6 +517,7 @@ def main() -> None:
     p.add_argument("--config", default=str(ROOT / "configs" / "default.yaml"))
     p.add_argument("--training-data-root", default=str(ROOT / "runs" / "training_data"))
     p.add_argument("--training-root", default=str(ROOT / "runs" / "training"))
+    p.add_argument("--article-id", default=None, help="Preload one arXiv article cache inspector.")
     p.add_argument("--refresh", type=float, default=10.0)
     args = p.parse_args()
     V3TrainingDashboard(
@@ -512,6 +525,7 @@ def main() -> None:
         training_root=Path(args.training_root),
         cfg=load_config(args.config),
         refresh_s=args.refresh,
+        article_id=args.article_id,
     ).run()
 
 
