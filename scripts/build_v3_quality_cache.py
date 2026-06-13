@@ -119,9 +119,10 @@ TEX_KINDS = [
     "results",
     "risks_and_limitations",
 ]
-RAW_TEX_EXTRA_KINDS = ["discussion"]
+RAW_TEX_EXTRA_KINDS = ["discussion", "other"]
 TEX_FILE_KIND_PATTERNS = {
-    "implementation": re.compile(r"(implement|train|complex|alg|main_alg)", re.I),
+    "method": re.compile(r"(method|approach|model|framework|design|workflow|interface|system|arch)", re.I),
+    "implementation": re.compile(r"(implement|train|complex|alg|main_alg|workflow|interface|system|design)", re.I),
     "evaluation": re.compile(r"(experiment|eval|dataset|ablation|comparison|accuracy|case_study|analysis)", re.I),
     "results": re.compile(r"(result|res|experiment|accuracy|comparison|ablation|case_study)", re.I),
 }
@@ -548,12 +549,23 @@ def _parse_json_array(text: str) -> list[dict[str, Any]]:
     text = text.strip()
     try:
         value = json.loads(text)
-        return value if isinstance(value, list) else []
+        if isinstance(value, list):
+            return value
+        if isinstance(value, dict):
+            return [value]
+        return []
     except Exception:
         pass
     match = re.search(r"\[[\s\S]*\]", text)
     if not match:
-        return []
+        obj_match = re.search(r"\{[\s\S]*\}", text)
+        if not obj_match:
+            return []
+        try:
+            value = json.loads(obj_match.group(0))
+            return [value] if isinstance(value, dict) else []
+        except Exception:
+            return []
     try:
         value = json.loads(match.group(0))
         return value if isinstance(value, list) else []
@@ -577,7 +589,8 @@ def _curate_tex_snippets(
     title = row.get("title") or ""
     abstract = _collapse(row.get("abstract"))[:1600]
     extra_candidates = {
-        "method": ["abstract", "problem", "discussion"],
+        "method": ["abstract", "problem", "implementation", "discussion", "other"],
+        "implementation": ["method", "algorithm_or_system", "training_or_data_recipe", "problem", "abstract", "discussion", "other"],
         "algorithm_or_system": ["abstract", "method", "implementation", "discussion"],
         "training_or_data_recipe": ["implementation", "method"],
         "evaluation": ["results", "implementation", "abstract", "method", "discussion"],
@@ -650,6 +663,35 @@ def _curate_tex_snippets(
                 "quality": quality,
             })
         curated[kind] = snippets[:3]
+    fallbacks = {
+        "method": ["algorithm_or_system", "training_or_data_recipe", "implementation", "problem"],
+        "implementation": ["training_or_data_recipe", "algorithm_or_system", "method"],
+        "evaluation": ["results", "training_or_data_recipe"],
+        "results": ["evaluation"],
+    }
+    for kind, source_kinds in fallbacks.items():
+        if curated.get(kind):
+            continue
+        for source_kind in source_kinds:
+            source_snippets = curated.get(source_kind) or []
+            if not source_snippets:
+                continue
+            fallback_items = []
+            for snippet in source_snippets[:2]:
+                text = snippet.get("text") or ""
+                quality = snippet.get("quality") or _quality_text(text, min_words=20, max_words=260)
+                if not quality.get("complete") or quality.get("has_ellipsis"):
+                    continue
+                fallback_items.append({
+                    "kind": kind,
+                    "heading": f"{source_kind}: {snippet.get('heading') or kind}",
+                    "source": f"fallback_from_{source_kind}",
+                    "text": text,
+                    "quality": quality,
+                })
+            if fallback_items:
+                curated[kind] = fallback_items
+                break
     return curated
 
 
