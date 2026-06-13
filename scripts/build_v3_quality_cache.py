@@ -1046,6 +1046,8 @@ def main() -> None:
     parser.add_argument("--input", type=Path, default=ROOT / "runs" / "training_data" / "v3_0_targets_qwen25_32b_strict_batch1000_audit" / "tex_targets.accepted.jsonl")
     parser.add_argument("--output", type=Path, default=ROOT / "runs" / "v3_quality_cache" / "strict929_v1")
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--num-shards", type=int, default=1)
+    parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--arxiv-id", action="append")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--use-api", action="store_true")
@@ -1071,8 +1073,16 @@ def main() -> None:
         args.arxiv_root = cfg.get("arxiv_root") or ROOT.parent / "data" / "arxiv" / "papers"
     args.dataset_records = load_dataset_records(Path(cfg["dataset_dir"]), ["train", "val", "test"])
     args.prompt_caches = load_prompt_property_caches(cfg)
+    if args.num_shards < 1:
+        raise SystemExit("--num-shards must be >= 1")
+    if not 0 <= args.shard_index < args.num_shards:
+        raise SystemExit("--shard-index must be in [0, --num-shards)")
     ids = set(args.arxiv_id or []) or None
-    rows = _load_rows(args.input, limit=args.limit, arxiv_ids=ids)
+    rows = _load_rows(args.input, arxiv_ids=ids)
+    if args.num_shards > 1:
+        rows = [row for idx, row in enumerate(rows) if idx % args.num_shards == args.shard_index]
+    if args.limit is not None:
+        rows = rows[: args.limit]
     args.output.mkdir(parents=True, exist_ok=True)
     index_path = args.output / "index.jsonl"
     done = {} if args.force else _load_done(index_path)
@@ -1084,6 +1094,8 @@ def main() -> None:
         "input": str(args.input),
         "output": str(args.output),
         "rows_requested": len(rows),
+        "num_shards": args.num_shards,
+        "shard_index": args.shard_index,
         "use_api": args.use_api,
         "model": args.model if args.use_api else None,
         "endpoint": args.endpoint if args.use_api else None,
