@@ -73,7 +73,8 @@ From the candidate excerpts below, select only material that directly describes 
 own {kind}. Discard related-work, baseline-only, citation-list, and malformed formula-only text.
 Rewrite into 1-3 clean, human-readable snippets. Preserve concrete technical details, datasets,
 metrics, implementation choices, and results when present. Remove LaTeX commands and repair mangled
-symbols into readable prose. If no useful evidence is present, output an empty JSON array.
+symbols into readable prose. Do not use ellipses or unfinished placeholder text. If no useful evidence
+is present, output an empty JSON array.
 
 Return only valid JSON:
 [
@@ -105,6 +106,11 @@ TEX_KINDS = [
     "risks_and_limitations",
 ]
 RAW_TEX_EXTRA_KINDS = ["discussion"]
+TEX_FILE_KIND_PATTERNS = {
+    "implementation": re.compile(r"(implement|train|complex|alg|main_alg)", re.I),
+    "evaluation": re.compile(r"(experiment|eval|dataset|ablation|comparison|accuracy|case_study|analysis)", re.I),
+    "results": re.compile(r"(result|res|experiment|accuracy|comparison|ablation|case_study)", re.I),
+}
 
 
 def _collapse(text: str | None) -> str:
@@ -499,6 +505,28 @@ def _raw_section_candidates(row: dict[str, Any], max_chars: int, per_kind: int) 
             "chars_raw": len(text),
             "text": text[:max_chars].rstrip(),
         })
+    tex_dir = row.get("tex_dir")
+    if tex_dir:
+        base = Path(tex_dir)
+        if base.exists():
+            for path in sorted(base.glob("*.tex"))[:80]:
+                name = path.name
+                for kind, pattern in TEX_FILE_KIND_PATTERNS.items():
+                    if not pattern.search(name):
+                        continue
+                    try:
+                        text = _collapse(path.read_text(errors="ignore"))
+                    except Exception:
+                        continue
+                    if not text:
+                        continue
+                    grouped.setdefault(kind, []).append({
+                        "kind": kind,
+                        "heading": name,
+                        "source": str(path),
+                        "chars_raw": len(text),
+                        "text": text[:max_chars].rstrip(),
+                    })
     return {k: v[:per_kind] for k, v in grouped.items()}
 
 
@@ -538,6 +566,8 @@ def _curate_tex_snippets(
         "method": ["abstract", "problem", "discussion"],
         "algorithm_or_system": ["abstract", "method", "implementation", "discussion"],
         "training_or_data_recipe": ["implementation", "method"],
+        "evaluation": ["results", "abstract", "method", "discussion"],
+        "results": ["evaluation", "abstract", "discussion"],
         "risks_and_limitations": ["discussion", "problem"],
     }
     for kind in TEX_KINDS:
@@ -581,12 +611,15 @@ def _curate_tex_snippets(
             text = _collapse(item.get("text"))
             if not text:
                 continue
+            quality = _quality_text(text, min_words=20, max_words=260)
+            if quality.get("has_ellipsis") or not quality.get("complete"):
+                continue
             snippets.append({
                 "kind": kind,
                 "heading": _collapse(item.get("heading")) or kind,
                 "source": "llm_curated_tex",
                 "text": text,
-                "quality": _quality_text(text, min_words=20, max_words=260),
+                "quality": quality,
             })
         curated[kind] = snippets[:3]
     return curated
@@ -603,9 +636,10 @@ def _select_top_refs(
         source = "legacy_cached_top_k_indices"
         for idx in cached_indices:
             try:
-                i = int(idx)
+                raw_i = int(idx)
             except Exception:
                 continue
+            i = next((pos for pos, ref in enumerate(refs) if ref.get("raw_ref_index") == raw_i), raw_i)
             if 0 <= i < len(refs) and i not in indices:
                 indices.append(i)
             if len(indices) >= top_k:
@@ -754,6 +788,8 @@ def _generate_related_work(
 
 def _article_quality(article: dict[str, Any]) -> dict[str, Any]:
     errors: list[str] = []
+    if article.get("excluded_missing_abstract_refs"):
+        errors.append("excluded_missing_ref_abstract")
     q = article.get("research_question") or {}
     q_quality = q.get("quality") or {}
     if not q_quality.get("min_words_ok") or not q_quality.get("max_words_ok"):
@@ -830,7 +866,7 @@ def _process_row(
         force_api=args.use_api,
     )
 
-    refs: list[dict[str, Any]] = []
+    refs_all: list[dict[str, Any]] = []
     for idx, ref in enumerate(raw_refs):
         hydrated = _hydrate_ref(
             ref,
@@ -865,7 +901,8 @@ def _process_row(
                     "title": hydrated.get("title"),
                     "compact": compact,
                 })
-        refs.append({
+        refs_all.append({
+            "raw_ref_index": idx,
             "ref_key": _ref_key(hydrated),
             "arxiv_id": hydrated.get("arxiv_id"),
             "title": hydrated.get("title"),
@@ -878,7 +915,19 @@ def _process_row(
             "compact": compact,
             "compact_cache_key": compact_cache_key,
         })
-    missing_after_download = [idx for idx, ref in enumerate(refs) if not ref.get("abstract")]
+    excluded_missing_abstract_refs = [
+        {
+            "raw_ref_index": ref.get("raw_ref_index"),
+            "ref_key": ref.get("ref_key"),
+            "arxiv_id": ref.get("arxiv_id"),
+            "title": ref.get("title"),
+            "abstract_source": ref.get("abstract_source"),
+            "metadata_error": ref.get("metadata_error"),
+        }
+        for ref in refs_all
+        if not ref.get("abstract") or not ref.get("compact_abstract")
+    ]
+    missing_after_download = [ref["raw_ref_index"] for ref in excluded_missing_abstract_refs]
     if missing_after_download:
         print(json.dumps({
             "event": "ref_abstract_missing_after_download",
@@ -886,6 +935,7 @@ def _process_row(
             "missing_ref_indices": missing_after_download,
             "count": len(missing_after_download),
         }, ensure_ascii=False), flush=True)
+    refs = [ref for ref in refs_all if ref.get("abstract") and ref.get("compact_abstract")]
 
     cached_indices = None
     if getattr(args, "prompt_caches", None):
@@ -980,6 +1030,8 @@ def _process_row(
             "compact": target_compact,
         },
         "refs": refs,
+        "raw_ref_count": len(raw_refs),
+        "excluded_missing_abstract_refs": excluded_missing_abstract_refs,
         "top_refs": [{"ref_key": r["ref_key"], "title": r.get("title"), "arxiv_id": r.get("arxiv_id")} for r in top_refs],
         "top_ref_selection": top_meta,
         "leakage_guard": leakage_guard,
@@ -1035,7 +1087,8 @@ def _process_row(
         "question_source": question["source"],
         "ref_count": len(refs),
         "raw_ref_count": len(raw_refs),
-        "ref_missing_abstract_count": sum(1 for r in refs if not r.get("abstract")),
+        "excluded_missing_abstract_count": len(excluded_missing_abstract_refs),
+        "ref_missing_abstract_count": 0,
         "prompt_strategies": sorted(prompts),
     }
 
@@ -1105,6 +1158,7 @@ def main() -> None:
         "quality_failed": 0,
         "errors": 0,
         "ref_missing_abstract_total": 0,
+        "excluded_missing_abstract_total": 0,
         "ref_records_total": 0,
         "question_words": [],
         "quality_error_counts": {},
@@ -1124,6 +1178,7 @@ def main() -> None:
             summary["question_words"].append(result["question_words"])
             summary["ref_records_total"] += result["ref_count"]
             summary["ref_missing_abstract_total"] += result["ref_missing_abstract_count"]
+            summary["excluded_missing_abstract_total"] += result.get("excluded_missing_abstract_count", 0)
             if result["quality_passed"]:
                 summary["quality_passed"] += 1
             else:
