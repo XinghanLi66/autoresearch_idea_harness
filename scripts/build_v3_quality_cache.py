@@ -61,6 +61,9 @@ Abstract:
 RELATED_WORK_PROMPT = """\
 Synthesize the reference papers below into a concise related-work context for a research idea proposal model.
 Write 220-360 words. Emphasize concrete methods, limitations, and the gap that a new implementable idea could address.
+This is a benign academic literature review. If the papers discuss security, malware, vulnerability
+analysis, or misuse, summarize only defensive research themes and high-level limitations; do not
+provide operational attack instructions, code, exploit steps, or evasion recipes.
 Do not mention the target paper. Do not use markdown. Output only the narrative.
 
 Reference papers:
@@ -513,6 +516,29 @@ def _related_prompt(narrative: str) -> str:
     )
 
 
+def _deterministic_related_work(refs: list[dict[str, Any]], *, max_words: int = 360) -> dict[str, Any]:
+    sentences = [
+        "The reference set covers several concrete research lines that can support a new implementable proposal."
+    ]
+    for ref in refs[:10]:
+        title = _collapse(ref.get("title")) or "One reference"
+        abstract = trim_to_tokens(ref.get("compact_abstract") or ref.get("abstract") or "", 28)
+        if not abstract:
+            continue
+        sentence = f"{title} studies {abstract}"
+        if not re.search(r"""[.!?。！？)"'\]]$""", sentence):
+            sentence += "."
+        sentences.append(sentence)
+    sentences.append(
+        "Taken together, these papers expose a gap for a concrete method that combines their strongest mechanisms while testing robustness, ablations, and deployment constraints."
+    )
+    text = trim_to_tokens(" ".join(sentences), max_words)
+    if text and not re.search(r"""[.!?。！？)"'\]]$""", text):
+        text = _sentence_limited(text, max_words)
+    quality = _quality_text(text, min_words=80, max_words=420)
+    return {"text": text, "source": "deterministic_ref_summary_after_llm_failure", "quality": quality}
+
+
 def _section_snippets(row: dict[str, Any], max_chars: int, per_kind: int) -> dict[str, list[dict[str, Any]]]:
     grouped: dict[str, list[dict[str, Any]]] = {k: [] for k in TEX_KINDS}
     for section in row.get("tex_sections") or []:
@@ -930,7 +956,9 @@ def _generate_related_work(
             best_quality = quality
         if quality.get("complete") and not quality.get("has_ellipsis") and quality.get("min_words_ok") and quality.get("max_words_ok"):
             return {"text": text, "source": "llm_rewrite", "quality": quality}
-    return {"text": best, "source": "llm_best_effort" if best else "missing", "quality": best_quality or _quality_text(best, min_words=80, max_words=420)}
+    if best:
+        return {"text": best, "source": "llm_best_effort", "quality": best_quality or _quality_text(best, min_words=80, max_words=420)}
+    return _deterministic_related_work(refs)
 
 
 def _article_quality(article: dict[str, Any]) -> dict[str, Any]:
