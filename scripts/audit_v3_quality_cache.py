@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from autoresearch_idea_harness.io import iter_jsonl, write_json  # noqa: E402
+from autoresearch_idea_harness.training_manifest import TARGET_XML_TAGS  # noqa: E402
 
 
 PROMPT_STRATEGIES = {
@@ -22,6 +23,19 @@ PROMPT_STRATEGIES = {
     "top_k_related_work",
     "with_research_question",
 }
+CACHE_PROMPT_STRATEGIES = {*PROMPT_STRATEGIES, "abstract"}
+TEX_KINDS = {
+    "abstract",
+    "problem",
+    "method",
+    "implementation",
+    "algorithm_or_system",
+    "training_or_data_recipe",
+    "evaluation",
+    "results",
+    "risks_and_limitations",
+}
+TARGET_TEX_KINDS = {tag for tag in TARGET_XML_TAGS if tag != "title"}
 
 
 def _words(text: str | None) -> int:
@@ -45,12 +59,13 @@ def _audit_article(article_dir: Path, index_row: dict[str, Any] | None) -> dict[
         "refs.json",
         "quality_audit.json",
         "tex_snippets.json",
+        "target_tex_snippets.json",
         "top_k_5_index.json",
     ]
     for name in required:
         if not (article_dir / name).exists():
             errors.append(f"missing_file:{name}")
-    for strategy in PROMPT_STRATEGIES:
+    for strategy in CACHE_PROMPT_STRATEGIES:
         if not (article_dir / "prompts" / f"{strategy}.txt").exists():
             errors.append(f"missing_prompt:{strategy}")
     if errors:
@@ -87,7 +102,7 @@ def _audit_article(article_dir: Path, index_row: dict[str, Any] | None) -> dict[
         errors.append("top_k_index_mismatch")
 
     snippets = article.get("tex_snippets") or {}
-    for kind in ("method", "implementation", "evaluation"):
+    for kind in TEX_KINDS:
         values = snippets.get(kind) or []
         if not values:
             errors.append(f"missing_tex:{kind}")
@@ -97,6 +112,18 @@ def _audit_article(article_dir: Path, index_row: dict[str, Any] | None) -> dict[
                 errors.append(f"bad_tex:{kind}:{i}")
             if "\\begin" in text or "\\end" in text:
                 errors.append(f"raw_tex:{kind}:{i}")
+
+    target_snippets = article.get("target_tex_snippets") or {}
+    for kind in TARGET_TEX_KINDS:
+        values = target_snippets.get(kind) or []
+        if not values:
+            errors.append(f"missing_target_tex:{kind}")
+        for i, snippet in enumerate(values):
+            text = snippet.get("text") or ""
+            if not _complete(text):
+                errors.append(f"bad_target_tex:{kind}:{i}")
+            if "\\begin" in text or "\\end" in text:
+                errors.append(f"raw_target_tex:{kind}:{i}")
 
     return {"arxiv_id": article.get("arxiv_id") or aid, "article_dir": str(article_dir), "passed": not errors, "errors": errors}
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -27,6 +28,21 @@ def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
 
 
+def _safe_name(value: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", value)
+
+
+def _link_article_dir(src: Path, dst: Path) -> None:
+    if not src.is_dir():
+        raise SystemExit(f"Missing article directory: {src}")
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    if dst.exists() or dst.is_symlink():
+        if dst.resolve() == src.resolve():
+            return
+        raise SystemExit(f"Article output already exists with different target: {dst}")
+    dst.symlink_to(src.resolve(), target_is_directory=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Merge independent V3 quality-cache shard outputs.")
     parser.add_argument("--shards-root", type=Path, required=True)
@@ -49,6 +65,7 @@ def main() -> None:
     duplicate_ids: list[str] = []
     seen_ids: set[str] = set()
     quality_errors: Counter[str] = Counter()
+    article_dirs_linked = 0
 
     for shard in shards:
         summary = _read_json(shard / "summary.json")
@@ -64,6 +81,8 @@ def main() -> None:
             seen_ids.add(aid)
             index_rows.append(row)
             quality_errors.update(row.get("quality_errors") or [])
+            _link_article_dir(shard / "articles" / _safe_name(aid), output / "articles" / _safe_name(aid))
+            article_dirs_linked += 1
 
         for row in iter_jsonl(shard / "ref_abstract_cache.jsonl"):
             ref_rows.append(row)
@@ -94,6 +113,7 @@ def main() -> None:
         "top_k_index_rows": len(top_rows),
         "compact_cache_keys": len(compact_by_key),
         "quality_error_counts": dict(quality_errors),
+        "article_dirs_linked": article_dirs_linked,
         "shard_summaries": summaries,
     }
 

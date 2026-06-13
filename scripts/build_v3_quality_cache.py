@@ -24,7 +24,12 @@ from autoresearch_idea_harness.prompt_properties import (  # noqa: E402
     trim_to_tokens,
 )
 from autoresearch_idea_harness.runway_client import RunwayClient  # noqa: E402
-from autoresearch_idea_harness.training_manifest import PROPOSAL_FORMAT, _filter_refs_for_leakage, _parse_date  # noqa: E402
+from autoresearch_idea_harness.training_manifest import (  # noqa: E402
+    PROPOSAL_FORMAT,
+    TARGET_XML_TAGS,
+    _filter_refs_for_leakage,
+    _parse_date,
+)
 
 
 QUESTION_PROMPT = """\
@@ -107,6 +112,7 @@ PROMPT_STRATEGIES = [
     "top_k_related_work",
     "with_research_question",
 ]
+CACHE_PROMPT_STRATEGIES = [*PROMPT_STRATEGIES, "abstract"]
 
 TEX_KINDS = [
     "abstract",
@@ -119,6 +125,18 @@ TEX_KINDS = [
     "results",
     "risks_and_limitations",
 ]
+TARGET_TEX_KINDS = [tag for tag in TARGET_XML_TAGS if tag != "title"]
+TARGET_TEX_SOURCE_KINDS = {
+    "problem": ["problem", "abstract", "method"],
+    "gap": ["problem", "risks_and_limitations", "abstract"],
+    "core_idea": ["method", "algorithm_or_system", "implementation"],
+    "implementation_plan": ["implementation", "training_or_data_recipe", "method"],
+    "algorithm_or_system": ["algorithm_or_system", "method", "implementation"],
+    "training_or_data_recipe": ["training_or_data_recipe", "implementation", "evaluation"],
+    "evaluation_plan": ["evaluation", "results", "training_or_data_recipe"],
+    "expected_results": ["results", "evaluation", "abstract"],
+    "risks_and_limitations": ["risks_and_limitations", "problem", "abstract"],
+}
 RAW_TEX_EXTRA_KINDS = ["discussion", "other"]
 TEX_FILE_KIND_PATTERNS = {
     "method": re.compile(r"(method|approach|model|framework|design|workflow|interface|system|arch)", re.I),
@@ -467,6 +485,16 @@ def _condition_prompt(refs: list[dict[str, Any]], question: str) -> str:
     )
 
 
+def _abstract_prompt(title: str, compact_abstract: str) -> str:
+    return (
+        "Below is the target paper abstract. Based only on this abstract, "
+        "rewrite the work as one concrete research proposal.\n\n"
+        f"Title: {title or 'Unknown'}\n\n"
+        f"Abstract: {compact_abstract}\n\n"
+        f"{PROPOSAL_FORMAT}"
+    )
+
+
 def _plain_refs_prompt(refs: list[dict[str, Any]]) -> str:
     return (
         f"Below are {len(refs)} papers from a researcher's reading list. "
@@ -589,6 +617,8 @@ def _curate_tex_snippets(
     title = row.get("title") or ""
     abstract = _collapse(row.get("abstract"))[:1600]
     extra_candidates = {
+        "abstract": ["problem", "method", "results"],
+        "problem": ["abstract", "method", "discussion", "other"],
         "method": ["abstract", "problem", "implementation", "discussion", "other"],
         "implementation": ["method", "algorithm_or_system", "training_or_data_recipe", "problem", "abstract", "discussion", "other"],
         "algorithm_or_system": ["abstract", "method", "implementation", "discussion"],
@@ -601,6 +631,14 @@ def _curate_tex_snippets(
         candidates = list(raw.get(kind) or [])
         for extra_kind in extra_candidates.get(kind, []):
             candidates.extend(raw.get(extra_kind) or [])
+        if kind == "abstract" and abstract:
+            candidates.append({
+                "kind": "abstract",
+                "heading": "Target abstract",
+                "source": "metadata_abstract",
+                "chars_raw": len(abstract),
+                "text": abstract,
+            })
         seen = set()
         deduped = []
         for candidate in candidates:
@@ -664,10 +702,15 @@ def _curate_tex_snippets(
             })
         curated[kind] = snippets[:3]
     fallbacks = {
+        "abstract": ["method", "problem", "results"],
+        "problem": ["abstract", "method"],
         "method": ["algorithm_or_system", "training_or_data_recipe", "implementation", "problem"],
         "implementation": ["training_or_data_recipe", "algorithm_or_system", "method"],
+        "algorithm_or_system": ["method", "implementation"],
+        "training_or_data_recipe": ["implementation", "method", "evaluation"],
         "evaluation": ["results", "training_or_data_recipe"],
         "results": ["evaluation"],
+        "risks_and_limitations": ["problem", "abstract"],
     }
     for kind, source_kinds in fallbacks.items():
         if curated.get(kind):
@@ -693,6 +736,28 @@ def _curate_tex_snippets(
                 curated[kind] = fallback_items
                 break
     return curated
+
+
+def _target_tex_snippets(tex_snippets: dict[str, list[dict[str, Any]]]) -> dict[str, list[dict[str, Any]]]:
+    target: dict[str, list[dict[str, Any]]] = {kind: [] for kind in TARGET_TEX_KINDS}
+    for target_kind, source_kinds in TARGET_TEX_SOURCE_KINDS.items():
+        items: list[dict[str, Any]] = []
+        for source_kind in source_kinds:
+            for snippet in tex_snippets.get(source_kind) or []:
+                text = snippet.get("text") or ""
+                quality = snippet.get("quality") or _quality_text(text, min_words=20, max_words=300)
+                if not quality.get("complete") or quality.get("has_ellipsis"):
+                    continue
+                copied = dict(snippet)
+                copied["target_kind"] = target_kind
+                copied["kind"] = target_kind
+                copied["source_kind"] = source_kind
+                copied["source"] = copied.get("source") or f"mapped_from_{source_kind}"
+                items.append(copied)
+            if items:
+                break
+        target[target_kind] = items[:3]
+    return target
 
 
 def _select_top_refs(
@@ -893,7 +958,7 @@ def _article_quality(article: dict[str, Any]) -> dict[str, Any]:
         if ref.get("abstract") and (quality.get("has_ellipsis") or not quality.get("complete") or not quality.get("max_words_ok")):
             errors.append("ref_compact_quality")
             break
-    for strategy in PROMPT_STRATEGIES:
+    for strategy in CACHE_PROMPT_STRATEGIES:
         if not ((article.get("prompts") or {}).get(strategy) or {}).get("prompt"):
             errors.append(f"missing_prompt_{strategy}")
     for strategy in ("related_work", "top_k_related_work"):
@@ -901,7 +966,7 @@ def _article_quality(article: dict[str, Any]) -> dict[str, Any]:
         if quality and (quality.get("has_ellipsis") or not quality.get("complete")):
             errors.append(f"{strategy}_incomplete")
     snippets = article.get("tex_snippets") or {}
-    for kind in ("method", "implementation", "evaluation"):
+    for kind in TEX_KINDS:
         if not snippets.get(kind):
             errors.append(f"missing_tex_{kind}")
         for snippet in snippets.get(kind) or []:
@@ -912,6 +977,17 @@ def _article_quality(article: dict[str, Any]) -> dict[str, Any]:
                 break
             if any(token in text.lower() for token in ["\\begin", "\\end", "itemize"]):
                 errors.append(f"raw_tex_artifact_{kind}")
+                break
+    target_snippets = article.get("target_tex_snippets") or {}
+    for kind in TARGET_TEX_KINDS:
+        if not target_snippets.get(kind):
+            errors.append(f"missing_target_tex_{kind}")
+            continue
+        for snippet in target_snippets.get(kind) or []:
+            text = snippet.get("text") or ""
+            quality = snippet.get("quality") or _quality_text(text, min_words=20, max_words=300)
+            if not quality.get("complete") or quality.get("has_ellipsis"):
+                errors.append(f"bad_target_tex_{kind}")
                 break
     return {"passed": not errors, "errors": errors}
 
@@ -1063,9 +1139,16 @@ def _process_row(
         log_root=llm_dir / "tex_snippets",
         temperature=args.temperature,
     )
+    target_tex_snippets = _target_tex_snippets(tex_snippets)
 
     full_refs = refs[: args.full_refs_cap]
     prompts = {
+        "abstract": {
+            "prompt": _abstract_prompt(row.get("title") or "", target_compact["text"]),
+            "n_refs": 0,
+            "source": "target_compact_abstract",
+            "compact_abstract": target_compact,
+        },
         "full_refs": {
             "prompt": _plain_refs_prompt(full_refs),
             "n_refs": len(full_refs),
@@ -1097,7 +1180,7 @@ def _process_row(
     }
 
     article = {
-        "schema_version": "v3_quality_cache_v1",
+        "schema_version": "v3_quality_cache_v2",
         "built_at": int(time.time()),
         "arxiv_id": aid,
         "sample_id": row.get("sample_id"),
@@ -1120,6 +1203,7 @@ def _process_row(
         "research_question": question,
         "raw_tex_snippets": raw_tex_snippets,
         "tex_snippets": tex_snippets,
+        "target_tex_snippets": target_tex_snippets,
         "prompts": prompts,
         "source": {
             "accepted_target_cache": str(args.input),
@@ -1133,6 +1217,7 @@ def _process_row(
         (article_dir / "prompts").mkdir(parents=True, exist_ok=True)
         (article_dir / "prompts" / f"{strategy}.txt").write_text(prompt["prompt"])
     write_json(article_dir / "tex_snippets.json", article["tex_snippets"])
+    write_json(article_dir / "target_tex_snippets.json", article["target_tex_snippets"])
     write_json(article_dir / "refs.json", refs)
     write_json(article_dir / "quality_audit.json", article["quality_audit"])
     top_k_index_row = {
