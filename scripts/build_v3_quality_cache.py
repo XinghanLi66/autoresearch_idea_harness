@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -9,6 +10,7 @@ import time
 from collections import Counter
 from pathlib import Path
 from typing import Any
+from xml.etree import ElementTree as ET
 
 import httpx
 
@@ -130,6 +132,18 @@ def _load_done(index_path: Path) -> dict[str, dict[str, Any]]:
     return done
 
 
+def _load_compact_cache(path: Path) -> dict[str, dict[str, Any]]:
+    cache: dict[str, dict[str, Any]] = {}
+    if not path.exists():
+        return cache
+    for row in iter_jsonl(path):
+        key = row.get("cache_key")
+        compact = row.get("compact")
+        if key and isinstance(compact, dict) and compact.get("text"):
+            cache[str(key)] = compact
+    return cache
+
+
 def _load_rows(path: Path, limit: int | None = None, arxiv_ids: set[str] | None = None) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for row in iter_jsonl(path):
@@ -211,6 +225,32 @@ def _fetch_s2_metadata(arxiv_id: str | None, title: str | None, *, allow_title_s
     return {"metadata_source": "missing"}
 
 
+def _fetch_arxiv_metadata(arxiv_id: str | None) -> dict[str, Any]:
+    if not arxiv_id:
+        return {"metadata_source": "missing"}
+    try:
+        with httpx.Client(timeout=30.0) as client:
+            resp = client.get("https://export.arxiv.org/api/query", params={"id_list": arxiv_id, "max_results": 1})
+            resp.raise_for_status()
+        root = ET.fromstring(resp.text)
+        ns = {"atom": "http://www.w3.org/2005/Atom"}
+        entry = root.find("atom:entry", ns)
+        if entry is None:
+            return {"metadata_source": "arxiv_api_empty"}
+        title = _collapse(entry.findtext("atom:title", default="", namespaces=ns))
+        abstract = _collapse(entry.findtext("atom:summary", default="", namespaces=ns))
+        published = _collapse(entry.findtext("atom:published", default="", namespaces=ns))
+        return {
+            "arxiv_id": arxiv_id,
+            "title": _clean_title(title),
+            "year": published[:4] if published else None,
+            "abstract": abstract,
+            "metadata_source": "arxiv_api",
+        }
+    except Exception as exc:
+        return {"metadata_source": "arxiv_api_error", "metadata_error": repr(exc)}
+
+
 def _hydrate_ref(ref: dict[str, Any], *, arxiv_root: Path, allow_title_search: bool) -> dict[str, Any]:
     hydrated = dict(ref)
     hydrated["title"] = _clean_title(hydrated.get("title"))
@@ -236,6 +276,19 @@ def _hydrate_ref(ref: dict[str, Any], *, arxiv_root: Path, allow_title_search: b
         except Exception as exc:
             hydrated["local_metadata_error"] = repr(exc)
 
+    arxiv_meta = _fetch_arxiv_metadata(hydrated.get("arxiv_id"))
+    if arxiv_meta.get("abstract"):
+        hydrated.update({
+            "arxiv_id": arxiv_meta.get("arxiv_id") or hydrated.get("arxiv_id"),
+            "title": _clean_title(arxiv_meta.get("title") or hydrated.get("title")),
+            "year": hydrated.get("year") or arxiv_meta.get("year"),
+            "abstract": arxiv_meta.get("abstract"),
+            "abstract_source": arxiv_meta.get("metadata_source"),
+        })
+        return hydrated
+    if arxiv_meta.get("metadata_error"):
+        hydrated["arxiv_api_error"] = arxiv_meta.get("metadata_error")
+
     s2 = _fetch_s2_metadata(hydrated.get("arxiv_id"), hydrated.get("title"), allow_title_search=allow_title_search)
     if s2.get("abstract"):
         hydrated.update({
@@ -250,6 +303,42 @@ def _hydrate_ref(ref: dict[str, Any], *, arxiv_root: Path, allow_title_search: b
         if s2.get("metadata_error"):
             hydrated["metadata_error"] = s2.get("metadata_error")
     return hydrated
+
+
+def _abstract_cache_key(title: str | None, abstract: str | None) -> str:
+    title = _collapse(title).lower()
+    abstract = _collapse(abstract)
+    digest = hashlib.sha1(f"{title}\n{abstract}".encode("utf-8")).hexdigest()[:20]
+    return f"abstract:{digest}"
+
+
+def _sentence_limited(text: str, max_words: int) -> str:
+    text = _collapse(text)
+    if not text:
+        return ""
+    words = text.split()
+    if len(words) <= max_words:
+        return text
+    sentences = re.split(r"(?<=[.!?。！？])\s+", text)
+    kept: list[str] = []
+    count = 0
+    for sentence in sentences:
+        sw = sentence.split()
+        if not sw:
+            continue
+        if kept and count + len(sw) > max_words:
+            break
+        kept.append(sentence)
+        count += len(sw)
+        if count >= max_words:
+            break
+    candidate = _collapse(" ".join(kept))
+    if candidate:
+        return candidate
+    candidate = " ".join(words[:max_words]).rstrip(" ,;:")
+    if candidate and candidate[-1] not in ".!?。！？":
+        candidate += "."
+    return candidate
 
 
 def _llm(
@@ -572,9 +661,9 @@ def _summarize_abstract(
         if quality["complete"] and not quality["has_ellipsis"] and quality["min_words_ok"] and quality["max_words_ok"]:
             return {"text": text, "source": "llm_rewrite", "quality": quality, "attempts": attempt_rows}
     if not best:
-        best = trim_to_tokens(abstract, max_words)
-    if approx_token_count(best) > max_words:
-        best = trim_to_tokens(best, max_words)
+        best = _sentence_limited(abstract, max_words)
+    if len(best.split()) > max_words:
+        best = _sentence_limited(best, max_words)
     return {"text": best, "source": "llm_best_effort", "quality": _quality_text(best, max_words=max_words), "attempts": attempt_rows}
 
 
@@ -719,6 +808,7 @@ def _process_row(
     aid = str(row.get("arxiv_id") or "")
     article_dir = out_dir / "articles" / _safe_name(aid)
     llm_dir = article_dir / "llm_calls"
+    print(json.dumps({"event": "article_start", "arxiv_id": aid, "time": int(time.time())}, ensure_ascii=False), flush=True)
     raw_record = getattr(args, "dataset_records", {}).get(aid) or {}
     raw_refs = list(raw_record.get("refs") or row.get("refs") or [])
     target_date = _parse_date(row.get("created"))
@@ -747,18 +837,34 @@ def _process_row(
             arxiv_root=Path(args.arxiv_root),
             allow_title_search=args.allow_title_search,
         )
-        compact = _summarize_abstract(
-            client,
-            endpoint=args.endpoint,
-            model=args.model,
-            title=hydrated.get("title") or "",
-            abstract=hydrated.get("abstract") or "",
-            max_words=args.max_abstract_words,
-            attempts=args.abstract_attempts,
-            temperature=args.temperature,
-            log_root=llm_dir / "refs" / f"{idx:03d}_{_safe_name(_ref_key(ref))}",
-            force_api=args.use_api,
-        )
+        compact_cache_key = _abstract_cache_key(hydrated.get("title"), hydrated.get("abstract"))
+        compact_cache = getattr(args, "abstract_compact_cache", {})
+        compact = compact_cache.get(compact_cache_key)
+        if compact:
+            compact = dict(compact)
+            compact["source"] = f"reused_{compact.get('source') or 'compact_cache'}"
+        else:
+            compact = _summarize_abstract(
+                client,
+                endpoint=args.endpoint,
+                model=args.model,
+                title=hydrated.get("title") or "",
+                abstract=hydrated.get("abstract") or "",
+                max_words=args.max_abstract_words,
+                attempts=args.abstract_attempts,
+                temperature=args.temperature,
+                log_root=llm_dir / "refs" / f"{idx:03d}_{_safe_name(_ref_key(ref))}",
+                force_api=args.use_api,
+            )
+            if compact.get("text"):
+                compact_cache[compact_cache_key] = compact
+                _jsonl_append(out_dir / "ref_compact_by_key.jsonl", {
+                    "cache_key": compact_cache_key,
+                    "ref_key": _ref_key(hydrated),
+                    "ref_arxiv_id": hydrated.get("arxiv_id"),
+                    "title": hydrated.get("title"),
+                    "compact": compact,
+                })
         refs.append({
             "ref_key": _ref_key(hydrated),
             "arxiv_id": hydrated.get("arxiv_id"),
@@ -770,7 +876,16 @@ def _process_row(
             "metadata_error": hydrated.get("metadata_error"),
             "compact_abstract": compact["text"],
             "compact": compact,
+            "compact_cache_key": compact_cache_key,
         })
+    missing_after_download = [idx for idx, ref in enumerate(refs) if not ref.get("abstract")]
+    if missing_after_download:
+        print(json.dumps({
+            "event": "ref_abstract_missing_after_download",
+            "arxiv_id": aid,
+            "missing_ref_indices": missing_after_download,
+            "count": len(missing_after_download),
+        }, ensure_ascii=False), flush=True)
 
     cached_indices = None
     if getattr(args, "prompt_caches", None):
@@ -961,6 +1076,7 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     index_path = args.output / "index.jsonl"
     done = {} if args.force else _load_done(index_path)
+    args.abstract_compact_cache = {} if args.force else _load_compact_cache(args.output / "ref_compact_by_key.jsonl")
     client = RunwayClient(cfg, key_env=args.key_env) if args.use_api else None
 
     summary = {
@@ -976,6 +1092,8 @@ def main() -> None:
         "quality_passed": 0,
         "quality_failed": 0,
         "errors": 0,
+        "ref_missing_abstract_total": 0,
+        "ref_records_total": 0,
         "question_words": [],
         "quality_error_counts": {},
     }
@@ -992,17 +1110,19 @@ def main() -> None:
             _jsonl_append(index_path, result)
             summary["processed"] += 1
             summary["question_words"].append(result["question_words"])
+            summary["ref_records_total"] += result["ref_count"]
+            summary["ref_missing_abstract_total"] += result["ref_missing_abstract_count"]
             if result["quality_passed"]:
                 summary["quality_passed"] += 1
             else:
                 summary["quality_failed"] += 1
                 error_counts.update(result["quality_errors"])
-            print(json.dumps(result, ensure_ascii=False))
+            print(json.dumps(result, ensure_ascii=False), flush=True)
         except Exception as exc:
             summary["errors"] += 1
             err = {"arxiv_id": aid, "error": repr(exc)}
             _jsonl_append(args.output / "errors.jsonl", err)
-            print(json.dumps(err, ensure_ascii=False), file=sys.stderr)
+            print(json.dumps(err, ensure_ascii=False), file=sys.stderr, flush=True)
     summary["finished_at"] = int(time.time())
     summary["quality_error_counts"] = dict(error_counts)
     if summary["question_words"]:
