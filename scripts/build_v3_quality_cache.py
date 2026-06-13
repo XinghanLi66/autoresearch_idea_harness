@@ -886,6 +886,14 @@ def _process_row(
     write_json(article_dir / "tex_snippets.json", article["tex_snippets"])
     write_json(article_dir / "refs.json", refs)
     write_json(article_dir / "quality_audit.json", article["quality_audit"])
+    top_k_index_row = {
+        "key": aid,
+        "value": top_meta.get("indices") or [],
+        "source": top_meta.get("source"),
+        "top_k": top_meta.get("top_k"),
+        "top_refs": article["top_refs"],
+    }
+    write_json(article_dir / "top_k_5_index.json", top_k_index_row)
     for ref_idx, ref in enumerate(refs):
         _jsonl_append(out_dir / "ref_abstract_cache.jsonl", {
             "article_arxiv_id": aid,
@@ -900,12 +908,7 @@ def _process_row(
             "compact_source": (ref.get("compact") or {}).get("source"),
             "compact_quality": (ref.get("compact") or {}).get("quality"),
         })
-    _jsonl_append(out_dir / "top_k_5_index.jsonl", {
-        "key": aid,
-        "value": top_meta.get("indices") or [],
-        "source": top_meta.get("source"),
-        "top_k": top_meta.get("top_k"),
-    })
+    _jsonl_append(out_dir / "top_k_5_index.jsonl", top_k_index_row)
     return {
         "arxiv_id": aid,
         "sample_id": row.get("sample_id"),
