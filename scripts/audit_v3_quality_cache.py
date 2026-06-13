@@ -42,9 +42,22 @@ def _words(text: str | None) -> int:
     return len((text or "").split())
 
 
+def _has_bad_ellipsis(text: str) -> bool:
+    text = " ".join((text or "").split())
+    if "…" in text:
+        return True
+    if "..." not in text:
+        return False
+    if text.endswith("..."):
+        return True
+    sequence_ellipsis = re.compile(r"[A-Za-z0-9_{}\\^/()+\\-]+,\s*\.\.\.,\s*[A-Za-z0-9_{}\\^/()+\\-]+")
+    cleaned = sequence_ellipsis.sub("", text)
+    return "..." in cleaned
+
+
 def _complete(text: str | None) -> bool:
     text = " ".join((text or "").split())
-    return bool(text) and bool(re.search(r"""[.!?。！？)"'\]]$""", text)) and "..." not in text and "…" not in text
+    return bool(text) and bool(re.search(r"""[.!?。！？)"'\]]$""", text)) and not _has_bad_ellipsis(text)
 
 
 def _load_json(path: Path) -> dict[str, Any]:

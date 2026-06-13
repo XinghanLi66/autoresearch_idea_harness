@@ -446,6 +446,24 @@ def _llm(
         return {"ok": False, "text": "", "latency_s": latency, "error": repr(exc), "model": model}
 
 
+def _has_bad_ellipsis(text: str) -> bool:
+    """Treat prose ellipses as incomplete, but allow math/list sequences.
+
+    LLM summaries often preserve paper notation such as ``M_1,...,M_n``.
+    That is not truncation, while a trailing or prose ellipsis is.
+    """
+    text = _collapse(text)
+    if "…" in text:
+        return True
+    if "..." not in text:
+        return False
+    if text.endswith("..."):
+        return True
+    sequence_ellipsis = re.compile(r"[A-Za-z0-9_{}\\^/()+\\-]+,\s*\.\.\.,\s*[A-Za-z0-9_{}\\^/()+\\-]+")
+    cleaned = sequence_ellipsis.sub("", text)
+    return "..." in cleaned
+
+
 def _quality_text(text: str, *, min_words: int = 1, max_words: int | None = None) -> dict[str, Any]:
     text = _collapse(text)
     words = text.split()
@@ -456,7 +474,7 @@ def _quality_text(text: str, *, min_words: int = 1, max_words: int | None = None
         "tokens": approx_token_count(text),
         "complete": bool(text) and final_char_ok and not text.endswith("...") and not text.endswith(",") and not text.endswith(";"),
         "final_char_ok": final_char_ok,
-        "has_ellipsis": "..." in text or "…" in text,
+        "has_ellipsis": _has_bad_ellipsis(text),
         "min_words_ok": len(words) >= min_words,
         "max_words_ok": max_words is None or len(words) <= max_words,
     }

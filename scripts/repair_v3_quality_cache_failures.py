@@ -47,6 +47,55 @@ def _fallback_related_work(article: dict[str, Any], build: Any) -> dict[str, Any
     return build._deterministic_related_work(article.get("refs") or [])
 
 
+def _repair_ref_compact_quality(article: dict[str, Any], build: Any) -> list[str]:
+    repaired_keys: list[str] = []
+    for ref in article.get("refs") or []:
+        compact = ref.get("compact") or {}
+        quality = compact.get("quality") or {}
+        if not (
+            quality.get("has_ellipsis")
+            or not quality.get("complete")
+            or not quality.get("max_words_ok")
+        ):
+            continue
+        text = ref.get("compact_abstract") or compact.get("text") or ""
+        new_quality = build._quality_text(text, min_words=20, max_words=200)
+        if (
+            new_quality.get("complete")
+            and not new_quality.get("has_ellipsis")
+            and new_quality.get("max_words_ok")
+        ):
+            compact["quality"] = new_quality
+            ref["compact"] = compact
+            ref["compact_abstract"] = text
+            key = ref.get("compact_cache_key")
+            if key:
+                repaired_keys.append(str(key))
+    return repaired_keys
+
+
+def _update_ref_compact_cache(shard: Path, article: dict[str, Any], repaired_keys: list[str]) -> None:
+    if not repaired_keys:
+        return
+    path = shard / "ref_compact_by_key.jsonl"
+    if not path.exists():
+        return
+    repaired = {
+        str(ref.get("compact_cache_key")): ref.get("compact")
+        for ref in article.get("refs") or []
+        if ref.get("compact_cache_key") in repaired_keys and ref.get("compact")
+    }
+    rows = list(iter_jsonl(path))
+    changed = False
+    for row in rows:
+        key = str(row.get("cache_key") or "")
+        if key in repaired:
+            row["compact"] = repaired[key]
+            changed = True
+    if changed:
+        _write_jsonl(path, rows)
+
+
 def _repair_article(article_dir: Path, build: Any) -> dict[str, Any]:
     cache_path = article_dir / "article_cache.json"
     article = json.loads(cache_path.read_text())
@@ -70,19 +119,27 @@ def _repair_article(article_dir: Path, build: Any) -> dict[str, Any]:
         related_entry["source"] = fallback.get("source")
         repaired_fields.append("related_work")
 
+    repaired_ref_keys = _repair_ref_compact_quality(article, build)
+    if repaired_ref_keys:
+        repaired_fields.append("ref_compact_quality")
+
     article["quality_audit"] = build._article_quality(article)
     write_json(cache_path, article)
+    write_json(article_dir / "refs.json", article.get("refs") or [])
     write_json(article_dir / "quality_audit.json", article["quality_audit"])
+    _update_ref_compact_cache(article_dir.parent.parent, article, repaired_ref_keys)
     if repaired_fields:
         prompt_dir = article_dir / "prompts"
         prompt_dir.mkdir(parents=True, exist_ok=True)
-        (prompt_dir / "related_work.txt").write_text(prompts["related_work"]["prompt"])
+        if "related_work" in repaired_fields:
+            (prompt_dir / "related_work.txt").write_text(prompts["related_work"]["prompt"])
     return {
         "arxiv_id": aid,
         "article_dir": str(article_dir),
         "before": before,
         "after": article["quality_audit"],
         "repaired_fields": repaired_fields,
+        "repaired_ref_compact_keys": repaired_ref_keys,
     }
 
 
