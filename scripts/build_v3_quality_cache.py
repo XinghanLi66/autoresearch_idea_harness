@@ -461,6 +461,8 @@ def _has_bad_ellipsis(text: str) -> bool:
         return True
     sequence_ellipsis = re.compile(r"[A-Za-z0-9_{}\\^/()+\\-]+,\s*\.\.\.,\s*[A-Za-z0-9_{}\\^/()+\\-]+")
     cleaned = sequence_ellipsis.sub("", text)
+    quoted_example_ellipsis = re.compile(r"""["'“‘][^"'“”‘’]{0,160}\.\.\.[^"'“”‘’]{0,80}["'”’]""")
+    cleaned = quoted_example_ellipsis.sub("", cleaned)
     return "..." in cleaned
 
 
