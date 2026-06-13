@@ -60,6 +60,28 @@ Reference papers:
 {ref_block}
 """
 
+TEX_SNIPPET_PROMPT = """\
+You are cleaning TeX-derived evidence for a training cache.
+
+Target paper: {title}
+Target abstract: {abstract}
+Evidence kind: {kind}
+
+From the candidate excerpts below, select only material that directly describes the target paper's
+own {kind}. Discard related-work, baseline-only, citation-list, and malformed formula-only text.
+Rewrite into 1-3 clean, human-readable snippets. Preserve concrete technical details, datasets,
+metrics, implementation choices, and results when present. Remove LaTeX commands and repair mangled
+symbols into readable prose. If no useful evidence is present, output an empty JSON array.
+
+Return only valid JSON:
+[
+  {{"heading": "...", "text": "..."}}
+]
+
+Candidate excerpts:
+{candidate_block}
+"""
+
 
 PROMPT_STRATEGIES = [
     "full_refs",
@@ -80,6 +102,7 @@ TEX_KINDS = [
     "results",
     "risks_and_limitations",
 ]
+RAW_TEX_EXTRA_KINDS = ["discussion"]
 
 
 def _collapse(text: str | None) -> str:
@@ -295,11 +318,13 @@ def _llm(
 def _quality_text(text: str, *, min_words: int = 1, max_words: int | None = None) -> dict[str, Any]:
     text = _collapse(text)
     words = text.split()
+    final_char_ok = bool(re.search(r"""[.!?。！？)"'\]]$""", text))
     return {
         "chars": len(text),
         "words": len(words),
         "tokens": approx_token_count(text),
-        "complete": bool(text) and not text.endswith("...") and not text.endswith(",") and not text.endswith(";"),
+        "complete": bool(text) and final_char_ok and not text.endswith("...") and not text.endswith(",") and not text.endswith(";"),
+        "final_char_ok": final_char_ok,
         "has_ellipsis": "..." in text or "…" in text,
         "min_words_ok": len(words) >= min_words,
         "max_words_ok": max_words is None or len(words) <= max_words,
@@ -369,6 +394,115 @@ def _section_snippets(row: dict[str, Any], max_chars: int, per_kind: int) -> dic
     return {k: v[:per_kind] for k, v in grouped.items()}
 
 
+def _raw_section_candidates(row: dict[str, Any], max_chars: int, per_kind: int) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = {k: [] for k in [*TEX_KINDS, *RAW_TEX_EXTRA_KINDS]}
+    for section in row.get("tex_sections") or []:
+        kind = str(section.get("kind") or "other")
+        if kind not in grouped:
+            continue
+        text = _collapse(section.get("text"))
+        if not text:
+            continue
+        grouped[kind].append({
+            "kind": kind,
+            "heading": section.get("heading"),
+            "source": section.get("source"),
+            "chars_raw": len(text),
+            "text": text[:max_chars].rstrip(),
+        })
+    return {k: v[:per_kind] for k, v in grouped.items()}
+
+
+def _parse_json_array(text: str) -> list[dict[str, Any]]:
+    text = text.strip()
+    try:
+        value = json.loads(text)
+        return value if isinstance(value, list) else []
+    except Exception:
+        pass
+    match = re.search(r"\[[\s\S]*\]", text)
+    if not match:
+        return []
+    try:
+        value = json.loads(match.group(0))
+        return value if isinstance(value, list) else []
+    except Exception:
+        return []
+
+
+def _curate_tex_snippets(
+    client: RunwayClient | None,
+    *,
+    endpoint: str,
+    model: str,
+    row: dict[str, Any],
+    raw: dict[str, list[dict[str, Any]]],
+    log_root: Path,
+    temperature: float | None,
+) -> dict[str, list[dict[str, Any]]]:
+    if client is None:
+        return {k: raw.get(k, []) for k in TEX_KINDS}
+    curated: dict[str, list[dict[str, Any]]] = {k: [] for k in TEX_KINDS}
+    title = row.get("title") or ""
+    abstract = _collapse(row.get("abstract"))[:1600]
+    extra_candidates = {
+        "method": ["abstract", "problem", "discussion"],
+        "algorithm_or_system": ["abstract", "method", "implementation", "discussion"],
+        "training_or_data_recipe": ["implementation", "method"],
+        "risks_and_limitations": ["discussion", "problem"],
+    }
+    for kind in TEX_KINDS:
+        candidates = list(raw.get(kind) or [])
+        for extra_kind in extra_candidates.get(kind, []):
+            candidates.extend(raw.get(extra_kind) or [])
+        seen = set()
+        deduped = []
+        for candidate in candidates:
+            key = (candidate.get("source"), candidate.get("heading"), candidate.get("text", "")[:80])
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(candidate)
+        candidates = deduped[:10]
+        if not candidates:
+            continue
+        candidate_block = "\n\n".join(
+            f"### {idx}. {c.get('heading') or '(no heading)'}\n"
+            f"source: {c.get('source') or ''}\n"
+            f"{c.get('text') or ''}"
+            for idx, c in enumerate(candidates, start=1)
+        )
+        result = _llm(
+            client,
+            endpoint=endpoint,
+            model=model,
+            prompt=TEX_SNIPPET_PROMPT.format(
+                title=title,
+                abstract=abstract,
+                kind=kind,
+                candidate_block=candidate_block[:12000],
+            ),
+            max_tokens=1400,
+            temperature=temperature,
+            log_dir=log_root / kind,
+            call_id=f"tex_{kind}",
+        )
+        snippets = []
+        for item in _parse_json_array(result.get("text") or ""):
+            text = _collapse(item.get("text"))
+            if not text:
+                continue
+            snippets.append({
+                "kind": kind,
+                "heading": _collapse(item.get("heading")) or kind,
+                "source": "llm_curated_tex",
+                "text": text,
+                "quality": _quality_text(text, min_words=20, max_words=260),
+            })
+        curated[kind] = snippets[:3]
+    return curated
+
+
 def _select_top_refs(
     refs: list[dict[str, Any]],
     top_k: int,
@@ -425,7 +559,7 @@ def _summarize_abstract(
             endpoint=endpoint,
             model=model,
             prompt=prompt,
-            max_tokens=320,
+            max_tokens=700,
             temperature=temperature,
             log_dir=log_root / f"attempt_{i:02d}",
             call_id=f"abstract_{i:02d}",
@@ -482,7 +616,7 @@ def _generate_question(
             endpoint=endpoint,
             model=model,
             prompt=prompt,
-            max_tokens=360,
+            max_tokens=700,
             temperature=temperature,
             log_dir=log_root / f"attempt_{i:02d}",
             call_id=f"question_{i:02d}",
@@ -520,7 +654,7 @@ def _generate_related_work(
         endpoint=endpoint,
         model=model,
         prompt=RELATED_WORK_PROMPT.format(ref_block=ref_block),
-        max_tokens=560,
+        max_tokens=900,
         temperature=temperature,
         log_dir=log_root,
         call_id="related_work",
@@ -555,10 +689,23 @@ def _article_quality(article: dict[str, Any]) -> dict[str, Any]:
     for strategy in PROMPT_STRATEGIES:
         if not ((article.get("prompts") or {}).get(strategy) or {}).get("prompt"):
             errors.append(f"missing_prompt_{strategy}")
+    for strategy in ("related_work", "top_k_related_work"):
+        quality = (((article.get("prompts") or {}).get(strategy) or {}).get("related_work") or {}).get("quality") or {}
+        if quality and (quality.get("has_ellipsis") or not quality.get("complete")):
+            errors.append(f"{strategy}_incomplete")
     snippets = article.get("tex_snippets") or {}
     for kind in ("method", "implementation", "evaluation"):
         if not snippets.get(kind):
             errors.append(f"missing_tex_{kind}")
+        for snippet in snippets.get(kind) or []:
+            text = snippet.get("text") or ""
+            quality = snippet.get("quality") or _quality_text(text, min_words=20, max_words=300)
+            if not quality.get("complete") or quality.get("has_ellipsis"):
+                errors.append(f"bad_tex_{kind}")
+                break
+            if any(token in text.lower() for token in ["\\begin", "\\end", "itemize", "equation"]):
+                errors.append(f"raw_tex_artifact_{kind}")
+                break
     return {"passed": not errors, "errors": errors}
 
 
@@ -659,6 +806,16 @@ def _process_row(
         log_root=llm_dir / "related_work_top",
         temperature=args.temperature,
     )
+    raw_tex_snippets = _raw_section_candidates(row, args.tex_snippet_chars, args.raw_snippets_per_kind)
+    tex_snippets = _curate_tex_snippets(
+        client,
+        endpoint=args.endpoint,
+        model=args.model,
+        row=row,
+        raw=raw_tex_snippets,
+        log_root=llm_dir / "tex_snippets",
+        temperature=args.temperature,
+    )
 
     full_refs = refs[: args.full_refs_cap]
     prompts = {
@@ -712,7 +869,8 @@ def _process_row(
         "top_ref_selection": top_meta,
         "leakage_guard": leakage_guard,
         "research_question": question,
-        "tex_snippets": _section_snippets(row, args.tex_snippet_chars, args.max_snippets_per_kind),
+        "raw_tex_snippets": raw_tex_snippets,
+        "tex_snippets": tex_snippets,
         "prompts": prompts,
         "source": {
             "accepted_target_cache": str(args.input),
@@ -785,7 +943,7 @@ def main() -> None:
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--full-refs-cap", type=int, default=40)
     parser.add_argument("--tex-snippet-chars", type=int, default=1800)
-    parser.add_argument("--max-snippets-per-kind", type=int, default=4)
+    parser.add_argument("--raw-snippets-per-kind", type=int, default=8)
     parser.add_argument("--arxiv-root", default=None)
     parser.add_argument("--allow-title-search", action="store_true")
     args = parser.parse_args()
