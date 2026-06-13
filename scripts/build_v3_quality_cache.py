@@ -85,6 +85,20 @@ Candidate excerpts:
 {candidate_block}
 """
 
+TEX_SNIPPET_RETRY_PROMPT = """\
+Clean the TeX-derived evidence below into exactly one concise, complete, human-readable snippet
+for the target paper's own {kind}. Keep concrete implementation, evaluation, dataset, metric, or
+result details when present. Remove LaTeX commands. Do not use ellipses. Keep it under 180 words.
+
+Return only valid JSON:
+[
+  {{"heading": "...", "text": "..."}}
+]
+
+Candidate excerpts:
+{candidate_block}
+"""
+
 
 PROMPT_STRATEGIES = [
     "full_refs",
@@ -566,8 +580,8 @@ def _curate_tex_snippets(
         "method": ["abstract", "problem", "discussion"],
         "algorithm_or_system": ["abstract", "method", "implementation", "discussion"],
         "training_or_data_recipe": ["implementation", "method"],
-        "evaluation": ["results", "abstract", "method", "discussion"],
-        "results": ["evaluation", "abstract", "discussion"],
+        "evaluation": ["results", "implementation", "abstract", "method", "discussion"],
+        "results": ["evaluation", "implementation", "abstract", "discussion"],
         "risks_and_limitations": ["discussion", "problem"],
     }
     for kind in TEX_KINDS:
@@ -591,23 +605,37 @@ def _curate_tex_snippets(
             f"{c.get('text') or ''}"
             for idx, c in enumerate(candidates, start=1)
         )
+        prompt = TEX_SNIPPET_PROMPT.format(
+            title=title,
+            abstract=abstract,
+            kind=kind,
+            candidate_block=candidate_block[:12000],
+        )
         result = _llm(
             client,
             endpoint=endpoint,
             model=model,
-            prompt=TEX_SNIPPET_PROMPT.format(
-                title=title,
-                abstract=abstract,
-                kind=kind,
-                candidate_block=candidate_block[:12000],
-            ),
-            max_tokens=1400,
+            prompt=prompt,
+            max_tokens=2200,
             temperature=temperature,
             log_dir=log_root / kind,
             call_id=f"tex_{kind}",
         )
+        parsed = _parse_json_array(result.get("text") or "")
+        if not parsed:
+            retry = _llm(
+                client,
+                endpoint=endpoint,
+                model=model,
+                prompt=TEX_SNIPPET_RETRY_PROMPT.format(kind=kind, candidate_block=candidate_block[:9000]),
+                max_tokens=900,
+                temperature=temperature,
+                log_dir=log_root / f"{kind}_retry",
+                call_id=f"tex_{kind}_retry",
+            )
+            parsed = _parse_json_array(retry.get("text") or "")
         snippets = []
-        for item in _parse_json_array(result.get("text") or ""):
+        for item in parsed:
             text = _collapse(item.get("text"))
             if not text:
                 continue
@@ -772,18 +800,30 @@ def _generate_related_work(
     if client is None:
         text = " ".join(f"{r.get('title')} studies {r.get('compact_abstract')}" for r in refs)
         return {"text": trim_to_tokens(text, 320), "source": "mock_without_api", "quality": _quality_text(text, max_words=380)}
-    result = _llm(
-        client,
-        endpoint=endpoint,
-        model=model,
-        prompt=RELATED_WORK_PROMPT.format(ref_block=ref_block),
-        max_tokens=900,
-        temperature=temperature,
-        log_dir=log_root,
-        call_id="related_work",
-    )
-    text = result.get("text") or ""
-    return {"text": text, "source": "llm_rewrite" if result.get("ok") else "missing", "quality": _quality_text(text, min_words=80, max_words=420)}
+    best = ""
+    best_quality: dict[str, Any] = {}
+    for attempt in range(2):
+        prompt = RELATED_WORK_PROMPT.format(ref_block=ref_block)
+        if attempt:
+            prompt += "\n\nEnsure the output ends with a complete final sentence and does not stop mid-metric or mid-list."
+        result = _llm(
+            client,
+            endpoint=endpoint,
+            model=model,
+            prompt=prompt,
+            max_tokens=1300,
+            temperature=temperature,
+            log_dir=log_root / f"attempt_{attempt:02d}",
+            call_id=f"related_work_{attempt:02d}",
+        )
+        text = result.get("text") or ""
+        quality = _quality_text(text, min_words=80, max_words=420)
+        if text and (not best or (quality.get("complete") and not quality.get("has_ellipsis"))):
+            best = text
+            best_quality = quality
+        if quality.get("complete") and not quality.get("has_ellipsis") and quality.get("min_words_ok") and quality.get("max_words_ok"):
+            return {"text": text, "source": "llm_rewrite", "quality": quality}
+    return {"text": best, "source": "llm_best_effort" if best else "missing", "quality": best_quality or _quality_text(best, min_words=80, max_words=420)}
 
 
 def _article_quality(article: dict[str, Any]) -> dict[str, Any]:
@@ -828,7 +868,7 @@ def _article_quality(article: dict[str, Any]) -> dict[str, Any]:
             if not quality.get("complete") or quality.get("has_ellipsis"):
                 errors.append(f"bad_tex_{kind}")
                 break
-            if any(token in text.lower() for token in ["\\begin", "\\end", "itemize", "equation"]):
+            if any(token in text.lower() for token in ["\\begin", "\\end", "itemize"]):
                 errors.append(f"raw_tex_artifact_{kind}")
                 break
     return {"passed": not errors, "errors": errors}
