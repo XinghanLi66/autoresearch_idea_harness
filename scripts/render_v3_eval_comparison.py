@@ -167,11 +167,11 @@ def collect_results(run_root: Path) -> dict[str, Any]:
 
 
 def row_completeness(row: dict[str, Any]) -> int:
-    if row.get("worker_status") == "error" or row.get("error"):
-        return 3
     if row.get("passed") is not None:
-        return 3
+        return 4
     if row.get("val_metric") is not None:
+        return 3
+    if row.get("worker_status") == "error" or row.get("error"):
         return 2
     if row.get("worker_status"):
         return 1
