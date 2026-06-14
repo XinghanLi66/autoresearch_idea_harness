@@ -153,6 +153,7 @@ def _invoke_claude_worker(
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     }
     result_path = workspace / "result.json"
+    last_error_result_mtime = 0.0
     with prompt_file.open() as stdin_f, log_file.open("a") as log_f:
         proc = subprocess.Popen(cmd, stdin=stdin_f, stdout=log_f, stderr=subprocess.STDOUT, cwd=workspace, env=env)
         started = time.time()
@@ -160,16 +161,25 @@ def _invoke_claude_worker(
             elapsed = time.time() - started
             log_size = log_file.stat().st_size if log_file.exists() else 0
             if result_path.exists() and result_path.stat().st_mtime >= started - 1:
-                _event(events_path, "worker_result_detected_while_process_running", elapsed_s=round(elapsed, 3))
-                log_f.write("\n[runner] result.json detected; terminating worker process after result capture\n")
-                proc.terminate()
                 try:
-                    proc.wait(timeout=15)
-                except subprocess.TimeoutExpired:
-                    _event(events_path, "worker_result_detected_kill_after_grace", elapsed_s=round(time.time() - started, 3))
-                    proc.kill()
-                    proc.wait()
-                return
+                    raw_result = json.loads(result_path.read_text())
+                except Exception:
+                    raw_result = {}
+                if raw_result.get("val_metric") is not None:
+                    _event(events_path, "worker_result_detected_while_process_running", elapsed_s=round(elapsed, 3))
+                    log_f.write("\n[runner] metric result.json detected; terminating worker process after result capture\n")
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=15)
+                    except subprocess.TimeoutExpired:
+                        _event(events_path, "worker_result_detected_kill_after_grace", elapsed_s=round(time.time() - started, 3))
+                        proc.kill()
+                        proc.wait()
+                    return
+                current_mtime = result_path.stat().st_mtime
+                if current_mtime > last_error_result_mtime:
+                    last_error_result_mtime = current_mtime
+                    _event(events_path, "worker_error_result_detected_continue", elapsed_s=round(elapsed, 3))
             if silent_timeout > 0 and log_size == 0 and elapsed >= silent_timeout:
                 _event(events_path, "worker_silent_timeout", elapsed_s=round(elapsed, 3), silent_timeout=silent_timeout)
                 proc.kill()

@@ -14,6 +14,9 @@ DEFAULT_BASE_EXTRAS = [
     ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_qwen25_32b_base_v1sem_supp_pending2",
 ]
 DEFAULT_SFT = ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_v1sem_cot_sft_16k_guarded"
+DEFAULT_SFT_EXTRAS = [
+    ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_v1sem_cot_sft_16k_guarded_reg_retry",
+]
 DEFAULT_OUTPUT = ROOT / "runs" / "reports" / "v3_base_vs_v1sem_cot_sft_eval.md"
 
 
@@ -292,6 +295,7 @@ def main() -> None:
     parser.add_argument("--base-run", type=Path, default=DEFAULT_BASE)
     parser.add_argument("--base-extra-run", type=Path, action="append", default=None)
     parser.add_argument("--sft-run", type=Path, default=DEFAULT_SFT)
+    parser.add_argument("--sft-extra-run", type=Path, action="append", default=None)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--json-output", type=Path, default=None)
     args = parser.parse_args()
@@ -300,7 +304,7 @@ def main() -> None:
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "runs": {
             "base_32b": collect_merged_results(args.base_run, args.base_extra_run if args.base_extra_run is not None else DEFAULT_BASE_EXTRAS),
-            "v1sem_cot_sft": collect_results(args.sft_run),
+            "v1sem_cot_sft": collect_merged_results(args.sft_run, args.sft_extra_run if args.sft_extra_run is not None else DEFAULT_SFT_EXTRAS),
         },
     }
     json_output = args.json_output or args.output.with_suffix(".json")
