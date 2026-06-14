@@ -458,14 +458,30 @@ class EndToEndRunner:
             "--allowedTools", "Bash,Read,Edit,Write",
         ]
         env = {**os.environ, "CUDA_VISIBLE_DEVICES": self.opts.gpu, "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"}
+        result_path = workspace / "result.json"
         with prompt_file.open() as stdin_f, log_file.open("a") as log_f:
             proc = subprocess.Popen(cmd, stdin=stdin_f, stdout=log_f, stderr=subprocess.STDOUT, cwd=workspace, env=env)
-            try:
-                proc.wait(timeout=self.opts.worker_timeout)
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                proc.wait()
-                log_f.write(f"\n[runner] worker timeout after {self.opts.worker_timeout}s\n")
+            started = time.time()
+            while proc.poll() is None:
+                elapsed = time.time() - started
+                if result_path.exists() and result_path.stat().st_mtime >= started - 1:
+                    self.events.emit("worker_result_detected_while_process_running", elapsed_s=round(elapsed, 3))
+                    log_f.write("\n[runner] result.json detected; terminating worker process after result capture\n")
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=15)
+                    except subprocess.TimeoutExpired:
+                        self.events.emit("worker_result_detected_kill_after_grace", elapsed_s=round(time.time() - started, 3))
+                        proc.kill()
+                        proc.wait()
+                    return
+                if elapsed >= self.opts.worker_timeout:
+                    self.events.emit("worker_timeout", elapsed_s=round(elapsed, 3), worker_timeout=self.opts.worker_timeout)
+                    proc.kill()
+                    proc.wait()
+                    log_f.write(f"\n[runner] worker timeout after {self.opts.worker_timeout}s\n")
+                    return
+                time.sleep(5)
 
     def _ask_master_advice(
         self,

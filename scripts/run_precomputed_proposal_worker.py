@@ -152,12 +152,24 @@ def _invoke_claude_worker(
         "CUDA_VISIBLE_DEVICES": gpu,
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     }
+    result_path = workspace / "result.json"
     with prompt_file.open() as stdin_f, log_file.open("a") as log_f:
         proc = subprocess.Popen(cmd, stdin=stdin_f, stdout=log_f, stderr=subprocess.STDOUT, cwd=workspace, env=env)
         started = time.time()
         while proc.poll() is None:
             elapsed = time.time() - started
             log_size = log_file.stat().st_size if log_file.exists() else 0
+            if result_path.exists() and result_path.stat().st_mtime >= started - 1:
+                _event(events_path, "worker_result_detected_while_process_running", elapsed_s=round(elapsed, 3))
+                log_f.write("\n[runner] result.json detected; terminating worker process after result capture\n")
+                proc.terminate()
+                try:
+                    proc.wait(timeout=15)
+                except subprocess.TimeoutExpired:
+                    _event(events_path, "worker_result_detected_kill_after_grace", elapsed_s=round(time.time() - started, 3))
+                    proc.kill()
+                    proc.wait()
+                return
             if silent_timeout > 0 and log_size == 0 and elapsed >= silent_timeout:
                 _event(events_path, "worker_silent_timeout", elapsed_s=round(elapsed, 3), silent_timeout=silent_timeout)
                 proc.kill()

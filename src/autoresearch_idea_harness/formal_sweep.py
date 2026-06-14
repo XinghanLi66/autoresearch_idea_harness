@@ -499,7 +499,7 @@ class FormalSweepRunner:
             return self._fixture_worker(task, proposal, sample_dir, event)
         event("worker_started", proposal_id=proposal["proposal_id"])
         t0 = time.time()
-        self._invoke_claude_worker(sample_dir)
+        self._invoke_claude_worker(sample_dir, event)
         self._wait_for_worker_result(sample_dir, event)
         result = self._parse_worker_result(task, proposal["proposal_id"], sample_dir, time.time() - t0)
         if result.get("status") != "done":
@@ -520,7 +520,7 @@ class FormalSweepRunner:
         event("fixture_worker_done", metric=metric, passed=result.get("passed"))
         return result
 
-    def _invoke_claude_worker(self, sample_dir: Path) -> None:
+    def _invoke_claude_worker(self, sample_dir: Path, event=None) -> None:
         workspace = sample_dir / "workspace"
         prompt_file = sample_dir / "worker_prompt.txt"
         log_file = sample_dir / "worker.log"
@@ -535,14 +535,33 @@ class FormalSweepRunner:
             "--allowedTools", "Bash,Read,Edit,Write",
         ]
         env = {**os.environ, "CUDA_VISIBLE_DEVICES": self.opts.gpu, "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"}
+        result_path = workspace / "result.json"
         with prompt_file.open() as stdin_f, log_file.open("a") as log_f:
             proc = subprocess.Popen(cmd, stdin=stdin_f, stdout=log_f, stderr=subprocess.STDOUT, cwd=workspace, env=env)
-            try:
-                proc.wait(timeout=self.opts.worker_timeout)
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                proc.wait()
-                log_f.write(f"\n[runner] worker timeout after {self.opts.worker_timeout}s\n")
+            started = time.time()
+            while proc.poll() is None:
+                elapsed = time.time() - started
+                if result_path.exists() and result_path.stat().st_mtime >= started - 1:
+                    if event:
+                        event("worker_result_detected_while_process_running", elapsed_s=round(elapsed, 3))
+                    log_f.write("\n[runner] result.json detected; terminating worker process after result capture\n")
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=15)
+                    except subprocess.TimeoutExpired:
+                        if event:
+                            event("worker_result_detected_kill_after_grace", elapsed_s=round(time.time() - started, 3))
+                        proc.kill()
+                        proc.wait()
+                    return
+                if elapsed >= self.opts.worker_timeout:
+                    if event:
+                        event("worker_timeout", elapsed_s=round(elapsed, 3), worker_timeout=self.opts.worker_timeout)
+                    proc.kill()
+                    proc.wait()
+                    log_f.write(f"\n[runner] worker timeout after {self.opts.worker_timeout}s\n")
+                    return
+                time.sleep(5)
 
     def _wait_for_worker_result(self, sample_dir: Path, event) -> None:
         workspace = sample_dir / "workspace"
