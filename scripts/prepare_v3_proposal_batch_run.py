@@ -35,11 +35,13 @@ def _quote_cmd(args: list[str]) -> str:
 
 def _validate_final_model(model_dir: Path) -> list[str]:
     errors = []
-    for name in ("config.json", "model.safetensors.index.json", "tokenizer.json"):
+    for name in ("config.json", "tokenizer.json"):
         if not (model_dir / name).exists():
             errors.append(f"missing final model file: {model_dir / name}")
-    if not list(model_dir.glob("model-*.safetensors")):
-        errors.append(f"missing model safetensor shards in {model_dir}")
+    has_sharded_weights = (model_dir / "model.safetensors.index.json").exists() and bool(list(model_dir.glob("model-*.safetensors")))
+    has_single_weight = (model_dir / "model.safetensors").exists()
+    if not has_sharded_weights and not has_single_weight:
+        errors.append(f"missing model safetensor weights in {model_dir}")
     return errors
 
 
