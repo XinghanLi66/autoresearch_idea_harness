@@ -10,6 +10,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BASE = ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_qwen25_32b_base_v1sem"
+DEFAULT_BASE_EXTRAS = [
+    ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_qwen25_32b_base_v1sem_supp_pending2",
+]
 DEFAULT_SFT = ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_v1sem_cot_sft_16k"
 DEFAULT_OUTPUT = ROOT / "runs" / "reports" / "v3_base_vs_v1sem_cot_sft_eval.md"
 
@@ -160,6 +163,61 @@ def collect_results(run_root: Path) -> dict[str, Any]:
     }
 
 
+def row_completeness(row: dict[str, Any]) -> int:
+    if row.get("worker_status") == "error" or row.get("error"):
+        return 3
+    if row.get("passed") is not None:
+        return 3
+    if row.get("val_metric") is not None:
+        return 2
+    if row.get("worker_status"):
+        return 1
+    return 0
+
+
+def recompute_counts(run: dict[str, Any]) -> dict[str, Any]:
+    rows = sorted(run.get("rows") or [], key=lambda row: (str(row.get("task")), str(row.get("subtask"))))
+    completed = [row for row in rows if row.get("passed") is not None]
+    passed = [row for row in completed if row.get("passed") is True]
+    errors = [row for row in rows if row.get("worker_status") == "error" or row.get("error")]
+    planned_count = max(int(run.get("planned_count") or 0), len(rows))
+    run.update({
+        "row_count": len(rows),
+        "completed_count": len(completed),
+        "passed_count": len(passed),
+        "error_count": len(errors),
+        "pass_rate_completed": (len(passed) / len(completed)) if completed else None,
+        "pass_rate_planned_conservative": (len(passed) / planned_count) if planned_count else None,
+        "planned_count": planned_count,
+        "rows": rows,
+    })
+    return run
+
+
+def collect_merged_results(primary_run: Path, extra_runs: list[Path]) -> dict[str, Any]:
+    merged = collect_results(primary_run)
+    merged["merged_run_roots"] = [str(primary_run)]
+    by_key = {
+        (str(row.get("task")), str(row.get("subtask"))): row
+        for row in merged.get("rows") or []
+    }
+    for extra in extra_runs:
+        if not extra.exists():
+            continue
+        extra_payload = collect_results(extra)
+        merged["merged_run_roots"].append(str(extra))
+        merged["planned_count"] = max(int(merged.get("planned_count") or 0), int(extra_payload.get("planned_count") or 0))
+        for row in extra_payload.get("rows") or []:
+            key = (str(row.get("task")), str(row.get("subtask")))
+            old = by_key.get(key)
+            if old is None or row_completeness(row) > row_completeness(old):
+                copied = dict(row)
+                copied["merged_source_run_root"] = str(extra)
+                by_key[key] = copied
+    merged["rows"] = list(by_key.values())
+    return recompute_counts(merged)
+
+
 def fmt_rate(value: float | None) -> str:
     if value is None:
         return "-"
@@ -222,6 +280,9 @@ def render_markdown(payload: dict[str, Any]) -> str:
             f"- `{name}`: `{run['run_root']}` job={submission.get('job_id') or '-'} "
             f"result={submission.get('result') or (submission.get('latest_status') or {}).get('status') or '-'}"
         )
+        for extra_root in run.get("merged_run_roots") or []:
+            if extra_root != run.get("run_root"):
+                lines.append(f"  - merged extra: `{extra_root}`")
     lines.append("")
     return "\n".join(lines)
 
@@ -229,6 +290,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Compare V3 base 32B and V1-semantics CoT SFT worker eval runs.")
     parser.add_argument("--base-run", type=Path, default=DEFAULT_BASE)
+    parser.add_argument("--base-extra-run", type=Path, action="append", default=None)
     parser.add_argument("--sft-run", type=Path, default=DEFAULT_SFT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--json-output", type=Path, default=None)
@@ -237,7 +299,7 @@ def main() -> None:
     payload = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "runs": {
-            "base_32b": collect_results(args.base_run),
+            "base_32b": collect_merged_results(args.base_run, args.base_extra_run if args.base_extra_run is not None else DEFAULT_BASE_EXTRAS),
             "v1sem_cot_sft": collect_results(args.sft_run),
         },
     }
