@@ -147,6 +147,9 @@ def _select_top_refs(article: dict[str, Any], refs: list[dict[str, Any]], top_in
                 i = int(idx)
             except Exception:
                 continue
+            # V1 top_k_5_index has a few duplicate indices. Treat duplicate refs
+            # as a cache artifact and keep only the first occurrence; this keeps
+            # the V1 ordering while giving the model more distinct context.
             if 0 <= i < len(refs) and i not in indices:
                 indices.append(i)
             if len(indices) >= 5:
@@ -267,7 +270,7 @@ def _rebuild_article(
             "v1_prompt_cache": str(DEFAULT_V1_PROMPT_CACHE),
             "notes": [
                 "full_refs and with_research_question use the V1 full-ref conditioning set",
-                "top_k strategies use V1 top_k_5_index when available",
+                "top_k strategies use V1 top_k_5_index when available, deduplicating repeated indices",
                 "related_work strategies use V1 annotated narrative plus title list caches",
                 "proposal output schema remains the V3 XML target schema",
             ],

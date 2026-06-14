@@ -110,9 +110,24 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         "names=()",
         "rc=0",
     ]
+    def append_wait_batch() -> None:
+        shell_lines.extend(
+            [
+                "for i in \"${!pids[@]}\"; do",
+                "  if ! wait \"${pids[$i]}\"; then",
+                "    echo \"[worker-eval] ${names[$i]} failed with rc=$?\" >&2",
+                "    rc=1",
+                "  fi",
+                "done",
+                "pids=()",
+                "names=()",
+            ]
+        )
+
+    max_parallel = max(1, min(args.max_parallel, args.gpus))
     for idx, row in enumerate(selected):
         gpu = idx % max(1, args.gpus)
-        sample_id = f"{row['task']}__{row['subtask']}__v3_sft_strict1000__worker_eval"
+        sample_id = f"{row['task']}__{row['subtask']}__{args.module_id}__worker_eval"
         log_path = run_dir / f"{row['task']}.worker_eval.log"
         cmd = [
             args.python_bin,
@@ -134,9 +149,9 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
             "--sample-id",
             sample_id,
             "--module-id",
-            "v3_sft_strict1000",
+            args.module_id,
             "--model-id",
-            "qwen25_32b_v3_sft_strict1000",
+            args.model_id,
             "--worker-mode",
             args.worker_mode,
             "--gpu",
@@ -159,16 +174,13 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
                 f"names+=({shlex.quote(str(row['task']))})",
             ]
         )
+        if (idx + 1) % max_parallel == 0:
+            append_wait_batch()
+    append_wait_batch()
     shell_lines.extend(
         [
-            "for i in \"${!pids[@]}\"; do",
-            "  if ! wait \"${pids[$i]}\"; then",
-            "    echo \"[worker-eval] ${names[$i]} failed with rc=$?\" >&2",
-            "    rc=1",
-            "  fi",
-            "done",
             f"{_quote_cmd([args.python_bin, '-c', _summary_snippet(), str(eval_root), str(run_dir / 'worker_eval_job_status.json')])}",
-            "exit 0",
+            "exit \"$rc\"",
             "",
         ]
     )
@@ -272,6 +284,8 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         "batch_root": str(batch_root),
         "output_dir": str(eval_root),
         "selected": selected,
+        "module_id": args.module_id,
+        "model_id": args.model_id,
         "resources": {
             "workspace_id": str(args.workspace_id or dlc.get("workspace_id")),
             "resource_id": str(args.resource_id or dlc.get("resource_id")),
@@ -282,6 +296,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
             "priority": args.priority,
             "max_running_minutes": args.max_running_minutes,
             "claude_real_bin": args.claude_real_bin,
+            "max_parallel": max_parallel,
         },
         "files": {
             "command": str(command_file),
@@ -314,8 +329,11 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_strict1000_lr_act")
     parser.add_argument("--job-name", default="v3_worker_eval_strict1000_lr_act")
     parser.add_argument("--python-bin", default="/newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python")
+    parser.add_argument("--module-id", default="v3_sft_strict1000")
+    parser.add_argument("--model-id", default="qwen25_32b_v3_sft_strict1000")
     parser.add_argument("--worker-mode", choices=["claude", "fixture", "skip"], default="claude")
     parser.add_argument("--gpus", type=int, default=2)
+    parser.add_argument("--max-parallel", type=int, default=9999)
     parser.add_argument("--cpus", type=int, default=32)
     parser.add_argument("--memory", default="300Gi")
     parser.add_argument("--shared-memory", default="64Gi")

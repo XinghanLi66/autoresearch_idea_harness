@@ -842,6 +842,9 @@ def _select_top_refs(
             except Exception:
                 continue
             i = next((pos for pos, ref in enumerate(refs) if ref.get("raw_ref_index") == raw_i), raw_i)
+            # V1 top_k_5_index occasionally contains duplicate indices. Repeating
+            # the same paper wastes training context, so V3 preserves the cached
+            # order while keeping only the first occurrence.
             if 0 <= i < len(refs) and i not in indices:
                 indices.append(i)
             if len(indices) >= top_k:

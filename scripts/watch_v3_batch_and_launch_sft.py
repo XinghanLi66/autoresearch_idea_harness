@@ -118,6 +118,8 @@ def score_sft_targets(sft_dir: Path, args: argparse.Namespace, events: Path) -> 
         str(output_dir),
         "--allow-raw-target",
     ]
+    if args.max_seq_length:
+        cmd.extend(["--max-seq-length", str(args.max_seq_length)])
     result = run_cmd(cmd, timeout=1800)
     append_jsonl(events, {
         "time": now_cst(),
@@ -206,6 +208,30 @@ def choose_quota(required_gpus: int, events: Path) -> dict[str, Any]:
         if candidate["launchable"]:
             return candidate
     raise RuntimeError(f"no launchable quota candidate for {required_gpus} GPUs: {candidates}")
+
+
+def choose_quota_with_fallback(args: argparse.Namespace, events: Path) -> dict[str, Any]:
+    if args.fixed_workspace_id and args.fixed_resource_id:
+        waiting = visible_queuing_count(args.fixed_workspace_id)
+        free = int(args.fixed_free_gpus)
+        quota = {
+            "workspace": args.fixed_workspace_id,
+            "quota": args.fixed_resource_id,
+            "quota_name": "fixed_by_user_or_workflow",
+            "desired_gpus": None,
+            "used_gpus": None,
+            "free_gpus": free,
+            "visible_queuing": waiting,
+            "launchable": waiting == 0 and free >= int(args.gpus),
+            "queue_source": "fixed_workspace_visible_queue_count; free_gpu_count_not_resource_api_proven",
+        }
+        append_jsonl(events, {"time": now_cst(), "event": "fixed_quota_selected", "quota": quota})
+        if waiting != 0:
+            raise RuntimeError(f"fixed quota has visible queue: {quota}")
+        if free < int(args.gpus):
+            raise RuntimeError(f"fixed quota free_gpus={free} < required_gpus={args.gpus}: {quota}")
+        return quota
+    return choose_quota(args.gpus, events)
 
 
 def prepare_run(sft_dir: Path, quota: dict[str, Any], args: argparse.Namespace, events: Path) -> Path:
@@ -372,6 +398,15 @@ def main() -> int:
     parser.add_argument("--min-train-rows", type=int, default=800)
     parser.add_argument("--gpus", type=int, default=8)
     parser.add_argument("--priority", type=int, default=6)
+    parser.add_argument("--max-seq-length", type=int, default=None)
+    parser.add_argument("--fixed-workspace-id", default=None)
+    parser.add_argument("--fixed-resource-id", default=None)
+    parser.add_argument(
+        "--fixed-free-gpus",
+        type=int,
+        default=0,
+        help="Manual free-GPU count for fixed quota fallback when resource quota API is unavailable.",
+    )
     parser.add_argument("--interval-sec", type=int, default=300)
     parser.add_argument("--max-wait-sec", type=int, default=12 * 3600)
     parser.add_argument("--submit-if-launch-ready", action="store_true")
@@ -382,7 +417,7 @@ def main() -> int:
         append_jsonl(events, {"time": now_cst(), "event": "watch_started", "args": vars(args)})
         sft_dir, rows = wait_for_collate(args, events)
         score_sft_targets(sft_dir, args, events)
-        quota = choose_quota(args.gpus, events)
+        quota = choose_quota_with_fallback(args, events)
         run_dir = prepare_run(sft_dir, quota, args, events)
         preflight_run(run_dir, quota, args, events)
         submission: dict[str, Any] | None = None

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import random
 import re
 from collections import Counter
 from datetime import date
@@ -132,6 +133,70 @@ def _load_target_cache(paths: list[Path]) -> dict[str, dict[str, Any]]:
                 "cache_path": str(path),
             }
     return cache
+
+
+def _load_quality_article_cache(root: Path | None) -> dict[str, dict[str, Any]]:
+    if root is None or not root.exists():
+        return {}
+    articles: dict[str, dict[str, Any]] = {}
+    for path in sorted((root / "articles").glob("*/article_cache.json")):
+        try:
+            row = json.loads(path.read_text())
+        except Exception:
+            continue
+        aid = str(row.get("arxiv_id") or path.parent.name)
+        if aid:
+            row["_quality_cache_path"] = str(path)
+            articles[aid] = row
+    return articles
+
+
+def _v1_full_ref_order(refs: list[dict[str, Any]], max_refs: int = 40, seed: int = 42) -> list[dict[str, Any]]:
+    selected = list(refs)
+    random.Random(seed).shuffle(selected)
+    return selected[:max_refs]
+
+
+def _condition_from_quality_cache(
+    arxiv_id: str,
+    article: dict[str, Any],
+    *,
+    max_refs: int = 40,
+    seed: int = 42,
+) -> dict[str, Any] | None:
+    prompts = article.get("prompts") or {}
+    prompt_entry = prompts.get("with_research_question") or {}
+    prompt = str(prompt_entry.get("prompt") or "")
+    if not prompt:
+        return None
+    refs = list(article.get("refs") or [])
+    selected_refs = _v1_full_ref_order(refs, max_refs=max_refs, seed=seed)
+    rq = article.get("research_question") or prompt_entry.get("research_question") or {}
+    related_top = (prompts.get("top_k_related_work") or {}).get("related_work") or {}
+    return {
+        "strategy": "with_research_question",
+        "research_question": str(rq.get("text") or ""),
+        "research_question_raw": str(rq.get("text") or ""),
+        "research_question_status": "cached" if rq.get("text") else "missing",
+        "research_question_source": rq.get("source") or prompt_entry.get("source") or "strict_quality_cache",
+        "research_question_tokens": (rq.get("quality") or {}).get("tokens") or (rq.get("quality") or {}).get("words"),
+        "research_question_complete": bool((rq.get("quality") or {}).get("complete")),
+        "selected_refs": selected_refs,
+        "related_work_cache": related_top.get("text") if isinstance(related_top, dict) else related_top,
+        "ref_selection": {
+            "source": "strict_quality_cache_v1_semantics",
+            "quality_cache_arxiv_id": arxiv_id,
+            "quality_cache_path": article.get("_quality_cache_path"),
+            "prompt_source": prompt_entry.get("source"),
+            "selected_ref_count": len(selected_refs),
+            "full_ref_policy": "V1 full-ref seed-42 shuffle capped at 40; duplicate top-k cleanup applies only to top-k strategies.",
+        },
+        "reference_detail_policy": (
+            "Prompt is read directly from the audited strict quality cache. It uses "
+            "V1 full-ref conditioning semantics with V3 compact abstracts and long research question."
+        ),
+        "prompt": prompt,
+    }
 
 
 def _ref_date_bucket(ref: dict[str, Any], target_date: date) -> str:
@@ -330,6 +395,8 @@ def build_v3_training_manifest(
     target_cache_paths: list[Path] | None = None,
     min_quality_score: float | None = None,
     through_date: str | None = None,
+    quality_cache_root: Path | None = None,
+    require_quality_cache: bool = False,
 ) -> dict[str, Any]:
     tm_cfg = cfg.get("training_manifest", {})
     output_dir = output_dir or Path(cfg["runs_dir"]) / "training_data" / str(tm_cfg.get("version", "v3_0_manifest"))
@@ -342,6 +409,9 @@ def build_v3_training_manifest(
     dataset_records = load_dataset_records(Path(cfg["dataset_dir"]), ["train", "val", "test"])
     prompt_caches = _load_prompt_caches(cfg)
     target_cache = _load_target_cache(target_cache_paths or [Path(cfg["dataset_dir"]) / "demo_tex_impl_targets.jsonl"])
+    if quality_cache_root is None and tm_cfg.get("quality_cache_root"):
+        quality_cache_root = Path(tm_cfg["quality_cache_root"])
+    quality_articles = _load_quality_article_cache(quality_cache_root)
 
     allowed_types = set(tm_cfg.get("paper_types", ["method_algorithm"]))
     allowed_routes = set(tm_cfg.get("training_routes", ["tex_target_with_ref_detail"]))
@@ -400,6 +470,10 @@ def build_v3_training_manifest(
             skipped["missing_raw_dataset_record"] += 1
             continue
         refs, ref_guard = _filter_refs_for_leakage(list(raw.get("refs") or []), target_date)
+        quality_article = quality_articles.get(arxiv_id)
+        if require_quality_cache and quality_article is None:
+            skipped["missing_required_quality_cache"] += 1
+            continue
         if len(refs) < min_refs:
             skipped["not_enough_refs_after_leakage_filter"] += 1
             continue
@@ -408,18 +482,57 @@ def build_v3_training_manifest(
             skipped["quality_score_below_min"] += 1
             continue
 
-        selected_refs, ref_selection = _select_refs(arxiv_id, refs, prompt_caches, top_k, abstract_token_limit)
-        if len(selected_refs) < min_refs:
-            skipped["not_enough_selected_refs"] += 1
-            continue
-        raw_research_question = prompt_caches["research_question"].get(arxiv_id)
-        question_info = compact_research_question(arxiv_id, raw_research_question, prompt_caches)
-        research_question = question_info["text"]
+        quality_condition = None
+        if quality_article is not None:
+            quality_refs = list(quality_article.get("refs") or [])
+            _, quality_ref_guard = _filter_refs_for_leakage(quality_refs, target_date)
+            if quality_ref_guard.get("dropped_future_ref_count"):
+                skipped["quality_cache_future_refs"] += 1
+                continue
+            quality_condition = _condition_from_quality_cache(arxiv_id, quality_article)
+            if quality_condition is None:
+                skipped["quality_cache_missing_with_research_question_prompt"] += 1
+                if require_quality_cache:
+                    continue
+
+        if quality_condition is not None:
+            selected_refs = list(quality_condition["selected_refs"])
+            if len(selected_refs) < min_refs:
+                skipped["not_enough_quality_cache_selected_refs"] += 1
+                continue
+            raw_research_question = quality_condition["research_question_raw"]
+            question_info = {
+                "text": quality_condition["research_question"],
+                "source": quality_condition["research_question_source"],
+                "tokens": quality_condition["research_question_tokens"],
+                "complete": quality_condition["research_question_complete"],
+            }
+            research_question = question_info["text"]
+            condition_prompt = quality_condition["prompt"]
+            ref_selection = quality_condition["ref_selection"]
+            related_work_cache = quality_condition["related_work_cache"]
+            reference_detail_policy = quality_condition["reference_detail_policy"]
+            condition_source = "strict_quality_cache"
+        else:
+            selected_refs, ref_selection = _select_refs(arxiv_id, refs, prompt_caches, top_k, abstract_token_limit)
+            if len(selected_refs) < min_refs:
+                skipped["not_enough_selected_refs"] += 1
+                continue
+            raw_research_question = prompt_caches["research_question"].get(arxiv_id)
+            question_info = compact_research_question(arxiv_id, raw_research_question, prompt_caches)
+            research_question = question_info["text"]
+            condition_prompt = _build_condition_prompt(selected_refs, research_question)
+            related_work_cache = prompt_caches["top_k_related_work"].get(arxiv_id)
+            reference_detail_policy = (
+                "This manifest starts from metadata/abstract refs. A later ref-evidence "
+                "stage should attach TeX snippets when available before final collate."
+            )
+            condition_source = "prompt_property_cache"
+
         if require_research_question and not research_question.strip():
             skipped["missing_research_question"] += 1
             continue
         target = _target_payload(arxiv_id, target_cache)
-        condition_prompt = _build_condition_prompt(selected_refs, research_question)
         sample = {
             "sample_id": stable_id("v3s", arxiv_id, row.get("created"), row.get("paper_type"), length=14),
             "manifest_version": tm_cfg.get("version", "v3_0_manifest"),
@@ -450,6 +563,7 @@ def build_v3_training_manifest(
             },
             "condition_packet": {
                 "strategy": "with_research_question",
+                "source": condition_source,
                 "research_question": research_question,
                 "research_question_raw": raw_research_question,
                 "research_question_status": "cached" if research_question.strip() else "missing",
@@ -457,12 +571,9 @@ def build_v3_training_manifest(
                 "research_question_tokens": question_info["tokens"],
                 "research_question_complete": question_info["complete"],
                 "selected_refs": selected_refs,
-                "related_work_cache": prompt_caches["top_k_related_work"].get(arxiv_id),
+                "related_work_cache": related_work_cache,
                 "ref_selection": ref_selection,
-                "reference_detail_policy": (
-                    "This manifest starts from metadata/abstract refs. A later ref-evidence "
-                    "stage should attach TeX snippets when available before final collate."
-                ),
+                "reference_detail_policy": reference_detail_policy,
                 "prompt": condition_prompt,
             },
             "target": target,
@@ -539,6 +650,8 @@ def build_v3_training_manifest(
             "legacy_reference_abstract_chars": tm_cfg.get("reference_abstract_chars"),
             "require_research_question": require_research_question,
             "min_quality_score": min_quality,
+            "quality_cache_root": str(quality_cache_root) if quality_cache_root else None,
+            "require_quality_cache": require_quality_cache,
         },
         "splits": {split: len(rows) for split, rows in by_split.items()},
         "created_range": {
@@ -553,6 +666,7 @@ def build_v3_training_manifest(
         "target_status": dict(Counter(s["target"]["target_status"] for s in candidates)),
         "research_question_status": dict(Counter(s["condition_packet"]["research_question_status"] for s in candidates)),
         "research_question_source": dict(Counter(s["condition_packet"].get("research_question_source") for s in candidates)),
+        "condition_source": dict(Counter(s["condition_packet"].get("source") for s in candidates)),
         "selected_ref_abstract_sources": dict(Counter(
             ref.get("abstract_source")
             for sample in candidates
@@ -593,6 +707,7 @@ def _sample_with_target(sample: dict[str, Any], cached: dict[str, Any], include_
         "quality": sample.get("quality") or {},
         "leakage_guard": sample.get("leakage_guard") or {},
         "condition_strategy": sample.get("condition_packet", {}).get("strategy", "with_research_question"),
+        "condition_source": sample.get("condition_packet", {}).get("source"),
         "target_schema_version": sample.get("target", {}).get("schema_version", TARGET_SCHEMA_VERSION),
         "target_cache": {
             "target_source": cached.get("target_source"),

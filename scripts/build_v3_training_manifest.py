@@ -48,6 +48,16 @@ def main() -> None:
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--min-quality-score", type=float, default=None)
     p.add_argument(
+        "--quality-cache-root",
+        default=None,
+        help="Optional audited V3 article cache root. When set, with_research_question prompts are read directly from article_cache.json.",
+    )
+    p.add_argument(
+        "--require-quality-cache",
+        action="store_true",
+        help="Skip any paper that is not present in --quality-cache-root.",
+    )
+    p.add_argument(
         "--target-cache",
         action="append",
         default=None,
@@ -81,6 +91,8 @@ def main() -> None:
         limit=args.limit,
         min_quality_score=args.min_quality_score,
         target_cache_paths=[Path(p) for p in args.target_cache] if args.target_cache else None,
+        quality_cache_root=Path(args.quality_cache_root) if args.quality_cache_root else None,
+        require_quality_cache=args.require_quality_cache,
     )
     print(summary)
 
