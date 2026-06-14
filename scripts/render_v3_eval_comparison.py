@@ -122,13 +122,20 @@ def collect_results(run_root: Path) -> dict[str, Any]:
             })
         elif workspace_result:
             val_metric = workspace_result.get("val_metric")
-            row.update({
-                "worker_status": "done_pending_summary",
-                "val_metric": val_metric,
-                "improvement": metric_improvement(packet, val_metric),
-                "passed": metric_passed(packet, val_metric),
-                "signed_workspace_result": True,
-            })
+            if val_metric is None and workspace_result.get("error"):
+                row.update({
+                    "worker_status": "error",
+                    "error": workspace_result.get("error"),
+                    "signed_workspace_result": True,
+                })
+            else:
+                row.update({
+                    "worker_status": "done_pending_summary",
+                    "val_metric": val_metric,
+                    "improvement": metric_improvement(packet, val_metric),
+                    "passed": metric_passed(packet, val_metric),
+                    "signed_workspace_result": True,
+                })
         if error:
             row.update({"worker_status": "error", "error": error.get("error") or error})
     rows = sorted(by_task.values(), key=lambda row: (str(row.get("task")), str(row.get("subtask"))))
