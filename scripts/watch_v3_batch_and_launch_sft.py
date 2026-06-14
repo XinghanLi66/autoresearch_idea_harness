@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -47,6 +48,24 @@ def count_jsonl(path: Path) -> int:
         return sum(1 for line in f if line.strip())
 
 
+def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    rows = []
+    if not path.exists():
+        return rows
+    with path.open(errors="replace") as f:
+        for line in f:
+            if line.strip():
+                rows.append(json.loads(line))
+    return rows
+
+
+def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w") as f:
+        for row in rows:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
 def run_cmd(cmd: list[str], *, timeout: int = 600, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     proc_env = dict(os.environ)
     if env:
@@ -83,14 +102,21 @@ def extract_json_value(text: str) -> Any:
 def wait_for_collate(args: argparse.Namespace, events: Path) -> tuple[Path, int]:
     sft_dir = ROOT / "runs" / "training_data" / f"v3_0_sft_qwen25_32b_{args.batch_name}"
     audit_dir = ROOT / "runs" / "training_data" / f"v3_0_targets_qwen25_32b_{args.batch_name}_audit"
-    train_path = sft_dir / "train.jsonl"
+    ready_path = sft_dir / ("all.jsonl" if args.train_source == "all" else "train.jsonl")
     summary_path = audit_dir / "pipeline_summary.json"
     deadline = time.time() + args.max_wait_sec
     last_rows = -1
     while time.time() < deadline:
-        rows = count_jsonl(train_path)
+        rows = count_jsonl(ready_path)
         if summary_path.exists() and rows >= args.min_train_rows:
-            append_jsonl(events, {"time": now_cst(), "event": "collate_ready", "sft_dir": str(sft_dir), "train_rows": rows})
+            append_jsonl(events, {
+                "time": now_cst(),
+                "event": "collate_ready",
+                "sft_dir": str(sft_dir),
+                "ready_path": str(ready_path),
+                "ready_rows": rows,
+                "train_source": args.train_source,
+            })
             return sft_dir, rows
         target_rows = count_jsonl(ROOT / "runs" / "training_data" / f"v3_0_targets_qwen25_32b_{args.batch_name}" / "tex_targets.jsonl")
         if target_rows != last_rows:
@@ -99,12 +125,53 @@ def wait_for_collate(args: argparse.Namespace, events: Path) -> tuple[Path, int]
                 "event": "waiting_for_batch",
                 "batch_name": args.batch_name,
                 "target_rows": target_rows,
-                "train_rows": rows,
+                "ready_rows": rows,
                 "summary_exists": summary_path.exists(),
+                "train_source": args.train_source,
             })
             last_rows = target_rows
         time.sleep(args.interval_sec)
     raise TimeoutError(f"timed out waiting for {args.batch_name} collate with >= {args.min_train_rows} rows")
+
+
+def materialize_sft_dir(sft_dir: Path, args: argparse.Namespace, events: Path) -> tuple[Path, int]:
+    if args.train_source == "train":
+        return sft_dir, count_jsonl(sft_dir / "train.jsonl")
+    all_rows = read_jsonl(sft_dir / "all.jsonl")
+    if len(all_rows) < args.min_train_rows:
+        raise RuntimeError(f"all.jsonl has {len(all_rows)} rows, expected at least {args.min_train_rows}")
+    all_rows.sort(key=lambda row: (
+        str(row.get("created") or ""),
+        int(row.get("chronological_rank") or 0),
+        str(row.get("arxiv_id") or row.get("sample_id") or ""),
+    ))
+    launch_dir = sft_dir.with_name(f"{sft_dir.name}_train_all")
+    launch_dir.mkdir(parents=True, exist_ok=True)
+    write_jsonl(launch_dir / "train.jsonl", all_rows)
+    for name in ("all.jsonl", "val.jsonl", "test.jsonl", "missing_target.jsonl"):
+        src = sft_dir / name
+        if src.exists():
+            shutil.copy2(src, launch_dir / name)
+    source_summary = {}
+    if (sft_dir / "summary.json").exists():
+        source_summary = json.loads((sft_dir / "summary.json").read_text())
+    summary = {
+        **source_summary,
+        "output_dir": str(launch_dir),
+        "source_sft_dir": str(sft_dir),
+        "train_source": "all",
+        "train_row_count": len(all_rows),
+        "note": "train.jsonl is materialized from all.jsonl for the 929-row CoT SFT run; original split files are preserved.",
+    }
+    write_json(launch_dir / "summary.json", summary)
+    append_jsonl(events, {
+        "time": now_cst(),
+        "event": "materialize_train_all",
+        "source_sft_dir": str(sft_dir),
+        "launch_sft_dir": str(launch_dir),
+        "train_rows": len(all_rows),
+    })
+    return launch_dir, len(all_rows)
 
 
 def score_sft_targets(sft_dir: Path, args: argparse.Namespace, events: Path) -> None:
@@ -232,6 +299,27 @@ def choose_quota_with_fallback(args: argparse.Namespace, events: Path) -> dict[s
             raise RuntimeError(f"fixed quota free_gpus={free} < required_gpus={args.gpus}: {quota}")
         return quota
     return choose_quota(args.gpus, events)
+
+
+def wait_for_quota(args: argparse.Namespace, events: Path) -> dict[str, Any]:
+    deadline = time.time() + args.quota_max_wait_sec
+    attempts = 0
+    while time.time() < deadline:
+        attempts += 1
+        try:
+            quota = choose_quota_with_fallback(args, events)
+            append_jsonl(events, {"time": now_cst(), "event": "quota_ready", "attempts": attempts, "quota": quota})
+            return quota
+        except Exception as exc:  # noqa: BLE001 - watcher should persist transient quota state.
+            append_jsonl(events, {
+                "time": now_cst(),
+                "event": "quota_wait",
+                "attempts": attempts,
+                "error": repr(exc),
+                "sleep_sec": args.quota_check_interval_sec,
+            })
+            time.sleep(args.quota_check_interval_sec)
+    raise TimeoutError(f"timed out waiting for quota after {args.quota_max_wait_sec}s")
 
 
 def prepare_run(sft_dir: Path, quota: dict[str, Any], args: argparse.Namespace, events: Path) -> Path:
@@ -396,6 +484,7 @@ def main() -> int:
     parser.add_argument("--run-id", default="v3_sft_strict_batch1000_auto")
     parser.add_argument("--base-model-id", default="qwen25_32b_instruct")
     parser.add_argument("--min-train-rows", type=int, default=800)
+    parser.add_argument("--train-source", choices=["train", "all"], default="train")
     parser.add_argument("--gpus", type=int, default=8)
     parser.add_argument("--priority", type=int, default=6)
     parser.add_argument("--max-seq-length", type=int, default=None)
@@ -409,15 +498,18 @@ def main() -> int:
     )
     parser.add_argument("--interval-sec", type=int, default=300)
     parser.add_argument("--max-wait-sec", type=int, default=12 * 3600)
+    parser.add_argument("--quota-check-interval-sec", type=int, default=300)
+    parser.add_argument("--quota-max-wait-sec", type=int, default=6 * 3600)
     parser.add_argument("--submit-if-launch-ready", action="store_true")
     args = parser.parse_args()
 
     events = ROOT / "runs" / "training" / "v3_sft_qwen25_32b" / args.run_id / "watch_events.jsonl"
     try:
         append_jsonl(events, {"time": now_cst(), "event": "watch_started", "args": vars(args)})
-        sft_dir, rows = wait_for_collate(args, events)
+        source_sft_dir, rows = wait_for_collate(args, events)
+        sft_dir, train_rows = materialize_sft_dir(source_sft_dir, args, events)
         score_sft_targets(sft_dir, args, events)
-        quota = choose_quota_with_fallback(args, events)
+        quota = wait_for_quota(args, events)
         run_dir = prepare_run(sft_dir, quota, args, events)
         preflight_run(run_dir, quota, args, events)
         submission: dict[str, Any] | None = None
@@ -428,7 +520,10 @@ def main() -> int:
             "time": now_cst(),
             "event": "watch_completed",
             "sft_dir": str(sft_dir),
-            "train_rows": rows,
+            "source_sft_dir": str(source_sft_dir),
+            "ready_rows": rows,
+            "train_rows": train_rows,
+            "train_source": args.train_source,
             "run_dir": str(run_dir),
             "submitted": bool(submission),
             "submission": submission,
