@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -47,6 +48,21 @@ def _fallback_related_work(article: dict[str, Any], build: Any) -> dict[str, Any
     return build._deterministic_related_work(article.get("refs") or [])
 
 
+def _trim_to_complete_sentence(text: str, build: Any) -> str:
+    text = build._collapse(text)
+    if not text:
+        return ""
+    if build._quality_text(text, min_words=20, max_words=200).get("complete"):
+        return text
+    matches = list(re.finditer(r"""[.!?。！？)"'\]](?=\s|$)""", text))
+    if not matches:
+        return text
+    candidate = text[: matches[-1].end()].rstrip()
+    if len(candidate.split()) < 20:
+        return text
+    return candidate
+
+
 def _repair_ref_compact_quality(article: dict[str, Any], build: Any) -> list[str]:
     repaired_keys: list[str] = []
     for ref in article.get("refs") or []:
@@ -59,18 +75,21 @@ def _repair_ref_compact_quality(article: dict[str, Any], build: Any) -> list[str
         ):
             continue
         text = ref.get("compact_abstract") or compact.get("text") or ""
+        text = _trim_to_complete_sentence(text, build)
         new_quality = build._quality_text(text, min_words=20, max_words=200)
         if (
             new_quality.get("complete")
             and not new_quality.get("has_ellipsis")
             and new_quality.get("max_words_ok")
         ):
+            compact["text"] = text
             compact["quality"] = new_quality
             ref["compact"] = compact
             ref["compact_abstract"] = text
             key = ref.get("compact_cache_key")
             if key:
                 repaired_keys.append(str(key))
+                article.setdefault("ref_compact_by_key", {})[str(key)] = compact
     return repaired_keys
 
 
