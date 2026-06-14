@@ -258,11 +258,64 @@ def _article_status(item: dict[str, Any]) -> str:
     return "ready" if text else "missing"
 
 
+def _quality_words(item: dict[str, Any] | None) -> Any:
+    if not item:
+        return None
+    quality = item.get("quality") if isinstance(item, dict) else None
+    if isinstance(quality, dict):
+        return quality.get("words") or quality.get("tokens")
+    return None
+
+
+def _render_snippets(label: str, snippets: list[dict[str, Any]]) -> list[str]:
+    lines = [f"## {label}", ""]
+    if not snippets:
+        lines.extend(["(missing)", ""])
+        return lines
+    for idx, snippet in enumerate(snippets, start=1):
+        lines.extend(
+            [
+                f"### {idx}. {snippet.get('heading') or '(no heading)'}",
+                f"`{snippet.get('source') or ''}`",
+                "",
+                snippet.get("text") or "",
+                "",
+            ]
+        )
+    return lines
+
+
+def _ref_display_lines(refs: list[dict[str, Any]]) -> list[str]:
+    lines: list[str] = []
+    if not refs:
+        return ["(missing)"]
+    for idx, ref in enumerate(refs, start=1):
+        compact = ref.get("compact_abstract") or ref.get("compact") or {}
+        compact_obj = compact if isinstance(compact, dict) else {}
+        compact_text = compact_obj.get("text")
+        lines.extend(
+            [
+                f"## {idx}. {ref.get('title') or ref.get('ref_key') or '(untitled)'}",
+                "",
+                f"- ref_key: `{ref.get('ref_key') or ''}`",
+                f"- arxiv_id: `{ref.get('arxiv_id') or ''}`",
+                f"- year: `{ref.get('year') or ''}`",
+                f"- compact_source: `{compact_obj.get('source') or ''}`",
+                f"- compact_words: `{_quality_words(compact_obj)}`",
+                "",
+                compact_text or ref.get("abstract") or "(missing compact abstract)",
+                "",
+            ]
+        )
+    return lines
+
+
 def discover_article_items(cfg: dict[str, Any], arxiv_id: str) -> list[DashboardItem]:
     cached_report = ROOT / "runs" / "reports" / f"article_cache_{arxiv_id}.full_cache.json"
     report = _read_json(cached_report) if cached_report.exists() else inspect_article_cache(cfg, arxiv_id)
     items: list[DashboardItem] = []
     metadata = report.get("metadata") or {}
+    quality_cache_path = report.get("quality_cache_path") or (str(cached_report) if cached_report.exists() else "")
     overview = "\n".join(
         [
             f"# Article Overview: {arxiv_id}",
@@ -276,6 +329,10 @@ def discover_article_items(cfg: dict[str, Any], arxiv_id: str) -> list[Dashboard
             "```json",
             _fmt(_article_completeness(report)),
             "```",
+            "",
+            "## Quality Cache",
+            f"- source: `{report.get('cache_source') or 'legacy_prompt_property_cache'}`",
+            f"- path: `{quality_cache_path}`",
         ]
     )
     items.append(
@@ -288,6 +345,35 @@ def discover_article_items(cfg: dict[str, Any], arxiv_id: str) -> list[Dashboard
             scope_id=arxiv_id,
             content=overview,
             metadata={"component": "overview", "cached_report": str(cached_report) if cached_report.exists() else None},
+        )
+    )
+
+    target_abstract = report.get("target_abstract") or {}
+    compact = target_abstract.get("compact") or {}
+    abstract_text = "\n".join(
+        [
+            f"# Target Abstract Cache: {arxiv_id}",
+            "",
+            f"- compact_source: `{compact.get('source')}`",
+            f"- compact_words: `{_quality_words(compact)}`",
+            "",
+            "## Compact Abstract",
+            target_abstract.get("compact_text") or compact.get("text") or "(missing)",
+            "",
+            "## Original Abstract",
+            target_abstract.get("original") or "(missing)",
+        ]
+    )
+    items.append(
+        DashboardItem(
+            item_type="cache",
+            name="target_abstract",
+            status="ready" if target_abstract.get("compact_text") or compact.get("text") else "missing",
+            summary=f"compact_words={_quality_words(compact)} source={compact.get('source')}",
+            scope_type="arxiv",
+            scope_id=arxiv_id,
+            content=abstract_text,
+            metadata={"component": "target_abstract"},
         )
     )
 
@@ -349,7 +435,7 @@ def discover_article_items(cfg: dict[str, Any], arxiv_id: str) -> list[Dashboard
                 item_type="cache",
                 name=f"prompt/{strategy}",
                 status=str(prompt.get("status") or "missing"),
-                summary=f"chars={prompt.get('chars')} abs={counts.get('cached_abstract_summary', 0)}/{counts.get('raw_abstract_under_limit', 0)}/{counts.get('fallback_token_trimmed_abstract', 0)}",
+                summary=f"chars={prompt.get('chars')} refs={meta.get('n_refs', '')} source={meta.get('source', '')}",
                 scope_type="arxiv",
                 scope_id=arxiv_id,
                 content=text,
@@ -357,37 +443,63 @@ def discover_article_items(cfg: dict[str, Any], arxiv_id: str) -> list[Dashboard
             )
         )
 
+    refs = report.get("references") or {}
+    ref_lines = [
+        f"# Reference Cache: {arxiv_id}",
+        "",
+        f"- ref_count: `{refs.get('ref_count')}`",
+        f"- top_ref_count: `{refs.get('top_ref_count')}`",
+        "",
+        "## Top-k Index",
+        "```json",
+        _fmt(refs.get("top_ref_selection") or {}),
+        "```",
+        "",
+        "## Top References",
+        "",
+    ]
+    ref_lines.extend(_ref_display_lines(refs.get("top_refs") or []))
+    ref_lines.extend(["", "## First 10 Refs Preview", "", "```json", _fmt(refs.get("refs_preview") or []), "```"])
+    items.append(
+        DashboardItem(
+            item_type="cache",
+            name="refs/top_k",
+            status="ready" if refs.get("top_ref_count") else "missing",
+            summary=f"refs={refs.get('ref_count')} top={refs.get('top_ref_count')}",
+            scope_type="arxiv",
+            scope_id=arxiv_id,
+            content="\n".join(ref_lines).rstrip() + "\n",
+            metadata={"component": "refs"},
+        )
+    )
+
     tex = report.get("tex_details") or {}
     snippets_by_kind = tex.get("snippets_by_kind") or {}
+    raw_snippets_by_kind = tex.get("raw_snippets_by_kind") or {}
+    target_snippets_by_kind = tex.get("target_snippets_by_kind") or {}
     expected_tex = ["abstract", "problem", "method", "implementation", "algorithm_or_system", "training_or_data_recipe", "evaluation", "results", "risks_and_limitations"]
     for kind in expected_tex:
         snippets = snippets_by_kind.get(kind) or []
+        raw_snippets = raw_snippets_by_kind.get(kind) or []
+        target_snippets = target_snippets_by_kind.get(kind) or []
         lines = [
             f"# TeX Detail Cache: {arxiv_id}/{kind}",
             "",
             f"- tex_status: `{tex.get('tex_status')}`",
-            f"- snippets: `{len(snippets)}`",
+            f"- curated_snippets: `{len(snippets)}`",
+            f"- raw_snippets: `{len(raw_snippets)}`",
+            f"- target_snippets: `{len(target_snippets)}`",
             "",
         ]
-        if snippets:
-            for idx, snippet in enumerate(snippets, start=1):
-                lines.extend(
-                    [
-                        f"## {idx}. {snippet.get('heading') or '(no heading)'}",
-                        f"`{snippet.get('source') or ''}`",
-                        "",
-                        snippet.get("text") or "",
-                        "",
-                    ]
-                )
-        else:
-            lines.append("(missing)")
+        lines.extend(_render_snippets("Curated Snippets", snippets))
+        lines.extend(_render_snippets("Raw TeX Snippets", raw_snippets))
+        lines.extend(_render_snippets("Target-Mapped Snippets", target_snippets))
         items.append(
             DashboardItem(
                 item_type="cache",
                 name=f"tex/{kind}",
-                status="ready" if snippets else "missing",
-                summary=f"snippets={len(snippets)}",
+                status="ready" if snippets or raw_snippets or target_snippets else "missing",
+                summary=f"curated/raw/target={len(snippets)}/{len(raw_snippets)}/{len(target_snippets)}",
                 scope_type="arxiv",
                 scope_id=arxiv_id,
                 content="\n".join(lines).rstrip() + "\n",
@@ -425,15 +537,30 @@ def _article_completeness(report: dict[str, Any]) -> dict[str, Any]:
     for strategy, item in variants.items():
         counts = (item.get("metadata") or {}).get("abstract_source_counts") or {}
         fallback_counts[strategy] = counts.get("fallback_token_trimmed_abstract", 0)
-    tex_kinds = sorted(((report.get("tex_details") or {}).get("snippets_by_kind") or {}).keys())
+    tex = report.get("tex_details") or {}
+    tex_kinds = sorted((tex.get("snippets_by_kind") or {}).keys())
+    raw_tex_kinds = sorted((tex.get("raw_snippets_by_kind") or {}).keys())
+    target_tex_kinds = sorted((tex.get("target_snippets_by_kind") or {}).keys())
+    refs = report.get("references") or {}
+    target_abstract = report.get("target_abstract") or {}
+    compact = target_abstract.get("compact") or {}
     return {
+        "cache_source": report.get("cache_source") or "legacy_prompt_property_cache",
+        "quality_cache_path": report.get("quality_cache_path"),
         "found_dataset_record": report.get("found_dataset_record"),
         "found_classified_row": report.get("found_classified_row"),
         "open_question_complete": (report.get("open_question") or {}).get("complete"),
+        "open_question_words": (report.get("open_question") or {}).get("words") or (report.get("open_question") or {}).get("tokens"),
+        "target_compact_words": _quality_words(compact),
+        "ref_count": refs.get("ref_count"),
+        "top_ref_count": refs.get("top_ref_count"),
         "prompt_status": {k: v.get("status") for k, v in variants.items()},
         "fallback_abstract_counts": fallback_counts,
         "tex_status": (report.get("tex_details") or {}).get("tex_status"),
         "tex_kinds": tex_kinds,
+        "raw_tex_kinds": raw_tex_kinds,
+        "target_tex_kinds": target_tex_kinds,
+        "quality_audit": report.get("quality_audit"),
     }
 
 
