@@ -13,7 +13,7 @@ DEFAULT_BASE = ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_qwen25_
 DEFAULT_BASE_EXTRAS = [
     ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_qwen25_32b_base_v1sem_supp_pending2",
 ]
-DEFAULT_SFT = ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_v1sem_cot_sft_16k"
+DEFAULT_SFT = ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_mls10_v1sem_cot_sft_16k_guarded"
 DEFAULT_OUTPUT = ROOT / "runs" / "reports" / "v3_base_vs_v1sem_cot_sft_eval.md"
 
 
