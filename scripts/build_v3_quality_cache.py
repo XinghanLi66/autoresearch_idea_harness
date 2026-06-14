@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import random
 import re
 import sys
 import time
@@ -116,6 +117,7 @@ PROMPT_STRATEGIES = [
     "with_research_question",
 ]
 CACHE_PROMPT_STRATEGIES = [*PROMPT_STRATEGIES, "abstract"]
+V1_PROMPT_SHUFFLE_SEED = 42
 
 TEX_KINDS = [
     "abstract",
@@ -527,10 +529,29 @@ def _plain_refs_prompt(refs: list[dict[str, Any]]) -> str:
     )
 
 
-def _related_prompt(narrative: str) -> str:
+def _v1_ordered_full_refs(refs: list[dict[str, Any]], max_refs: int) -> list[dict[str, Any]]:
+    selected = list(refs)
+    random.Random(V1_PROMPT_SHUFFLE_SEED).shuffle(selected)
+    return selected[:max_refs]
+
+
+def _ref_title_index(refs: list[dict[str, Any]]) -> str:
+    lines = []
+    for idx, ref in enumerate(refs, start=1):
+        title = _collapse(ref.get("title")) or "Unknown"
+        lines.append(f"[{idx}] {title}")
+    return "\n".join(lines)
+
+
+def _related_prompt(narrative: str, refs: list[dict[str, Any]] | None = None, *, focused: bool = False) -> str:
+    ref_index = _ref_title_index(refs or [])
+    area = "focused area" if focused else "area"
+    annotated = narrative
+    if ref_index:
+        annotated = f"{narrative}\n\n**References:**\n{ref_index}"
     return (
-        "A researcher has been studying the following area of the literature:\n\n"
-        f"{narrative}\n\n"
+        f"A researcher has been studying the following {area} of the literature:\n\n"
+        f"{annotated}\n\n"
         "Based on this background, propose a novel research direction.\n\n"
         f"{PROPOSAL_FORMAT}"
     )
@@ -1149,11 +1170,13 @@ def _process_row(
         if isinstance(cached, list):
             cached_indices = cached
     top_refs, top_meta = _select_top_refs(refs, args.top_k, cached_indices=cached_indices)
+    full_refs = refs[: args.full_refs_cap]
+    full_refs_prompt = _v1_ordered_full_refs(refs, args.full_refs_cap)
     question = _generate_question(
         client,
         endpoint=args.endpoint,
         model=args.model,
-        refs=top_refs,
+        refs=full_refs,
         min_words=args.min_question_words,
         max_words=args.max_question_words,
         attempts=args.question_attempts,
@@ -1189,7 +1212,6 @@ def _process_row(
     )
     target_tex_snippets = _target_tex_snippets(tex_snippets)
 
-    full_refs = refs[: args.full_refs_cap]
     prompts = {
         "abstract": {
             "prompt": _abstract_prompt(row.get("title") or "", target_compact["text"]),
@@ -1198,9 +1220,9 @@ def _process_row(
             "compact_abstract": target_compact,
         },
         "full_refs": {
-            "prompt": _plain_refs_prompt(full_refs),
-            "n_refs": len(full_refs),
-            "source": "rebuilt_compact_abstracts",
+            "prompt": _plain_refs_prompt(full_refs_prompt),
+            "n_refs": len(full_refs_prompt),
+            "source": "v1_full_refs_shuffle_seed_42_v3_compact_abstracts",
         },
         "top_k_refs": {
             "prompt": _plain_refs_prompt(top_refs),
@@ -1208,20 +1230,20 @@ def _process_row(
             "source": top_meta["source"],
         },
         "related_work": {
-            "prompt": _related_prompt(related_all["text"]),
+            "prompt": _related_prompt(related_all["text"], full_refs),
             "n_refs": len(full_refs),
             "source": related_all["source"],
             "related_work": related_all,
         },
         "top_k_related_work": {
-            "prompt": _related_prompt(related_top["text"]),
+            "prompt": _related_prompt(related_top["text"], top_refs, focused=True),
             "n_refs": len(top_refs),
             "source": related_top["source"],
             "related_work": related_top,
         },
         "with_research_question": {
-            "prompt": _condition_prompt(top_refs, question["text"]),
-            "n_refs": len(top_refs),
+            "prompt": _condition_prompt(full_refs_prompt, question["text"]),
+            "n_refs": len(full_refs_prompt),
             "source": question["source"],
             "research_question": question,
         },
@@ -1245,7 +1267,7 @@ def _process_row(
         "refs": refs,
         "raw_ref_count": len(raw_refs),
         "excluded_missing_abstract_refs": excluded_missing_abstract_refs,
-        "top_refs": [{"ref_key": r["ref_key"], "title": r.get("title"), "arxiv_id": r.get("arxiv_id")} for r in top_refs],
+        "top_refs": top_refs,
         "top_ref_selection": top_meta,
         "leakage_guard": leakage_guard,
         "research_question": question,

@@ -354,24 +354,39 @@ def build_prompt_variants(record: dict[str, Any], caches: dict[str, KeyValueCach
         ),
     }
 
+    def title_index(selected_refs: list[dict[str, Any]]) -> str:
+        lines = []
+        for idx, ref in enumerate(selected_refs, start=1):
+            title = str(ref.get("title") or "Unknown").strip()
+            lines.append(f"[{idx}] {title}")
+        return "\n".join(lines)
+
     related = caches.get("related_work_annotated", KeyValueCache()).get(arxiv_id) or caches.get("related_work", KeyValueCache()).get(arxiv_id)
+    related_index = title_index(full_refs)
+    related_block = related or "(related_work cache missing)"
+    if related and "**References:**" not in related:
+        related_block = f"{related}\n\n**References:**\n{related_index or '(reference list missing)'}"
     variants["related_work"] = {
         "status": "cached" if related else "missing",
         "metadata": {"cache": "related_work_annotated|related_work"},
         "prompt": (
             "A researcher has been studying the following area of the literature:\n\n"
-            f"{related or '(related_work cache missing)'}\n\n"
+            f"{related_block}\n\n"
             f"Based on this background, propose a novel research direction.\n\n{proposal_format}"
         ),
     }
 
     top_related = caches.get("top_k_related_work", KeyValueCache()).get(arxiv_id)
+    top_related_index = title_index(top_refs)
+    top_related_block = top_related or "(top_k_related_work cache missing)"
+    if top_related and "**References:**" not in top_related:
+        top_related_block = f"{top_related}\n\n**References:**\n{top_related_index or '(reference list missing)'}"
     variants["top_k_related_work"] = {
         "status": "cached" if top_related else "missing",
         "metadata": {"cache": "top_k_5_related_work"},
         "prompt": (
             "A researcher has been studying the following focused area of the literature:\n\n"
-            f"{top_related or '(top_k_related_work cache missing)'}\n\n"
+            f"{top_related_block}\n\n"
             f"Based on this background, propose a novel research direction.\n\n{proposal_format}"
         ),
     }
@@ -384,9 +399,9 @@ def build_prompt_variants(record: dict[str, Any], caches: dict[str, KeyValueCach
             "question_source": question["source"],
             "question_tokens": question["tokens"],
             "question_complete": question["complete"],
-            **top_meta,
+            **full_meta,
         },
         "open_question": question,
-        "prompt": build_v3_condition_prompt(top_refs, question["text"], proposal_format),
+        "prompt": build_v3_condition_prompt(full_refs, question["text"], proposal_format),
     }
     return variants

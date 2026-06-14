@@ -142,7 +142,7 @@ def _inspect_quality_article_cache(arxiv_id: str) -> dict[str, Any] | None:
     target_abstract = article.get("target_abstract") or {}
     compact_abstract = target_abstract.get("compact") or {}
     refs = article.get("refs") or []
-    top_refs = article.get("top_refs") or []
+    top_refs = _quality_top_refs(article, refs)
     source = article.get("source") or {}
     article_dir = path.parent
 
@@ -204,6 +204,36 @@ def _inspect_quality_article_cache(arxiv_id: str) -> dict[str, Any] | None:
             "quality_audit": [str(article_dir / "quality_audit.json")],
         },
     }
+
+
+def _quality_top_refs(article: dict[str, Any], refs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    indices = ((article.get("top_ref_selection") or {}).get("indices") or [])
+    selected: list[dict[str, Any]] = []
+    for idx in indices:
+        try:
+            i = int(idx)
+        except Exception:
+            continue
+        if 0 <= i < len(refs):
+            selected.append(refs[i])
+    if selected:
+        return selected
+
+    raw_top = article.get("top_refs") or []
+    detailed: list[dict[str, Any]] = []
+    for top_ref in raw_top:
+        ref_key = top_ref.get("ref_key")
+        arxiv_id = top_ref.get("arxiv_id")
+        match = next(
+            (
+                ref
+                for ref in refs
+                if (ref_key and ref.get("ref_key") == ref_key) or (arxiv_id and ref.get("arxiv_id") == arxiv_id)
+            ),
+            None,
+        )
+        detailed.append(match or top_ref)
+    return detailed
 
 
 def inspect_article_cache(cfg: dict[str, Any], arxiv_id: str) -> dict[str, Any]:
