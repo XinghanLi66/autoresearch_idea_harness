@@ -43,6 +43,34 @@ def planned_tasks(run_root: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def metric_passed(packet: dict[str, Any], val_metric: Any) -> bool | None:
+    if val_metric is None:
+        return None
+    pass_metric = packet.get("pass_metric")
+    if pass_metric is None:
+        return None
+    try:
+        val = float(val_metric)
+        threshold = float(pass_metric)
+    except Exception:
+        return None
+    if bool(packet.get("lower_is_better")):
+        return val <= threshold
+    return val >= threshold
+
+
+def metric_improvement(packet: dict[str, Any], val_metric: Any) -> float | None:
+    baseline = packet.get("baseline_metric")
+    if val_metric is None or baseline is None:
+        return None
+    try:
+        val = float(val_metric)
+        base = float(baseline)
+    except Exception:
+        return None
+    return base - val if bool(packet.get("lower_is_better")) else val - base
+
+
 def collect_results(run_root: Path) -> dict[str, Any]:
     output_root = run_root / "output"
     planned = planned_tasks(run_root)
@@ -74,12 +102,15 @@ def collect_results(run_root: Path) -> dict[str, Any]:
         if not sample_dir.is_dir() or (sample_dir / "summary.json").exists():
             continue
         result = load_json(sample_dir / "result.json")
+        workspace_result = load_json(sample_dir / "workspace" / "result.json")
         error = load_json(sample_dir / "error.json")
         packet = load_json(sample_dir / "task_packet.json")
         key = (str(packet.get("task") or sample_dir.name.split("__")[0]), str(packet.get("subtask") or ""))
         row = by_task.setdefault(key, {"task": key[0], "subtask": key[1]})
         row.setdefault("sample_dir", str(sample_dir))
         row["summary_exists"] = False
+        row.setdefault("baseline_metric", packet.get("baseline_metric"))
+        row.setdefault("pass_metric", packet.get("pass_metric"))
         if result:
             parsed = result.get("_parsed") or {}
             row.update({
@@ -88,6 +119,15 @@ def collect_results(run_root: Path) -> dict[str, Any]:
                 "improvement": parsed.get("improvement"),
                 "passed": parsed.get("passed"),
                 "error": parsed.get("error"),
+            })
+        elif workspace_result:
+            val_metric = workspace_result.get("val_metric")
+            row.update({
+                "worker_status": "done_pending_summary",
+                "val_metric": val_metric,
+                "improvement": metric_improvement(packet, val_metric),
+                "passed": metric_passed(packet, val_metric),
+                "signed_workspace_result": True,
             })
         if error:
             row.update({"worker_status": "error", "error": error.get("error") or error})
@@ -163,7 +203,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
                 cells.append("missing")
                 continue
             passed = row.get("passed")
-            verdict = "pass" if passed is True else "fail" if passed is False else "running"
+            verdict = "pass" if passed is True else "fail" if passed is False else str(row.get("worker_status") or "running")
             cells.append(
                 f"{fmt_metric(row.get('val_metric'))}/{fmt_metric(row.get('pass_metric'))}/{verdict}"
             )
