@@ -21,7 +21,8 @@ from textual.widgets import DataTable, Footer, Header, Input, Select, Static
 from autoresearch_idea_harness.article_cache_inspector import inspect_article_cache
 from autoresearch_idea_harness.io import load_config
 
-MAX_TEXT_CHARS = 1_500_000
+MAX_TEXT_CHARS = 240_000
+MAX_LOG_CHARS = 320_000
 
 
 @dataclass
@@ -50,13 +51,18 @@ def _fmt(obj: Any) -> str:
     return json.dumps(obj, indent=2, ensure_ascii=False, sort_keys=True)
 
 
-def _read(path: Path | None, *, max_chars: int = MAX_TEXT_CHARS) -> str:
+def _read(path: Path | None, *, max_chars: int = MAX_TEXT_CHARS, tail: bool = False) -> str:
     if not path:
         return "(missing)"
     if not path.exists():
         return f"(missing: {path})"
     text = path.read_text(errors="replace")
     if len(text) > max_chars:
+        if tail:
+            return (
+                f"... showing last {max_chars} chars of {len(text)}; open file for full content: {path}\n\n"
+                + text[-max_chars:]
+            )
         return text[:max_chars] + f"\n\n... truncated at {max_chars} chars; open file for full content: {path}\n"
     return text
 
@@ -155,6 +161,66 @@ def _artifact_summary(files: dict[str, Path]) -> str:
     return ",".join(ready[:8]) if ready else "no files"
 
 
+def _files_brief(files: dict[str, Path]) -> str:
+    order = [
+        ("P", "task_packet"),
+        ("M", "master_prompt"),
+        ("Q", "proposal"),
+        ("E", "expert"),
+        ("W", "worker_prompt"),
+        ("L", "worker_log"),
+        ("R", "result"),
+        ("S", "summary"),
+    ]
+    labels = [label for label, key in order if files.get(key) and files[key].exists()]
+    return " ".join(labels) if labels else "-"
+
+
+def _item_metric(item: DashboardItem) -> str:
+    row = item.metadata.get("report_row") if isinstance(item.metadata, dict) else None
+    if isinstance(row, dict):
+        metric = row.get("val_metric")
+        pass_metric = row.get("pass_metric")
+        passed = row.get("passed")
+        if metric is not None and pass_metric is not None:
+            pass_mark = "PASS" if passed else "fail"
+            return f"{metric}/{pass_metric} {pass_mark}"
+        if metric is not None:
+            return str(metric)
+    result_path = item.files.get("result") if item.files else None
+    result = _read_json(result_path)
+    metric = result.get("val_metric") or result.get("metric")
+    parsed = result.get("_parsed") or {}
+    if metric is None:
+        metric = parsed.get("val_metric") or parsed.get("metric")
+    passed = result.get("passed")
+    if passed is None:
+        passed = parsed.get("passed")
+    if metric is not None:
+        if passed is None:
+            return str(metric)
+        return f"{metric} {'PASS' if passed else 'fail'}"
+    return "-"
+
+
+def _item_module(item: DashboardItem) -> str:
+    module = item.metadata.get("module") if isinstance(item.metadata, dict) else None
+    if module:
+        return str(module)
+    component = item.metadata.get("component") if isinstance(item.metadata, dict) else None
+    return str(component or "-")
+
+
+def _short_name(item: DashboardItem) -> str:
+    name = item.name
+    if item.item_type == "run" and " :: " in name:
+        left, right = name.split(" :: ", 1)
+        parts = right.split("/")
+        if len(parts) >= 2:
+            return f"{left} :: {parts[0]}"
+    return name
+
+
 def _status_from_files(files: dict[str, Path]) -> str:
     if files.get("result") and files["result"].exists():
         result = _read_json(files["result"])
@@ -233,9 +299,101 @@ def _make_run_item(base: Path, query: str) -> DashboardItem | None:
     )
 
 
-def discover_mls_items(runs_root: Path, training_data_root: Path, training_root: Path, cfg: dict[str, Any], query: str) -> list[DashboardItem]:
+def _make_report_run_item(row: dict[str, Any], run_name: str, query: str) -> DashboardItem | None:
+    task = str(row.get("task") or "")
+    subtask = str(row.get("subtask") or "")
+    if not _task_matches(task, subtask, query):
+        return None
+    sample_dir = row.get("sample_dir")
+    if not sample_dir:
+        return None
+    base = Path(sample_dir)
+    files = _artifact_files(base)
+    module = str(row.get("module_id") or run_name)
+    status = _status_from_files(files)
+    metric = row.get("val_metric")
+    pass_metric = row.get("pass_metric")
+    passed = row.get("passed")
+    score_bits = []
+    if metric is not None:
+        score_bits.append(f"metric={metric}")
+    if pass_metric is not None:
+        score_bits.append(f"pass={pass_metric}")
+    if passed is not None:
+        score_bits.append(f"passed={passed}")
+    summary = f"{run_name} | {module} | {' '.join(score_bits)} | {_artifact_summary(files)}"
+    return DashboardItem(
+        item_type="run",
+        name=f"{task}/{subtask} :: {run_name}/{base.name}",
+        status=status,
+        summary=summary,
+        scope_type="mls",
+        scope_id=task or query,
+        path=base,
+        files=files,
+        metadata={"task": task, "subtask": subtask, "module": module, "report_run": run_name, "report_row": row},
+    )
+
+
+def _discover_report_index_items(runs_root: Path, query: str) -> list[DashboardItem]:
     items: list[DashboardItem] = []
     seen: set[Path] = set()
+    report_paths = [
+        runs_root / "reports" / "v3_base_vs_v1sem_cot_sft_eval_partial.json",
+    ]
+    for report_path in report_paths:
+        report = _read_json(report_path)
+        for run_name, run_data in (report.get("runs") or {}).items():
+            rows = run_data.get("rows") or []
+            for row in rows:
+                item = _make_report_run_item(row, str(run_name), query)
+                if not item:
+                    continue
+                key = (item.path or Path(str(item.name))).resolve()
+                if key in seen:
+                    continue
+                seen.add(key)
+                items.append(item)
+    return items
+
+
+def discover_mls_items(
+    runs_root: Path,
+    training_data_root: Path,
+    training_root: Path,
+    cfg: dict[str, Any],
+    query: str,
+    *,
+    deep_scan: bool = False,
+) -> list[DashboardItem]:
+    items: list[DashboardItem] = []
+    seen: set[Path] = set()
+
+    # Fast path for completed indexed evaluations. Full runs/ globbing can be
+    # very expensive after large formal sweeps, so use report indexes first.
+    indexed_items = _discover_report_index_items(runs_root, query)
+    if indexed_items:
+        indexed_items.sort(key=lambda item: (item.name, str(item.path or "")))
+        return indexed_items
+
+    if not deep_scan:
+        return [
+            DashboardItem(
+                item_type="cache",
+                name="no_indexed_runs",
+                status="missing",
+                summary="No indexed MLS rows found. Restart with --deep-scan to search historical run trees.",
+                scope_type="mls",
+                scope_id=query,
+                content=(
+                    "# No Indexed MLS Runs\n\n"
+                    f"No report-indexed rows matched `{query}`.\n\n"
+                    "The dashboard avoids scanning the full `runs/` tree by default because old formal sweeps "
+                    "can make the TUI appear frozen. Relaunch with `--deep-scan` only when you need historical "
+                    "unindexed artifacts.\n"
+                ),
+            )
+        ]
 
     for packet_path in _iter_task_packet_paths(runs_root):
         base = packet_path.parent.resolve()
@@ -575,7 +733,8 @@ def _tab_text(tab: RunTab) -> str:
     for path in existing:
         suffix = path.suffix.lower()
         fence = "json" if suffix == ".json" else "text"
-        lines.extend([f"`{path}`", "", f"```{fence}", _read(path), "```", ""])
+        is_log = tab.key in {"worker_log", "eval_log"} or path.suffix.lower() == ".log"
+        lines.extend([f"`{path}`", "", f"```{fence}", _read(path, max_chars=MAX_LOG_CHARS if is_log else MAX_TEXT_CHARS, tail=is_log), "```", ""])
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -639,13 +798,14 @@ def _run_tabs(item: DashboardItem) -> list[RunTab]:
         RunTab("overview", "Overview", inline=overview),
         RunTab("packet", "1 Packet", [files.get("task_packet") or base / "task_packet.json"]),
         RunTab("master", "2 Master Prompt", [files.get("master_prompt") or base / "prompt.txt", files.get("messages") or base / "messages.json"]),
-        RunTab("expert", "3 Expert / Market", [files.get("expert") or base / "expert_forecasts.jsonl", files.get("settlement") or base / "settlement.json"]),
-        RunTab("worker_prompt", "4 Worker Prompt", [files.get("worker_prompt") or base / "worker_prompt.txt"]),
-        RunTab("worker_log", "5 Worker Log", [files.get("worker_log") or base / "worker.log"]),
-        RunTab("eval_log", "6 Eval Log", [files.get("eval_log") or base / "eval.log"]),
-        RunTab("result", "7 Result", [files.get("result") or base / "result.json"]),
-        RunTab("summary", "8 Summary / Report", [files.get("summary") or base / "summary.json", files.get("error") or base / "error.json"]),
-        RunTab("artifacts", "9 Artifact Index", inline=overview),
+        RunTab("proposal", "3 Proposal", [files.get("proposal") or base / "proposal.txt"]),
+        RunTab("expert", "4 Expert / Market", [files.get("expert") or base / "expert_forecasts.jsonl", files.get("settlement") or base / "settlement.json"]),
+        RunTab("worker_prompt", "5 Worker Prompt", [files.get("worker_prompt") or base / "worker_prompt.txt"]),
+        RunTab("worker_log", "6 Worker Log", [files.get("worker_log") or base / "worker.log"]),
+        RunTab("eval_log", "7 Eval Log", [files.get("eval_log") or base / "eval.log"]),
+        RunTab("result", "8 Result", [files.get("result") or base / "result.json"]),
+        RunTab("summary", "9 Summary / Report", [files.get("summary") or base / "summary.json", files.get("error") or base / "error.json"]),
+        RunTab("artifacts", "10 Artifact Index", inline=overview),
     ]
 
 
@@ -683,13 +843,14 @@ class RunDetailScreen(Screen[None]):
         Binding("c", "copy", "Copy"),
         Binding("1", "tab(1)", "Packet"),
         Binding("2", "tab(2)", "Master"),
-        Binding("3", "tab(3)", "Expert"),
-        Binding("4", "tab(4)", "Worker Prompt"),
-        Binding("5", "tab(5)", "Worker Log"),
-        Binding("6", "tab(6)", "Eval Log"),
-        Binding("7", "tab(7)", "Result"),
-        Binding("8", "tab(8)", "Summary"),
-        Binding("9", "tab(9)", "Artifacts"),
+        Binding("3", "tab(3)", "Proposal"),
+        Binding("4", "tab(4)", "Expert"),
+        Binding("5", "tab(5)", "Worker Prompt"),
+        Binding("6", "tab(6)", "Worker Log"),
+        Binding("7", "tab(7)", "Eval Log"),
+        Binding("8", "tab(8)", "Result"),
+        Binding("9", "tab(9)", "Summary"),
+        Binding("a", "artifacts", "Artifacts"),
         Binding("q", "back", "Back"),
     ]
 
@@ -718,10 +879,11 @@ class RunDetailScreen(Screen[None]):
         self.notify(_copy_to_clipboard(self.current_text))
 
     def action_tab(self, number: int) -> None:
-        if number == 9:
-            self.index = min(8, len(self.tabs) - 1)
-        else:
-            self.index = min(max(1, number), len(self.tabs) - 1)
+        self.index = min(max(1, number), len(self.tabs) - 1)
+        self._render()
+
+    def action_artifacts(self) -> None:
+        self.index = len(self.tabs) - 1
         self._render()
 
     def _render(self) -> None:
