@@ -139,6 +139,7 @@ export REMOTE_RUN_DIR={shlex.quote(remote_run_dir)}
 export HF_HOME="${{HF_HOME:-{remote_root}/hf_cache}}"
 export TRANSFORMERS_CACHE="${{TRANSFORMERS_CACHE:-$HF_HOME/transformers}}"
 export HF_HUB_ENABLE_HF_TRANSFER="${{HF_HUB_ENABLE_HF_TRANSFER:-0}}"
+export CUDA_VISIBLE_DEVICES="${{CUDA_VISIBLE_DEVICES:-0}}"
 SMOKE_SLEEP_SECONDS=${{QS_SMOKE_SLEEP_SECONDS:-{sleep_seconds}}}
 
 mkdir -p "$REMOTE_RUN_DIR/src" "$REMOTE_RUN_DIR/data" "$HF_HOME"
@@ -151,6 +152,7 @@ echo "[qs-lora-smoke] uname=$(uname -a)" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] expected_commit={shlex.quote(expected_commit)}" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] base_model={shlex.quote(base_model)}" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] HF_HOME=$HF_HOME" | tee -a lora_smoke.log
+echo "[qs-lora-smoke] CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES" | tee -a lora_smoke.log
 
 rm -rf {shlex.quote(clone_dir)}
 git clone --depth 1 --branch {shlex.quote(repo_ref)} {shlex.quote(repo_url)} {shlex.quote(clone_dir)} 2>&1 | tee -a lora_smoke.log
