@@ -126,6 +126,33 @@ v3_training:
         mount: /newcpfs
         version: v1
         access: RW
+  qs:
+    queue_id: 532
+    queue_name: research_agent
+    cloud_id: 12
+    cloud_name: 小红书-JP
+    cluster_id: 70
+    resource_package_id: 234
+    resource_package_name: 4Gpu/140C/900Gi
+    worker_num: 1
+    priority: 0
+    overuse: false
+    job_type: PytorchJob
+    image: artifactory.devops.xiaohongshu.com/quicksilver/images/training/media/nvidia/tutu_cybertron:ngc2510_xray_newep_3fs_v1
+    remote_project_root: /mnt/3fs/lxh/agentic-training
+    remote_harness_root: /mnt/3fs/lxh/agentic-training/autoresearch_idea_harness
+    remote_run_root: /mnt/3fs/lxh/agentic-training/autoresearch_idea_harness/runs/qs
+    remote_code_smoke_root: /mnt/3fs/lxh/agentic-training/code_smoke
+    smoke_sleep_seconds: 60
+    git_repos:
+      - name: autoresearch_idea_harness
+        url: https://github.com/XinghanLi66/autoresearch_idea_harness.git
+        ref: V3
+        compile_check: src/autoresearch_idea_harness/io.py
+      - name: proposal_rl
+        url: https://github.com/XinghanLi66/proposal_rl.git
+        ref: main
+        compile_check: scripts/probe.py
 
 proposal_batches:
   proposals_per_packet: 4
