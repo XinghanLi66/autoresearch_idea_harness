@@ -115,12 +115,36 @@ def _synthetic_rows_json() -> str:
     return json.dumps(rows, ensure_ascii=False)
 
 
+def _load_rows_json(train_jsonl: Path | None, limit_rows: int) -> tuple[str, str, int]:
+    if train_jsonl is None:
+        rows = json.loads(_synthetic_rows_json())
+        return json.dumps(rows, ensure_ascii=False), "synthetic", len(rows)
+    rows = []
+    with train_jsonl.open() as f:
+        for line in f:
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            if not isinstance(row.get("messages"), list):
+                raise SystemExit(f"row without messages in {train_jsonl}")
+            rows.append(row)
+            if len(rows) >= limit_rows:
+                break
+    if not rows:
+        raise SystemExit(f"no rows loaded from {train_jsonl}")
+    return json.dumps(rows, ensure_ascii=False), str(train_jsonl), len(rows)
+
+
 def _command_text(
     run_id: str,
     qs_cfg: dict[str, Any],
     harness_repo: dict[str, Any],
     expected_commit: str,
     base_model: str,
+    rows_json: str,
+    data_source: str,
+    train_limit: int,
+    max_seq_length: int,
 ) -> str:
     remote_root = str(qs_cfg["remote_project_root"]).rstrip("/")
     remote_run_dir = f"{remote_root}/qs_researcher_lora_smoke/{run_id}"
@@ -130,7 +154,6 @@ def _command_text(
     clone_dir = f"{remote_run_dir}/src/autoresearch_idea_harness"
     train_jsonl = f"{remote_run_dir}/data/train.jsonl"
     output_dir = f"{remote_run_dir}/output"
-    rows_json = _synthetic_rows_json()
     return f"""#!/usr/bin/env bash
 set -euo pipefail
 
@@ -151,6 +174,9 @@ echo "[qs-lora-smoke] hostname=$(hostname)" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] uname=$(uname -a)" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] expected_commit={shlex.quote(expected_commit)}" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] base_model={shlex.quote(base_model)}" | tee -a lora_smoke.log
+echo "[qs-lora-smoke] data_source={shlex.quote(data_source)}" | tee -a lora_smoke.log
+echo "[qs-lora-smoke] train_limit={train_limit}" | tee -a lora_smoke.log
+echo "[qs-lora-smoke] max_seq_length={max_seq_length}" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] HF_HOME=$HF_HOME" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES" | tee -a lora_smoke.log
 
@@ -176,10 +202,10 @@ python scripts/train_v3_researcher_cot_lora.py \
   --output-dir {shlex.quote(output_dir)} \
   --base-model {shlex.quote(base_model)} \
   --max-steps 1 \
-  --limit 2 \
+  --limit {train_limit} \
   --per-device-batch-size 1 \
   --grad-accum 1 \
-  --max-seq-length 256 \
+  --max-seq-length {max_seq_length} \
   --no-merge \
   --skip-gen-check 2>&1 | tee -a "$REMOTE_RUN_DIR/lora_smoke.log"
 
@@ -246,7 +272,15 @@ def _script_text(
     return "\n".join(lines) + "\n"
 
 
-def prepare(config_path: Path, output_dir: Path, run_id: str | None, base_model: str) -> dict[str, Any]:
+def prepare(
+    config_path: Path,
+    output_dir: Path,
+    run_id: str | None,
+    base_model: str,
+    train_jsonl: Path | None,
+    limit_rows: int,
+    max_seq_length: int,
+) -> dict[str, Any]:
     cfg = load_config(config_path)
     qs_cfg = dict(cfg.get("v3_training", {}).get("qs") or {})
     required = [
@@ -270,7 +304,18 @@ def prepare(config_path: Path, output_dir: Path, run_id: str | None, base_model:
 
     harness_repo = _find_harness_repo(qs_cfg)
     expected_commit = _local_git_head()
-    command = _command_text(run_id, qs_cfg, harness_repo, expected_commit, base_model)
+    rows_json, data_source, train_limit = _load_rows_json(train_jsonl, limit_rows)
+    command = _command_text(
+        run_id,
+        qs_cfg,
+        harness_repo,
+        expected_commit,
+        base_model,
+        rows_json,
+        data_source,
+        train_limit,
+        max_seq_length,
+    )
     command_path = run_dir / "qs_command_lora_smoke.sh"
     command_path.write_text(command)
     command_path.chmod(0o755)
@@ -307,9 +352,10 @@ def prepare(config_path: Path, output_dir: Path, run_id: str | None, base_model:
         },
         "training": {
             "base_model": base_model,
+            "data_source": data_source,
             "max_steps": 1,
-            "limit": 2,
-            "max_seq_length": 256,
+            "limit": train_limit,
+            "max_seq_length": max_seq_length,
             "no_merge": True,
             "skip_gen_check": True,
         },
@@ -333,8 +379,19 @@ def main() -> None:
     parser.add_argument("--output-dir", default=str(ROOT / "runs" / "qs_researcher_lora_smoke"))
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--base-model", default=DEFAULT_SMALL_MODEL)
+    parser.add_argument("--train-jsonl", default=None)
+    parser.add_argument("--limit-rows", type=int, default=8)
+    parser.add_argument("--max-seq-length", type=int, default=256)
     args = parser.parse_args()
-    summary = prepare(Path(args.config), Path(args.output_dir), args.run_id, args.base_model)
+    summary = prepare(
+        Path(args.config),
+        Path(args.output_dir),
+        args.run_id,
+        args.base_model,
+        Path(args.train_jsonl) if args.train_jsonl else None,
+        args.limit_rows,
+        args.max_seq_length,
+    )
     print(json.dumps(summary, indent=2, ensure_ascii=False, sort_keys=True))
 
 

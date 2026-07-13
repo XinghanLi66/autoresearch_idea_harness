@@ -48,6 +48,7 @@ def _command_text(
     remote_model_parent: str,
     expected_total_bytes: int,
     expected_weight_bytes: int,
+    weight_file_glob: str,
 ) -> str:
     remote_root = str(qs_cfg["remote_project_root"]).rstrip("/")
     remote_run_dir = f"{remote_root}/qs_model_stage/{run_id}"
@@ -68,6 +69,7 @@ export REMOTE_MODEL_PARENT={shlex.quote(remote_model_parent)}
 export EXPECTED_MODEL_DIR={shlex.quote(model_dir)}
 export EXPECTED_TOTAL_BYTES={expected_total_bytes}
 export EXPECTED_WEIGHT_BYTES={expected_weight_bytes}
+export WEIGHT_FILE_GLOB={shlex.quote(weight_file_glob)}
 SMOKE_SLEEP_SECONDS=${{QS_SMOKE_SLEEP_SECONDS:-{sleep_seconds}}}
 
 mkdir -p "$REMOTE_RUN_DIR" "$REMOTE_MODEL_PARENT"
@@ -110,41 +112,38 @@ print("model_tools_available", importlib.util.find_spec("model_tools") is not No
 PY
 
 normalize_layout() {{
-  if [[ -f "$EXPECTED_MODEL_DIR/model.safetensors" ]]; then
+  if compgen -G "$EXPECTED_MODEL_DIR/$WEIGHT_FILE_GLOB" >/dev/null; then
     log "model already in expected directory layout"
     return 0
   fi
-  if [[ -f "$REMOTE_MODEL_PARENT/model.safetensors" ]]; then
+  if compgen -G "$REMOTE_MODEL_PARENT/*.safetensors" >/dev/null; then
     log "normalizing flat model_tools download layout"
     mkdir -p "$EXPECTED_MODEL_DIR"
-    for name in \\
-      .msc \\
-      .mv \\
-      LICENSE \\
-      README.md \\
-      config.json \\
-      configuration.json \\
-      generation_config.json \\
-      merges.txt \\
-      model.safetensors \\
-      tokenizer.json \\
-      tokenizer_config.json \\
-      vocab.json; do
-      if [[ -e "$REMOTE_MODEL_PARENT/$name" ]]; then
-        mv -f "$REMOTE_MODEL_PARENT/$name" "$EXPECTED_MODEL_DIR/$name"
+    shopt -s nullglob
+    for path in \\
+      "$REMOTE_MODEL_PARENT"/*.bin \\
+      "$REMOTE_MODEL_PARENT"/*.json \\
+      "$REMOTE_MODEL_PARENT"/*.md \\
+      "$REMOTE_MODEL_PARENT"/*.safetensors \\
+      "$REMOTE_MODEL_PARENT"/*.txt \\
+      "$REMOTE_MODEL_PARENT"/LICENSE \\
+      "$REMOTE_MODEL_PARENT"/.[!.]*; do
+      if [[ -f "$path" ]]; then
+        mv -f "$path" "$EXPECTED_MODEL_DIR/$(basename "$path")"
       fi
     done
+    shopt -u nullglob
   fi
 }}
 
-if [[ -d "$EXPECTED_MODEL_DIR" && ! -f "$EXPECTED_MODEL_DIR/model.safetensors" ]]; then
+if [[ -d "$EXPECTED_MODEL_DIR" ]] && ! compgen -G "$EXPECTED_MODEL_DIR/$WEIGHT_FILE_GLOB" >/dev/null; then
   log "removing incomplete expected model directory"
   rm -rf "$EXPECTED_MODEL_DIR"
 fi
 rm -rf "$REMOTE_MODEL_PARENT/$MODEL_NAME.tmp"
 
 normalize_layout
-if [[ ! -f "$EXPECTED_MODEL_DIR/model.safetensors" ]]; then
+if ! compgen -G "$EXPECTED_MODEL_DIR/$WEIGHT_FILE_GLOB" >/dev/null; then
   log "downloading model from QS registry"
 
   python3 -m model_tools download \\
@@ -161,10 +160,10 @@ if [[ ! -f "$EXPECTED_MODEL_DIR/model.safetensors" ]]; then
     | tee -a "$REMOTE_RUN_DIR/stage.log"
   normalize_layout
 else
-  log "skipping download because expected model file already exists"
+  log "skipping download because expected model weights already exist"
 fi
 
-python3 - <<'PY' "$REMOTE_RUN_DIR/stage_result.json" "$EXPECTED_MODEL_DIR" "$EXPECTED_TOTAL_BYTES" "$EXPECTED_WEIGHT_BYTES"
+python3 - <<'PY' "$REMOTE_RUN_DIR/stage_result.json" "$EXPECTED_MODEL_DIR" "$EXPECTED_TOTAL_BYTES" "$EXPECTED_WEIGHT_BYTES" "$WEIGHT_FILE_GLOB"
 import json
 import sys
 from pathlib import Path
@@ -173,12 +172,12 @@ out = Path(sys.argv[1])
 model_dir = Path(sys.argv[2])
 expected_total = int(sys.argv[3])
 expected_weight = int(sys.argv[4])
+weight_glob = sys.argv[5]
 required = [
     "config.json",
     "generation_config.json",
     "tokenizer_config.json",
     "tokenizer.json",
-    "model.safetensors",
 ]
 files = {{}}
 missing = []
@@ -188,6 +187,9 @@ for name in required:
         files[name] = path.stat().st_size
     else:
         missing.append(name)
+weight_files = sorted(model_dir.glob(weight_glob)) if model_dir.exists() else []
+weight_sizes = {{path.name: path.stat().st_size for path in weight_files if path.is_file()}}
+weight_total = sum(weight_sizes.values())
 total = sum(path.stat().st_size for path in model_dir.rglob("*") if path.is_file()) if model_dir.exists() else 0
 result = {{
     "status": "ok",
@@ -195,13 +197,17 @@ result = {{
     "exists": model_dir.exists(),
     "required_files": files,
     "missing_required_files": missing,
+    "weight_file_glob": weight_glob,
+    "weight_files": weight_sizes,
+    "weight_file_count": len(weight_sizes),
+    "weight_total_bytes": weight_total,
     "total_file_bytes": total,
     "expected_total_bytes": expected_total,
     "expected_weight_bytes": expected_weight,
-    "weight_size_ok": files.get("model.safetensors") == expected_weight,
+    "weight_size_ok": weight_total >= expected_weight,
     "total_size_ok": total >= expected_total,
 }}
-if missing or not result["weight_size_ok"] or not result["total_size_ok"]:
+if missing or not weight_sizes or not result["weight_size_ok"] or not result["total_size_ok"]:
     result["status"] = "failed_validation"
 out.write_text(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True))
 print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True))
@@ -280,6 +286,7 @@ def prepare(
     remote_model_parent: str | None,
     expected_total_bytes: int,
     expected_weight_bytes: int,
+    weight_file_glob: str,
 ) -> dict[str, Any]:
     cfg = load_config(config_path)
     qs_cfg = dict(cfg.get("v3_training", {}).get("qs") or {})
@@ -315,6 +322,7 @@ def prepare(
         remote_model_parent=remote_model_parent,
         expected_total_bytes=expected_total_bytes,
         expected_weight_bytes=expected_weight_bytes,
+        weight_file_glob=weight_file_glob,
     )
     command_path = run_dir / "qs_command_model_stage.sh"
     command_path.write_text(command)
@@ -354,6 +362,7 @@ def prepare(
             "zone": zone,
             "expected_total_bytes": expected_total_bytes,
             "expected_weight_bytes": expected_weight_bytes,
+            "weight_file_glob": weight_file_glob,
             "expected_remote_model_dir": model_dir,
         },
         "artifacts": {
@@ -383,6 +392,7 @@ def main() -> None:
     parser.add_argument("--remote-model-parent", default=None)
     parser.add_argument("--expected-total-bytes", type=int, default=999_603_325)
     parser.add_argument("--expected-weight-bytes", type=int, default=988_097_824)
+    parser.add_argument("--weight-file-glob", default="*.safetensors")
     args = parser.parse_args()
     summary = prepare(
         config_path=Path(args.config),
@@ -396,6 +406,7 @@ def main() -> None:
         remote_model_parent=args.remote_model_parent,
         expected_total_bytes=args.expected_total_bytes,
         expected_weight_bytes=args.expected_weight_bytes,
+        weight_file_glob=args.weight_file_glob,
     )
     print(json.dumps(summary, indent=2, ensure_ascii=False, sort_keys=True))
 
