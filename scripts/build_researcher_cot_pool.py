@@ -20,6 +20,7 @@ import argparse
 import json
 import re
 import subprocess
+import time
 import sys
 from pathlib import Path
 from typing import Any
@@ -31,17 +32,25 @@ OUT_DIR = ROOT / "runs" / "researcher_cot" / "pool"
 ARXIV_RE = re.compile(r"(\d{4}\.\d{4,5})")
 
 
-def run_hi(args: list[str]) -> dict[str, Any]:
-    """Call the hi CLI and parse its JSON stdout."""
-    proc = subprocess.run(["hi", *args], capture_output=True, text=True, timeout=120)
-    out = proc.stdout.strip()
-    try:
-        return json.loads(out)
-    except json.JSONDecodeError:
-        start = out.find("{")
-        if start >= 0:
-            return json.loads(out[start:])
-        raise RuntimeError(f"hi {' '.join(args)} -> non-JSON: {out[:300]} / err {proc.stderr[:200]}")
+def run_hi(args: list[str], retries: int = 4) -> dict[str, Any]:
+    """Call the hi CLI and parse its JSON stdout, retrying transient failures
+    (the node/nvm CLI intermittently errors with 'Cannot find package ...')."""
+    last = ""
+    for attempt in range(retries):
+        try:
+            proc = subprocess.run(["hi", *args], capture_output=True, text=True, timeout=120)
+            out = proc.stdout.strip()
+            try:
+                return json.loads(out)
+            except json.JSONDecodeError:
+                start = out.find("{")
+                if start >= 0:
+                    return json.loads(out[start:])
+                last = f"non-JSON: {out[:200]} / err {proc.stderr[:200]}"
+        except Exception as e:
+            last = str(e)
+        time.sleep(2 * (attempt + 1))
+    raise RuntimeError(f"hi {' '.join(args[:2])} failed after {retries} tries: {last}")
 
 
 def get_doc_md(shortcut_id: str) -> str:
@@ -91,9 +100,22 @@ def extract_arxiv_ids(text: str) -> list[str]:
     return ids
 
 
-def parse_overall_score(case_md: str) -> str | None:
-    m = re.search(r"综合\s*\**\s*(\d+(?:\.\d+)?\s*/\s*10)", case_md)
-    return m.group(1).replace(" ", "") if m else None
+def parse_overall_score(case_md: str) -> tuple[str | None, float | None]:
+    """Parse the case's overall quality score. Formats seen:
+       '... ｜ 综合 **10/10**'  and  '> 质量分 **9/10** ...'  and bare '**8/10**' in the header."""
+    head = case_md[:800]
+    pats = [
+        r"综合\s*\**\s*(\d+(?:\.\d+)?)\s*/\s*10",
+        r"质量分\s*\**\s*(\d+(?:\.\d+)?)\s*/\s*10",
+        r"\*\*\s*(\d+(?:\.\d+)?)\s*/\s*10\s*\*\*",  # any bolded X/10 near the top
+        r"(\d+(?:\.\d+)?)\s*/\s*10",                  # last resort: first X/10 in the header
+    ]
+    for p in pats:
+        m = re.search(p, head)
+        if m:
+            val = float(m.group(1))
+            return f"{m.group(1)}/10", val
+    return None, None
 
 
 def crawl_researcher(r: dict[str, str]) -> dict[str, Any]:
@@ -110,9 +132,10 @@ def crawl_researcher(r: dict[str, str]) -> dict[str, Any]:
     if case_index:
         for c in menu(case_index["shortcutId"]):
             md = get_doc_md(c["shortcutId"])
+            score_str, score_num = parse_overall_score(md)
             cases.append({
                 "shortcut_id": c["shortcutId"], "title": c["title"], "md": md,
-                "overall_score": parse_overall_score(md),
+                "overall_score": score_str, "overall_score_num": score_num,
                 "arxiv_ids": extract_arxiv_ids(md),
             })
 

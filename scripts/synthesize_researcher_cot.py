@@ -18,6 +18,7 @@ import argparse
 import concurrent.futures as cf
 import json
 import os
+import time
 import pathlib
 import re
 import sys
@@ -167,6 +168,18 @@ def parse_json_obj(text: str) -> dict[str, Any]:
     raise ValueError("no JSON object found")
 
 
+def complete_retry(client, *, retries: int = 4, **kwargs):
+    """RunwayClient.complete with backoff on transient errors (rate limits, 5xx, timeouts)."""
+    last = None
+    for attempt in range(retries):
+        try:
+            return client.complete(**kwargs)
+        except Exception as e:
+            last = e
+            time.sleep(3 * (attempt + 1))
+    raise last
+
+
 def build_user(researcher: dict[str, Any], case: dict[str, Any], route_desc: str,
                skills_md: str, max_skills_chars: int) -> str:
     skills = (skills_md or "")[:max_skills_chars]
@@ -190,6 +203,8 @@ def main() -> None:
     ap.add_argument("--routes", type=int, default=3, help="number of reasoning routes per case (<=3)")
     ap.add_argument("--only-researcher", default=None, help="substring filter on researcher name")
     ap.add_argument("--limit-cases", type=int, default=None, help="cap total cases (smoke)")
+    ap.add_argument("--min-case-score", type=float, default=None,
+                    help="source gate: only synthesize cases with overall_score_num >= this (e.g. 8)")
     ap.add_argument("--max-tokens", type=int, default=4500)
     ap.add_argument("--max-skills-chars", type=int, default=6000)
     ap.add_argument("--concurrency", type=int, default=4)
@@ -210,14 +225,19 @@ def main() -> None:
     # build job list: (researcher, case, route_idx)
     jobs: list[tuple[dict, dict, int]] = []
     ncase = 0
+    skipped_lowscore = 0
     for r in researchers:
         for c in r.get("cases", []):
+            if args.min_case_score is not None and (c.get("overall_score_num") or 0) < args.min_case_score:
+                skipped_lowscore += 1
+                continue
             ncase += 1
             if args.limit_cases and ncase > args.limit_cases:
                 break
             for ri in range(min(args.routes, len(ROUTES))):
                 jobs.append((r, c, ri))
-    print(f"[synth] {len(researchers)} researchers, {len(jobs)} (case,route) jobs", flush=True)
+    print(f"[synth] {len(researchers)} researchers, {len(jobs)} (case,route) jobs "
+          f"(skipped {skipped_lowscore} cases below --min-case-score={args.min_case_score})", flush=True)
 
     lock = threading.Lock()
     tls = threading.local()
@@ -236,8 +256,8 @@ def main() -> None:
         skills_md = (researcher.get("skills") or {}).get("md", "")
         user = build_user(researcher, case, route_desc, skills_md, args.max_skills_chars)
         try:
-            res = client().complete(
-                endpoint=args.endpoint, model=args.model,
+            res = complete_retry(
+                client(), endpoint=args.endpoint, model=args.model,
                 messages=[{"role": "system", "content": SYNTH_SYSTEM}, {"role": "user", "content": user}],
                 temperature=None, max_tokens=args.max_tokens, stream=False,
             )
@@ -256,8 +276,8 @@ def main() -> None:
                 "Return the corrected strict JSON."
             )
             try:
-                fc = client().complete(
-                    endpoint=args.endpoint, model=args.model,
+                fc = complete_retry(
+                    client(), endpoint=args.endpoint, model=args.model,
                     messages=[{"role": "system", "content": FACTCHECK_SYSTEM}, {"role": "user", "content": fc_user}],
                     temperature=None, max_tokens=args.max_tokens, stream=False,
                 )
