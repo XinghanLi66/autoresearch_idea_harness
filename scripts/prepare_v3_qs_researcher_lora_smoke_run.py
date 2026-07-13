@@ -149,9 +149,11 @@ def _command_text(
     max_seq_length: int,
     remote_train_jsonl: str | None,
     remote_val_jsonl: str | None,
+    remote_run_family: str,
+    log_prefix: str,
 ) -> str:
     remote_root = str(qs_cfg["remote_project_root"]).rstrip("/")
-    remote_run_dir = f"{remote_root}/qs_researcher_lora_smoke/{run_id}"
+    remote_run_dir = f"{remote_root}/{remote_run_family}/{run_id}"
     sleep_seconds = int(qs_cfg.get("smoke_sleep_seconds", 60))
     repo_url = str(harness_repo["url"])
     repo_ref = str(harness_repo.get("ref") or "V3")
@@ -195,18 +197,18 @@ SMOKE_SLEEP_SECONDS=${{QS_SMOKE_SLEEP_SECONDS:-{sleep_seconds}}}
 mkdir -p "$REMOTE_RUN_DIR/src" "$REMOTE_RUN_DIR/data" "$HF_HOME"
 cd "$REMOTE_RUN_DIR"
 
-echo "[qs-lora-smoke] start $(date -Is)" | tee lora_smoke.log
-echo "[qs-lora-smoke] run_id=$RUN_ID" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] hostname=$(hostname)" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] uname=$(uname -a)" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] expected_commit={shlex.quote(expected_commit)}" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] base_model={shlex.quote(base_model)}" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] data_source={shlex.quote(data_source)}" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] train_limit={train_limit}" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] max_steps={max_steps}" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] max_seq_length={max_seq_length}" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] HF_HOME=$HF_HOME" | tee -a lora_smoke.log
-echo "[qs-lora-smoke] CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES" | tee -a lora_smoke.log
+echo "[{log_prefix}] start $(date -Is)" | tee lora_smoke.log
+echo "[{log_prefix}] run_id=$RUN_ID" | tee -a lora_smoke.log
+echo "[{log_prefix}] hostname=$(hostname)" | tee -a lora_smoke.log
+echo "[{log_prefix}] uname=$(uname -a)" | tee -a lora_smoke.log
+echo "[{log_prefix}] expected_commit={shlex.quote(expected_commit)}" | tee -a lora_smoke.log
+echo "[{log_prefix}] base_model={shlex.quote(base_model)}" | tee -a lora_smoke.log
+echo "[{log_prefix}] data_source={shlex.quote(data_source)}" | tee -a lora_smoke.log
+echo "[{log_prefix}] train_limit={train_limit}" | tee -a lora_smoke.log
+echo "[{log_prefix}] max_steps={max_steps}" | tee -a lora_smoke.log
+echo "[{log_prefix}] max_seq_length={max_seq_length}" | tee -a lora_smoke.log
+echo "[{log_prefix}] HF_HOME=$HF_HOME" | tee -a lora_smoke.log
+echo "[{log_prefix}] CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES" | tee -a lora_smoke.log
 
 rm -rf {shlex.quote(clone_dir)}
 git clone --depth 1 --branch {shlex.quote(repo_ref)} {shlex.quote(repo_url)} {shlex.quote(clone_dir)} 2>&1 | tee -a lora_smoke.log
@@ -246,9 +248,9 @@ print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True))
 raise SystemExit(0 if summary else 2)
 PY
 
-echo "[qs-lora-smoke] sleeping $SMOKE_SLEEP_SECONDS seconds for log/exec inspection" | tee -a "$REMOTE_RUN_DIR/lora_smoke.log"
+echo "[{log_prefix}] sleeping $SMOKE_SLEEP_SECONDS seconds for log/exec inspection" | tee -a "$REMOTE_RUN_DIR/lora_smoke.log"
 sleep "$SMOKE_SLEEP_SECONDS"
-echo "[qs-lora-smoke] done $(date -Is)" | tee -a "$REMOTE_RUN_DIR/lora_smoke.log"
+echo "[{log_prefix}] done $(date -Is)" | tee -a "$REMOTE_RUN_DIR/lora_smoke.log"
 """
 
 
@@ -304,6 +306,9 @@ def prepare(
     limit_rows: int,
     max_steps: int,
     max_seq_length: int,
+    remote_run_family: str = "qs_researcher_lora_smoke",
+    purpose: str | None = None,
+    log_prefix: str = "qs-lora-smoke",
 ) -> dict[str, Any]:
     cfg = load_config(config_path)
     qs_cfg = dict(cfg.get("v3_training", {}).get("qs") or {})
@@ -347,6 +352,8 @@ def prepare(
         max_seq_length,
         remote_train_jsonl,
         remote_val_jsonl,
+        remote_run_family,
+        log_prefix,
     )
     command_path = run_dir / "qs_command_lora_smoke.sh"
     command_path.write_text(command)
@@ -361,11 +368,12 @@ def prepare(
     submit_path.chmod(0o755)
 
     remote_root = str(qs_cfg["remote_project_root"]).rstrip("/")
-    remote_run_dir = f"{remote_root}/qs_researcher_lora_smoke/{run_id}"
+    remote_run_dir = f"{remote_root}/{remote_run_family}/{run_id}"
     summary = {
         "run_id": run_id,
         "run_dir": str(run_dir),
-        "purpose": "QS V3 real-script smoke: run train_v3_researcher_cot_lora.py for one step with a small Qwen model.",
+        "purpose": purpose
+        or "QS V3 real-script smoke: run train_v3_researcher_cot_lora.py with a small Qwen model.",
         "qs": {
             "queue_id": int(qs_cfg["queue_id"]),
             "queue_name": qs_cfg.get("queue_name"),
@@ -392,6 +400,7 @@ def prepare(
             "max_seq_length": max_seq_length,
             "no_merge": True,
             "skip_gen_check": True,
+            "remote_run_family": remote_run_family,
         },
         "artifacts": {
             "command": str(command_path),
@@ -419,6 +428,13 @@ def main() -> None:
     parser.add_argument("--limit-rows", type=int, default=8)
     parser.add_argument("--max-steps", type=int, default=1)
     parser.add_argument("--max-seq-length", type=int, default=256)
+    parser.add_argument("--remote-run-family", default="qs_researcher_lora_smoke")
+    parser.add_argument(
+        "--purpose",
+        default=None,
+        help="Human-readable purpose recorded in run_plan.json.",
+    )
+    parser.add_argument("--log-prefix", default="qs-lora-smoke")
     args = parser.parse_args()
     if args.train_jsonl and args.remote_train_jsonl:
         raise SystemExit("--train-jsonl and --remote-train-jsonl are mutually exclusive")
@@ -433,6 +449,9 @@ def main() -> None:
         args.limit_rows,
         args.max_steps,
         args.max_seq_length,
+        remote_run_family=args.remote_run_family,
+        purpose=args.purpose,
+        log_prefix=args.log_prefix,
     )
     print(json.dumps(summary, indent=2, ensure_ascii=False, sort_keys=True))
 
