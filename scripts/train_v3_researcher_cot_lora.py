@@ -30,6 +30,8 @@ The script:
 from __future__ import annotations
 
 import argparse
+import importlib.machinery
+import importlib.util
 import json
 import os
 import sys
@@ -72,6 +74,31 @@ os.environ.setdefault("WANDB_DISABLED", "true")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 import torch
+
+
+def _patch_transformers_modeling_layers() -> None:
+    """Patch older/internal transformers builds for newer PEFT imports.
+
+    Some QS images have a PEFT build that imports
+    `transformers.modeling_layers.GradientCheckpointingLayer`, while the
+    installed transformers package does not ship that module. PEFT only needs
+    the symbol for layer-type checks, so this compatibility shim keeps import
+    behavior stable without changing training math.
+    """
+    if importlib.util.find_spec("transformers.modeling_layers") is not None:
+        return
+    module = types.ModuleType("transformers.modeling_layers")
+    module.__spec__ = importlib.machinery.ModuleSpec("transformers.modeling_layers", loader=None)
+
+    class GradientCheckpointingLayer(torch.nn.Module):
+        pass
+
+    module.GradientCheckpointingLayer = GradientCheckpointingLayer
+    sys.modules["transformers.modeling_layers"] = module
+
+
+_patch_transformers_modeling_layers()
+
 from datasets import Dataset
 from peft import LoraConfig, TaskType, get_peft_model
 from transformers import (

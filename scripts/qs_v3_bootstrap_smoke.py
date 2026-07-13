@@ -10,11 +10,14 @@ can swap in real Qwen weights once the model/cache location on /mnt/3fs is fixed
 from __future__ import annotations
 
 import argparse
+import importlib.machinery
 import importlib.util
+import importlib.metadata as importlib_metadata
 import json
 import math
 import platform
 import sys
+import types
 import time
 from pathlib import Path
 from typing import Any
@@ -144,8 +147,36 @@ def _module_presence(names: list[str]) -> dict[str, bool]:
     return {name: importlib.util.find_spec(name) is not None for name in names}
 
 
+def _module_versions(names: list[str]) -> dict[str, str | None]:
+    versions: dict[str, str | None] = {}
+    for name in names:
+        try:
+            versions[name] = importlib_metadata.version(name)
+        except importlib_metadata.PackageNotFoundError:
+            versions[name] = None
+    return versions
+
+
+def _patch_transformers_modeling_layers() -> bool:
+    if importlib.util.find_spec("transformers.modeling_layers") is not None:
+        return False
+    import torch
+
+    module = types.ModuleType("transformers.modeling_layers")
+    module.__spec__ = importlib.machinery.ModuleSpec("transformers.modeling_layers", loader=None)
+
+    class GradientCheckpointingLayer(torch.nn.Module):
+        pass
+
+    module.GradientCheckpointingLayer = GradientCheckpointingLayer
+    sys.modules["transformers.modeling_layers"] = module
+    return True
+
+
 def run_smoke(run_dir: Path, require_cuda: bool) -> dict[str, Any]:
     import torch
+
+    patched_modeling_layers = _patch_transformers_modeling_layers()
     from peft import LoraConfig, TaskType, get_peft_model
     from transformers import LlamaConfig, LlamaForCausalLM
 
@@ -160,6 +191,7 @@ def run_smoke(run_dir: Path, require_cuda: bool) -> dict[str, Any]:
     cfg = load_config(ROOT / "configs" / "default.yaml")
     qs_cfg = cfg.get("v3_training", {}).get("qs", {})
     modules = _module_presence(["torch", "transformers", "peft", "datasets", "tokenizers"])
+    versions = _module_versions(["torch", "transformers", "peft", "datasets", "tokenizers"])
     if not all(modules.values()):
         missing = [name for name, ok in modules.items() if not ok]
         raise RuntimeError(f"missing bootstrap modules: {missing}")
@@ -245,6 +277,11 @@ def run_smoke(run_dir: Path, require_cuda: bool) -> dict[str, Any]:
             "remote_project_root": qs_cfg.get("remote_project_root"),
         },
         "modules": modules,
+        "module_versions": versions,
+        "compat": {
+            "patched_transformers_modeling_layers": patched_modeling_layers,
+            "transformers_modeling_layers_spec": str(importlib.util.find_spec("transformers.modeling_layers")),
+        },
         "gpu": gpu,
         "dataset": {
             "train_jsonl": str(train_jsonl),
