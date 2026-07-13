@@ -99,6 +99,43 @@ def _patch_transformers_modeling_layers() -> None:
 
 _patch_transformers_modeling_layers()
 
+
+def _patch_broken_apex_amp() -> None:
+    """Patch QS images where a non-NVIDIA apex package shadows apex.amp."""
+    try:
+        import apex  # type: ignore
+    except Exception:
+        return
+    if hasattr(apex, "amp"):
+        return
+
+    amp = types.ModuleType("apex.amp")
+
+    def initialize(model, optimizer=None, **_: Any):
+        return (model, optimizer) if optimizer is not None else model
+
+    class _ScaleLoss:
+        def __init__(self, loss, optimizer=None):
+            self.loss = loss
+            self.optimizer = optimizer
+
+        def __enter__(self):
+            return self.loss
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def scale_loss(loss, optimizer=None):
+        return _ScaleLoss(loss, optimizer)
+
+    amp.initialize = initialize
+    amp.scale_loss = scale_loss
+    apex.amp = amp
+    sys.modules["apex.amp"] = amp
+
+
+_patch_broken_apex_amp()
+
 from datasets import Dataset
 from peft import LoraConfig, TaskType, get_peft_model
 from transformers import (
