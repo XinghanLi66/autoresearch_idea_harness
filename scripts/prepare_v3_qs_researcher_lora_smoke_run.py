@@ -3,7 +3,8 @@
 
 This smoke is heavier than `qs_v3_bootstrap_smoke.py`: it uses the actual
 `train_v3_researcher_cot_lora.py` entrypoint and a small public Qwen Instruct
-model, but limits training to one step and skips merge/generation.
+model, while keeping merge/generation disabled. It can either embed a few local
+JSONL rows into the QS command or point at JSONL files already staged on /mnt/3fs.
 """
 
 from __future__ import annotations
@@ -141,10 +142,13 @@ def _command_text(
     harness_repo: dict[str, Any],
     expected_commit: str,
     base_model: str,
-    rows_json: str,
+    rows_json: str | None,
     data_source: str,
     train_limit: int,
+    max_steps: int,
     max_seq_length: int,
+    remote_train_jsonl: str | None,
+    remote_val_jsonl: str | None,
 ) -> str:
     remote_root = str(qs_cfg["remote_project_root"]).rstrip("/")
     remote_run_dir = f"{remote_root}/qs_researcher_lora_smoke/{run_id}"
@@ -152,8 +156,31 @@ def _command_text(
     repo_url = str(harness_repo["url"])
     repo_ref = str(harness_repo.get("ref") or "V3")
     clone_dir = f"{remote_run_dir}/src/autoresearch_idea_harness"
-    train_jsonl = f"{remote_run_dir}/data/train.jsonl"
+    train_jsonl = remote_train_jsonl or f"{remote_run_dir}/data/train.jsonl"
     output_dir = f"{remote_run_dir}/output"
+    if remote_train_jsonl:
+        write_train_block = f"""python - <<'PY' {shlex.quote(train_jsonl)}
+from pathlib import Path
+import json
+path = Path(__import__("sys").argv[1])
+if not path.exists():
+    raise SystemExit(f"missing remote train_jsonl: {{path}}")
+rows = sum(1 for line in path.read_text().splitlines() if line.strip())
+print(json.dumps({{"train_jsonl": str(path), "rows": rows, "mode": "remote"}}, ensure_ascii=False))
+PY"""
+    else:
+        if rows_json is None:
+            raise SystemExit("rows_json is required unless remote_train_jsonl is set")
+        write_train_block = f"""python - <<'PY' {shlex.quote(train_jsonl)}
+import json
+import sys
+rows = json.loads({rows_json!r})
+with open(sys.argv[1], "w") as f:
+    for row in rows:
+        f.write(json.dumps(row, ensure_ascii=False) + "\\n")
+print(json.dumps({{"train_jsonl": sys.argv[1], "rows": len(rows), "mode": "embedded"}}, ensure_ascii=False))
+PY"""
+    val_arg = f"  --val-jsonl {shlex.quote(remote_val_jsonl)} \\\n" if remote_val_jsonl else ""
     return f"""#!/usr/bin/env bash
 set -euo pipefail
 
@@ -176,6 +203,7 @@ echo "[qs-lora-smoke] expected_commit={shlex.quote(expected_commit)}" | tee -a l
 echo "[qs-lora-smoke] base_model={shlex.quote(base_model)}" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] data_source={shlex.quote(data_source)}" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] train_limit={train_limit}" | tee -a lora_smoke.log
+echo "[qs-lora-smoke] max_steps={max_steps}" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] max_seq_length={max_seq_length}" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] HF_HOME=$HF_HOME" | tee -a lora_smoke.log
 echo "[qs-lora-smoke] CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES" | tee -a lora_smoke.log
@@ -187,21 +215,14 @@ git rev-parse HEAD | tee "$REMOTE_RUN_DIR/git_head.txt"
 
 python -m py_compile scripts/train_v3_researcher_cot_lora.py 2>&1 | tee -a "$REMOTE_RUN_DIR/lora_smoke.log"
 
-python - <<'PY' {shlex.quote(train_jsonl)}
-import json
-import sys
-rows = json.loads({rows_json!r})
-with open(sys.argv[1], "w") as f:
-    for row in rows:
-        f.write(json.dumps(row, ensure_ascii=False) + "\\n")
-print(json.dumps({{"train_jsonl": sys.argv[1], "rows": len(rows)}}, ensure_ascii=False))
-PY
+{write_train_block}
 
 python scripts/train_v3_researcher_cot_lora.py \
   --train-jsonl {shlex.quote(train_jsonl)} \
+{val_arg}\
   --output-dir {shlex.quote(output_dir)} \
   --base-model {shlex.quote(base_model)} \
-  --max-steps 1 \
+  --max-steps {max_steps} \
   --limit {train_limit} \
   --per-device-batch-size 1 \
   --grad-accum 1 \
@@ -278,7 +299,10 @@ def prepare(
     run_id: str | None,
     base_model: str,
     train_jsonl: Path | None,
+    remote_train_jsonl: str | None,
+    remote_val_jsonl: str | None,
     limit_rows: int,
+    max_steps: int,
     max_seq_length: int,
 ) -> dict[str, Any]:
     cfg = load_config(config_path)
@@ -304,7 +328,12 @@ def prepare(
 
     harness_repo = _find_harness_repo(qs_cfg)
     expected_commit = _local_git_head()
-    rows_json, data_source, train_limit = _load_rows_json(train_jsonl, limit_rows)
+    if remote_train_jsonl:
+        rows_json = None
+        data_source = remote_train_jsonl
+        train_limit = limit_rows
+    else:
+        rows_json, data_source, train_limit = _load_rows_json(train_jsonl, limit_rows)
     command = _command_text(
         run_id,
         qs_cfg,
@@ -314,7 +343,10 @@ def prepare(
         rows_json,
         data_source,
         train_limit,
+        max_steps,
         max_seq_length,
+        remote_train_jsonl,
+        remote_val_jsonl,
     )
     command_path = run_dir / "qs_command_lora_smoke.sh"
     command_path.write_text(command)
@@ -353,7 +385,9 @@ def prepare(
         "training": {
             "base_model": base_model,
             "data_source": data_source,
-            "max_steps": 1,
+            "remote_train_jsonl": remote_train_jsonl,
+            "remote_val_jsonl": remote_val_jsonl,
+            "max_steps": max_steps,
             "limit": train_limit,
             "max_seq_length": max_seq_length,
             "no_merge": True,
@@ -380,16 +414,24 @@ def main() -> None:
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--base-model", default=DEFAULT_SMALL_MODEL)
     parser.add_argument("--train-jsonl", default=None)
+    parser.add_argument("--remote-train-jsonl", default=None)
+    parser.add_argument("--remote-val-jsonl", default=None)
     parser.add_argument("--limit-rows", type=int, default=8)
+    parser.add_argument("--max-steps", type=int, default=1)
     parser.add_argument("--max-seq-length", type=int, default=256)
     args = parser.parse_args()
+    if args.train_jsonl and args.remote_train_jsonl:
+        raise SystemExit("--train-jsonl and --remote-train-jsonl are mutually exclusive")
     summary = prepare(
         Path(args.config),
         Path(args.output_dir),
         args.run_id,
         args.base_model,
         Path(args.train_jsonl) if args.train_jsonl else None,
+        args.remote_train_jsonl,
+        args.remote_val_jsonl,
         args.limit_rows,
+        args.max_steps,
         args.max_seq_length,
     )
     print(json.dumps(summary, indent=2, ensure_ascii=False, sort_keys=True))
