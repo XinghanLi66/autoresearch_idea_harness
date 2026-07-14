@@ -98,7 +98,9 @@ cd {clone_dir}
 git rev-parse HEAD | tee "$REMOTE_RUN_DIR/git_head.txt"
 echo "[qs-grpo] expected_commit={head}" | tee -a "$REMOTE_RUN_DIR/grpo.log"
 
-python3 -c "import transformers, peft, numpy; print('deps ok')" | tee -a "$REMOTE_RUN_DIR/grpo.log"
+python3 -c "import transformers, numpy; print('deps ok')" | tee -a "$REMOTE_RUN_DIR/grpo.log"
+# NOTE: do not import peft here — on this image peft requires the transformers.modeling_layers
+# shim, which the trainer applies before importing peft.
 python3 -m py_compile scripts/train_v3_researcher_cot_grpo.py
 
 python3 scripts/train_v3_researcher_cot_grpo.py \\
