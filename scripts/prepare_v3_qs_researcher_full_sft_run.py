@@ -131,6 +131,8 @@ def _command_text(
     master_port: int,
     remote_run_family: str,
     restore_mode: str,
+    save_steps_override: int | None,
+    eval_steps_override: int | None,
 ) -> str:
     remote_root = str(qs_cfg["remote_project_root"]).rstrip("/")
     remote_run_dir = f"{remote_root}/{remote_run_family}/{run_id}"
@@ -140,8 +142,8 @@ def _command_text(
     clone_dir = f"{remote_run_dir}/src/autoresearch_idea_harness"
     output_dir = f"{remote_run_dir}/output"
     restore_output_dir = f"{remote_run_dir}/restore_output"
-    save_steps = 1 if max_steps <= 2 else 50
-    eval_steps = 1 if max_steps <= 2 else 50
+    save_steps = save_steps_override if save_steps_override is not None else (1 if max_steps <= 2 else 50)
+    eval_steps = eval_steps_override if eval_steps_override is not None else (1 if max_steps <= 2 else 50)
     first_train = _torchrun_block(
         nproc_per_node=nproc_per_node,
         master_port=master_port,
@@ -434,6 +436,8 @@ def prepare(
     master_port: int,
     remote_run_family: str,
     restore_mode: str,
+    save_steps: int | None,
+    eval_steps: int | None,
 ) -> dict[str, Any]:
     cfg = load_config(config_path)
     qs_cfg = dict(cfg.get("v3_training", {}).get("qs") or {})
@@ -477,6 +481,8 @@ def prepare(
         master_port=master_port,
         remote_run_family=remote_run_family,
         restore_mode=restore_mode,
+        save_steps_override=save_steps,
+        eval_steps_override=eval_steps,
     )
     command_path = run_dir / "qs_command_full_sft.sh"
     command_path.write_text(command)
@@ -527,6 +533,8 @@ def prepare(
             "nproc_per_node": nproc_per_node,
             "fsdp": "full_shard auto_wrap",
             "remote_run_family": remote_run_family,
+            "save_steps": save_steps,
+            "eval_steps": eval_steps,
         },
         "artifacts": {
             "command": str(command_path),
@@ -561,6 +569,8 @@ def main() -> None:
     parser.add_argument("--master-port", type=int, default=29517)
     parser.add_argument("--remote-run-family", default="qs_researcher_full_sft")
     parser.add_argument("--restore-mode", choices=["model_reload", "trainer_resume"], default="model_reload")
+    parser.add_argument("--save-steps", type=int, default=None)
+    parser.add_argument("--eval-steps", type=int, default=None)
     args = parser.parse_args()
     summary = prepare(
         config_path=Path(args.config),
@@ -580,6 +590,8 @@ def main() -> None:
         master_port=args.master_port,
         remote_run_family=args.remote_run_family,
         restore_mode=args.restore_mode,
+        save_steps=args.save_steps,
+        eval_steps=args.eval_steps,
     )
     print(json.dumps(summary, indent=2, ensure_ascii=False, sort_keys=True))
 
