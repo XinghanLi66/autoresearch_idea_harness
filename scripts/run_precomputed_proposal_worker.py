@@ -135,7 +135,7 @@ def _invoke_claude_worker(
     workspace = sample_dir / "workspace"
     prompt_file = sample_dir / "worker_prompt.txt"
     log_file = sample_dir / "worker.log"
-    claude_cmd = str((cfg.get("end_to_end") or {}).get("claude_cmd", "/newcpfs/lxh/claude-home-agent1/run_claude.sh"))
+    claude_cmd = os.environ.get("CLAUDE_CMD") or str((cfg.get("end_to_end") or {}).get("claude_cmd", "claude"))
     cmd = [
         claude_cmd,
         "-p",

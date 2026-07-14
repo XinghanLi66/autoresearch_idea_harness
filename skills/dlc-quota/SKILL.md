@@ -5,6 +5,9 @@ description: Use before selecting a PAI-DLC workspace/quota, launching a DLC job
 
 # DLC Quota Selection
 
+> **INTERNAL:** This skill targets the lab's Alibaba PAI-DLC quota pools and is
+> not needed for external reproduction (see REPRODUCE.md).
+
 Use this skill before any PAI-DLC launch, retry, or quota decision.
 
 ## Required Command
@@ -34,7 +37,7 @@ If sandbox blocks the local credential endpoint or DLC API, rerun the same comma
 - Prefer the pool with the lowest `waiting` count.
 - Break ties by lower `running`, then lower `stopping`.
 - If every pool is `UNKNOWN`, do not launch.
-- If the selected job command depends on `/newcpfs`, dry-run payload must include `DataSources` with `MountPath=/newcpfs`.
+- If the selected job command depends on the shared cluster filesystem, the dry-run payload must include `DataSources` with the matching `MountPath`.
 - Always inspect the dry-run payload before real submit and confirm `WorkspaceId`, `ResourceId`, `Priority`, `Image`, `DataSources`, and command file.
 
 ## Manual Console Snapshot

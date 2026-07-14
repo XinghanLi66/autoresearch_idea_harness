@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction (see REPRODUCE.md).
 """Fail-closed PAI-DLC quota availability checker.
 
 This replaces ad-hoc quota polling that treated API failures as empty queues.
@@ -30,7 +31,7 @@ from typing import Any
 
 DEFAULT_ENDPOINT = "pai-dlc.ap-southeast-1.aliyuncs.com"
 DEFAULT_CREDENTIAL_URI = "http://localhost:7002/api/v1/credentials/0"
-PAI = Path("/root/.claude/skills/pai/scripts/pai_manage.py")
+PAI = Path(os.environ.get("PAI_MANAGE", "/root/.claude/skills/pai/scripts/pai_manage.py"))
 
 POOLS = [
     {"workspace": "224239", "quota": "quota1ecrg95m4n9", "label": "M0-Dots_V3"},

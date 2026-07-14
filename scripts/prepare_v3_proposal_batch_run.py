@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction (see REPRODUCE.md).
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import sys
 import time
@@ -85,7 +87,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
             [
                 "#!/usr/bin/env bash",
                 "set -euo pipefail",
-                "cd /newcpfs/lxh/agentic-training/autoresearch_idea_harness",
+                f"cd {ROOT}",
                 'POD_NAME="${K8S_POD_NAME:-${POD_NAME:-${HOSTNAME:-}}}"',
                 'echo "[proposal-batch] pod guard: ${POD_NAME}"',
                 'if [[ "${POD_NAME}" == *aimaster* ]]; then',
@@ -107,7 +109,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     job_name = args.job_name or f"v3_proposal_batch_{int(time.time())}"
     create_args = [
         "python",
-        "/root/.claude/skills/pai/scripts/pai_manage.py",
+        os.environ.get("PAI_MANAGE", "/root/.claude/skills/pai/scripts/pai_manage.py"),
         "create-job",
         "--endpoint",
         str(dlc.get("endpoint")),
@@ -175,8 +177,8 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     submit_file.chmod(0o755)
 
     errors = _validate_final_model(model_dir)
-    if not any(ds.get("mount") == "/newcpfs" and ds.get("id") for ds in dlc.get("data_sources") or []):
-        errors.append("DLC data_sources must include /newcpfs with an id")
+    if not any(ds.get("mount") and ds.get("id") for ds in dlc.get("data_sources") or []):
+        errors.append("DLC data_sources must include a mounted datasource with an id")
     for key in ("endpoint", "workspace_id", "resource_id", "image"):
         if not dlc.get(key):
             errors.append(f"missing v3_training.dlc.{key}")
@@ -219,7 +221,7 @@ def main() -> int:
     parser.add_argument("--model-dir", type=Path, default=DEFAULT_MODEL_DIR)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "runs" / "v3_checkpoint_proposal_batch" / "dlc_mls10_strict1000")
     parser.add_argument("--job-name", default="v3_proposal_batch_mls10_strict1000")
-    parser.add_argument("--python-bin", default="/newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python")
+    parser.add_argument("--python-bin", default=sys.executable)
     parser.add_argument("--tasks", nargs="*", default=None)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--max-new-tokens", type=int, default=1600)

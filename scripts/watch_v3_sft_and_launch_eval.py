@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction (see REPRODUCE.md).
 from __future__ import annotations
 
 import argparse
@@ -13,7 +14,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PAI = Path("/root/.claude/skills/pai/scripts/pai_manage.py")
+PAI = Path(os.environ.get("PAI_MANAGE", "/root/.claude/skills/pai/scripts/pai_manage.py"))
 ENDPOINT = "pai-dlc.ap-southeast-1.aliyuncs.com"
 CREDENTIAL_URI = "http://localhost:7002/api/v1/credentials/0"
 

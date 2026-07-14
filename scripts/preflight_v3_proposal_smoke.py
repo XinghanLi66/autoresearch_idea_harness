@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction (see REPRODUCE.md).
 """Fail-closed preflight for a V3 checkpoint proposal smoke DLC run.
 
 This script does not submit jobs and does not query PAI. It verifies local
@@ -131,8 +132,8 @@ def validate_files(run_dir: Path, plan: dict[str, Any], errors: list[str], warni
     if job_config_path.exists():
         job_cfg = yaml.safe_load(job_config_path.read_text()) or {}
         data_sources = job_cfg.get("data_sources") or []
-        if not any(ds.get("mount") == "/newcpfs" and ds.get("id") for ds in data_sources if isinstance(ds, dict)):
-            add_error(errors, "pai_job_config.yaml must mount /newcpfs with a datasource id")
+        if not any(ds.get("mount") and ds.get("id") for ds in data_sources if isinstance(ds, dict)):
+            add_error(errors, "pai_job_config.yaml must include a mounted datasource with an id")
 
     output_dir = Path(str(plan.get("output_dir") or ""))
     try:

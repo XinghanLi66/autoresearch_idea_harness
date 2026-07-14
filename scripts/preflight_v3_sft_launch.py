@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction (see REPRODUCE.md).
 """Fail-closed preflight for launching a V3 SFT DLC job.
 
 This script does not submit jobs. It verifies that the prepared chronological
@@ -218,8 +219,8 @@ def validate_run_plan(run_dir: Path, min_train_rows: int, require_priority: int)
     if int(dlc.get("gpus", 0)) != 8:
         add_warning(warnings, f"dlc gpus={dlc.get('gpus')}, expected 8 for smoke 32B run")
     data_sources = dlc.get("data_sources") or []
-    if not any(ds.get("mount") == "/newcpfs" and ds.get("id") for ds in data_sources if isinstance(ds, dict)):
-        add_error(errors, "dlc data_sources must include an id mounted at /newcpfs")
+    if not any(ds.get("mount") and ds.get("id") for ds in data_sources if isinstance(ds, dict)):
+        add_error(errors, "dlc data_sources must include a mounted datasource with an id")
     command_file = run_dir / "dlc_command_skeleton.sh"
     if not command_file.exists():
         add_error(errors, f"missing command file: {command_file}")
@@ -243,8 +244,8 @@ def validate_run_plan(run_dir: Path, min_train_rows: int, require_priority: int)
         add_error(errors, f"missing PAI config with data sources: {job_config}")
     else:
         job_cfg = yaml.safe_load(job_config.read_text()) or {}
-        if not any(ds.get("mount") == "/newcpfs" for ds in job_cfg.get("data_sources", []) if isinstance(ds, dict)):
-            add_error(errors, "pai_job_config.yaml does not mount /newcpfs")
+        if not any(ds.get("mount") for ds in job_cfg.get("data_sources", []) if isinstance(ds, dict)):
+            add_error(errors, "pai_job_config.yaml has no mounted datasource")
 
     return plan, errors, warnings
 

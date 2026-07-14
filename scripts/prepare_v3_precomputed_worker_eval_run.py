@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction (see REPRODUCE.md).
 from __future__ import annotations
 
 import argparse
@@ -20,7 +21,8 @@ from autoresearch_idea_harness.io import load_config, write_json
 
 DEFAULT_BATCH_ROOT = ROOT / "runs" / "v3_checkpoint_proposal_batch" / "dlc_mls10_strict1000" / "output"
 DEFAULT_TASKS = ["dl_lr_schedule", "dl_activation_function"]
-DEFAULT_CLAUDE_REAL_BIN = "/newcpfs/lxh/.local/share/claude/versions/2.1.172"
+# Real Claude Code binary used inside worker pods; set CLAUDE_REAL_BIN explicitly.
+DEFAULT_CLAUDE_REAL_BIN = os.environ.get("CLAUDE_REAL_BIN", "")
 
 
 def _quote_cmd(args: list[str | Path]) -> str:
@@ -103,7 +105,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     shell_lines = [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        "cd /newcpfs/lxh/agentic-training/autoresearch_idea_harness",
+        f"cd {ROOT}",
         'POD_NAME="${K8S_POD_NAME:-${POD_NAME:-${HOSTNAME:-}}}"',
         'echo "[worker-eval] pod guard: ${POD_NAME}"',
         'if [[ "${POD_NAME}" == *aimaster* ]]; then',
@@ -201,7 +203,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     job_name = args.job_name or f"v3_worker_eval_strict1000_{int(time.time())}"
     create_args = [
         "python",
-        "/root/.claude/skills/pai/scripts/pai_manage.py",
+        os.environ.get("PAI_MANAGE", "/root/.claude/skills/pai/scripts/pai_manage.py"),
         "create-job",
         "--endpoint",
         str(dlc.get("endpoint")),
@@ -270,8 +272,8 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     submit_file.chmod(0o755)
 
     errors = _validate_claude_real_bin(args.claude_real_bin)
-    if not any(ds.get("mount") == "/newcpfs" and ds.get("id") for ds in dlc.get("data_sources") or []):
-        errors.append("DLC data_sources must include /newcpfs with an id")
+    if not any(ds.get("mount") and ds.get("id") for ds in dlc.get("data_sources") or []):
+        errors.append("DLC data_sources must include a mounted datasource with an id")
     for key in ("endpoint", "workspace_id", "resource_id", "image"):
         if key in {"workspace_id", "resource_id"} and (args.workspace_id or args.resource_id):
             continue
@@ -334,7 +336,7 @@ def main() -> int:
     parser.add_argument("--tasks", nargs="*", default=DEFAULT_TASKS)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "runs" / "v3_precomputed_worker_eval" / "dlc_strict1000_lr_act")
     parser.add_argument("--job-name", default="v3_worker_eval_strict1000_lr_act")
-    parser.add_argument("--python-bin", default="/newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python")
+    parser.add_argument("--python-bin", default=sys.executable)
     parser.add_argument("--module-id", default="v3_sft_strict1000")
     parser.add_argument("--model-id", default="qwen25_32b_v3_sft_strict1000")
     parser.add_argument("--worker-mode", choices=["claude", "fixture", "skip"], default="claude")

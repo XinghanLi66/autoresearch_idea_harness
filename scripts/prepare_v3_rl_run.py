@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction (see REPRODUCE.md).
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import sys
 from pathlib import Path
@@ -62,7 +64,7 @@ cd {ROOT}
 
     base_args = [
         "python",
-        "/root/.claude/skills/pai/scripts/pai_manage.py",
+        os.environ.get("PAI_MANAGE", "/root/.claude/skills/pai/scripts/pai_manage.py"),
         "create-job",
         "--endpoint", str(dlc["endpoint"]),
         "--name", str(summary["run_id"]),
@@ -203,7 +205,7 @@ def main() -> None:
     p.add_argument("--sft-dir", default=str(DEFAULT_SFT_DIR))
     p.add_argument("--model-path", default=str(DEFAULT_MODEL))
     p.add_argument("--output-dir", default=str(ROOT / "runs" / "training" / "v3_rl_qwen25_32b"))
-    p.add_argument("--python-bin", default="/newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python")
+    p.add_argument("--python-bin", default=sys.executable)
     p.add_argument("--limit", type=int, default=512)
     p.add_argument("--total-training-steps", type=int, default=80)
     p.add_argument("--num-generations", type=int, default=4)

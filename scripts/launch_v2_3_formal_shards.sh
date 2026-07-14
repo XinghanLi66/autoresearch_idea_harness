@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
+# Internal multi-host sweep launcher (tmux/ssh across the lab's DSW machines) —
+# not needed for external reproduction (see REPRODUCE.md). Externally, run
+# scripts/run_formal_sweep.py directly on your own GPU node.
 set -euo pipefail
 
-PROJECT_ROOT="${PROJECT_ROOT:-/newcpfs/lxh/agentic-training}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HARNESS_DEFAULT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="${PROJECT_ROOT:-$(dirname "$HARNESS_DEFAULT")}"
 HARNESS_ROOT="$PROJECT_ROOT/autoresearch_idea_harness"
 RUN_ROOT="${RUN_ROOT:-$HARNESS_ROOT/runs/formal_sweeps/v2_3_mls10_modules9}"
-PYTHON_BIN="${PYTHON_BIN:-/newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python}"
+PYTHON_BIN="${PYTHON_BIN:-python}"
 SHARD_COUNT="${SHARD_COUNT:-32}"
 SESSION_PREFIX="${SESSION_PREFIX:-v23s}"
 

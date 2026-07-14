@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction (see REPRODUCE.md).
 from __future__ import annotations
 
 import argparse
@@ -63,7 +64,7 @@ def get_job(endpoint: str, job_id: str) -> dict[str, Any]:
     env.setdefault("ALIBABA_CLOUD_CREDENTIALS_URI", "http://localhost:7002/api/v1/credentials/0")
     cmd = [
         "python",
-        "/root/.claude/skills/pai/scripts/pai_manage.py",
+        os.environ.get("PAI_MANAGE", "/root/.claude/skills/pai/scripts/pai_manage.py"),
         "get-job",
         "--endpoint",
         endpoint,

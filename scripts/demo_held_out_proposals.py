@@ -250,9 +250,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--config", default=str(ROOT / "configs" / "default.yaml"))
     ap.add_argument("--model-dir", type=Path, default=DEFAULT_MODEL_DIR)
-    ap.add_argument("--dataset", type=Path,
-                    default=Path("/newcpfs/lxh/agentic-training/proposal_rl/runs/dataset/train.jsonl"),
-                    help="jsonl of candidate records (need arxiv_id, refs, created)")
+    ap.add_argument("--dataset", type=Path, default=None,
+                    help="jsonl of candidate records (need arxiv_id, refs, created); "
+                         "defaults to <dataset_dir>/train.jsonl from the config")
     ap.add_argument("--n-papers", type=int, default=5)
     ap.add_argument("--month", default="2505", help="arxiv month prefix filter, e.g. 2505; empty for any")
     ap.add_argument("--min-refs", type=int, default=15)
@@ -268,6 +268,8 @@ def main() -> None:
     args = ap.parse_args()
 
     cfg = load_config(args.config)
+    if args.dataset is None:
+        args.dataset = Path(cfg["dataset_dir"]) / "train.jsonl"
     caches = load_prompt_property_caches(cfg)
     training_ids = load_training_ids()
     print(f"[demo] training_ids(strict929)={len(training_ids)}", flush=True)
