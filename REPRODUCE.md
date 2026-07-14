@@ -69,7 +69,7 @@ train/val/test splits, 928 usable training rows):
 
 ```bash
 # https://huggingface.co/datasets/<HF_NAMESPACE>/arxiv-proposal-cot-sft-32b-v2 (fill <HF_NAMESPACE> after upload)
-huggingface-cli download <https://huggingface.co/datasets/<HF_NAMESPACE>/arxiv-proposal-cot-sft-32b-v2> --repo-type dataset \
+huggingface-cli download <HF_NAMESPACE>/arxiv-proposal-cot-sft-32b-v2 --repo-type dataset \
   --local-dir runs/training_data/v3_0_sft
 ```
 
