@@ -177,9 +177,12 @@ def main() -> None:
         if not j:
             return False
         subs = [j.get(k, 0) for k in ("faithfulness", "clarity_of_core", "non_triviality", "creativity")]
+        # NOTE: we do NOT require names_researcher — the SFT sample names the researcher via the
+        # conditioned system prompt, so penalizing the cot for not self-naming would wrongly drop
+        # good data. Anchors are kept (they teach the Core idea / Non-trivial crux format).
         return (j.get("verdict") == "keep" and all(s >= args.min_sub_score for s in subs)
                 and j.get("fingerprint", 0) >= args.min_fingerprint and not j.get("impl_leak", True)
-                and j.get("has_anchors", False) and j.get("names_researcher", False))
+                and j.get("has_anchors", False))
 
     for r in recs:
         r["kept"] = keeps(r)
