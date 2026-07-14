@@ -40,6 +40,10 @@ def main() -> None:
     p.add_argument("--worker-timeout", type=int, default=7200)
     p.add_argument("--max-turns", type=int, default=30)
     p.add_argument("--max-master-advice", type=int, default=1)
+    p.add_argument("--free-hparams", action="store_true",
+                   help="Allow the worker to choose its own training hyperparameters "
+                        "(LR, batch size, epochs, etc.). Loosens Rule 3. Use for "
+                        "evaluating optimisation/training-recipe proposals.")
     p.add_argument("--force", action="store_true")
     p.add_argument("--write-thresholds", action="store_true",
                    help="For calibration mode, update configs/v2_3_thresholds.json.")
@@ -83,6 +87,7 @@ def main() -> None:
         worker_timeout=args.worker_timeout,
         max_turns=args.max_turns,
         max_master_advice=args.max_master_advice,
+        free_hparams=args.free_hparams,
         force=args.force,
         write_thresholds=args.write_thresholds,
         max_new_tokens=args.max_new_tokens,

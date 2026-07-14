@@ -72,6 +72,7 @@ class EndToEndOptions:
     worker_timeout: int = 7200
     max_turns: int = 30
     max_master_advice: int = 1
+    free_hparams: bool = False  # allow worker to choose own training hyperparameters
     output_dir: Path | None = None
 
 
@@ -393,7 +394,7 @@ class EndToEndRunner:
 
     def _fixture_worker(self, task, task_packet: dict[str, Any], proposal: dict[str, Any], worker_dir: Path) -> dict[str, Any]:
         self.events.emit("fixture_worker_started", proposal_id=proposal["proposal_id"])
-        prompt = worker_prompt(task_packet, proposal["text"])
+        prompt = worker_prompt(task_packet, proposal["text"], free_hparams=self.opts.free_hparams)
         (worker_dir / "worker_prompt.txt").write_text(prompt)
         (worker_dir / "worker.log").write_text("fixture worker: no Claude Code call\n")
         (worker_dir / "eval.log").write_text("fixture eval log\n")
@@ -415,7 +416,10 @@ class EndToEndRunner:
         dialogue_path.write_text("")
         result: dict[str, Any] = {"status": "error", "error": "worker did not run"}
         for attempt in range(self.opts.max_master_advice + 1):
-            prompt_text = worker_prompt(task_packet, proposal["text"], advice=advice)
+            prompt_text = worker_prompt(
+                task_packet, proposal["text"], advice=advice,
+                free_hparams=self.opts.free_hparams,
+            )
             (worker_dir / "worker_prompt.txt").write_text(prompt_text)
             self.events.emit("worker_attempt_started", proposal_id=proposal["proposal_id"], attempt=attempt)
             t0 = time.time()

@@ -253,7 +253,7 @@ def run_worker(args: argparse.Namespace) -> dict[str, Any]:
 
     workspace = sample_dir / "workspace"
     task.setup_workspace(workspace)
-    prompt_text = worker_prompt(task_packet, proposal_text)
+    prompt_text = worker_prompt(task_packet, proposal_text, free_hparams=getattr(args, "free_hparams", False))
     (sample_dir / "worker_prompt.txt").write_text(prompt_text)
     (sample_dir / "master_worker_dialogue.jsonl").write_text("")
 
@@ -346,6 +346,9 @@ def main() -> int:
     parser.add_argument("--worker-timeout", type=int, default=7200)
     parser.add_argument("--result-wait-timeout", type=int, default=7200)
     parser.add_argument("--no-eval-wait-timeout", type=int, default=180)
+    parser.add_argument("--free-hparams", action="store_true",
+                       help="Allow the worker to choose its own training hyperparameters "
+                            "(LR, batch size, epochs, etc.). Loosens Rule 3.")
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
     summary = run_worker(args)

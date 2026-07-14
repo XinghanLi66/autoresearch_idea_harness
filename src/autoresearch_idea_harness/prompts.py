@@ -168,7 +168,27 @@ def master_advice_prompt(
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
-def worker_prompt(task_packet: dict[str, Any], proposal_text: str, advice: list[str] | None = None) -> str:
+def worker_prompt(
+    task_packet: dict[str, Any],
+    proposal_text: str,
+    advice: list[str] | None = None,
+    *,
+    free_hparams: bool = False,
+) -> str:
+    """Generate the worker prompt.
+
+    Args:
+        task_packet:   Task context dict (from task.task_packet()).
+        proposal_text: The proposal to implement (empty = worker-only control).
+        advice:        Optional master advice strings accumulated so far.
+        free_hparams:  If True, use the "freer worker" variant that allows the
+                       worker to choose its own training hyperparameters (learning
+                       rate, batch size, number of epochs, etc.) rather than being
+                       constrained to the default training configuration. Use this
+                       when evaluating proposals that are themselves about novel
+                       training recipes or optimisation ideas — a constrained worker
+                       cannot surface the quality of such proposals.
+    """
     advice_block = ""
     if advice:
         advice_block = "\n\n## Master Advice So Far\n" + "\n\n".join(
@@ -203,13 +223,28 @@ def worker_prompt(task_packet: dict[str, Any], proposal_text: str, advice: list[
         "No proposal is provided; implement your own strongest idea from task context."
         if empty_control else proposal_text
     )
+
+    # Rule 3 varies by mode: constrained (default) vs free-hparams
+    if free_hparams:
+        rule3 = (
+            "3. You MAY adjust training hyperparameters (learning rate, batch size, "
+            "number of epochs, warmup schedule, optimiser settings) if the proposal "
+            "calls for it or if you judge them suboptimal for your implementation. "
+            "You must NOT change the evaluation metric, dataset split, or result "
+            "reporting format. The HMAC-signed result.json must still be produced.\n"
+        )
+    else:
+        rule3 = (
+            "3. Do not change the evaluation setup, dataset, metric, epochs, "
+            "architecture, or result reporting.\n"
+        )
+
     return (
         opening +
         "## Rules\n\n"
         f"{first_rule}"
         f"2. {edit_rule}\n"
-        "3. Do not change the evaluation setup, dataset, metric, epochs, architecture, "
-        "or result reporting.\n"
+        f"{rule3}"
         "4. Run `bash run.sh result.json` after your changes.\n"
         "   CRITICAL: call the Bash tool directly with timeout=7200000 — do NOT use "
         "run_in_background, the Task tool, or any other async mechanism. The command "

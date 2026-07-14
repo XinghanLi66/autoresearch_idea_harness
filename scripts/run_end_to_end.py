@@ -27,6 +27,10 @@ def main() -> None:
     p.add_argument("--worker-timeout", type=int, default=7200)
     p.add_argument("--max-turns", type=int, default=30)
     p.add_argument("--max-master-advice", type=int, default=1)
+    p.add_argument("--free-hparams", action="store_true",
+                   help="Allow the worker to choose its own training hyperparameters "
+                        "(LR, batch size, epochs, etc.). Use for evaluating proposals "
+                        "that are themselves novel optimisation/training-recipe ideas.")
     p.add_argument("--output-dir", default=None)
     args = p.parse_args()
 
@@ -45,6 +49,7 @@ def main() -> None:
         worker_timeout=args.worker_timeout,
         max_turns=args.max_turns,
         max_master_advice=args.max_master_advice,
+        free_hparams=args.free_hparams,
         output_dir=Path(args.output_dir) if args.output_dir else None,
     )
     summary = run_end_to_end(cfg, opts)

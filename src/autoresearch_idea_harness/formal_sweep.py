@@ -139,6 +139,7 @@ class SweepOptions:
     worker_timeout: int = 7200
     max_turns: int = 30
     max_master_advice: int = 1
+    free_hparams: bool = False  # allow worker to choose own training hyperparameters
     force: bool = False
     write_thresholds: bool = False
     max_new_tokens: int = 2048
@@ -492,7 +493,7 @@ class FormalSweepRunner:
             return result
         workspace = sample_dir / "workspace"
         task.setup_workspace(workspace)
-        prompt_text = worker_prompt(task_packet, proposal.get("text", ""))
+        prompt_text = worker_prompt(task_packet, proposal.get("text", ""), free_hparams=self.opts.free_hparams)
         (sample_dir / "worker_prompt.txt").write_text(prompt_text)
         (sample_dir / "master_worker_dialogue.jsonl").write_text("")
         if self.opts.worker_mode == "fixture":
