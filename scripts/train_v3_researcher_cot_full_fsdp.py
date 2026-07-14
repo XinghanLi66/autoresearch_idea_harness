@@ -423,6 +423,17 @@ def main() -> None:
     log(f"model_loaded_s={time.time() - load_start:.1f}")
 
     collator = PaddingCollator(tokenizer=tokenizer, max_length=args.max_seq_length)
+
+    from transformers import TrainerCallback
+
+    class _EmptyCacheAfterEval(TrainerCallback):
+        """Free eval-loop allocator residue; at 32B full-param the margin is ~1GB and the
+        post-eval training step OOMs otherwise (observed twice at step 101)."""
+
+        def on_evaluate(self, *a, **k):
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -430,6 +441,7 @@ def main() -> None:
         eval_dataset=eval_ds,
         data_collator=collator,
         processing_class=tokenizer,
+        callbacks=[_EmptyCacheAfterEval()],
     )
 
     train_start = time.time()
