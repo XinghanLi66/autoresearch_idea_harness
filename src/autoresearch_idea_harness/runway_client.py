@@ -17,11 +17,26 @@ class ChatResult:
 
 
 class RunwayClient:
-    """Small OpenAI-compatible client for the internal Runway endpoint."""
+    """Small OpenAI-compatible client for the INTERNAL Runway LLM proxy.
+
+    Runway is an internal-only gateway; there is intentionally no default base
+    URL. Configure it via `llm.runway_base_url` in the config or the
+    RUNWAY_BASE_URL environment variable. External users should use the
+    standard Anthropic API path instead (see README "External reproducibility
+    scope").
+    """
 
     def __init__(self, cfg: dict[str, Any], key_env: str) -> None:
         llm_cfg = cfg.get("llm", {})
-        self.base_url = str(llm_cfg.get("runway_base_url", "https://runway.devops.rednote.life")).rstrip("/")
+        base_url = llm_cfg.get("runway_base_url") or os.environ.get("RUNWAY_BASE_URL") or ""
+        self.base_url = str(base_url).rstrip("/")
+        if not self.base_url:
+            raise RuntimeError(
+                "Runway base URL is not configured. Runway is an internal-only LLM proxy; "
+                "set llm.runway_base_url in configs/default.yaml or export RUNWAY_BASE_URL "
+                "if you have access to it. For public/external use, switch to the standard "
+                "Anthropic API (e.g. the `claude` generator with ANTHROPIC_API_KEY) instead."
+            )
         self.api_version = str(llm_cfg.get("chat_api_version", "2024-12-01-preview"))
         self.timeout = float(llm_cfg.get("timeout", 300))
         self.api_key = os.environ.get(key_env)

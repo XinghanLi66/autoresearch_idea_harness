@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# INTERNAL-ONLY helper: local HTTP proxy that translates Anthropic Messages API
+# requests onto the internal Runway LLM gateway. Not needed for external
+# reproduction (see REPRODUCE.md) — external users call the Anthropic API
+# directly with ANTHROPIC_API_KEY. Requires RUNWAY_BASE_URL to be set; there is
+# intentionally no default gateway URL.
 from __future__ import annotations
 
 import argparse
@@ -15,7 +20,6 @@ from urllib.parse import urlparse
 import httpx
 
 
-DEFAULT_RUNWAY_BASE = "https://runway.devops.rednote.life"
 DEFAULT_RAW_PREDICT_PATH = "/openai/google/anthropic/v1:rawPredict"
 DEFAULT_BEDROCK_INVOKE_PATH = "/openai/bedrock_runtime/model/invoke"
 CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"
@@ -365,7 +369,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
         api_key = os.environ.get(key_env)
         if not api_key:
             raise RuntimeError(f"{key_env} is not set")
-        base = os.environ.get("RUNWAY_BASE_URL", DEFAULT_RUNWAY_BASE).rstrip("/")
+        base = os.environ.get("RUNWAY_BASE_URL", "").rstrip("/")
+        if not base:
+            raise RuntimeError("RUNWAY_BASE_URL is not set (internal-only Runway gateway)")
         url = base + DEFAULT_RAW_PREDICT_PATH
         headers = {"api-key": api_key, "Content-Type": "application/json"}
         timeout = float(os.environ.get("RUNWAY_PROXY_TIMEOUT", "600"))
@@ -381,7 +387,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
         api_key = os.environ.get(key_env)
         if not api_key:
             raise RuntimeError(f"{key_env} is not set")
-        base = os.environ.get("RUNWAY_BASE_URL", DEFAULT_RUNWAY_BASE).rstrip("/")
+        base = os.environ.get("RUNWAY_BASE_URL", "").rstrip("/")
+        if not base:
+            raise RuntimeError("RUNWAY_BASE_URL is not set (internal-only Runway gateway)")
         url = base + DEFAULT_BEDROCK_INVOKE_PATH
         headers = {"token": api_key, "Content-Type": "application/json"}
         timeout = float(os.environ.get("RUNWAY_PROXY_TIMEOUT", "600"))

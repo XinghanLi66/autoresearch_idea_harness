@@ -141,9 +141,19 @@ class ClaudeGenerator(ProposalGenerator):
     def generate(self, packet: dict[str, Any]) -> str:
         import anthropic
 
-        base_url = os.environ.get("ANTHROPIC_BASE_URL", "http://10.39.10.241:10001")
-        api_key = os.environ.get("ANTHROPIC_API_KEY") or "123"
-        client = anthropic.Anthropic(api_key=api_key, base_url=base_url, timeout=180.0, max_retries=2)
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise RuntimeError(
+                "ANTHROPIC_API_KEY is not set. The `claude` generator calls the standard "
+                "Anthropic API; create a key at https://console.anthropic.com/ and export "
+                "ANTHROPIC_API_KEY (or add it to .env). ANTHROPIC_BASE_URL may optionally "
+                "point at a compatible gateway."
+            )
+        client_kwargs: dict[str, Any] = {"api_key": api_key, "timeout": 180.0, "max_retries": 2}
+        base_url = os.environ.get("ANTHROPIC_BASE_URL")
+        if base_url:
+            client_kwargs["base_url"] = base_url
+        client = anthropic.Anthropic(**client_kwargs)
         prompt = (
             "You are an autoresearch idea proposal model. Based on the evidence packet below, "
             "write one structured, implementable research proposal. Do not mention that you are "
