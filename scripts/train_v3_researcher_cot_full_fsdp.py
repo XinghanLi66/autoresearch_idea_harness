@@ -71,9 +71,6 @@ os.environ.setdefault("NCCL_DEBUG", "WARN")
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 import torch
-from datasets import Dataset
-from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments
-from transformers.trainer_utils import get_last_checkpoint
 
 
 def _patch_transformers_modeling_layers() -> None:
@@ -129,6 +126,10 @@ def _patch_broken_apex_amp() -> None:
 
 _patch_transformers_modeling_layers()
 _patch_broken_apex_amp()
+
+from datasets import Dataset
+from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments
+from transformers.trainer_utils import get_last_checkpoint
 
 
 DEFAULT_BASE_MODEL = "/mnt/3fs/lxh/agentic-training/models/Qwen2.5-32B-Instruct"
