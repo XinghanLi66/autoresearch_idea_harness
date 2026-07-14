@@ -313,8 +313,9 @@ def build_training_args(args: argparse.Namespace) -> TrainingArguments:
         max_grad_norm=args.max_grad_norm,
         bf16=True,
         tf32=True,
-        gradient_checkpointing=True,
-        gradient_checkpointing_kwargs={"use_reentrant": False},
+        # For FSDP full_shard, use activation_checkpointing in fsdp_config
+        # instead of Trainer gradient_checkpointing to avoid redundant all-gather.
+        gradient_checkpointing=False,
         fsdp="full_shard auto_wrap",
         fsdp_config=fsdp_config,
         logging_steps=args.logging_steps,
