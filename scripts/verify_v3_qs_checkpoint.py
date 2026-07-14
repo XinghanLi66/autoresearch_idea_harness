@@ -24,6 +24,7 @@ from train_v3_researcher_cot_grpo import (  # noqa: E402  (reuse shims + reward)
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--model", required=True)
+    ap.add_argument("--adapter", default=None, help="optional LoRA adapter dir (post-RL verification)")
     ap.add_argument("--val-jsonl", required=True)
     ap.add_argument("--reward-heads-dir", required=True)
     ap.add_argument("--n", type=int, default=4)
@@ -50,6 +51,11 @@ def main() -> None:
         tok.pad_token = tok.eos_token
     t0 = time.time()
     model = AutoModelForCausalLM.from_pretrained(args.model, torch_dtype=torch.bfloat16, device_map="cuda")
+    if args.adapter:
+        from peft import PeftModel  # shims already applied via the trainer import above
+        model = PeftModel.from_pretrained(model, args.adapter)
+        model = model.merge_and_unload()
+        print(f"[verify] merged adapter {args.adapter}", flush=True)
     model.eval()
     print(f"[verify] model loaded in {time.time()-t0:.0f}s", flush=True)
 
