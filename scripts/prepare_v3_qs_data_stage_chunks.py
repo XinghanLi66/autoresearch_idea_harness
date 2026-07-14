@@ -50,14 +50,17 @@ def _payload(path: Path, remote_name: str, chunk_chars: int) -> dict[str, Any]:
     }
 
 
-def _qs_create_script(qs_cfg: dict[str, Any], command_path: Path, *, submit: bool) -> str:
+def _qs_create_script(qs_cfg: dict[str, Any], command_path: Path, *, submit: bool, name_prefix: str = "") -> str:
+    # QS rejects duplicate trial names ("任务名已存在"); a bare file stem collides across
+    # staging runs (same step filenames every run), so scope the name with a run prefix.
+    trial_name = f"{name_prefix}{command_path.stem}" if name_prefix else command_path.stem
     args = ["qs", "training", "create"]
     if not submit:
         args.append("--dry-run")
     args.extend(
         [
             "--name",
-            command_path.stem,
+            trial_name,
             "--image",
             str(qs_cfg["image"]),
             "--queue-id",
@@ -226,6 +229,8 @@ def prepare(
     if not remote_data_dir:
         remote_data_dir = f"{remote_root}/data/researcher_cot/prejudge_v1"
 
+    name_prefix = re.sub(r"[^a-zA-Z0-9_-]+", "", run_id)[-20:] + "_"
+
     payloads = [_payload(train_jsonl, "train.jsonl", chunk_chars)]
     if val_jsonl:
         payloads.append(_payload(val_jsonl, "val.jsonl", chunk_chars))
@@ -240,8 +245,8 @@ def prepare(
             command_path.chmod(0o755)
             dry = run_dir / f"{name}.dry_run.sh"
             submit = run_dir / f"{name}.submit.sh"
-            dry.write_text(_qs_create_script(qs_cfg, command_path, submit=False))
-            submit.write_text(_qs_create_script(qs_cfg, command_path, submit=True))
+            dry.write_text(_qs_create_script(qs_cfg, command_path, submit=False, name_prefix=name_prefix))
+            submit.write_text(_qs_create_script(qs_cfg, command_path, submit=True, name_prefix=name_prefix))
             dry.chmod(0o755)
             submit.chmod(0o755)
             steps.append(
@@ -263,8 +268,8 @@ def prepare(
     final_command.chmod(0o755)
     final_dry = run_dir / f"{final_name}.dry_run.sh"
     final_submit = run_dir / f"{final_name}.submit.sh"
-    final_dry.write_text(_qs_create_script(qs_cfg, final_command, submit=False))
-    final_submit.write_text(_qs_create_script(qs_cfg, final_command, submit=True))
+    final_dry.write_text(_qs_create_script(qs_cfg, final_command, submit=False, name_prefix=name_prefix))
+    final_submit.write_text(_qs_create_script(qs_cfg, final_command, submit=True, name_prefix=name_prefix))
     final_dry.chmod(0o755)
     final_submit.chmod(0o755)
     steps.append(
