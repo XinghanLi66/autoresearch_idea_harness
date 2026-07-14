@@ -1,0 +1,29 @@
+# Pinned versions taken from the environment used for the V2 runs.
+# Python 3.10+ recommended.
+
+# Core pipeline (data build, collate, prompts, reports)
+PyYAML==6.0.3
+httpx==0.28.1
+numpy==1.26.4
+pandas==2.2.3
+pyarrow==23.0.1
+
+# LLM clients (eval / proposal generation via the Anthropic API)
+anthropic==0.75.0
+
+# Local checkpoint inference and SFT data prep
+torch==2.10.0
+transformers==5.5.0
+
+# TUI dashboards (scripts/dashboard_tui.py, scripts/dashboard_v3_tui.py)
+textual==8.2.5
+
+# --- Optional / internal-only extras -----------------------------------------
+# RL experiments (scripts/run_v3_rl.py, scripts/v3_verl_reward.py) — internal only,
+# not needed for the external V2 reproduction path:
+# omegaconf==2.3.0
+# verl==0.7.1
+# sentence-transformers==3.3.1
+#
+# MLE-Bench grading (scripts/mle_grade.py) requires mlebench installed from
+# source: https://github.com/openai/mle-bench (pinned locally at 1.0.0).
