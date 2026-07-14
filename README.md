@@ -12,11 +12,62 @@ paper bank -> evidence packets -> proposal generators -> expert forecasts -> rep
 The MVP is train-ready but does not train a model.  It builds auditable JSONL
 artifacts that can later feed SFT, reward modeling, or RL.
 
+## Setup
+
+```bash
+git clone https://github.com/XinghanLi66/autoresearch_idea_harness.git
+cd autoresearch_idea_harness
+
+python -m venv .venv && source .venv/bin/activate   # or use conda
+pip install -r requirements.txt
+
+cp .env.example .env   # then fill in ANTHROPIC_API_KEY (see below)
+```
+
+All paths in `configs/default.yaml` are repo-relative by default and are
+resolved against the repository root (env vars like `${MODEL_DIR}` and `~` are
+expanded). Point `data/`, `external/`, and `models/` at your own copies, or
+edit the config.
+
+To use a local copy of the 32B base model, download it from the HuggingFace
+hub and set `MODEL_DIR`:
+
+```bash
+huggingface-cli download Qwen/Qwen2.5-32B-Instruct \
+  --local-dir "$MODEL_DIR/Qwen/Qwen2.5-32B-Instruct"
+```
+
+If `MODEL_DIR` is unset, the registry entry falls back to the hub id
+`Qwen/Qwen2.5-32B-Instruct` and `transformers` downloads it on demand.
+
+## External reproducibility scope
+
+Everything you need for the external reproduction path is public:
+
+- **External (reproducible with this repo + your own hardware/keys):**
+  collate the released V2 SFT dataset -> prepare the chronological SFT run
+  (`scripts/prepare_v3_sft_run.py`) -> train the 32B LoRA SFT with `torchrun`
+  on your own 8-GPU node (training entry point lives in the sibling
+  [`proposal_rl`](../proposal_rl) repo, `train/sft.py`) -> evaluate proposals
+  with your own `ANTHROPIC_API_KEY`. See [REPRODUCE.md](REPRODUCE.md) for the
+  step-by-step guide and the honest expected outcome.
+- **Internal-only (lab infrastructure; released artifacts replace them):**
+  - *Runway LLM proxy* (`src/autoresearch_idea_harness/runway_client.py`,
+    the `runway_*` generators, and the `target_synthesis` step): an internal
+    gateway to Anthropic/OpenAI models. It has no public endpoint; the CoT
+    target synthesis it powered is superseded by the released dataset.
+    The public path for LLM calls is the standard Anthropic API — use the
+    `claude` generator and `ANTHROPIC_API_KEY`.
+  - *PAI-DLC / cluster submission* (`scripts/check_dlc_quota.py`,
+    `scripts/prepare_v3_*_run.py`, `scripts/watch_v3_*.py`,
+    `scripts/monitor_v3_sft_job.py`, `skills/dlc-quota/`): Alibaba PAI-DLC
+    job submission helpers for the lab cluster, marked with an internal
+    header. Externally, run the generated `run_sft_curriculum.sh` directly
+    with `torchrun` instead of submitting a DLC job.
+
 ## Quick Smoke
 
 ```bash
-cd /newcpfs/lxh/agentic-training/autoresearch_idea_harness
-
 python scripts/build_paper_bank.py --limit 20
 python scripts/build_evidence_packets.py --limit 20
 python scripts/generate_proposal_batches.py --limit 20 \
@@ -29,12 +80,13 @@ Outputs are written under `runs/`.
 
 ## LLM Pipeline
 
-Create a local `.env` from `.env.example` and fill Runway keys/model names there.
+Create a local `.env` from `.env.example` and fill in `ANTHROPIC_API_KEY`
+(public path). The `runway_*` generator/expert entries additionally need the
+internal Runway gateway (`RUNWAY_BASE_URL` + keys) and only work inside the
+lab network; external users should use the `claude` generator instead.
 The `.env` file is ignored and should not be committed or copied into reports.
 
 ```bash
-cd /newcpfs/lxh/agentic-training/autoresearch_idea_harness
-
 python scripts/build_paper_bank.py --limit 100
 python scripts/build_evidence_packets.py --limit 20
 python scripts/generate_proposal_batches.py --limit 20
@@ -45,8 +97,9 @@ python scripts/render_report.py
 
 Default LLM roles:
 
-- Proposal generator: `runway_opus47_proposal`
-- Expert judges: `opus47`, `gpt55`
+- Proposal generator: `runway_opus47_proposal` (internal Runway route;
+  externally pass `--generators claude`)
+- Expert judges: `opus47`, `gpt55` (internal Runway routes)
 - `gpt55` uses the Runway Responses API; `opus47` uses the Google Anthropic
   `rawPredict` API documented under the Gemini service docs.
   For debugging a partially unavailable market, pass `--skip-errors` to
@@ -57,8 +110,6 @@ Default LLM roles:
 Run an offline self-contained smoke first:
 
 ```bash
-cd /newcpfs/lxh/agentic-training/autoresearch_idea_harness
-
 python scripts/run_end_to_end.py \
   --task dl_activation_function \
   --subtask resnet20-cifar10 \
@@ -126,7 +177,12 @@ For formal runs, add the 32B base model to `configs/default.yaml` under
 `--base-model-release-date` is kept only for planning/smoke usage.
 
 After the manifest exists, synthesize missing TeX-grounded targets into a
-resumable cache:
+resumable cache. **Internal-only:** this step calls Anthropic models through
+the internal Runway gateway (`target_synthesis.provider:
+runway_google_anthropic`) and also imports legacy synthesis helpers from the
+sibling `proposal_rl` checkout, so it cannot be run externally. External
+users should skip it and use the released V2 SFT dataset instead (see
+REPRODUCE.md).
 
 ```bash
 python scripts/synthesize_v3_targets.py \
@@ -165,7 +221,9 @@ python scripts/prepare_v3_sft_run.py \
 ```
 
 This writes `run_plan.json`, phase-local `sft_config.yaml` files, prebuilt
-message Parquets, `run_sft_curriculum.sh`, and a `dlc_command_skeleton.sh`.
+message Parquets, `run_sft_curriculum.sh`, and a `dlc_command_skeleton.sh`
+(the DLC skeleton is for internal PAI-DLC submission only — externally just
+run `run_sft_curriculum.sh` with `torchrun` available; see REPRODUCE.md).
 The current default is conservative low-LR LoRA for the first cycle so the
 master keeps general debugging/advice ability; move to fuller 32B tuning only
 after regression checks.
