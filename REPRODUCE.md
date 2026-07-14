@@ -68,8 +68,8 @@ Download the released dataset (message-format SFT JSONL, chronological
 train/val/test splits, 928 usable training rows):
 
 ```bash
-# TODO-HF-DATASET-URL — released V2 dataset on the HuggingFace hub
-huggingface-cli download <TODO-HF-DATASET-URL> --repo-type dataset \
+# https://huggingface.co/datasets/<HF_NAMESPACE>/arxiv-proposal-cot-sft-32b-v2 (fill <HF_NAMESPACE> after upload)
+huggingface-cli download <https://huggingface.co/datasets/<HF_NAMESPACE>/arxiv-proposal-cot-sft-32b-v2> --repo-type dataset \
   --local-dir runs/training_data/v3_0_sft
 ```
 
