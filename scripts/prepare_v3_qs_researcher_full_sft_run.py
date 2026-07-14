@@ -69,8 +69,15 @@ def _torchrun_block(
     save_steps: int,
     eval_steps: int,
     summary_name: str,
+    fsdp_state_dict_type: str = "SHARDED_STATE_DICT",
+    save_strategy: str = "steps",
+    save_only_model: bool = False,
+    final_save: bool = True,
     resume_from: str | None = None,
 ) -> str:
+    def shell_value(value: str) -> str:
+        return value if value.startswith("$") else shlex.quote(value)
+
     val_arg = f"  --val-jsonl {shlex.quote(val_jsonl)} \\\n" if val_jsonl else ""
     if resume_from and resume_from.startswith("$"):
         resume_value = resume_from
@@ -79,21 +86,27 @@ def _torchrun_block(
     else:
         resume_value = ""
     resume_arg = f"  --resume-from-checkpoint {resume_value} \\\n" if resume_value else ""
+    save_only_arg = "  --save-only-model \\\n" if save_only_model else ""
+    final_save_arg = "" if final_save else "  --no-final-save \\\n"
     return f"""$TORCHRUN_BIN --standalone --nproc_per_node={nproc_per_node} --master_port={master_port} \\
   scripts/train_v3_researcher_cot_full_fsdp.py \\
   --train-jsonl {shlex.quote(train_jsonl)} \\
 {val_arg}\
   --output-dir {shlex.quote(output_dir)} \\
-  --base-model {shlex.quote(base_model)} \\
+  --base-model {shell_value(base_model)} \\
   --limit {limit_rows} \\
   --max-steps {max_steps} \\
   --max-seq-length {max_seq_length} \\
   --per-device-batch-size 1 \\
   --grad-accum {grad_accum} \\
   --lr {lr} \\
+  --fsdp-state-dict-type {shlex.quote(fsdp_state_dict_type)} \\
+  --save-strategy {shlex.quote(save_strategy)} \\
   --save-steps {save_steps} \\
   --eval-steps {eval_steps} \\
   --save-total-limit 3 \\
+{save_only_arg}\
+{final_save_arg}\
 {resume_arg}\
   --summary-name {shlex.quote(summary_name)}"""
 
@@ -117,6 +130,7 @@ def _command_text(
     nproc_per_node: int,
     master_port: int,
     remote_run_family: str,
+    restore_mode: str,
 ) -> str:
     remote_root = str(qs_cfg["remote_project_root"]).rstrip("/")
     remote_run_dir = f"{remote_root}/{remote_run_family}/{run_id}"
@@ -125,6 +139,7 @@ def _command_text(
     repo_ref = str(harness_repo.get("ref") or "V3")
     clone_dir = f"{remote_run_dir}/src/autoresearch_idea_harness"
     output_dir = f"{remote_run_dir}/output"
+    restore_output_dir = f"{remote_run_dir}/restore_output"
     save_steps = 1 if max_steps <= 2 else 50
     eval_steps = 1 if max_steps <= 2 else 50
     first_train = _torchrun_block(
@@ -142,6 +157,10 @@ def _command_text(
         save_steps=save_steps,
         eval_steps=eval_steps,
         summary_name="train_summary_initial.json",
+        fsdp_state_dict_type="FULL_STATE_DICT",
+        save_strategy="steps",
+        save_only_model=True,
+        final_save=False,
     )
     resume_train = _torchrun_block(
         nproc_per_node=nproc_per_node,
@@ -160,8 +179,30 @@ def _command_text(
         summary_name="train_summary_resume.json",
         resume_from="$RESUME_CKPT",
     )
+    restore_train = _torchrun_block(
+        nproc_per_node=nproc_per_node,
+        master_port=master_port + 1,
+        train_jsonl=remote_train_jsonl,
+        val_jsonl=remote_val_jsonl,
+        output_dir=restore_output_dir,
+        base_model="$RESUME_CKPT",
+        limit_rows=limit_rows,
+        max_steps=resume_max_steps,
+        max_seq_length=max_seq_length,
+        lr=lr,
+        grad_accum=grad_accum,
+        save_steps=save_steps,
+        eval_steps=eval_steps,
+        summary_name="train_summary_restore.json",
+        fsdp_state_dict_type="FULL_STATE_DICT",
+        save_strategy="no",
+        save_only_model=True,
+        final_save=False,
+    )
     resume_block = ""
     if resume_check:
+        second_train = resume_train if restore_mode == "trainer_resume" else restore_train
+        second_label = "resume_ckpt" if restore_mode == "trainer_resume" else "restore_model_ckpt"
         resume_block = f"""
 RESUME_CKPT=$(python3 - <<'PY' {shlex.quote(output_dir)}
 import re
@@ -178,8 +219,8 @@ if not ckpts:
 print(str(sorted(ckpts)[-1][1]))
 PY
 )
-echo "[qs-full-sft] resume_ckpt=$RESUME_CKPT" | tee -a "$REMOTE_RUN_DIR/full_sft.log"
-{resume_train} 2>&1 | tee -a "$REMOTE_RUN_DIR/full_sft.log"
+echo "[qs-full-sft] {second_label}=$RESUME_CKPT" | tee -a "$REMOTE_RUN_DIR/full_sft.log"
+{second_train} 2>&1 | tee -a "$REMOTE_RUN_DIR/full_sft.log"
 """
     return f"""#!/usr/bin/env bash
 set -euo pipefail
@@ -210,6 +251,7 @@ echo "[qs-full-sft] val_jsonl={shlex.quote(remote_val_jsonl or '')}" | tee -a fu
 echo "[qs-full-sft] limit_rows={limit_rows}" | tee -a full_sft.log
 echo "[qs-full-sft] max_steps={max_steps}" | tee -a full_sft.log
 echo "[qs-full-sft] resume_check={str(resume_check).lower()}" | tee -a full_sft.log
+echo "[qs-full-sft] restore_mode={shlex.quote(restore_mode)}" | tee -a full_sft.log
 echo "[qs-full-sft] max_seq_length={max_seq_length}" | tee -a full_sft.log
 echo "[qs-full-sft] nproc_per_node={nproc_per_node}" | tee -a full_sft.log
 echo "[qs-full-sft] CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES" | tee -a full_sft.log
@@ -265,34 +307,46 @@ nvidia-smi 2>&1 | tee -a "$REMOTE_RUN_DIR/full_sft.log"
 
 {first_train} 2>&1 | tee -a "$REMOTE_RUN_DIR/full_sft.log"
 {resume_block}
-python3 - <<'PY' "$REMOTE_RUN_DIR/result.json" {shlex.quote(output_dir)} {str(resume_check).lower()!r}
+python3 - <<'PY' "$REMOTE_RUN_DIR/result.json" {shlex.quote(output_dir)} {shlex.quote(restore_output_dir)} {str(resume_check).lower()!r} {shlex.quote(restore_mode)}
 import json
 import sys
 from pathlib import Path
 
 result_path = Path(sys.argv[1])
 output_dir = Path(sys.argv[2])
-resume_required = sys.argv[3] == "true"
+restore_output_dir = Path(sys.argv[3])
+resume_required = sys.argv[4] == "true"
+restore_mode = sys.argv[5]
 initial_path = output_dir / "train_summary_initial.json"
 resume_path = output_dir / "train_summary_resume.json"
+restore_path = restore_output_dir / "train_summary_restore.json"
 initial = json.loads(initial_path.read_text()) if initial_path.exists() else None
 resume = json.loads(resume_path.read_text()) if resume_path.exists() else None
+restore = json.loads(restore_path.read_text()) if restore_path.exists() else None
 checkpoints = sorted(p.name for p in output_dir.glob("checkpoint-*") if p.is_dir())
 eval_ok = bool(initial and initial.get("eval_metrics"))
 if resume_required:
-    eval_ok = eval_ok and bool(resume and resume.get("eval_metrics"))
+    if restore_mode == "trainer_resume":
+        eval_ok = eval_ok and bool(resume and resume.get("eval_metrics"))
+    else:
+        eval_ok = eval_ok and bool(restore and restore.get("eval_metrics"))
 result = {{
     "status": "ok",
     "output_dir": str(output_dir),
+    "restore_output_dir": str(restore_output_dir),
+    "restore_mode": restore_mode,
     "initial_summary": str(initial_path) if initial else None,
     "resume_summary": str(resume_path) if resume else None,
+    "restore_summary": str(restore_path) if restore else None,
     "checkpoint_dirs": checkpoints,
     "full_checkpoint_saved": bool(checkpoints),
     "resume_required": resume_required,
-    "resume_ok": (not resume_required) or bool(resume),
+    "resume_ok": (not resume_required) or bool(resume) or bool(restore),
+    "restore_ok": (not resume_required) or bool(restore),
     "eval_ok": eval_ok,
     "initial": initial,
     "resume": resume,
+    "restore": restore,
 }}
 if not result["full_checkpoint_saved"] or not result["resume_ok"] or not result["eval_ok"]:
     result["status"] = "failed_validation"
@@ -379,6 +433,7 @@ def prepare(
     nproc_per_node: int,
     master_port: int,
     remote_run_family: str,
+    restore_mode: str,
 ) -> dict[str, Any]:
     cfg = load_config(config_path)
     qs_cfg = dict(cfg.get("v3_training", {}).get("qs") or {})
@@ -421,6 +476,7 @@ def prepare(
         nproc_per_node=nproc_per_node,
         master_port=master_port,
         remote_run_family=remote_run_family,
+        restore_mode=restore_mode,
     )
     command_path = run_dir / "qs_command_full_sft.sh"
     command_path.write_text(command)
@@ -463,6 +519,7 @@ def prepare(
             "limit": limit_rows,
             "max_steps": max_steps,
             "resume_check": resume_check,
+            "restore_mode": restore_mode,
             "resume_max_steps": resume_max_steps,
             "max_seq_length": max_seq_length,
             "lr": lr,
@@ -503,6 +560,7 @@ def main() -> None:
     parser.add_argument("--nproc-per-node", type=int, default=4)
     parser.add_argument("--master-port", type=int, default=29517)
     parser.add_argument("--remote-run-family", default="qs_researcher_full_sft")
+    parser.add_argument("--restore-mode", choices=["model_reload", "trainer_resume"], default="model_reload")
     args = parser.parse_args()
     summary = prepare(
         config_path=Path(args.config),
@@ -521,6 +579,7 @@ def main() -> None:
         nproc_per_node=args.nproc_per_node,
         master_port=args.master_port,
         remote_run_family=args.remote_run_family,
+        restore_mode=args.restore_mode,
     )
     print(json.dumps(summary, indent=2, ensure_ascii=False, sort_keys=True))
 

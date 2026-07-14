@@ -297,8 +297,10 @@ def build_training_args(args: argparse.Namespace) -> TrainingArguments:
         "limit_all_gathers": True,
         "forward_prefetch": False,
         "backward_prefetch": "backward_pre",
-        "state_dict_type": "SHARDED_STATE_DICT",
+        "state_dict_type": args.fsdp_state_dict_type,
     }
+    if args.save_only_model and args.fsdp_state_dict_type == "SHARDED_STATE_DICT":
+        raise SystemExit("save_only_model is incompatible with FSDP SHARDED_STATE_DICT in this transformers build")
     return TrainingArguments(
         output_dir=str(args.output_dir),
         num_train_epochs=args.num_epochs,
@@ -319,6 +321,7 @@ def build_training_args(args: argparse.Namespace) -> TrainingArguments:
         fsdp="full_shard auto_wrap",
         fsdp_config=fsdp_config,
         logging_steps=args.logging_steps,
+        save_strategy=args.save_strategy,
         save_steps=args.save_steps,
         save_total_limit=args.save_total_limit,
         eval_strategy="no" if args.val_jsonl is None else "steps",
@@ -328,7 +331,7 @@ def build_training_args(args: argparse.Namespace) -> TrainingArguments:
         seed=args.seed,
         remove_unused_columns=False,
         save_safetensors=True,
-        save_only_model=False,
+        save_only_model=args.save_only_model,
     )
 
 
@@ -351,13 +354,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-seq-length", type=int, default=1024)
     parser.add_argument("--logging-steps", type=int, default=1)
     parser.add_argument("--save-steps", type=int, default=1)
+    parser.add_argument("--save-strategy", default="steps", choices=["no", "steps", "epoch", "best"])
     parser.add_argument("--eval-steps", type=int, default=1)
     parser.add_argument("--save-total-limit", type=int, default=2)
     parser.add_argument("--dataloader-num-workers", type=int, default=1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--fsdp-transformer-layer", default="Qwen2DecoderLayer")
+    parser.add_argument(
+        "--fsdp-state-dict-type",
+        default="SHARDED_STATE_DICT",
+        choices=["FULL_STATE_DICT", "SHARDED_STATE_DICT", "LOCAL_STATE_DICT"],
+    )
     parser.add_argument("--fsdp-activation-checkpointing", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--fsdp-cpu-ram-efficient-loading", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--save-only-model", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--final-save", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--resume-from-checkpoint", default=None)
     parser.add_argument("--summary-name", default="train_summary.json")
     return parser.parse_args()
@@ -431,9 +442,10 @@ def main() -> None:
     if eval_ds is not None:
         eval_metrics = trainer.evaluate()
 
-    trainer.save_model(str(args.output_dir))
-    if trainer.is_world_process_zero():
-        tokenizer.save_pretrained(str(args.output_dir))
+    if args.final_save:
+        trainer.save_model(str(args.output_dir))
+        if trainer.is_world_process_zero():
+            tokenizer.save_pretrained(str(args.output_dir))
 
     if torch.distributed.is_available() and torch.distributed.is_initialized():
         torch.distributed.barrier()
@@ -466,6 +478,9 @@ def main() -> None:
             "effective_global_batch": args.per_device_batch_size * args.grad_accum * int(os.environ.get("WORLD_SIZE", "1")),
             "fsdp": "full_shard auto_wrap",
             "fsdp_config": training_args.fsdp_config,
+            "save_strategy": str(training_args.save_strategy),
+            "save_only_model": args.save_only_model,
+            "final_save": args.final_save,
             "train_elapsed_s": round(train_elapsed, 1),
             "peak_gpu_memory_gb_rank0": round(peak_mem_gb, 2) if peak_mem_gb is not None else None,
             "total_gpu_memory_gb_rank0": round(total_memory_gb, 2) if total_memory_gb is not None else None,
