@@ -95,11 +95,14 @@ def _patch_broken_apex_amp() -> None:
     try:
         import apex  # type: ignore
     except Exception:
-        return
+        apex = types.ModuleType("apex")
+        apex.__spec__ = importlib.machinery.ModuleSpec("apex", loader=None)
+        sys.modules["apex"] = apex
     if hasattr(apex, "amp"):
         return
 
     amp = types.ModuleType("apex.amp")
+    amp.__spec__ = importlib.machinery.ModuleSpec("apex.amp", loader=None)
 
     def initialize(model, optimizer=None, **_: Any):
         return (model, optimizer) if optimizer is not None else model
