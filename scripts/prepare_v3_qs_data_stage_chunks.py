@@ -213,6 +213,7 @@ def prepare(
     val_jsonl: Path | None,
     remote_data_dir: str | None,
     chunk_chars: int,
+    file_pairs: list[tuple[Path, str]] | None = None,
 ) -> dict[str, Any]:
     cfg = load_config(config_path)
     qs_cfg = dict(cfg.get("v3_training", {}).get("qs") or {})
@@ -231,9 +232,12 @@ def prepare(
 
     name_prefix = re.sub(r"[^a-zA-Z0-9_-]+", "", run_id)[-20:] + "_"
 
-    payloads = [_payload(train_jsonl, "train.jsonl", chunk_chars)]
-    if val_jsonl:
-        payloads.append(_payload(val_jsonl, "val.jsonl", chunk_chars))
+    if file_pairs:
+        payloads = [_payload(local, remote, chunk_chars) for local, remote in file_pairs]
+    else:
+        payloads = [_payload(train_jsonl, "train.jsonl", chunk_chars)]
+        if val_jsonl:
+            payloads.append(_payload(val_jsonl, "val.jsonl", chunk_chars))
 
     steps = []
     step_index = 0
@@ -317,7 +321,17 @@ def main() -> None:
     parser.add_argument("--val-jsonl", default=str(ROOT / "runs/training_data/v3_researcher_cot_prejudge/val.jsonl"))
     parser.add_argument("--remote-data-dir", default=None)
     parser.add_argument("--chunk-chars", type=int, default=50_000)
+    parser.add_argument("--file", action="append", default=None, metavar="LOCAL:REMOTE_NAME",
+                        help="generic file to stage (repeatable); overrides --train-jsonl/--val-jsonl")
     args = parser.parse_args()
+    file_pairs = None
+    if args.file:
+        file_pairs = []
+        for spec in args.file:
+            local, _, remote = spec.rpartition(":")
+            if not local:
+                raise SystemExit(f"--file expects LOCAL:REMOTE_NAME, got {spec!r}")
+            file_pairs.append((Path(local), remote))
     summary = prepare(
         Path(args.config),
         Path(args.output_dir),
@@ -326,6 +340,7 @@ def main() -> None:
         Path(args.val_jsonl) if args.val_jsonl else None,
         args.remote_data_dir,
         args.chunk_chars,
+        file_pairs=file_pairs,
     )
     print(json.dumps(summary, indent=2, ensure_ascii=False, sort_keys=True))
 
