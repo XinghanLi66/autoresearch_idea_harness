@@ -101,16 +101,42 @@ def mask_name(text: str, researcher: str) -> str:
     return text
 
 
+class MiniLMEmbedder:
+    """Minimal all-MiniLM-L6-v2 embedder (AutoModel + mean pooling + L2 norm, 256-token trunc).
+
+    Matches sentence_transformers' encode() for this model without importing
+    sentence_transformers (whose datasets->torchcodec import chain is broken on the QS image).
+    """
+
+    def __init__(self, model_id: str, device: str = "cpu") -> None:
+        from transformers import AutoModel, AutoTokenizer
+
+        self.tok = AutoTokenizer.from_pretrained(model_id)
+        self.model = AutoModel.from_pretrained(model_id).to(device).eval()
+        self.device = device
+
+    def encode(self, texts: list[str], batch_size: int = 32, **_) -> np.ndarray:
+        out = []
+        with torch.no_grad():
+            for i in range(0, len(texts), batch_size):
+                enc = self.tok(texts[i:i + batch_size], padding=True, truncation=True,
+                               max_length=256, return_tensors="pt").to(self.device)
+                h = self.model(**enc).last_hidden_state  # (b, t, d)
+                mask = enc["attention_mask"].unsqueeze(-1).float()
+                emb = (h * mask).sum(1) / mask.sum(1).clamp(min=1e-9)
+                emb = F.normalize(emb, p=2, dim=1)
+                out.append(emb.cpu().numpy())
+        return np.concatenate(out, axis=0)
+
+
 class CompositeReward:
     def __init__(self, heads_dir: Path, w_fp: float, w_fmt: float, w_cr: float) -> None:
-        from sentence_transformers import SentenceTransformer
-
         meta = json.loads((heads_dir / "reward_heads_meta.json").read_text())
         npz = np.load(heads_dir / "reward_heads.npz")
         self.fp_coef, self.fp_b = npz["fp_coef"], npz["fp_intercept"]
         self.cr_coef, self.cr_b = npz["cr_coef"], npz["cr_intercept"]
         self.classes = {c: i for i, c in enumerate(meta["fingerprint_classes"])}
-        self.embedder = SentenceTransformer(meta["embedder"], device="cpu")
+        self.embedder = MiniLMEmbedder(meta["embedder"], device="cpu")
         self.w_fp, self.w_fmt, self.w_cr = w_fp, w_fmt, w_cr
 
     def score(self, cots: list[str], researchers: list[str]) -> list[dict]:
