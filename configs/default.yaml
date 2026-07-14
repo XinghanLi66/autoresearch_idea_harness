@@ -1,29 +1,49 @@
-project_root: /newcpfs/lxh/agentic-training/autoresearch_idea_harness
-repo_root: /newcpfs/lxh/agentic-training
-proposal_rl_root: /newcpfs/lxh/agentic-training/proposal_rl
-mls_bench_root: /newcpfs/lxh/MLS-Bench
-mle_data_dir: /newcpfs/lxh/LoongFlow/output/mlebench
-benchmark_python: /newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python
+# Autoresearch Idea Harness — default configuration.
+#
+# Path resolution (see src/autoresearch_idea_harness/io.py:load_config):
+#   * Relative paths are resolved against the repository root.
+#   * `~` and `${ENV_VAR}` references are expanded.
+# Sections marked "INTERNAL" refer to infrastructure that only exists inside
+# the original lab environment; they are not needed for external reproduction
+# (see REPRODUCE.md).
 
-classified_papers: /newcpfs/lxh/agentic-training/data/arxiv_tex_classified/v1/papers.jsonl
-dataset_dir: /newcpfs/lxh/agentic-training/proposal_rl/runs/dataset
-arxiv_root: /newcpfs/lxh/agentic-training/data/arxiv/papers
-runs_dir: /newcpfs/lxh/agentic-training/autoresearch_idea_harness/runs
+project_root: .
+repo_root: ..
+# Sibling checkout of the proposal_rl repo (cross-repo dependency: SFT training
+# code lives at proposal_rl/train/sft.py — see REPRODUCE.md).
+proposal_rl_root: ../proposal_rl
+# External benchmark checkouts / data. Clone or symlink them here, or replace
+# with absolute paths (env expansion is supported, e.g. ${MLS_BENCH_ROOT}).
+mls_bench_root: external/MLS-Bench
+mle_data_dir: external/mlebench_data
+# Python interpreter used to run benchmark training scripts.
+# null -> defaults to the current interpreter (sys.executable); can also be
+# overridden with the MLE_PYTHON environment variable.
+benchmark_python: null
+
+# arXiv-derived inputs. Place (or symlink) your data under data/, or point
+# these at absolute locations.
+classified_papers: data/arxiv_tex_classified/v1/papers.jsonl
+dataset_dir: data/dataset          # {train,val,test}.jsonl paper records
+arxiv_root: data/arxiv/papers      # raw paper TeX sources
+runs_dir: runs
 scan_arxiv_metadata: false
 
 base_models:
+  # Local directories scanned by scripts/discover_v3_base_models.py.
+  # Set MODEL_DIR to your HuggingFace snapshot root, or list paths here.
   search_roots:
-    - /newcpfs/lxh/agentic-training/proposal_rl/runs/model_cache
-    - /newcpfs/user/yuanqianhao/hf_models
-    - /newcpfs/user/gaochaochen/huimu/CodePrMP/models
-  # Fill this before formal V3 training. Each entry should include:
-  #   path: /absolute/hf/model/path
-  #   release_date: YYYY-MM-DD
+    - models
+  # Each entry should include:
+  #   hf_id: HuggingFace hub id (used when no local path is given)
+  #   path: optional absolute local snapshot path; when omitted the model is
+  #         resolved as ${MODEL_DIR}/<hf_id> if MODEL_DIR is set, else the hub
+  #         id itself (transformers will download from the hub).
+  #   release_date: YYYY-MM-DD (required for leakage-safe training)
   #   size_b: 32
   #   smoke_only: false
   registry:
     qwen25_32b_instruct:
-      path: /newcpfs/user/yuanqianhao/hf_models/Qwen/Qwen2.5-32B-Instruct
       hf_id: Qwen/Qwen2.5-32B-Instruct
       name: Qwen2.5-32B-Instruct
       release_date: 2024-09-19
@@ -32,7 +52,10 @@ base_models:
       smoke_only: false
 
 llm:
-  runway_base_url: https://runway.devops.rednote.life
+  # INTERNAL: base URL of the lab's Runway LLM proxy. Leave null externally;
+  # the public path uses the standard Anthropic API (ANTHROPIC_API_KEY).
+  # May also be supplied via the RUNWAY_BASE_URL environment variable.
+  runway_base_url: null
   chat_api_version: 2024-12-01-preview
   timeout: 300
   proposal_temperature: 0.7
@@ -74,6 +97,9 @@ training_manifest:
   train_ratio: 0.8
   val_ratio: 0.1
 
+# INTERNAL: TeX-grounded target synthesis was run through the internal Runway
+# proxy (Anthropic models behind a lab gateway). Externally, use the released
+# V2 dataset instead of re-running this step (see REPRODUCE.md).
 target_synthesis:
   provider: runway_google_anthropic
   endpoint: google_anthropic
@@ -93,7 +119,7 @@ sft_collate:
 
 v3_training:
   sft:
-    torchrun_bin: /newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/torchrun
+    torchrun_bin: torchrun
     finetune_mode: lora
     num_train_epochs: 1
     per_device_train_batch_size: 1
@@ -109,11 +135,15 @@ v3_training:
     sft_fraction_first_cycle: 0.7
     rl_or_preference_fraction_first_cycle: 0.3
     ability_preservation: low_lr_lora_first_then_regression_checked_full_or_adapter_tuning
+  # INTERNAL: Alibaba PAI-DLC submission settings for the lab cluster. Not
+  # needed externally — run the generated run_sft_curriculum.sh directly with
+  # torchrun on your own multi-GPU node (see REPRODUCE.md). The values below
+  # are placeholders.
   dlc:
-    endpoint: pai-dlc.ap-southeast-1.aliyuncs.com
-    workspace_id: "262162"
-    resource_id: quota1shcr2h7uae
-    image: ali-sg-acr-registry-vpc.ap-southeast-1.cr.aliyuncs.com/xhs-llm/guangsu:ngc2506_te2.8_h100_v3
+    endpoint: pai-dlc.<region>.aliyuncs.com
+    workspace_id: "<workspace-id>"
+    resource_id: <quota-id>
+    image: <registry>/<training-image>:<tag>
     gpus: 8
     cpus: 100
     memory: 1000Gi
@@ -122,8 +152,8 @@ v3_training:
     priority: 6
     enable_rdma: true
     data_sources:
-      - id: d-s5sllzhztbq48bhexm
-        mount: /newcpfs
+      - id: <datasource-id>
+        mount: /mnt/data
         version: v1
         access: RW
 
@@ -131,6 +161,8 @@ proposal_batches:
   proposals_per_packet: 4
   generators:
     - runway_opus47_proposal
+  # INTERNAL: generator entries below route through the Runway proxy. External
+  # users should use the `claude` generator (standard Anthropic API) instead.
   runway_generators:
     runway_opus47_proposal:
       key_env: RUNWAY_OPUS47_API_KEY
@@ -174,13 +206,15 @@ end_to_end:
   default_subtask: resnet20-cifar10
   default_n_proposals: 3
   default_experts: [opus47, gpt55]
-  claude_cmd: /newcpfs/lxh/claude-home-agent1/run_claude.sh
+  # Command used to invoke the Claude Code CLI worker. Overridable with the
+  # CLAUDE_CMD environment variable; defaults to `claude` on PATH.
+  claude_cmd: claude
   worker_timeout: 7200
   max_turns: 30
   max_master_advice: 1
 
 v2_3:
-  formal_sweep_root: /newcpfs/lxh/agentic-training/autoresearch_idea_harness/runs/formal_sweeps/v2_3_mls10_modules9
+  formal_sweep_root: runs/formal_sweeps/v2_3_mls10_modules9
   tasks:
     - dl_lr_schedule
     - dl_activation_function

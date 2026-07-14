@@ -46,43 +46,58 @@ V2_3_NEW_CALIBRATION_TASKS = [
     "dl_residual_connection",
 ]
 
+# INTERNAL: the V2.3 formal sweep compares checkpoints produced by the sibling
+# proposal_rl repo's experiments. Checkpoint locations default to the sibling
+# checkout's runs/ directory and can be overridden with the
+# PROPOSAL_RL_RUNS_ROOT environment variable. These checkpoints are not part
+# of the public release; external reproduction covers the worker-only and
+# API-master modules (see REPRODUCE.md).
+_PROPOSAL_RL_RUNS_ROOT = Path(
+    os.environ.get("PROPOSAL_RL_RUNS_ROOT", str(project_root().parent / "proposal_rl" / "runs"))
+)
+
+
+def _ckpt(rel_path: str) -> str:
+    return str(_PROPOSAL_RL_RUNS_ROOT / rel_path)
+
+
 V2_3_MODULES: dict[str, dict[str, Any]] = {
     "empty_worker_only": {"kind": "empty", "strategy": "worker_only", "model": "worker_only_control"},
     "opus47_master": {"kind": "runway", "generator_id": "runway_opus47_proposal"},
     "qwen25_7b_base_with_research_question": {
         "kind": "checkpoint",
         "strategy": "with_research_question",
-        "checkpoint": "/newcpfs/lxh/agentic-training/proposal_rl/runs/model_cache/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+        "checkpoint": _ckpt("model_cache/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28"),
     },
     "exp09_top_k_related_work": {
         "kind": "checkpoint",
         "strategy": "top_k_related_work",
-        "checkpoint": "/newcpfs/lxh/agentic-training/proposal_rl/runs/exps/exp09_top_k_refs_sft_rl_20260515_150827/rl/final",
+        "checkpoint": _ckpt("exps/exp09_top_k_refs_sft_rl_20260515_150827/rl/final"),
     },
     "exp11_top_k_related_work": {
         "kind": "checkpoint",
         "strategy": "top_k_related_work",
-        "checkpoint": "/newcpfs/lxh/agentic-training/proposal_rl/runs/exps/exp11_topk_rw_sft_rl_20260514_044424/rl/final",
+        "checkpoint": _ckpt("exps/exp11_topk_rw_sft_rl_20260514_044424/rl/final"),
     },
     "exp12_with_research_question": {
         "kind": "checkpoint",
         "strategy": "with_research_question",
-        "checkpoint": "/newcpfs/lxh/agentic-training/proposal_rl/runs/exps/exp12_research_q_sft_rl_20260510_193056/rl/final",
+        "checkpoint": _ckpt("exps/exp12_research_q_sft_rl_20260510_193056/rl/final"),
     },
     "exp13_top_k_refs": {
         "kind": "checkpoint",
         "strategy": "top_k_refs",
-        "checkpoint": "/newcpfs/lxh/agentic-training/proposal_rl/runs/exps/exp13_full_refs_sft_rl_20260510_192856/rl/final",
+        "checkpoint": _ckpt("exps/exp13_full_refs_sft_rl_20260510_192856/rl/final"),
     },
     "exp16_top_k_refs": {
         "kind": "checkpoint",
         "strategy": "top_k_refs",
-        "checkpoint": "/newcpfs/lxh/agentic-training/proposal_rl/runs/exps/exp16_full_refs_20x800_sft_rl_20260511_032856/rl/final",
+        "checkpoint": _ckpt("exps/exp16_full_refs_20x800_sft_rl_20260511_032856/rl/final"),
     },
     "exp17_with_research_question": {
         "kind": "checkpoint",
         "strategy": "with_research_question",
-        "checkpoint": "/newcpfs/lxh/agentic-training/proposal_rl/runs/exps/exp17_top_k_refs_ppl_rl_20260520_023410/rl/final",
+        "checkpoint": _ckpt("exps/exp17_top_k_refs_ppl_rl_20260520_023410/rl/final"),
     },
 }
 
@@ -525,7 +540,7 @@ class FormalSweepRunner:
         prompt_file = sample_dir / "worker_prompt.txt"
         log_file = sample_dir / "worker.log"
         cfg = self.cfg.get("end_to_end", {})
-        claude_cmd = str(cfg.get("claude_cmd", "/newcpfs/lxh/claude-home-agent1/run_claude.sh"))
+        claude_cmd = os.environ.get("CLAUDE_CMD") or str(cfg.get("claude_cmd", "claude"))
         cmd = [
             claude_cmd,
             "-p",

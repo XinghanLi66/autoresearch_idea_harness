@@ -448,7 +448,7 @@ class EndToEndRunner:
         prompt_file = worker_dir / "worker_prompt.txt"
         log_file = worker_dir / "worker.log"
         cfg = self.cfg.get("end_to_end", {})
-        claude_cmd = str(cfg.get("claude_cmd", "/newcpfs/lxh/claude-home-agent1/run_claude.sh"))
+        claude_cmd = os.environ.get("CLAUDE_CMD") or str(cfg.get("claude_cmd", "claude"))
         cmd = [
             claude_cmd,
             "-p",

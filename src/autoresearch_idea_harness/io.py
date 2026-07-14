@@ -30,11 +30,59 @@ def load_env_file(path: str | Path | None = None) -> None:
             os.environ[key] = value
 
 
+# Config keys that hold filesystem paths. Relative values are resolved against
+# the repository root so the default config works from any checkout location.
+_TOP_LEVEL_PATH_KEYS = (
+    "project_root",
+    "repo_root",
+    "proposal_rl_root",
+    "mls_bench_root",
+    "mle_data_dir",
+    "benchmark_python",
+    "classified_papers",
+    "dataset_dir",
+    "arxiv_root",
+    "runs_dir",
+)
+
+
+def _expand_path(value: Any) -> Any:
+    """Expand ~ and ${ENV_VAR} references; resolve relative paths to repo root."""
+    if not isinstance(value, str) or not value:
+        return value
+    expanded = os.path.expandvars(os.path.expanduser(value))
+    p = Path(expanded)
+    if not p.is_absolute():
+        p = (project_root() / p).resolve()
+    return str(p)
+
+
+def _resolve_config_paths(cfg: dict[str, Any]) -> None:
+    for key in _TOP_LEVEL_PATH_KEYS:
+        if cfg.get(key):
+            cfg[key] = _expand_path(cfg[key])
+    base_models = cfg.get("base_models") or {}
+    roots = base_models.get("search_roots")
+    if isinstance(roots, list):
+        base_models["search_roots"] = [_expand_path(r) for r in roots if r]
+    for record in (base_models.get("registry") or {}).values():
+        if isinstance(record, dict) and record.get("path"):
+            record["path"] = _expand_path(record["path"])
+    v2_3 = cfg.get("v2_3") or {}
+    if v2_3.get("formal_sweep_root"):
+        v2_3["formal_sweep_root"] = _expand_path(v2_3["formal_sweep_root"])
+    end_to_end = cfg.get("end_to_end") or {}
+    claude_cmd = end_to_end.get("claude_cmd")
+    if isinstance(claude_cmd, str) and ("/" in claude_cmd or claude_cmd.startswith("~")):
+        end_to_end["claude_cmd"] = _expand_path(claude_cmd)
+
+
 def load_config(path: str | Path | None = None) -> dict[str, Any]:
     load_env_file()
     cfg_path = Path(path) if path else project_root() / "configs" / "default.yaml"
     with cfg_path.open() as f:
         cfg = yaml.safe_load(f)
+    _resolve_config_paths(cfg)
     threshold_path = cfg_path.parent / "v2_3_thresholds.json"
     if threshold_path.exists():
         try:

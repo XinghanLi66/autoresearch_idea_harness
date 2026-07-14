@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, ClassVar
@@ -162,11 +163,11 @@ class MLSBenchTask(AbstractBenchmarkTask):
 
     @property
     def mls_root(self) -> Path:
-        return Path(self.cfg.get("mls_bench_root", "/newcpfs/lxh/MLS-Bench"))
+        return Path(self.cfg.get("mls_bench_root") or os.environ.get("MLS_BENCH_ROOT") or project_root() / "external" / "MLS-Bench")
 
     @property
     def python_bin(self) -> str:
-        return str(self.cfg.get("benchmark_python", "/newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python"))
+        return str(self.cfg.get("benchmark_python") or os.environ.get("MLE_PYTHON") or sys.executable)
 
     @property
     def edit_template(self) -> Path:
@@ -505,11 +506,11 @@ class MleBenchTask(AbstractBenchmarkTask):
 
     @property
     def mle_data_dir(self) -> Path:
-        return Path(self.cfg.get("mle_data_dir", os.environ.get("MLE_DATA_DIR", "/newcpfs/lxh/LoongFlow/output/mlebench")))
+        return Path(self.cfg.get("mle_data_dir") or os.environ.get("MLE_DATA_DIR") or project_root() / "external" / "mlebench_data")
 
     @property
     def python_bin(self) -> str:
-        return str(self.cfg.get("benchmark_python", os.environ.get("MLE_PYTHON", "/newcpfs/lxh/miniconda3/envs/loongflow_ml/bin/python")))
+        return str(self.cfg.get("benchmark_python") or os.environ.get("MLE_PYTHON") or sys.executable)
 
     @property
     def prepared_public(self) -> Path:

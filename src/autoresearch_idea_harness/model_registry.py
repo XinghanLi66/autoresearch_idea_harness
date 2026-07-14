@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from datetime import date
 from pathlib import Path
@@ -121,8 +122,21 @@ def resolve_base_model(
             available = ", ".join(sorted(registry)) or "(empty registry)"
             raise KeyError(f"unknown base model id {model_id!r}; available: {available}")
         record = dict(registry[model_id] or {})
-    path = Path(model_path or record.get("path") or "")
-    if not path:
+    path_text = model_path or record.get("path")
+    is_hub_id = False
+    if not path_text and record.get("hf_id"):
+        # No local path configured: prefer $MODEL_DIR/<hf_id> when MODEL_DIR is
+        # set, otherwise fall back to the HuggingFace hub id itself so that
+        # transformers can download the model on demand.
+        model_dir = os.environ.get("MODEL_DIR")
+        candidate = Path(model_dir) / str(record["hf_id"]) if model_dir else None
+        if candidate is not None and candidate.exists():
+            path_text = str(candidate)
+        else:
+            path_text = str(record["hf_id"])
+            is_hub_id = True
+    path = Path(path_text or "")
+    if not path_text:
         raise ValueError("base model path is required")
     resolved_release = release_date or record.get("release_date")
     parsed_date = _parse_date(resolved_release)
@@ -133,7 +147,7 @@ def resolve_base_model(
     if record.get("smoke_only") and not allow_smoke_model:
         raise ValueError(f"base model {model_id!r} is marked smoke_only; pass --allow-smoke-model for tests")
     config_exists = (path / "config.json").exists()
-    if not config_exists and not allow_missing_model:
+    if not config_exists and not allow_missing_model and not is_hub_id:
         raise FileNotFoundError(f"{path}/config.json not found")
 
     size_b = infer_model_size_b(model_id or path.name, path, record)

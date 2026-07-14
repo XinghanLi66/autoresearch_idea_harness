@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shlex
 from collections import Counter
@@ -9,7 +10,13 @@ from typing import Any
 
 import yaml
 
-from .io import iter_jsonl, write_json, write_jsonl
+from .io import iter_jsonl, project_root, write_json, write_jsonl
+
+# Internal Alibaba PAI-DLC helper — not needed for external reproduction
+# (see REPRODUCE.md). External users run the generated run_sft_curriculum.sh
+# directly with torchrun; the PAI submission skeleton below is only emitted
+# when the internal DLC config section is filled in.
+PAI_MANAGE = os.environ.get("PAI_MANAGE", "/root/.claude/skills/pai/scripts/pai_manage.py")
 
 
 def read_sft_rows(path: Path) -> list[dict[str, Any]]:
@@ -78,7 +85,7 @@ def _phase_rows(rows: list[dict[str, Any]], phase_by: str, max_samples_per_phase
 
 
 def _proposal_rl_root(cfg: dict[str, Any]) -> Path:
-    return Path(cfg.get("proposal_rl_root") or "/newcpfs/lxh/agentic-training/proposal_rl")
+    return Path(cfg.get("proposal_rl_root") or project_root().parent / "proposal_rl")
 
 
 def _phase_config(
@@ -264,13 +271,14 @@ def _launcher_text(phases: list[dict[str, Any]], run_dir: Path) -> str:
 
 
 def _write_dlc_skeleton(run_dir: Path, summary: dict[str, Any]) -> None:
-    text = f"""# V3 SFT DLC submission skeleton
+    text = f"""# V3 SFT DLC submission skeleton (INTERNAL: Alibaba PAI-DLC only)
 #
 # This is the command that should run inside the DLC worker pod.
 # Submit it through `pai_create_job_dry_run.sh` after checking quota availability.
+# External users: ignore this file and run the launcher directly (REPRODUCE.md).
 
 set -euo pipefail
-cd /newcpfs/lxh/agentic-training/autoresearch_idea_harness
+cd {project_root()}
 bash {summary['launcher']}
 """
     path = run_dir / "dlc_command_skeleton.sh"
@@ -306,7 +314,7 @@ def _pai_create_job_text(run_dir: Path, summary: dict[str, Any], *, dry_run: boo
     config_path = run_dir / "pai_job_config.yaml"
     args = [
         "python",
-        "/root/.claude/skills/pai/scripts/pai_manage.py",
+        PAI_MANAGE,
         "create-job",
         "--endpoint", str(dlc["endpoint"]),
         "--name", str(summary["run_id"]),
