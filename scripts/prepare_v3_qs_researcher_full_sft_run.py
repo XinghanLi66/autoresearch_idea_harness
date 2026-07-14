@@ -190,9 +190,9 @@ export HF_HOME="${{HF_HOME:-{remote_root}/hf_cache}}"
 export TRANSFORMERS_CACHE="${{TRANSFORMERS_CACHE:-$HF_HOME/transformers}}"
 export HF_HUB_ENABLE_HF_TRANSFER="${{HF_HUB_ENABLE_HF_TRANSFER:-0}}"
 export CUDA_VISIBLE_DEVICES="${{CUDA_VISIBLE_DEVICES:-0,1,2,3}}"
-export NCCL_ASYNC_ERROR_HANDLING="${{NCCL_ASYNC_ERROR_HANDLING:-1}}"
+export TORCH_NCCL_ASYNC_ERROR_HANDLING="${{TORCH_NCCL_ASYNC_ERROR_HANDLING:-1}}"
 export NCCL_DEBUG="${{NCCL_DEBUG:-WARN}}"
-export PYTORCH_CUDA_ALLOC_CONF="${{PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}}"
+export PYTORCH_ALLOC_CONF="${{PYTORCH_ALLOC_CONF:-expandable_segments:True}}"
 export TORCHRUN_BIN="${{TORCHRUN_BIN:-torchrun}}"
 SMOKE_SLEEP_SECONDS=${{QS_SMOKE_SLEEP_SECONDS:-{sleep_seconds}}}
 
@@ -214,6 +214,39 @@ echo "[qs-full-sft] max_seq_length={max_seq_length}" | tee -a full_sft.log
 echo "[qs-full-sft] nproc_per_node={nproc_per_node}" | tee -a full_sft.log
 echo "[qs-full-sft] CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES" | tee -a full_sft.log
 echo "[qs-full-sft] TORCHRUN_BIN=$TORCHRUN_BIN" | tee -a full_sft.log
+echo "[qs-full-sft] net_ifaces=$(ls /sys/class/net 2>/dev/null | tr '\\n' ',' || true)" | tee -a full_sft.log
+if command -v ip >/dev/null 2>&1; then
+  ip -o addr show 2>&1 | tee -a full_sft.log || true
+fi
+
+select_nccl_iface() {{
+  local iface path state
+  if [[ -n "${{QS_NCCL_SOCKET_IFNAME:-}}" && -d "/sys/class/net/${{QS_NCCL_SOCKET_IFNAME}}" ]]; then
+    printf '%s\\n' "$QS_NCCL_SOCKET_IFNAME"
+    return 0
+  fi
+  for path in /sys/class/net/*; do
+    [[ -e "$path" ]] || continue
+    iface=$(basename "$path")
+    case "$iface" in
+      lo|docker*|veth*|cni*|flannel*|tun*|tap*) continue ;;
+    esac
+    state=$(cat "$path/operstate" 2>/dev/null || true)
+    if [[ "$state" == "up" || "$state" == "unknown" ]]; then
+      printf '%s\\n' "$iface"
+      return 0
+    fi
+  done
+  printf 'lo\\n'
+}}
+export NCCL_SOCKET_IFNAME="$(select_nccl_iface)"
+export GLOO_SOCKET_IFNAME="${{GLOO_SOCKET_IFNAME:-$NCCL_SOCKET_IFNAME}}"
+unset NCCL_ASYNC_ERROR_HANDLING || true
+unset PYTORCH_CUDA_ALLOC_CONF || true
+echo "[qs-full-sft] NCCL_SOCKET_IFNAME=$NCCL_SOCKET_IFNAME" | tee -a full_sft.log
+echo "[qs-full-sft] GLOO_SOCKET_IFNAME=$GLOO_SOCKET_IFNAME" | tee -a full_sft.log
+echo "[qs-full-sft] TORCH_NCCL_ASYNC_ERROR_HANDLING=$TORCH_NCCL_ASYNC_ERROR_HANDLING" | tee -a full_sft.log
+echo "[qs-full-sft] PYTORCH_ALLOC_CONF=$PYTORCH_ALLOC_CONF" | tee -a full_sft.log
 
 test -d {shlex.quote(base_model)}
 test -f {shlex.quote(remote_train_jsonl)}
