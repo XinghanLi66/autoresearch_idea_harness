@@ -112,18 +112,34 @@ print("model_tools_available", importlib.util.find_spec("model_tools") is not No
 PY
 
 normalize_layout() {{
+  mkdir -p "$EXPECTED_MODEL_DIR"
+  shopt -s nullglob
+  for path in \\
+    "$REMOTE_MODEL_PARENT"/*.bin \\
+    "$REMOTE_MODEL_PARENT"/*.json \\
+    "$REMOTE_MODEL_PARENT"/*.md \\
+    "$REMOTE_MODEL_PARENT"/*.py \\
+    "$REMOTE_MODEL_PARENT"/*.safetensors \\
+    "$REMOTE_MODEL_PARENT"/*.txt \\
+    "$REMOTE_MODEL_PARENT"/LICENSE \\
+    "$REMOTE_MODEL_PARENT"/.[!.]*; do
+    if [[ -f "$path" ]]; then
+      mv -f "$path" "$EXPECTED_MODEL_DIR/$(basename "$path")"
+    fi
+  done
+  shopt -u nullglob
   if compgen -G "$EXPECTED_MODEL_DIR/$WEIGHT_FILE_GLOB" >/dev/null; then
     log "model already in expected directory layout"
     return 0
   fi
   if compgen -G "$REMOTE_MODEL_PARENT/*.safetensors" >/dev/null; then
     log "normalizing flat model_tools download layout"
-    mkdir -p "$EXPECTED_MODEL_DIR"
     shopt -s nullglob
     for path in \\
       "$REMOTE_MODEL_PARENT"/*.bin \\
       "$REMOTE_MODEL_PARENT"/*.json \\
       "$REMOTE_MODEL_PARENT"/*.md \\
+      "$REMOTE_MODEL_PARENT"/*.py \\
       "$REMOTE_MODEL_PARENT"/*.safetensors \\
       "$REMOTE_MODEL_PARENT"/*.txt \\
       "$REMOTE_MODEL_PARENT"/LICENSE \\
