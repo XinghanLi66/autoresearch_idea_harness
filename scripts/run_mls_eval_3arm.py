@@ -77,6 +77,9 @@ def parse_existing(arm: str, task: str, out_root: Path, pass_metric) -> dict | N
                     "improvement": wr.get("improvement"), "baseline_metric": d.get("baseline_metric"),
                     "status": wr.get("status"), "cached": True}
     return None
+
+
+def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--proposals-dir", type=Path, required=True, help="dir with proposals_<arm>.jsonl")
     ap.add_argument("--out-root", type=Path, default=ROOT / "runs" / "researcher_cot" / "mls_eval" / "worker_runs")
