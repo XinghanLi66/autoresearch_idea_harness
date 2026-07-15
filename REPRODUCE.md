@@ -155,3 +155,21 @@ Compare the trained checkpoint's pass rate against the base
 | PAI-DLC submission | `scripts/check_dlc_quota.py`, `scripts/prepare_v3_*_run.py`, `scripts/watch_v3_*.py`, `scripts/monitor_v3_sft_job.py`, `pai_create_job*.sh` artifacts | Direct `torchrun` (step 4) |
 | Multi-host tmux sweep launcher | `scripts/launch_v2_3_formal_shards.sh` | Run `scripts/run_formal_sweep.py` directly on one node |
 | proposal_rl experiment checkpoints (V2.3 sweep modules) | `formal_sweep.py` module table (`PROPOSAL_RL_RUNS_ROOT`) | Not released; external sweep covers worker-only and API-master modules |
+
+## Replication receipts (independent cluster, 2026-07-15)
+
+This branch's training path was replicated on an independent 4-GPU (aarch64 GB200) cluster,
+cloning THIS branch (plus `proposal_rl@opensource-prep` for `train/sft.py`) over HTTPS:
+
+| Step | Result | Evidence |
+|---|---|---|
+| Clone + `py_compile` on fresh image | PASS | trial 1697055 |
+| Smoke (256 rows, 32B LoRA, 4 GPUs) | PASS — losses 1.87–2.00, sharded checkpoint saved | trial 1699582 |
+| FULL run (928 rows, 16k seq, LoRA r64/α128, lr 1e-5, 1 epoch) | PASS — loss 2.033 → 1.837 (min, s7) → 1.880 (s14), checkpoint `global_step_14` saved | trial 1699595 |
+
+This matches the documented expectation: training reproduces cleanly (the recorded result is a
+no-pass-rate-gain vs base — see the top of this file). Environment notes confirmed:
+`peft>=0.15`, `accelerate>=1.10` (1.14.0 verified) with `transformers==5.5.0` + `verl==0.7.1`;
+remove old `torchao` if present. Known cosmetic issue: verl's post-training FSDP→HF merge can fail
+with a backend-enum `AttributeError` — the sharded checkpoint is intact; merge offline via
+`python -m verl.model_merger`.
