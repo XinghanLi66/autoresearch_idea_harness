@@ -40,23 +40,43 @@ def run_one(arm: str, rec: dict, out_root: Path, max_turns: int, timeout: int, g
     t0 = time.time()
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 600)
     elapsed = round(time.time() - t0, 1)
-    # find the settlement written by the worker script
-    passed = metric = status = None
-    for sd in sorted((out_root / arm).rglob("settlement.json")) + sorted((out_root / arm).rglob("result.json")):
-        if task in str(sd) or f"{arm}_{task}" in str(sd):
-            try:
-                d = json.loads(sd.read_text())
-                passed = d.get("passed", passed)
-                metric = d.get("val_metric", d.get("metric", metric))
-                status = d.get("status", status)
-            except Exception:
-                pass
+    # the worker script writes the authoritative verdict to <sample>/summary.json under worker_result
+    passed = metric = status = improvement = baseline = None
+    sdir = out_root / arm / f"mls_eval_{arm}"
+    cands = sorted((out_root / arm).rglob("summary.json"))
+    for sd in cands:
+        try:
+            d = json.loads(sd.read_text())
+        except Exception:
+            continue
+        if d.get("task") != task or "worker_result" not in d:
+            continue
+        wr = d["worker_result"]
+        passed = wr.get("passed")
+        metric = wr.get("val_metric")
+        status = wr.get("status")
+        improvement = wr.get("improvement")
+        baseline = d.get("baseline_metric")
     return {"arm": arm, "task": task, "pass_metric": rec.get("pass_metric"),
-            "passed": passed, "metric": metric, "status": status,
+            "passed": passed, "metric": metric, "improvement": improvement,
+            "baseline_metric": baseline, "status": status,
             "elapsed_s": elapsed, "rc": p.returncode, "stderr_tail": p.stderr[-300:]}
 
 
-def main() -> None:
+def parse_existing(arm: str, task: str, out_root: Path, pass_metric) -> dict | None:
+    """Re-derive a result row from an existing worker summary.json (no re-run)."""
+    for sd in sorted((out_root / arm).rglob("summary.json")):
+        try:
+            d = json.loads(sd.read_text())
+        except Exception:
+            continue
+        if d.get("task") == task and "worker_result" in d:
+            wr = d["worker_result"]
+            return {"arm": arm, "task": task, "pass_metric": pass_metric,
+                    "passed": wr.get("passed"), "metric": wr.get("val_metric"),
+                    "improvement": wr.get("improvement"), "baseline_metric": d.get("baseline_metric"),
+                    "status": wr.get("status"), "cached": True}
+    return None
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--proposals-dir", type=Path, required=True, help="dir with proposals_<arm>.jsonl")
     ap.add_argument("--out-root", type=Path, default=ROOT / "runs" / "researcher_cot" / "mls_eval" / "worker_runs")
@@ -69,32 +89,30 @@ def main() -> None:
 
     args.out_root.mkdir(parents=True, exist_ok=True)
     results_path = args.out_root / "results.jsonl"
-    done = set()
-    if results_path.exists():
-        for l in results_path.open():
-            try:
-                r = json.loads(l)
-                done.add((r["arm"], r["task"]))
-            except Exception:
-                pass
 
     arms = args.arms.split(",")
+    rows = []
     for arm in arms:
         props = load_proposals(args.proposals_dir / f"proposals_{arm}.jsonl")
         tasks = args.tasks.split(",") if args.tasks else list(props)
         for task in tasks:
-            if (arm, task) in done:
-                print(f"[eval] skip {arm}/{task} (cached)", flush=True)
+            existing = parse_existing(arm, task, args.out_root, props[task].get("pass_metric"))
+            if existing:
+                print(f"[eval] cached {arm}/{task}: passed={existing['passed']} metric={existing['metric']}", flush=True)
+                rows.append(existing)
                 continue
             print(f"[eval] START {arm}/{task}", flush=True)
             r = run_one(arm, props[task], args.out_root, args.max_turns, args.worker_timeout, args.gpu)
-            with results_path.open("a") as f:
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            rows.append(r)
             print(f"[eval] DONE {arm}/{task}: passed={r['passed']} metric={r['metric']} "
                   f"vs {r['pass_metric']} status={r['status']} {r['elapsed_s']}s", flush=True)
+            with results_path.open("w") as f:  # rewrite full snapshot after each run
+                for rr in rows:
+                    f.write(json.dumps(rr, ensure_ascii=False) + "\n")
 
-    # aggregate
-    rows = [json.loads(l) for l in results_path.open()]
+    with results_path.open("w") as f:
+        for rr in rows:
+            f.write(json.dumps(rr, ensure_ascii=False) + "\n")
     summary = {}
     for arm in arms:
         ar = [r for r in rows if r["arm"] == arm]
