@@ -37,8 +37,9 @@ cd <proposal_rl_root> && torchrun --nproc_per_node=$NGPU train/sft.py --config <
 Clone `proposal_rl` next to this repo (the default
 `proposal_rl_root: ../proposal_rl` in `configs/default.yaml` then works
 as-is), or set `proposal_rl_root` to wherever you put it. The training
-environment additionally needs `peft`, `accelerate`, and `datasets` (see
-`proposal_rl`'s own requirements).
+environment additionally needs `peft>=0.15`, `accelerate>=1.10` (1.14.0 verified), and `datasets`
+(see `proposal_rl`'s requirements; pins verified by independent-cluster replication 2026-07-15 —
+older peft/accelerate fail at LoraConfig/32B-load with transformers 5.5 + verl 0.7.1; remove torchao if present).
 
 ## 1. Environment
 
