@@ -1,0 +1,112 @@
+{
+  "base": {
+    "dl_lr_schedule": [
+      92.65,
+      false,
+      93.19
+    ],
+    "cv_pooling_aggregation": [
+      72.64,
+      true,
+      72.19000000000001
+    ],
+    "cv_multitask_loss": [
+      68.67,
+      false,
+      68.79
+    ],
+    "dl_residual_connection": [
+      93.12,
+      true,
+      92.96000000000001
+    ]
+  },
+  "sft": {
+    "dl_lr_schedule": [
+      92.8,
+      false,
+      93.19
+    ],
+    "cv_pooling_aggregation": [
+      71.75,
+      false,
+      72.19000000000001
+    ],
+    "cv_multitask_loss": [
+      25.89,
+      false,
+      68.79
+    ],
+    "dl_residual_connection": [
+      92.28,
+      false,
+      92.96000000000001
+    ]
+  },
+  "rl": {
+    "dl_lr_schedule": [
+      93.08,
+      false,
+      93.19
+    ],
+    "cv_pooling_aggregation": [
+      72.27,
+      true,
+      72.19000000000001
+    ],
+    "cv_multitask_loss": [
+      68.51,
+      false,
+      68.79
+    ],
+    "dl_residual_connection": [
+      92.83,
+      false,
+      92.96000000000001
+    ]
+  },
+  "frontier": {
+    "dl_lr_schedule": [
+      92.15,
+      false,
+      93.19
+    ],
+    "cv_pooling_aggregation": [
+      71.9,
+      false,
+      72.19000000000001
+    ],
+    "cv_multitask_loss": [
+      68.6,
+      false,
+      68.79
+    ],
+    "dl_residual_connection": [
+      91.68,
+      false,
+      92.96000000000001
+    ]
+  },
+  "rl_freehp": {
+    "dl_lr_schedule": [
+      92.89,
+      false,
+      93.19
+    ],
+    "cv_pooling_aggregation": [
+      71.1,
+      false,
+      72.19000000000001
+    ],
+    "cv_multitask_loss": [
+      68.88,
+      true,
+      68.79
+    ],
+    "dl_residual_connection": [
+      92.53,
+      false,
+      92.96000000000001
+    ]
+  }
+}

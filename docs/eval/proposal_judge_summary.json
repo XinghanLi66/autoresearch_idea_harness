@@ -1,0 +1,38 @@
+{
+  "base": {
+    "novelty_vs_baseline": 2.1,
+    "mechanism_specificity": 2.6,
+    "implementability": 2.7,
+    "expected_effectiveness": 1.8,
+    "correctness": 2.4,
+    "meaningful_frac": 0.3,
+    "n": 10
+  },
+  "sft": {
+    "novelty_vs_baseline": 2.4,
+    "mechanism_specificity": 3.8,
+    "implementability": 4.2,
+    "expected_effectiveness": 2.5,
+    "correctness": 3.3,
+    "meaningful_frac": 0.8,
+    "n": 10
+  },
+  "rl": {
+    "novelty_vs_baseline": 2.4,
+    "mechanism_specificity": 3.5,
+    "implementability": 3.8,
+    "expected_effectiveness": 2.5,
+    "correctness": 2.8,
+    "meaningful_frac": 0.7,
+    "n": 10
+  },
+  "frontier": {
+    "novelty_vs_baseline": 2.7,
+    "mechanism_specificity": 4.9,
+    "implementability": 4.9,
+    "expected_effectiveness": 3.2,
+    "correctness": 4.0,
+    "meaningful_frac": 1.0,
+    "n": 10
+  }
+}
