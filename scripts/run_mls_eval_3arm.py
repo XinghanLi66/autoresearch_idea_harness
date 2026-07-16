@@ -23,7 +23,8 @@ def load_proposals(path: Path) -> dict[str, dict]:
     return {r["task"]: r for r in (json.loads(l) for l in path.open())}
 
 
-def run_one(arm: str, rec: dict, out_root: Path, max_turns: int, timeout: int, gpu: str) -> dict:
+def run_one(arm: str, rec: dict, out_root: Path, max_turns: int, timeout: int, gpu: str,
+            free_hparams: bool = False) -> dict:
     task = rec["task"]
     prop_file = out_root / f"_proposal_{arm}_{task}.txt"
     prop_file.write_text(rec["proposal"])
@@ -35,6 +36,8 @@ def run_one(arm: str, rec: dict, out_root: Path, max_turns: int, timeout: int, g
            "--worker-mode", "claude", "--gpu", gpu,
            "--max-turns", str(max_turns), "--worker-timeout", str(timeout),
            "--result-wait-timeout", str(timeout), "--sample-id", f"{arm}_{task}", "--force"]
+    if free_hparams:
+        cmd.append("--free-hparams")
     if rec.get("subtask"):
         cmd += ["--subtask", rec["subtask"]]
     t0 = time.time()
@@ -88,6 +91,7 @@ def main() -> None:
     ap.add_argument("--max-turns", type=int, default=30)
     ap.add_argument("--worker-timeout", type=int, default=7200)
     ap.add_argument("--gpu", default="0")
+    ap.add_argument("--free-hparams", action="store_true")
     args = ap.parse_args()
 
     args.out_root.mkdir(parents=True, exist_ok=True)
@@ -105,7 +109,7 @@ def main() -> None:
                 rows.append(existing)
                 continue
             print(f"[eval] START {arm}/{task}", flush=True)
-            r = run_one(arm, props[task], args.out_root, args.max_turns, args.worker_timeout, args.gpu)
+            r = run_one(arm, props[task], args.out_root, args.max_turns, args.worker_timeout, args.gpu, args.free_hparams)
             rows.append(r)
             print(f"[eval] DONE {arm}/{task}: passed={r['passed']} metric={r['metric']} "
                   f"vs {r['pass_metric']} status={r['status']} {r['elapsed_s']}s", flush=True)
