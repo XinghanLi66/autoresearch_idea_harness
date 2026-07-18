@@ -130,18 +130,28 @@ class MiniLMEmbedder:
 
 
 class CompositeReward:
-    def __init__(self, heads_dir: Path, w_fp: float, w_fmt: float, w_cr: float) -> None:
+    def __init__(self, heads_dir: Path, w_fp: float, w_fmt: float, w_cr: float,
+                 reward_mode: str = "composite") -> None:
         meta = json.loads((heads_dir / "reward_heads_meta.json").read_text())
-        npz = np.load(heads_dir / "reward_heads.npz")
-        self.fp_coef, self.fp_b = npz["fp_coef"], npz["fp_intercept"]
-        self.cr_coef, self.cr_b = npz["cr_coef"], npz["cr_intercept"]
-        self.classes = {c: i for i, c in enumerate(meta["fingerprint_classes"])}
+        self.reward_mode = reward_mode
         self.embedder = MiniLMEmbedder(meta["embedder"], device="cpu")
+        if reward_mode == "bt":
+            # GRPO-BT: single pairwise Bradley-Terry reward (same signal DPO uses); drops the
+            # saturated fingerprint/format/creativity composite that flatlined the earlier run.
+            self.bt_coef = np.load(heads_dir / "bt_reward_head.npz")["bt_coef"][0]
+        else:
+            npz = np.load(heads_dir / "reward_heads.npz")
+            self.fp_coef, self.fp_b = npz["fp_coef"], npz["fp_intercept"]
+            self.cr_coef, self.cr_b = npz["cr_coef"], npz["cr_intercept"]
+            self.classes = {c: i for i, c in enumerate(meta["fingerprint_classes"])}
         self.w_fp, self.w_fmt, self.w_cr = w_fp, w_fmt, w_cr
 
     def score(self, cots: list[str], researchers: list[str]) -> list[dict]:
         masked = [mask_name(c, r) for c, r in zip(cots, researchers)]
         Z = self.embedder.encode(masked, convert_to_numpy=True, batch_size=32, show_progress_bar=False)
+        if self.reward_mode == "bt":
+            r = Z @ self.bt_coef
+            return [{"bt": float(r[i]), "reward": float(r[i])} for i in range(len(cots))]
         logits = Z @ self.fp_coef.T + self.fp_b  # (n, 125)
         logits -= logits.max(axis=1, keepdims=True)
         probs = np.exp(logits)
@@ -191,6 +201,8 @@ def main() -> None:
     ap.add_argument("--policy-model", required=True, help="full-SFT 32B checkpoint dir (or base for smoke)")
     ap.add_argument("--train-jsonl", required=True, help="anchored dataset; prompts = system+user")
     ap.add_argument("--reward-heads-dir", required=True)
+    ap.add_argument("--reward", default="composite", choices=["composite", "bt"],
+                    help="composite = fp+fmt+cr (old); bt = Bradley-Terry pairwise head (GRPO-BT arm)")
     ap.add_argument("--output-dir", type=Path, required=True)
     ap.add_argument("--max-steps", type=int, default=60)
     ap.add_argument("--prompts-per-step", type=int, default=4)
@@ -241,7 +253,7 @@ def main() -> None:
     log_event(event="model_loaded", load_s=round(time.time() - t0, 1),
               policy=args.policy_model)
 
-    reward = CompositeReward(Path(args.reward_heads_dir), args.w_fp, args.w_fmt, args.w_cr)
+    reward = CompositeReward(Path(args.reward_heads_dir), args.w_fp, args.w_fmt, args.w_cr, reward_mode=args.reward)
     prompts = load_prompts(Path(args.train_jsonl), args.prompt_limit, args.seed)
     log_event(event="setup", n_prompts=len(prompts), args=vars(args) | {"output_dir": str(args.output_dir)})
 
