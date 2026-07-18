@@ -318,13 +318,15 @@ def main() -> None:
         torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad], 1.0)
         opt.step()
 
-        comp_means = {k: float(np.mean([s[k] for s in scores])) for k in ("fingerprint", "format", "creativity", "reward")}
+        # reward-mode-aware: bt scores carry {bt,reward}; composite carries {fingerprint,format,creativity,reward}
+        comp_keys = [k for k in ("fingerprint", "format", "creativity", "bt", "reward") if k in scores[0]]
+        comp_means = {k: float(np.mean([s[k] for s in scores])) for k in comp_keys}
         running.append(comp_means["reward"])
         log_event(event="step", step=step, loss=round(total_loss, 4), kl=round(total_kl, 4),
                   gen_tokens=int(total_tok), elapsed_s=round(time.time() - step_t0, 1), **comp_means)
+        extra = " ".join(f"{k}={comp_means[k]:.3f}" for k in comp_keys if k != "reward")
         print(f"[grpo] step {step}/{args.max_steps} R={comp_means['reward']:.3f} "
-              f"(fp={comp_means['fingerprint']:.3f} fmt={comp_means['format']:.3f} "
-              f"cr={comp_means['creativity']:.3f}) kl={total_kl:.4f} "
+              f"({extra}) kl={total_kl:.4f} "
               f"{time.time()-step_t0:.0f}s", flush=True)
 
         if step % args.save_steps == 0 or step == args.max_steps:
