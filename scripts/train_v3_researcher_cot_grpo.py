@@ -309,7 +309,11 @@ def main() -> None:
             pol_logp, mask = completion_logprobs(model, ids, am, cm)
             tok_count = mask.sum().clamp(min=1.0)
             pg = -(adv_t[sl].unsqueeze(1) * pol_logp).sum() / tok_count
-            kl = ((pol_logp - ref_logp).sum() / tok_count)
+            # k3 (Schulman/GRPO) KL estimator: exp(ref-pol) - (ref-pol) - 1. Non-negative + low-variance;
+            # the plain k1 = (pol-ref) drifted monotonically negative (biased penalty). k3(0)=0 so the
+            # completion mask (pol/ref logp zeroed off-completion) is preserved.
+            log_ratio = ref_logp - pol_logp
+            kl = ((log_ratio.exp() - log_ratio - 1.0).sum() / tok_count)
             loss = (pg + args.kl_coef * kl) * (ids.shape[0] / n_seq)
             loss.backward()
             total_loss += float(loss.detach())
