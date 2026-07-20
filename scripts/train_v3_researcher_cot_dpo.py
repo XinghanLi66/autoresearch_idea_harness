@@ -27,6 +27,14 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import LoraConfig
 from trl import DPOConfig, DPOTrainer
 
+# Version-compat shim: transformers>=4.47 calls Trainer.log(logs, start_time) but trl 0.12's
+# DPOTrainer.log(self, logs) takes only one positional -> TypeError. Qwen3-arch bases (D1/M2) need
+# tfm>=4.51, so accept and drop the extra args. No-op on tfm 4.46 (called with a single arg).
+_ORIG_DPO_LOG = DPOTrainer.log
+def _dpo_log_compat(self, logs, *args, **kwargs):  # noqa: ANN001
+    return _ORIG_DPO_LOG(self, logs)
+DPOTrainer.log = _dpo_log_compat
+
 
 def build_dataset(pairs_jsonl: str, tok) -> Dataset:
     def render(msgs):
