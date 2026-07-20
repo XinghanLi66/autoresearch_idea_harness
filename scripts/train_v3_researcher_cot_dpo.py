@@ -66,6 +66,13 @@ def main() -> None:
     ap.add_argument("--lora-r", type=int, default=64)
     ap.add_argument("--lora-alpha", type=int, default=128)
     ap.add_argument("--val-frac", type=float, default=0.05)
+    ap.add_argument("--fsdp-sharding-strategy", default="none",
+                    choices=["none", "full_shard", "hybrid_shard"],
+                    help="none = single-process (device_map, existing path). full/hybrid_shard = "
+                         "multi-node FSDP under torchrun (shards the base so DPO's 2 forwards fit; "
+                         "required for large models like 235B). hybrid_shard recommended multi-node.")
+    ap.add_argument("--fsdp-transformer-layer", default="Qwen3MoeDecoderLayer",
+                    help="auto-wrap layer class for FSDP (Qwen3DecoderLayer dense / Qwen3MoeDecoderLayer MoE).")
     args = ap.parse_args()
 
     tok = AutoTokenizer.from_pretrained(args.base_model, trust_remote_code=True)
@@ -85,14 +92,33 @@ def main() -> None:
     peft_cfg = LoraConfig(r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=0.05,
                           bias="none", task_type="CAUSAL_LM", target_modules="all-linear")
 
+    # Multi-node FSDP: shard the (large) base across ranks so DPO's chosen+rejected forwards fit.
+    # With the model sharded across many GPUs, activations fit WITHOUT grad-checkpointing -> avoids the
+    # MoE reentrant-recompute failures. Single-node path (strategy=none) keeps grad-ckpt as before.
+    fsdp_on = args.fsdp_sharding_strategy != "none"
+    extra: dict = {}
+    if fsdp_on:
+        extra = {
+            "fsdp": f"{args.fsdp_sharding_strategy} auto_wrap",
+            "fsdp_config": {
+                "fsdp_version": 1,
+                "transformer_layer_cls_to_wrap": [args.fsdp_transformer_layer],
+                "sync_module_states": True,
+                "cpu_ram_efficient_loading": True,
+                "use_orig_params": True,
+                "limit_all_gathers": True,
+                "state_dict_type": "SHARDED_STATE_DICT",
+            },
+        }
     cfg = DPOConfig(
         output_dir=args.output_dir, loss_type=args.loss_type, beta=args.beta,
         learning_rate=args.lr, num_train_epochs=args.epochs,
         per_device_train_batch_size=args.per_device_batch, gradient_accumulation_steps=args.grad_accum,
         max_length=args.max_length, max_prompt_length=args.max_prompt_length,
-        bf16=True, gradient_checkpointing=True, logging_steps=5,
+        bf16=True, gradient_checkpointing=not fsdp_on, logging_steps=5,
         eval_strategy="steps", eval_steps=25, save_strategy="epoch",
         warmup_ratio=0.03, lr_scheduler_type="cosine", report_to=[],
+        **extra,
     )
     # ref_model=None + peft_config -> reference is the adapter-disabled base (zero extra weights)
     trainer = DPOTrainer(model=model, ref_model=None, args=cfg,
