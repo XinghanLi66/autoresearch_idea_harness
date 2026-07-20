@@ -138,6 +138,16 @@ v3_training:
     priority: 0
     overuse: false
     job_type: PytorchJob
+    # Multi-node distributed training (validated 2026-07-20: Phases 0-3, up to 32 GPU / 8 workers;
+    # 64 GPU needs quota — queue 532 caps at 48). QS injects PET_* rendezvous → torchrun native.
+    distributed:
+      parallel_strategy: fsdp          # 'fsdp' implemented; 'megatron' reserved seam (EP/3D) for later
+      sharding_strategy: hybrid_shard  # shard within a node's 4 GPU, replicate across nodes (multi-node)
+      nproc_per_node: 4                # GPUs per QS worker (resource-package 234)
+      # NCCL over InfiniBand (HCAs mlx5_0/1/4/5; busbw ~128 GB/s at 8 GPU). Image sets
+      # NCCL_SOCKET_IFNAME via /workspace/get_socket_name.sh (evaluate it in the command).
+      nccl_ib_hca: mlx5_0,mlx5_1,mlx5_4,mlx5_5
+      clone_to_tmp: true               # multi-pod: clone code to node-local /tmp (shared-3fs race)
     image: artifactory.devops.xiaohongshu.com/quicksilver/images/training/media/nvidia/tutu_cybertron:ngc2510_xray_newep_3fs_v1
     remote_project_root: /mnt/3fs/lxh/agentic-training
     remote_harness_root: /mnt/3fs/lxh/agentic-training/autoresearch_idea_harness
