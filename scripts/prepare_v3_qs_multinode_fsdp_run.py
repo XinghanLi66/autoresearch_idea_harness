@@ -76,6 +76,11 @@ rm -rf "$CLONE"
 git clone --depth 1 --branch {shlex.quote(repo_ref)} {shlex.quote(repo_url)} "$CLONE" 2>&1 | tee -a "$LOG"
 cd "$CLONE"
 git rev-parse HEAD | tee "$REMOTE_RUN_DIR/git_head_${{HOST}}.txt"
+# Qwen3 needs transformers>=4.51 (image default is older -> "model type qwen3 not recognized").
+# Installs are node-local (per-pod /usr/local) so no shared-fs race.
+python3 -m pip install -q -U "transformers>=4.51,<5" "accelerate>=1.10.0,<2" 2>&1 | tail -3 | tee -a "$LOG" || true
+python3 -m pip uninstall -y torchao 2>&1 | tail -1 | tee -a "$LOG" || true
+python3 -c "import transformers; print('[fsdp-mn] transformers', transformers.__version__)" | tee -a "$LOG" || true
 python3 -m py_compile scripts/train_v3_researcher_cot_full_fsdp.py 2>&1 | tee -a "$LOG"
 # torchrun reads PET_NNODES/PET_NODE_RANK/PET_MASTER_ADDR/PET_MASTER_PORT natively; override nproc only.
 torchrun --nproc-per-node=4 scripts/train_v3_researcher_cot_full_fsdp.py \
