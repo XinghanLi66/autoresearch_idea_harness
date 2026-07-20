@@ -183,6 +183,19 @@ SAVE_STEPS = 50
 ASSISTANT_START_STR = "<|im_start|>assistant\n"
 
 
+def derive_assistant_start_str(tokenizer) -> str:
+    """Model-agnostic assistant marker = the suffix add_generation_prompt appends (Qwen/DeepSeek/…)."""
+    probe = [{"role": "user", "content": "x"}]
+    try:
+        base = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=False)
+        gen = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=True)
+    except Exception:
+        return ASSISTANT_START_STR
+    if gen.startswith(base) and len(gen) > len(base):
+        return gen[len(base):]
+    return ASSISTANT_START_STR
+
+
 def tokenize_with_assistant_mask(
     examples: dict[str, Any],
     tokenizer: AutoTokenizer,
@@ -334,6 +347,10 @@ def main():
         help="Path to base HF model (Qwen2.5-7B-Instruct).",
     )
     parser.add_argument(
+        "--assistant-start-str", default="auto",
+        help="assistant-turn marker for loss masking; 'auto' derives it from the chat template.",
+    )
+    parser.add_argument(
         "--num-epochs", type=int, default=1,
         help="Number of training epochs.",
     )
@@ -388,6 +405,10 @@ def main():
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+    global ASSISTANT_START_STR
+    ASSISTANT_START_STR = (derive_assistant_start_str(tokenizer)
+                           if args.assistant_start_str == "auto" else args.assistant_start_str)
+    print(f"  assistant_start_str: {ASSISTANT_START_STR!r} (mode={args.assistant_start_str})")
 
     # ------------------------------------------------------------------
     # 2. Datasets

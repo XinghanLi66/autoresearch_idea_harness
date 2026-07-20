@@ -140,6 +140,21 @@ DEFAULT_OUTPUT_ROOT = str(
 ASSISTANT_START_STR = "<|im_start|>assistant\n"
 
 
+def derive_assistant_start_str(tokenizer) -> str:
+    """Model-agnostic assistant-turn marker = the exact suffix add_generation_prompt appends.
+    Qwen -> '<|im_start|>assistant\\n'; DeepSeek-R1 -> '<｜Assistant｜>'; Llama -> its header block.
+    Falls back to the Qwen default if the diff can't be computed."""
+    probe = [{"role": "user", "content": "x"}]
+    try:
+        base = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=False)
+        gen = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=True)
+    except Exception:
+        return ASSISTANT_START_STR
+    if gen.startswith(base) and len(gen) > len(base):
+        return gen[len(base):]
+    return ASSISTANT_START_STR
+
+
 def rank() -> int:
     return int(os.environ.get("RANK", "0"))
 
@@ -341,6 +356,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--val-jsonl", default=None)
     parser.add_argument("--output-dir", type=Path, default=Path(DEFAULT_OUTPUT_ROOT) / "run")
     parser.add_argument("--base-model", default=DEFAULT_BASE_MODEL)
+    parser.add_argument("--assistant-start-str", default="auto",
+                        help="assistant-turn marker for label masking; 'auto' derives it from the "
+                             "chat template (works for Qwen/DeepSeek/Llama), else pass a literal.")
     parser.add_argument("--num-epochs", type=int, default=1)
     parser.add_argument("--max-steps", type=int, default=-1)
     parser.add_argument("--limit", type=int, default=None)
@@ -394,6 +412,10 @@ def main() -> None:
 
     log("loading tokenizer")
     tokenizer = AutoTokenizer.from_pretrained(args.base_model, padding_side="right")
+    global ASSISTANT_START_STR
+    ASSISTANT_START_STR = (derive_assistant_start_str(tokenizer)
+                           if args.assistant_start_str == "auto" else args.assistant_start_str)
+    log(f"assistant_start_str={ASSISTANT_START_STR!r} (mode={args.assistant_start_str})")
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
