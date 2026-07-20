@@ -79,6 +79,9 @@ def main() -> None:
     model = AutoModelForCausalLM.from_pretrained(
         args.base_model, torch_dtype=torch.bfloat16, trust_remote_code=True)
     model.config.use_cache = False
+    # Frozen base + LoRA + gradient checkpointing: register the input-grad hook so checkpointed base
+    # layers have a grad path (else reentrant checkpointing -> "element 0 does not require grad").
+    model.enable_input_require_grads()
     peft_cfg = LoraConfig(r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=0.05,
                           bias="none", task_type="CAUSAL_LM", target_modules="all-linear")
 
