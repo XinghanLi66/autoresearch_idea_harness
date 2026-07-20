@@ -210,11 +210,23 @@ def tokenize_with_assistant_mask(
         input_ids = enc["input_ids"]
         attention_mask = enc["attention_mask"]
 
-        assistant_start_pos = text.rfind(ASSISTANT_START_STR)
-        if assistant_start_pos == -1:
+        # Delimiter-agnostic label boundary: render the prompt (all turns but the final assistant)
+        # WITH add_generation_prompt=True -> the exact prefix up to where assistant content begins.
+        # Works for any additive template (Qwen/DeepSeek/…) without a hardcoded marker string.
+        # Falls back to the rfind(marker) heuristic if the template isn't cleanly additive.
+        prefix_text = None
+        if msgs and isinstance(msgs[-1], dict) and msgs[-1].get("role") == "assistant":
+            cand = render_chat(tokenizer, msgs[:-1], add_generation_prompt=True)
+            if text.startswith(cand) and len(cand) < len(text):
+                prefix_text = cand
+        if prefix_text is None:
+            pos = text.rfind(ASSISTANT_START_STR)
+            if pos != -1:
+                prefix_text = text[: pos + len(ASSISTANT_START_STR)]
+
+        if prefix_text is None:
             labels = [-100] * len(input_ids)
         else:
-            prefix_text = text[: assistant_start_pos + len(ASSISTANT_START_STR)]
             prefix_ids = tokenizer(
                 prefix_text,
                 truncation=False,
@@ -446,6 +458,18 @@ def main() -> None:
     sample = train_ds[0]
     active_labels = sum(1 for label in sample["labels"] if label != -100)
     if active_labels == 0:
+        # Diagnose: truncation (prompt >= max_seq) vs template/delimiter issue.
+        import json as _json
+        with open(args.train_jsonl) as _fh:
+            _msgs = _json.loads(_fh.readline())["messages"]
+        _full = render_chat(tokenizer, _msgs, add_generation_prompt=False)
+        _prefix = render_chat(tokenizer, _msgs[:-1], add_generation_prompt=True)
+        _full_ids = tokenizer(_full, add_special_tokens=False)["input_ids"]
+        _pref_ids = tokenizer(_prefix, add_special_tokens=False)["input_ids"]
+        log(f"[diag] full_tok={len(_full_ids)} prefix_tok={len(_pref_ids)} max_seq={args.max_seq_length} "
+            f"full.startswith(prefix)={_full.startswith(_prefix)} enable_thinking={ENABLE_THINKING}")
+        log(f"[diag] prefix_tail={_prefix[-120:]!r}")
+        log(f"[diag] full_tail={_full[-160:]!r}")
         raise SystemExit("first training row has zero active assistant labels")
     log(f"train_examples={len(train_ds)} active_labels_first={active_labels}/{len(sample['labels'])}")
     if eval_ds is not None:

@@ -239,16 +239,21 @@ def tokenize_with_assistant_mask(
         input_ids = enc["input_ids"]
         attention_mask = enc["attention_mask"]
 
-        # Find where the assistant turn starts by tokenising the prefix up to the
-        # assistant block, then using that length as the mask boundary.
-        # Strategy: find the last occurrence of ASSISTANT_START_STR in the text,
-        # then measure how many tokens precede it.
-        assistant_start_pos = text.rfind(ASSISTANT_START_STR)
-        if assistant_start_pos == -1:
-            # Fallback: mask everything (no assistant turn found; shouldn't happen)
+        # Delimiter-agnostic label boundary: prompt (all but final assistant turn) rendered WITH
+        # add_generation_prompt=True = exact prefix up to assistant content. rfind(marker) fallback.
+        prefix_text = None
+        if msgs and isinstance(msgs[-1], dict) and msgs[-1].get("role") == "assistant":
+            cand = render_chat(tokenizer, msgs[:-1], add_generation_prompt=True)
+            if text.startswith(cand) and len(cand) < len(text):
+                prefix_text = cand
+        if prefix_text is None:
+            assistant_start_pos = text.rfind(ASSISTANT_START_STR)
+            if assistant_start_pos != -1:
+                prefix_text = text[: assistant_start_pos + len(ASSISTANT_START_STR)]
+
+        if prefix_text is None:
             labels = [-100] * len(input_ids)
         else:
-            prefix_text = text[: assistant_start_pos + len(ASSISTANT_START_STR)]
             prefix_ids = tokenizer(
                 prefix_text,
                 truncation=False,
