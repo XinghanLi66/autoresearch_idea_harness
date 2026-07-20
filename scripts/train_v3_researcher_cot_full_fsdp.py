@@ -143,15 +143,18 @@ ASSISTANT_START_STR = "<|im_start|>assistant\n"
 def derive_assistant_start_str(tokenizer) -> str:
     """Model-agnostic assistant-turn marker = the exact suffix add_generation_prompt appends.
     Qwen -> '<|im_start|>assistant\\n'; DeepSeek-R1 -> '<｜Assistant｜>'; Llama -> its header block.
-    Falls back to the Qwen default if the diff can't be computed."""
+    Renders with enable_thinking=False to match the training tokenization (Qwen3 injects a <think>
+    scaffold otherwise); falls back to no-kwarg for templates that lack it (DeepSeek), then to the
+    Qwen default if the diff can't be computed."""
     probe = [{"role": "user", "content": "x"}]
-    try:
-        base = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=False)
-        gen = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=True)
-    except Exception:
-        return ASSISTANT_START_STR
-    if gen.startswith(base) and len(gen) > len(base):
-        return gen[len(base):]
+    for kw in ({"enable_thinking": False}, {}):
+        try:
+            base = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=False, **kw)
+            gen = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=True, **kw)
+        except Exception:
+            continue
+        if gen.startswith(base) and len(gen) > len(base):
+            return gen[len(base):]
     return ASSISTANT_START_STR
 
 
