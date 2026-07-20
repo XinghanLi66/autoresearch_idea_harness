@@ -181,21 +181,33 @@ SAVE_STEPS = 50
 # We tokenize with the full chat template, then mask labels everywhere
 # EXCEPT the assistant content + <|im_end|> token.
 ASSISTANT_START_STR = "<|im_start|>assistant\n"
+ENABLE_THINKING = True   # set from --enable-thinking; couples derive + tokenize so markers match
+
+
+def render_chat(tokenizer, msgs, add_generation_prompt: bool) -> str:
+    """Render chat template respecting ENABLE_THINKING (see full-FSDP trainer for rationale)."""
+    if not ENABLE_THINKING:
+        try:
+            return tokenizer.apply_chat_template(
+                msgs, tokenize=False, add_generation_prompt=add_generation_prompt,
+                enable_thinking=False)
+        except TypeError:
+            pass
+    return tokenizer.apply_chat_template(
+        msgs, tokenize=False, add_generation_prompt=add_generation_prompt)
 
 
 def derive_assistant_start_str(tokenizer) -> str:
-    """Model-agnostic assistant marker = the suffix add_generation_prompt appends (Qwen/DeepSeek/…).
-    Renders with enable_thinking=False to match training (Qwen3 injects <think> otherwise); falls
-    back to no-kwarg (DeepSeek), then to the Qwen default."""
+    """Assistant marker = add_generation_prompt suffix, rendered under the same thinking mode as
+    training so the delimiter matches (Qwen/R1-0528-Qwen3 -> '<|im_start|>assistant\\n')."""
     probe = [{"role": "user", "content": "x"}]
-    for kw in ({"enable_thinking": False}, {}):
-        try:
-            base = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=False, **kw)
-            gen = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=True, **kw)
-        except Exception:
-            continue
-        if gen.startswith(base) and len(gen) > len(base):
-            return gen[len(base):]
+    try:
+        base = render_chat(tokenizer, probe, add_generation_prompt=False)
+        gen = render_chat(tokenizer, probe, add_generation_prompt=True)
+    except Exception:
+        return ASSISTANT_START_STR
+    if gen.startswith(base) and len(gen) > len(base):
+        return gen[len(base):]
     return ASSISTANT_START_STR
 
 
@@ -214,11 +226,7 @@ def tokenize_with_assistant_mask(
 
     for msgs in examples["messages"]:
         # Apply chat template (no generation prompt — we include the assistant turn)
-        text = tokenizer.apply_chat_template(
-            msgs,
-            tokenize=False,
-            add_generation_prompt=False,
-        )
+        text = render_chat(tokenizer, msgs, add_generation_prompt=False)
 
         # Tokenize full text
         enc = tokenizer(
@@ -354,6 +362,10 @@ def main():
         help="assistant-turn marker for loss masking; 'auto' derives it from the chat template.",
     )
     parser.add_argument(
+        "--enable-thinking", default="true", choices=["true", "false"],
+        help="whether the chat template renders a <think> scaffold; 'false' for think-free targets.",
+    )
+    parser.add_argument(
         "--num-epochs", type=int, default=1,
         help="Number of training epochs.",
     )
@@ -408,10 +420,11 @@ def main():
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    global ASSISTANT_START_STR
+    global ENABLE_THINKING, ASSISTANT_START_STR
+    ENABLE_THINKING = (args.enable_thinking == "true")
     ASSISTANT_START_STR = (derive_assistant_start_str(tokenizer)
                            if args.assistant_start_str == "auto" else args.assistant_start_str)
-    print(f"  assistant_start_str: {ASSISTANT_START_STR!r} (mode={args.assistant_start_str})")
+    print(f"  enable_thinking: {ENABLE_THINKING} | assistant_start_str: {ASSISTANT_START_STR!r} (mode={args.assistant_start_str})")
 
     # ------------------------------------------------------------------
     # 2. Datasets

@@ -138,23 +138,38 @@ DEFAULT_OUTPUT_ROOT = str(
 )
 
 ASSISTANT_START_STR = "<|im_start|>assistant\n"
+ENABLE_THINKING = True   # set from --enable-thinking; couples derive + tokenize so markers match
+
+
+def render_chat(tokenizer, msgs, add_generation_prompt: bool) -> str:
+    """Render the chat template respecting ENABLE_THINKING. When thinking is off we pass
+    enable_thinking=False (Qwen3 / R1-0528-Qwen3 honor it → no <think> scaffold); templates that
+    lack the kwarg (older DeepSeek) fall back to the default. Used by BOTH the label-mask tokenizer
+    and the marker auto-detect so the assistant delimiter is identical in both."""
+    if not ENABLE_THINKING:
+        try:
+            return tokenizer.apply_chat_template(
+                msgs, tokenize=False, add_generation_prompt=add_generation_prompt,
+                enable_thinking=False)
+        except TypeError:
+            pass
+    return tokenizer.apply_chat_template(
+        msgs, tokenize=False, add_generation_prompt=add_generation_prompt)
 
 
 def derive_assistant_start_str(tokenizer) -> str:
-    """Model-agnostic assistant-turn marker = the exact suffix add_generation_prompt appends.
-    Qwen -> '<|im_start|>assistant\\n'; DeepSeek-R1 -> '<｜Assistant｜>'; Llama -> its header block.
-    Renders with enable_thinking=False to match the training tokenization (Qwen3 injects a <think>
-    scaffold otherwise); falls back to no-kwarg for templates that lack it (DeepSeek), then to the
+    """Model-agnostic assistant-turn marker = the suffix add_generation_prompt appends, rendered
+    under the SAME thinking mode as training (so the delimiter matches). Qwen/R1-0528-Qwen3 ->
+    '<|im_start|>assistant\\n'; DeepSeek-R1 (thinking) -> '<｜Assistant｜>'. Falls back to the
     Qwen default if the diff can't be computed."""
     probe = [{"role": "user", "content": "x"}]
-    for kw in ({"enable_thinking": False}, {}):
-        try:
-            base = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=False, **kw)
-            gen = tokenizer.apply_chat_template(probe, tokenize=False, add_generation_prompt=True, **kw)
-        except Exception:
-            continue
-        if gen.startswith(base) and len(gen) > len(base):
-            return gen[len(base):]
+    try:
+        base = render_chat(tokenizer, probe, add_generation_prompt=False)
+        gen = render_chat(tokenizer, probe, add_generation_prompt=True)
+    except Exception:
+        return ASSISTANT_START_STR
+    if gen.startswith(base) and len(gen) > len(base):
+        return gen[len(base):]
     return ASSISTANT_START_STR
 
 
@@ -184,11 +199,7 @@ def tokenize_with_assistant_mask(
     all_labels = []
 
     for msgs in examples["messages"]:
-        text = tokenizer.apply_chat_template(
-            msgs,
-            tokenize=False,
-            add_generation_prompt=False,
-        )
+        text = render_chat(tokenizer, msgs, add_generation_prompt=False)
         enc = tokenizer(
             text,
             truncation=True,
@@ -362,6 +373,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--assistant-start-str", default="auto",
                         help="assistant-turn marker for label masking; 'auto' derives it from the "
                              "chat template (works for Qwen/DeepSeek/Llama), else pass a literal.")
+    parser.add_argument("--enable-thinking", default="true", choices=["true", "false"],
+                        help="whether the chat template renders a <think> scaffold; 'false' for our "
+                             "think-free anchored targets (Qwen3 + R1-0528-Qwen3). Couples derive + tokenize.")
     parser.add_argument("--num-epochs", type=int, default=1)
     parser.add_argument("--max-steps", type=int, default=-1)
     parser.add_argument("--limit", type=int, default=None)
@@ -415,10 +429,11 @@ def main() -> None:
 
     log("loading tokenizer")
     tokenizer = AutoTokenizer.from_pretrained(args.base_model, padding_side="right")
-    global ASSISTANT_START_STR
+    global ENABLE_THINKING, ASSISTANT_START_STR
+    ENABLE_THINKING = (args.enable_thinking == "true")
     ASSISTANT_START_STR = (derive_assistant_start_str(tokenizer)
                            if args.assistant_start_str == "auto" else args.assistant_start_str)
-    log(f"assistant_start_str={ASSISTANT_START_STR!r} (mode={args.assistant_start_str})")
+    log(f"enable_thinking={ENABLE_THINKING} assistant_start_str={ASSISTANT_START_STR!r} (mode={args.assistant_start_str})")
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
