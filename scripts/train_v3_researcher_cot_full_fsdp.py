@@ -356,10 +356,10 @@ def build_training_args(args: argparse.Namespace) -> TrainingArguments:
         max_grad_norm=args.max_grad_norm,
         bf16=True,
         tf32=True,
-        # For FSDP full_shard, use activation_checkpointing in fsdp_config
-        # instead of Trainer gradient_checkpointing to avoid redundant all-gather.
+        # For FSDP, use activation_checkpointing in fsdp_config instead of Trainer
+        # gradient_checkpointing to avoid redundant all-gather.
         gradient_checkpointing=False,
-        fsdp="full_shard auto_wrap",
+        fsdp=f"{args.fsdp_sharding_strategy} auto_wrap",
         fsdp_config=fsdp_config,
         logging_steps=args.logging_steps,
         save_strategy=args.save_strategy,
@@ -408,6 +408,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--fsdp-transformer-layer", default="Qwen2DecoderLayer")
     parser.add_argument(
+        "--fsdp-sharding-strategy", default="full_shard", choices=["full_shard", "hybrid_shard"],
+        help="full_shard (single-node default) shards params across ALL ranks; hybrid_shard shards "
+             "within a node and replicates across nodes (recommended for multi-node over IB).")
+    parser.add_argument(
+        "--parallel-strategy", default="fsdp", choices=["fsdp", "megatron"],
+        help="Parallelism backend. 'fsdp' implemented; 'megatron' is a reserved seam for future "
+             "tensor/pipeline/expert parallelism at very large scale (not yet implemented).")
+    parser.add_argument(
         "--fsdp-state-dict-type",
         default="SHARDED_STATE_DICT",
         choices=["FULL_STATE_DICT", "SHARDED_STATE_DICT", "LOCAL_STATE_DICT"],
@@ -423,6 +431,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if args.parallel_strategy == "megatron":
+        raise NotImplementedError(
+            "parallel_strategy=megatron is a reserved seam (tensor/pipeline/expert parallel) not yet "
+            "implemented; use --parallel-strategy fsdp with --fsdp-sharding-strategy hybrid_shard.")
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     training_args = build_training_args(args)
@@ -552,7 +564,7 @@ def main() -> None:
             "grad_accum": args.grad_accum,
             "world_size": int(os.environ.get("WORLD_SIZE", "1")),
             "effective_global_batch": args.per_device_batch_size * args.grad_accum * int(os.environ.get("WORLD_SIZE", "1")),
-            "fsdp": "full_shard auto_wrap",
+            "fsdp": f"{args.fsdp_sharding_strategy} auto_wrap",
             "fsdp_config": training_args.fsdp_config,
             "save_strategy": str(training_args.save_strategy),
             "save_only_model": args.save_only_model,
