@@ -77,6 +77,7 @@ def build_app(model, tok, served_name: str, default_thinking: bool) -> FastAPI:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
+    ap.add_argument("--adapter", default=None, help="optional PEFT LoRA adapter dir to load on the base")
     ap.add_argument("--served-name", default="m2-sft")
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=8000)
@@ -90,6 +91,11 @@ def main() -> None:
     model = AutoModelForCausalLM.from_pretrained(
         args.model, torch_dtype=torch.bfloat16, trust_remote_code=True,
         device_map="auto", tp_plan=None)
+    if args.adapter:
+        from peft import PeftModel
+        print(f"[serve] attaching LoRA adapter {args.adapter} ...", flush=True)
+        model = PeftModel.from_pretrained(model, args.adapter)
+        model = model.merge_and_unload()  # fold LoRA in for fast inference
     model.eval()
     print("[serve] model loaded; starting API", flush=True)
     app = build_app(model, tok, args.served_name, args.enable_thinking == "true")
