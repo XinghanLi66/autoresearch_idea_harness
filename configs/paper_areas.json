@@ -1,0 +1,297 @@
+{
+  "models": [
+    {
+      "name": "Claude Opus 4.6",
+      "id": "claude-opus-4.6",
+      "aliases": [
+        "claude-opus-4.6",
+        "anthropic/claude-opus-4.6",
+        "claude-opus-4-6",
+        "anthropic/claude-opus-4-6"
+      ]
+    },
+    {
+      "name": "GPT-5.4",
+      "id": "gpt-5.4",
+      "aliases": [
+        "gpt-5.4",
+        "openai/gpt-5.4"
+      ]
+    },
+    {
+      "name": "Gemini 3.1 Pro",
+      "id": "gemini-3.1-pro-preview",
+      "aliases": [
+        "gemini-3.1-pro-preview",
+        "google/gemini-3.1-pro-preview",
+        "gemini/gemini-3.1-pro-preview"
+      ]
+    },
+    {
+      "name": "DeepSeek-V3.2",
+      "id": "deepseek-reasoner",
+      "aliases": [
+        "deepseek-reasoner",
+        "deepseek/deepseek-reasoner",
+        "vertex_ai/deepseek-ai/deepseek-v3.2-maas"
+      ]
+    },
+    {
+      "name": "Qwen 3.6 Plus",
+      "id": "qwen3.6-plus",
+      "aliases": [
+        "qwen3.6-plus",
+        "qwen/qwen3.6-plus",
+        "qwen3.6-plus:free",
+        "qwen/qwen3.6-plus:free"
+      ]
+    }
+  ],
+  "areas": [
+    {
+      "name": "Language Models",
+      "abbr": "LM",
+      "tasks": [
+        "agent-tool-reasoning",
+        "llm-dllm-demask-strategy",
+        "llm-pretrain-attention",
+        "llm-pretrain-bitlinear",
+        "llm-pretrain-embedding",
+        "llm-pretrain-linear-attention",
+        "llm-pretrain-loss",
+        "llm-pretrain-lr-schedule",
+        "llm-pretrain-memory",
+        "llm-pretrain-mlp",
+        "llm-pretrain-normalization",
+        "llm-pretrain-optimizer",
+        "llm-pretrain-packing",
+        "llm-pretrain-precision",
+        "llm-pretrain-quantization",
+        "llm-pretrain-residual",
+        "llm-pretrain-test-time-training",
+        "llm-pretrain-weight-averaging",
+        "llm-rl-advantage",
+        "llm-rl-baseline",
+        "llm-scaling-law-discovery",
+        "mas-topology",
+        "ttt-memory"
+      ]
+    },
+    {
+      "name": "Robotics",
+      "abbr": "Rob",
+      "tasks": [
+        "jepa-planning",
+        "tdmpc2-planning",
+        "tdmpc2-simnorm",
+        "robomimic-bc-loss",
+        "robomimic-iql-vf",
+        "robomimic-obs-encoder",
+        "robot-imitation-objective",
+        "robot-policy-conditioning",
+        "jepa-prediction-loss",
+        "jepa-regularizer"
+      ]
+    },
+    {
+      "name": "Vision & Generation",
+      "abbr": "V\\&G",
+      "tasks": [
+        "cv-3dgs-densification",
+        "cv-dbm-sampler",
+        "cv-dbm-scheduler",
+        "cv-diffusion-architecture",
+        "cv-diffusion-cfg",
+        "cv-diffusion-conditioning",
+        "cv-diffusion-efficiency",
+        "cv-diffusion-prediction",
+        "cv-meanflow-perceptual-loss",
+        "cv-vae-loss"
+      ]
+    },
+    {
+      "name": "Reinforcement Learning",
+      "abbr": "RL",
+      "tasks": [
+        "irl-reward-learning",
+        "marl-centralized-critic",
+        "marl-mixing-network",
+        "meta-rl",
+        "meta-rl-algorithm",
+        "rl-intrinsic-exploration",
+        "rl-offline-adroit",
+        "rl-offline-continuous",
+        "rl-offline-off2on",
+        "rl-offpolicy-continuous",
+        "rl-onpolicy-continuous",
+        "rl-reward-learning",
+        "rl-value-atari",
+        "rl-value-discrete",
+        "safe-rl"
+      ]
+    },
+    {
+      "name": "ML Systems & Efficient ML",
+      "abbr": "Sys",
+      "tasks": [
+        "dlm-dkv-policy",
+        "llm-kv-adaptive-quantization",
+        "llm-kv-selection-budgeting",
+        "llm-kv-structural-reduction",
+        "mlsys-fused-attention",
+        "mlsys-moe-load-balance",
+        "mlsys-sparse-attention",
+        "llm-pretrain-kernel",
+        "llm-ptq-algorithm",
+        "llm-qat-algorithm"
+      ]
+    },
+    {
+      "name": "AI for Science",
+      "abbr": "Sci",
+      "tasks": [
+        "ai4bio-antibody-binding-scoring",
+        "ai4bio-antibody-cdr-design",
+        "ai4bio-mutation-effect-prediction",
+        "ai4bio-protein-function-prediction",
+        "ai4bio-protein-inverse-folding",
+        "ai4bio-protein-structure-repr",
+        "ai4sci-climate-emulation",
+        "ai4sci-inverse-diffusion-algo",
+        "ai4sci-mol-property-prediction",
+        "ai4sci-mol3d-generation",
+        "ai4sci-pla-binding-affinity",
+        "ai4sci-sbdd-drug-design",
+        "ai4sci-vs-contrastive-scoring",
+        "ai4sci-weather-forecast-aggregation",
+        "inverse-diffusion-algo",
+        "pde-autoregressive-solver",
+        "pde-conditional-solver",
+        "pde-design-solver",
+        "pde-foundation-icl",
+        "pde-steady-solver"
+      ]
+    },
+    {
+      "name": "Optimization & Theory",
+      "abbr": "Opt",
+      "tasks": [
+        "automl-nas-search",
+        "bo-acquisition-function",
+        "opt-evolution-strategy",
+        "opt-hyperparameter-search",
+        "opt-multi-objective",
+        "optimization-bayesian-acquisition",
+        "optimization-bilevel",
+        "optimization-convex-acceleration",
+        "optimization-convex-concave",
+        "optimization-diagonal-net",
+        "optimization-dp-sgd",
+        "optimization-evolution-strategy",
+        "optimization-gradient-compression",
+        "optimization-hyperparameter-search",
+        "optimization-multi-objective",
+        "optimization-nas",
+        "optimization-online-bandit",
+        "optimization-pac-bayes-bound",
+        "optimization-parity",
+        "optimization-variance-reduction"
+      ]
+    },
+    {
+      "name": "Classical & Adaptive Learning",
+      "abbr": "CAL",
+      "tasks": [
+        "cl-regularization",
+        "fed-aggregation-strategy",
+        "meta-fewshot-classification",
+        "meta-inner-loop-optimizer",
+        "ml-active-learning",
+        "ml-anomaly-detection",
+        "ml-calibration",
+        "ml-clustering-algorithm",
+        "ml-continual-regularization",
+        "ml-dimensionality-reduction",
+        "ml-ensemble-boosting",
+        "ml-feature-selection",
+        "ml-federated-aggregation",
+        "ml-missing-data-imputation",
+        "ml-selective-deferral",
+        "ml-subgroup-calibration-shift",
+        "ml-svm-kernel",
+        "ml-symbolic-regression",
+        "ml-tree-split-criterion",
+        "sr-symbolic-regression"
+      ]
+    },
+    {
+      "name": "Deep Learning",
+      "abbr": "DL",
+      "tasks": [
+        "dl-activation-function",
+        "dl-lr-schedule",
+        "dl-normalization",
+        "dl-regularization",
+        "dl-residual-connection",
+        "dl-weight-initialization",
+        "speech-asr-encoder",
+        "speech-enhancement",
+        "speech-speaker-embedding",
+        "speech-vocoder",
+        "cv-classification-loss",
+        "cv-data-augmentation",
+        "cv-multitask-loss",
+        "cv-pooling-aggregation",
+        "cv-sample-weighting"
+      ]
+    },
+    {
+      "name": "Time Series & Forecasting",
+      "abbr": "TS",
+      "tasks": [
+        "quant-concept-drift",
+        "quant-graph-stock",
+        "quant-order-execution",
+        "quant-portfolio-opt",
+        "quant-stock-prediction",
+        "stf-traffic-forecast",
+        "ts-anomaly-detection",
+        "ts-classification",
+        "ts-exogenous-forecast",
+        "ts-imputation",
+        "ts-long-term-forecast",
+        "ts-short-term-forecast"
+      ]
+    },
+    {
+      "name": "Structured & Causal Reasoning",
+      "abbr": "SCR",
+      "tasks": [
+        "causal-discovery-discrete",
+        "causal-observational-linear-gaussian",
+        "causal-observational-linear-non-gaussian",
+        "causal-observational-nonlinear",
+        "causal-treatment-effect",
+        "graph-generation",
+        "graph-graph-classification",
+        "graph-link-prediction",
+        "graph-node-classification",
+        "graph-signal-propagation"
+      ]
+    },
+    {
+      "name": "Trustworthy Learning",
+      "abbr": "TL",
+      "tasks": [
+        "security-adversarial-attack-black-box-score",
+        "security-adversarial-attack-sparse-l0",
+        "security-adversarial-attack-white-box-linf",
+        "security-adversarial-training",
+        "security-backdoor-defense",
+        "security-machine-unlearning",
+        "security-membership-inference-defense",
+        "security-poison-robust-learning"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-pretrain-residual",
+  "task_folder": "tasks/llm-pretrain-residual",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/llm-pretrain-residual/config.json",
+      "task_description_path": "tasks/llm-pretrain-residual/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 1,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "depth-4",
+      "cmd": "scripts/train.sh",
+      "package": "nanochat",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "vanilla",
+      "implementation": "edits/vanilla.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "hc",
+      "implementation": "edits/hc.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "mhc",
+      "implementation": "edits/mhc.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "full_attnres",
+      "implementation": "edits/full_attnres.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

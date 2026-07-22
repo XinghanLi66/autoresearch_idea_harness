@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "jepa-planning",
+  "task_folder": "tasks/jepa-planning",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/jepa-planning/config.json",
+      "task_description_path": "tasks/jepa-planning/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "horizon-30",
+      "cmd": "scripts/horizon_30.sh",
+      "package": "eb_jepa",
+      "group": 1,
+      "compute": 1.0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "horizon-60",
+      "cmd": "scripts/horizon_60.sh",
+      "package": "eb_jepa",
+      "group": 1,
+      "compute": 1.0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "horizon-90",
+      "cmd": "scripts/horizon_90.sh",
+      "package": "eb_jepa",
+      "group": 1,
+      "compute": 1.0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "random",
+      "implementation": "edits/random.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "cem",
+      "implementation": "edits/cem.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "mppi",
+      "implementation": "edits/mppi.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

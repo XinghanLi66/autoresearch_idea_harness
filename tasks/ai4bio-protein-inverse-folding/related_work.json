@@ -1,0 +1,277 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4bio-protein-inverse-folding",
+  "task_folder": "tasks/ai4bio-protein-inverse-folding",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "protein inverse folding and structure encoder design",
+    "research_question": "Design a novel GNN-based structure encoder for protein inverse folding.",
+    "local_sources": {
+      "config_path": "tasks/ai4bio-protein-inverse-folding/config.json",
+      "task_description_path": "tasks/ai4bio-protein-inverse-folding/task_description.md"
+    },
+    "notes": [
+      "No stub.py exists in this task folder; the implementation stub is custom_template.py.",
+      "TS50 did not surface a standalone benchmark paper in citation search, so it is linked to papers that explicitly report TS50 results."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 8
+  },
+  "tests": [
+    {
+      "label": "CATH4.2",
+      "cmd": "scripts/cath42.sh",
+      "package": "ProteinInvBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [
+        {"paper_id": "doi:10.1126/science.add2187", "role": "benchmark"},
+        {"paper_id": "doi:10.48550/arxiv.2209.12643", "role": "benchmark"}
+      ],
+      "notes": "Single-chain inverse-folding benchmark used by ProteinMPNN and PiFold."
+    },
+    {
+      "label": "CATH4.3",
+      "cmd": "scripts/cath43.sh",
+      "package": "ProteinInvBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [
+        {"paper_id": "doi:10.1126/science.add2187", "role": "benchmark"},
+        {"paper_id": "doi:10.1101/2023.02.03.526917", "role": "benchmark"},
+        {"paper_id": "doi:10.1093/nar/gkae1087", "role": "dataset"}
+      ],
+      "notes": "Updated CATH benchmark; linked to methods and the CATH v4.4 database expansion paper."
+    },
+    {
+      "label": "TS50",
+      "cmd": "scripts/ts50.sh",
+      "package": "ProteinInvBench",
+      "group": 2,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": true,
+      "paper_links": [
+        {"paper_id": "doi:10.1126/science.add2187", "role": "benchmark"},
+        {"paper_id": "doi:10.48550/arxiv.2209.12643", "role": "benchmark"},
+        {"paper_id": "doi:10.48550/arxiv.2305.15151", "role": "benchmark"}
+      ],
+      "notes": "Out-of-distribution benchmark; cited by multiple inverse-folding papers."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "proteinmpnn",
+      "implementation": "edits/proteinmpnn.edit.py",
+      "labels": [],
+      "paper_links": [
+        {"paper_id": "doi:10.1126/science.add2187", "role": "baseline_method"}
+      ],
+      "status": "paper_linked_exact",
+      "notes": "ProteinMPNN baseline from Science 2022."
+    },
+    {
+      "name": "pifold",
+      "implementation": "edits/pifold.edit.py",
+      "labels": [],
+      "paper_links": [
+        {"paper_id": "doi:10.48550/arxiv.2209.12643", "role": "baseline_method"}
+      ],
+      "status": "paper_linked_exact",
+      "notes": "PiFold baseline from arXiv 2022 / ICLR 2023 line of work."
+    },
+    {
+      "name": "gvp",
+      "implementation": "edits/gvp.edit.py",
+      "labels": [],
+      "paper_links": [
+        {"paper_id": "doi:10.48550/arxiv.2009.01411", "role": "baseline_method"}
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Geometric Vector Perceptron baseline."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1126/science.add2187",
+      "title": "Robust deep learning-based protein sequence design using ProteinMPNN",
+      "authors": ["Justas Dauparas", "Ivan Anishchenko", "Nathaniel R. Bennett", "Hua Bai", "Robert J. Ragotte", "Lukas F. Milles", "Basile I. M. Wicky", "Alexis Courbet", "Robbert J. de Haas", "Neville P. Bethel", "Philip J. Y. Leung", "Timothy F. Huddy", "Samuel J. Pellock", "Doug Tischer", "F. Chan", "Brian Koepnick", "Hannah Nguyen", "Alex Kang", "Banumathi Sankaran", "Asim K. Bera", "Neil P. King", "David Baker"],
+      "year": 2022,
+      "venue": "Science",
+      "doi": "10.1126/science.add2187",
+      "openalex_id": "https://openalex.org/W4296032638",
+      "landing_page": "https://doi.org/10.1126/science.add2187",
+      "source_urls": ["https://openalex.org/W4296032638", "https://doi.org/10.1126/science.add2187"],
+      "bibtex": "@article{Dauparas_2022, title={Robust deep learning–based protein sequence design using ProteinMPNN}, volume={378}, ISSN={1095-9203}, url={http://dx.doi.org/10.1126/science.add2187}, DOI={10.1126/science.add2187}, number={6615}, journal={Science}, publisher={American Association for the Advancement of Science (AAAS)}, author={Dauparas, J. and Anishchenko, I. and Bennett, N. and Bai, H. and Ragotte, R. J. and Milles, L. F. and Wicky, B. I. M. and Courbet, A. and de Haas, R. J. and Bethel, N. and Leung, P. J. Y. and Huddy, T. F. and Pellock, S. and Tischer, D. and Chan, F. and Koepnick, B. and Nguyen, H. and Kang, A. and Sankaran, B. and Bera, A. K. and King, N. P. and Baker, D.}, year={2022}, month=oct, pages={49–56} }",
+      "relevance_tags": ["baseline", "inverse_folding", "protein_design"],
+      "baseline_links": ["proteinmpnn"],
+      "test_links": ["CATH4.2", "CATH4.3", "TS50"],
+      "relevance": "Direct baseline for this inverse-folding task and a source for all three benchmark labels.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2209.12643",
+      "title": "PiFold: Toward effective and efficient protein inverse folding",
+      "authors": ["Zhangyang Gao", "Cheng Tan", "Pablo Chacón", "Stan Z. Li"],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2209.12643",
+      "openalex_id": "https://openalex.org/W4297433310",
+      "landing_page": "https://arxiv.org/abs/2209.12643",
+      "source_urls": ["https://openalex.org/W4297433310", "https://arxiv.org/abs/2209.12643"],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2209.12643, doi = {10.48550/ARXIV.2209.12643}, url = {https://arxiv.org/abs/2209.12643}, author = {Gao, Zhangyang and Tan, Cheng and Chacón, Pablo and Li, Stan Z.}, keywords = {Artificial Intelligence (cs.AI), Computational Engineering, Finance, and Science (cs.CE), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {PiFold: Toward effective and efficient protein inverse folding}, publisher = {arXiv}, year = {2022}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": ["baseline", "inverse_folding", "protein_design"],
+      "baseline_links": ["pifold"],
+      "test_links": ["CATH4.2", "TS50"],
+      "relevance": "Baseline inverse-folding method with rich geometric featurization.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2009.01411",
+      "title": "Learning from Protein Structure with Geometric Vector Perceptrons",
+      "authors": ["Bowen Jing", "Stephan Eismann", "Patricia Suriana", "Raphael J. L. Townshend", "Ron O. Dror"],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2009.01411",
+      "openalex_id": "https://openalex.org/W3081836708",
+      "landing_page": "https://arxiv.org/abs/2009.01411",
+      "source_urls": ["https://openalex.org/W3081836708", "https://arxiv.org/abs/2009.01411"],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2009.01411, doi = {10.48550/ARXIV.2009.01411}, url = {https://arxiv.org/abs/2009.01411}, author = {Jing, Bowen and Eismann, Stephan and Suriana, Patricia and Townshend, Raphael J. L. and Dror, Ron}, keywords = {Biomolecules (q-bio.BM), Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Biological sciences, FOS: Biological sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Learning from Protein Structure with Geometric Vector Perceptrons}, publisher = {arXiv}, year = {2020}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": ["baseline", "inverse_folding", "equivariant_gnn"],
+      "baseline_links": ["gvp"],
+      "test_links": [],
+      "relevance": "Foundational SE(3)-aware structure encoder used as a baseline here.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2022.04.15.488492",
+      "title": "A Deep SE(3)-Equivariant Model for Learning Inverse Protein Folding",
+      "authors": ["Matt McPartlon", "Ben Lai", "Jinbo Xu"],
+      "year": 2022,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2022.04.15.488492",
+      "openalex_id": "https://openalex.org/W4224066120",
+      "landing_page": "https://www.biorxiv.org/content/10.1101/2022.04.15.488492v1",
+      "source_urls": ["https://openalex.org/W4224066120", "https://doi.org/10.1101/2022.04.15.488492"],
+      "bibtex": "@article{McPartlon_2022, title={A Deep SE(3)-Equivariant Model for Learning Inverse Protein Folding}, url={http://dx.doi.org/10.1101/2022.04.15.488492}, DOI={10.1101/2022.04.15.488492}, publisher={openRxiv}, author={McPartlon, Matt and Lai, Ben and Xu, Jinbo}, year={2022}, month=apr }",
+      "relevance_tags": ["inverse_folding", "equivariant_gnn", "benchmark"],
+      "baseline_links": [],
+      "test_links": ["CATH4.2", "TS50"],
+      "relevance": "Strong inverse-folding reference that reports results on CATH4.2 and TS50.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41467-022-28313-9",
+      "title": "Protein sequence design with a learned potential",
+      "authors": ["Namrata Anand", "Raphael R. Eguchi", "Irimpan I. Mathews", "Carla P. Perez", "Alexander Derry", "Russ B. Altman", "Po-Ssu Huang"],
+      "year": 2022,
+      "venue": "Nature Communications",
+      "doi": "10.1038/s41467-022-28313-9",
+      "openalex_id": "https://openalex.org/W4210861939",
+      "landing_page": "https://doi.org/10.1038/s41467-022-28313-9",
+      "source_urls": ["https://openalex.org/W4210861939", "https://doi.org/10.1038/s41467-022-28313-9"],
+      "bibtex": "@article{Anand_2022, title={Protein sequence design with a learned potential}, volume={13}, ISSN={2041-1723}, url={http://dx.doi.org/10.1038/s41467-022-28313-9}, DOI={10.1038/s41467-022-28313-9}, number={1}, journal={Nature Communications}, publisher={Springer Science and Business Media LLC}, author={Anand, Namrata and Eguchi, Raphael and Mathews, Irimpan I. and Perez, Carla P. and Derry, Alexander and Altman, Russ B. and Huang, Po-Ssu}, year={2022}, month=feb }",
+      "relevance_tags": ["inverse_folding", "energy_model", "protein_design"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Related structure-based protein design paper with a learned energy/potential model.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1093/protein/gzad015",
+      "title": "Masked inverse folding with sequence transfer for protein representation learning",
+      "authors": ["Kevin K. Yang", "Niccolò Zanichelli", "Hugh Yeh"],
+      "year": 2022,
+      "venue": "Protein Engineering, Design and Selection",
+      "doi": "10.1093/protein/gzad015",
+      "openalex_id": "https://openalex.org/W4387966974",
+      "landing_page": "https://doi.org/10.1093/protein/gzad015",
+      "source_urls": ["https://openalex.org/W4387966974", "https://doi.org/10.1093/protein/gzad015"],
+      "bibtex": "@article{Yang_2022, title={Masked inverse folding with sequence transfer for protein representation learning}, volume={36}, ISSN={1741-0134}, url={http://dx.doi.org/10.1093/protein/gzad015}, DOI={10.1093/protein/gzad015}, journal={Protein Engineering, Design and Selection}, publisher={Oxford University Press (OUP)}, author={Yang, Kevin K and Zanichelli, Niccolò and Yeh, Hugh}, year={2022}, month=oct }",
+      "relevance_tags": ["inverse_folding", "pretraining", "protein_language_model"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Structure-conditioned masked modeling paper that is closely related to this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2023.02.03.526917",
+      "title": "Structure-informed Language Models Are Protein Designers",
+      "authors": ["Zaixiang Zheng", "Yifan Deng", "Dongyu Xue", "Yi Zhou", "Fei Ye", "Quanquan Gu"],
+      "year": 2023,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2023.02.03.526917",
+      "openalex_id": "https://openalex.org/W4319071809",
+      "landing_page": "https://www.biorxiv.org/content/10.1101/2023.02.03.526917v1",
+      "source_urls": ["https://openalex.org/W4319071809", "https://doi.org/10.1101/2023.02.03.526917"],
+      "bibtex": "@article{Zheng_2023, title={Structure-informed Language Models Are Protein Designers}, url={http://dx.doi.org/10.1101/2023.02.03.526917}, DOI={10.1101/2023.02.03.526917}, publisher={openRxiv}, author={Zheng, Zaixiang and Deng, Yifan and Xue, Dongyu and Zhou, Yi and Ye, Fei and Gu, Quanquan}, year={2023}, month=feb }",
+      "relevance_tags": ["inverse_folding", "protein_language_model", "benchmark"],
+      "baseline_links": [],
+      "test_links": ["CATH4.3"],
+      "relevance": "LM-Design reports CATH 4.2/4.3 benchmark numbers and is directly relevant to the test setup.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2305.15151",
+      "title": "Knowledge-Design: Pushing the Limit of Protein Design via Knowledge Refinement",
+      "authors": ["Zhangyang Gao", "Cheng Tan", "Stan Z. Li"],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2305.15151",
+      "openalex_id": "https://openalex.org/W4378474135",
+      "landing_page": "https://arxiv.org/abs/2305.15151",
+      "source_urls": ["https://openalex.org/W4378474135", "https://arxiv.org/abs/2305.15151"],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2305.15151, doi = {10.48550/ARXIV.2305.15151}, url = {https://arxiv.org/abs/2305.15151}, author = {Gao, Zhangyang and Tan, Cheng and Li, Stan Z.}, keywords = {Biomolecules (q-bio.BM), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), FOS: Biological sciences, FOS: Biological sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Knowledge-Design: Pushing the Limit of Protein Design via Knowledge Refinement}, publisher = {arXiv}, year = {2023}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": ["inverse_folding", "benchmark", "refinement"],
+      "baseline_links": [],
+      "test_links": ["CATH4.2", "TS50"],
+      "relevance": "Related inverse-folding method that explicitly evaluates on CATH and TS50.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2023.12.07.570727",
+      "title": "ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction",
+      "authors": ["Pascal Notin", "Aaron W. Kollasch", "Daniel P. Ritter", "Lood van Niekerk", "Steffanie B. Paul", "Hansen Spinner", "Nathan Rollins", "Ada Y. Shaw", "Ruben Weitzman", "Jonathan Frazer", "Mafalda Dias", "Dinko Franceschi", "Rose Orenbuch", "Yarin Gal", "Debora S. Marks"],
+      "year": 2023,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2023.12.07.570727",
+      "openalex_id": "https://openalex.org/W4389472984",
+      "landing_page": "https://www.biorxiv.org/content/10.1101/2023.12.07.570727v1",
+      "source_urls": ["https://openalex.org/W4389472984", "https://doi.org/10.1101/2023.12.07.570727"],
+      "bibtex": "@article{Notin_2023, title={ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction}, url={http://dx.doi.org/10.1101/2023.12.07.570727}, DOI={10.1101/2023.12.07.570727}, publisher={openRxiv}, author={Notin, Pascal and Kollasch, Aaron W. and Ritter, Daniel and van Niekerk, Lood and Paul, Steffanie and Spinner, Hansen and Rollins, Nathan and Shaw, Ada and Weitzman, Ruben and Frazer, Jonathan and Dias, Mafalda and Franceschi, Dinko and Orenbuch, Rose and Gal, Yarin and Marks, Debora S.}, year={2023}, month=dec }",
+      "relevance_tags": ["benchmark", "protein_design", "fitness_prediction"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Broad protein-design benchmark that includes inverse-folding models among evaluated baselines.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1093/nar/gkae1087",
+      "title": "CATH v4.4: major expansion of CATH by experimental and predicted structural data",
+      "authors": ["Vaishali P. Waman", "Nicola Bordin", "Andy M. Lau", "Shaun M. Kandathil", "Jude Wells", "David Miller", "Sameer Velankar", "David T. Jones", "Ian Sillitoe", "Christine Orengo"],
+      "year": 2024,
+      "venue": "Nucleic Acids Research",
+      "doi": "10.1093/nar/gkae1087",
+      "openalex_id": "https://openalex.org/W4404531739",
+      "landing_page": "https://doi.org/10.1093/nar/gkae1087",
+      "source_urls": ["https://openalex.org/W4404531739", "https://doi.org/10.1093/nar/gkae1087"],
+      "bibtex": "@article{Waman_2024, title={CATH v4.4: major expansion of CATH by experimental and predicted structural data}, volume={53}, ISSN={1362-4962}, url={http://dx.doi.org/10.1093/nar/gkae1087}, DOI={10.1093/nar/gkae1087}, number={D1}, journal={Nucleic Acids Research}, publisher={Oxford University Press (OUP)}, author={Waman, Vaishali P and Bordin, Nicola and Lau, Andy and Kandathil, Shaun and Wells, Jude and Miller, David and Velankar, Sameer and Jones, David T and Sillitoe, Ian and Orengo, Christine}, year={2024}, month=nov, pages={D348–D355} }",
+      "relevance_tags": ["dataset", "benchmark", "cath"],
+      "baseline_links": [],
+      "test_links": ["CATH4.3"],
+      "relevance": "Current CATH resource paper, useful context for the updated CATH benchmark.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

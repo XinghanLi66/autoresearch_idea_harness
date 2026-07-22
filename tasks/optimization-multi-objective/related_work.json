@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-multi-objective",
+  "task_folder": "tasks/optimization-multi-objective",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-multi-objective/config.json",
+      "task_description_path": "tasks/optimization-multi-objective/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 4,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "zdt1",
+      "cmd": "scripts/zdt1.sh",
+      "package": "deap",
+      "group": 1,
+      "compute": 0.25,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "zdt3",
+      "cmd": "scripts/zdt3.sh",
+      "package": "deap",
+      "group": 1,
+      "compute": 0.25,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "dtlz2",
+      "cmd": "scripts/dtlz2.sh",
+      "package": "deap",
+      "group": 1,
+      "compute": 0.25,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "dtlz1",
+      "cmd": "scripts/dtlz1.sh",
+      "package": "deap",
+      "group": 1,
+      "compute": 0.25,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "nsga2",
+      "implementation": "edits/nsga2.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "moead",
+      "implementation": "edits/moead.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "spea2",
+      "implementation": "edits/spea2.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "nsga3",
+      "implementation": "edits/nsga3.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "rvea",
+      "implementation": "edits/rvea.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "agemoea",
+      "implementation": "edits/agemoea.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

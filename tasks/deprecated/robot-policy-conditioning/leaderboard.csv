@@ -1,0 +1,5 @@
+timestamp,model,is_final,seed
+2026-04-15T06:54:57.291433+00:00,baseline:film,false,42
+2026-04-15T07:03:00.141032+00:00,baseline:adaln,false,42
+2026-04-15T07:03:11.144724+00:00,baseline:concatenation,false,42
+2026-04-15T07:10:02.470241+00:00,baseline:cross_attention,false,42

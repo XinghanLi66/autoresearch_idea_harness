@@ -1,0 +1,29 @@
+{
+  "base_image": "pytorch/pytorch:2.4.1-cuda12.4-cudnn9-runtime",
+  "data_deps": [
+    {
+      "name": "dbim_data",
+      "host_path": "{data_root}/dbim_data",
+      "container_path": "/workspace/dbim-codebase/assets",
+      "prepare": "vendor/data_scripts/dbim-codebase/prepare_data.py",
+      "description": "Datasets (e2h, DIODE, ImageNet), checkpoints, FID stats, and inception model for DBIM tasks."
+    }
+  ],
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y wget curl unzip && apt-get clean && rm -rf /var/lib/apt/lists/*",
+    "pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121",
+    "pip install blobfile piq matplotlib opencv-python joblib lmdb scipy clean-fid easydict torchmetrics rich ipdb wandb gdown",
+    "mkdir -p /data/torch_cache && TORCH_HOME=/data/torch_cache python -c \"import torchvision; torchvision.models.resnet50(weights='IMAGENET1K_V1'); print('ResNet50 cached')\"",
+    "TORCH_HOME=/data/torch_cache python -c \"from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity; m = LearnedPerceptualImagePatchSimilarity(net_type='vgg'); print('VGG for LPIPS cached')\""
+  ],
+  "data_bind": "{data_root}/dbim_data:/workspace/dbim-codebase/assets",
+  "env": {
+    "PYTHONPATH": "/workspace/dbim-codebase",
+    "HOME": "/root",
+    "TORCH_HOME": "/data/torch_cache"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

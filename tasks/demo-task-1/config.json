@@ -1,0 +1,31 @@
+{
+  "allow_create": false,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train.sh",
+      "label": "train",
+      "group": 1,
+      "compute": 1,
+      "time": "1:00:00",
+      "package": "pytorch-examples"
+    }
+  ],
+  "rigorous_codebase": false,
+  "baselines": {
+    "default": {
+      "cmd": "scripts/default.sh"
+    },
+    "batchnorm": {
+      "cmd": "scripts/batchnorm.sh",
+      "edit_ops": "edits/batchnorm.edit.py",
+      "labels": ["train"]
+    }
+  },
+  "files": [
+    {
+      "filename": "pytorch-examples/mnist/main.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": [{"start": 10, "end": 33}]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-convex-concave",
+  "task_folder": "tasks/optimization-convex-concave",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-convex-concave/config.json",
+      "task_description_path": "tasks/optimization-convex-concave/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "default-noise",
+      "cmd": "scripts/eval.sh",
+      "package": "RAIN",
+      "group": 1,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "low-noise",
+      "cmd": "scripts/eval_low_noise.sh",
+      "package": "RAIN",
+      "group": 1,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "high-noise",
+      "cmd": "scripts/eval_high_noise.sh",
+      "package": "RAIN",
+      "group": 1,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "seg",
+      "implementation": "edits/seg.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "r_seg",
+      "implementation": "edits/r_seg.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "seag",
+      "implementation": "edits/seag.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "rain",
+      "implementation": "edits/rain.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

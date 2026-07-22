@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0",
+  "task_name": "meta-fewshot-classification",
+  "task_folder": "tasks/meta-fewshot-classification",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/meta-fewshot-classification/config.json",
+      "task_description_path": "tasks/meta-fewshot-classification/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 6,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "mini_imagenet",
+      "cmd": "scripts/mini_imagenet.sh",
+      "package": "easy-few-shot-learning",
+      "group": 1,
+      "compute": 0.33,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "cifar_fs",
+      "cmd": "scripts/cifar_fs.sh",
+      "package": "easy-few-shot-learning",
+      "group": 1,
+      "compute": 0.33,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "CUB",
+      "cmd": "scripts/cub.sh",
+      "package": "easy-few-shot-learning",
+      "group": 1,
+      "compute": 0.33,
+      "time": "23:59:59",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "protonet",
+      "implementation": "edits/protonet.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1703.05175",
+          "url": "https://arxiv.org/abs/1703.05175",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical Prototypical Networks baseline."
+    },
+    {
+      "name": "matchingnet",
+      "implementation": "edits/matchingnet.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1606.04080",
+          "url": "https://arxiv.org/abs/1606.04080",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical Matching Networks baseline."
+    },
+    {
+      "name": "relationnet",
+      "implementation": "edits/relationnet.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1711.06025",
+          "url": "https://arxiv.org/abs/1711.06025",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical Relation Network baseline."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "arxiv:1703.05175",
+      "id": "arxiv:1703.05175",
+      "title": "Prototypical Networks for Few-shot Learning",
+      "authors": ["Jake Snell", "Kevin Swersky", "Richard S. Zemel"],
+      "year": 2017,
+      "venue": "NeurIPS",
+      "doi": null,
+      "arxiv_id": "1703.05175",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1703.05175",
+      "url": "https://arxiv.org/abs/1703.05175",
+      "source_urls": ["https://arxiv.org/abs/1703.05175"],
+      "bibtex": "@inproceedings{snell2017prototypical, title={Prototypical Networks for Few-shot Learning}, author={Snell, Jake and Swersky, Kevin and Zemel, Richard S.}, booktitle={Advances in Neural Information Processing Systems}, year={2017}}",
+      "relevance_tags": ["baseline", "few_shot_classification"],
+      "baseline_links": ["protonet"],
+      "test_links": [],
+      "relevance": "Defines the Prototypical Networks baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:1606.04080",
+      "id": "arxiv:1606.04080",
+      "title": "Matching Networks for One Shot Learning",
+      "authors": ["Oriol Vinyals", "Charles Blundell", "Timothy Lillicrap", "Koray Kavukcuoglu", "Daan Wierstra"],
+      "year": 2016,
+      "venue": "NeurIPS",
+      "doi": null,
+      "arxiv_id": "1606.04080",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1606.04080",
+      "url": "https://arxiv.org/abs/1606.04080",
+      "source_urls": ["https://arxiv.org/abs/1606.04080"],
+      "bibtex": "@inproceedings{vinyals2016matching, title={Matching Networks for One Shot Learning}, author={Vinyals, Oriol and Blundell, Charles and Lillicrap, Timothy and Kavukcuoglu, Koray and Wierstra, Daan}, booktitle={Advances in Neural Information Processing Systems}, year={2016}}",
+      "relevance_tags": ["baseline", "few_shot_classification"],
+      "baseline_links": ["matchingnet"],
+      "test_links": [],
+      "relevance": "Defines the Matching Networks baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:1711.06025",
+      "id": "arxiv:1711.06025",
+      "title": "Learning to Compare: Relation Network for Few-Shot Learning",
+      "authors": ["Flood Sung", "Yongxin Yang", "Li Zhang", "Tao Xiang", "Philip H. S. Torr", "Timothy M. Hospedales"],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": null,
+      "arxiv_id": "1711.06025",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1711.06025",
+      "url": "https://arxiv.org/abs/1711.06025",
+      "source_urls": ["https://arxiv.org/abs/1711.06025"],
+      "bibtex": "@inproceedings{sung2018learning, title={Learning to Compare: Relation Network for Few-Shot Learning}, author={Sung, Flood and Yang, Yongxin and Zhang, Li and Xiang, Tao and Torr, Philip H. S. and Hospedales, Timothy M.}, booktitle={IEEE/CVF Conference on Computer Vision and Pattern Recognition}, year={2018}}",
+      "relevance_tags": ["baseline", "few_shot_classification"],
+      "baseline_links": ["relationnet"],
+      "test_links": [],
+      "relevance": "Defines the Relation Network baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:2003.06777",
+      "id": "arxiv:2003.06777",
+      "title": "DeepEMD: Few-Shot Image Classification with Differentiable Earth Mover's Distance and Structured Classifiers",
+      "authors": ["Chi Zhang", "Yujun Cai", "Guosheng Lin", "Chunhua Shen"],
+      "year": 2020,
+      "venue": "CVPR",
+      "doi": null,
+      "arxiv_id": "2003.06777",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2003.06777",
+      "url": "https://arxiv.org/abs/2003.06777",
+      "source_urls": ["https://arxiv.org/abs/2003.06777"],
+      "bibtex": "@inproceedings{zhang2020deepemd, title={DeepEMD: Few-Shot Image Classification with Differentiable Earth Mover's Distance and Structured Classifiers}, author={Zhang, Chi and Cai, Yujun and Lin, Guosheng and Shen, Chunhua}, booktitle={IEEE/CVF Conference on Computer Vision and Pattern Recognition}, year={2020}}",
+      "relevance_tags": ["related_work", "few_shot_classification"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Additional few-shot classification reference for metric/structured comparison methods.",
+      "notes": "Additional reference supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:1904.03758",
+      "id": "arxiv:1904.03758",
+      "title": "Meta-Learning with Differentiable Convex Optimization",
+      "authors": ["Kwonjoon Lee", "Subhransu Maji", "Avinash Ravichandran", "Stefano Soatto"],
+      "year": 2019,
+      "venue": "CVPR",
+      "doi": null,
+      "arxiv_id": "1904.03758",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1904.03758",
+      "url": "https://arxiv.org/abs/1904.03758",
+      "source_urls": ["https://arxiv.org/abs/1904.03758"],
+      "bibtex": "@inproceedings{lee2019metalearning, title={Meta-Learning with Differentiable Convex Optimization}, author={Lee, Kwonjoon and Maji, Subhransu and Ravichandran, Avinash and Soatto, Stefano}, booktitle={IEEE/CVF Conference on Computer Vision and Pattern Recognition}, year={2019}}",
+      "relevance_tags": ["related_work", "few_shot_classification"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Additional few-shot classification reference for MetaOptNet-style baselines.",
+      "notes": "Additional reference supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:1904.04232",
+      "id": "arxiv:1904.04232",
+      "title": "A Closer Look at Few-shot Classification",
+      "authors": ["Wei-Yu Chen", "Yen-Cheng Liu", "Zsolt Kira", "Yu-Chiang Frank Wang", "Jia-Bin Huang"],
+      "year": 2019,
+      "venue": "ICLR",
+      "doi": null,
+      "arxiv_id": "1904.04232",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1904.04232",
+      "url": "https://arxiv.org/abs/1904.04232",
+      "source_urls": ["https://arxiv.org/abs/1904.04232"],
+      "bibtex": "@inproceedings{chen2019closer, title={A Closer Look at Few-shot Classification}, author={Chen, Wei-Yu and Liu, Yen-Cheng and Kira, Zsolt and Wang, Yu-Chiang Frank and Huang, Jia-Bin}, booktitle={International Conference on Learning Representations}, year={2019}}",
+      "relevance_tags": ["related_work", "few_shot_classification"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Additional reference for few-shot evaluation and baseline interpretation.",
+      "notes": "Additional reference supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    }
+  ]
+}

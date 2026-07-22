@@ -1,0 +1,17 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "pip install 'numpy<2' rdkit-pypi scikit-learn pandas tqdm lmdb",
+    "mkdir -p /data/unimol_weights",
+    "python -c \"import urllib.request as u; u.urlretrieve('https://github.com/deepmodeling/Uni-Mol/releases/download/v0.1/mol_pre_all_h_220816.pt', '/data/unimol_weights/mol_pre_all_h_220816.pt'); print('Uni-Mol weights done')\"",
+    "python -c \"\nimport urllib.request, tarfile, os\nurl = 'https://bioos-hermite-beijing.tos-cn-beijing.volces.com/unimol_data/finetune/molecular_property_prediction.tar.gz'\ntarball = '/data/molecular_property_prediction.tar.gz'\nprint('Downloading official Uni-Mol molecular property data...')\nurllib.request.urlretrieve(url, tarball)\nprint('Extracting...')\nwith tarfile.open(tarball, 'r:gz') as tar:\n    tar.extractall(path='/data')\nos.remove(tarball)\nprint('Official molecular property data extracted.')\n\"",
+    "python -c \"import os; datasets = ['bbbp','bace','tox21','esol','freesolv','lipo']; checks = [f'/data/molecular_property_prediction/{d}/{s}.lmdb' for d in datasets for s in ['train','valid','test']] + ['/data/unimol_weights/mol_pre_all_h_220816.pt']; missing = [f for f in checks if not os.path.exists(f)]; assert not missing, f'Missing: {missing}'; print('All data verified')\""
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/Uni-Mol:${PYTHONPATH}",
+    "DATA_DIR": "/data"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "workdir": "/workspace"
+}

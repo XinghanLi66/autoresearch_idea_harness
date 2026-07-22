@@ -1,0 +1,176 @@
+{
+  "_comment": "MLS-Bench-Lite: 30 challenging, research-relevant tasks (target), at least 2 per area. Currently populated as the subset on which all 15 paper-figure models have been evaluated; the figure auto-updates as more tasks come online.",
+  "tasks": [
+    "ai4sci-inverse-diffusion-algo",
+    "cv-pooling-aggregation",
+    "dl-activation-function",
+    "quant-concept-drift",
+    "ts-exogenous-forecast",
+    "ts-imputation"
+  ],
+  "models": [
+    {
+      "name": "Claude Opus 4.7",
+      "id": "claude-opus-4-7",
+      "company": "anthropic",
+      "color": "#BF6347",
+      "aliases": [
+        "claude-opus-4-7",
+        "anthropic/claude-opus-4-7",
+        "claude-opus-4.7",
+        "anthropic/claude-opus-4.7"
+      ]
+    },
+    {
+      "name": "Claude Opus 4.6",
+      "id": "claude-opus-4.6",
+      "company": "anthropic",
+      "color": "#D97757",
+      "aliases": [
+        "claude-opus-4.6",
+        "anthropic/claude-opus-4.6",
+        "claude-opus-4-6",
+        "anthropic/claude-opus-4-6"
+      ]
+    },
+    {
+      "name": "Claude Sonnet 4.6",
+      "id": "claude-sonnet-4-6",
+      "company": "anthropic",
+      "color": "#E8A488",
+      "aliases": [
+        "claude-sonnet-4-6",
+        "anthropic/claude-sonnet-4-6",
+        "vertex_ai/claude-sonnet-4-6",
+        "claude-sonnet-4.6"
+      ]
+    },
+    {
+      "name": "GPT-5.5 Pro",
+      "id": "gpt-5.5-pro",
+      "company": "openai",
+      "color": "#0B7A5E",
+      "aliases": [
+        "gpt-5.5-pro",
+        "openai/gpt-5.5-pro"
+      ]
+    },
+    {
+      "name": "GPT-5.5",
+      "id": "gpt-5.5",
+      "company": "openai",
+      "color": "#10A37F",
+      "aliases": [
+        "gpt-5.5",
+        "openai/gpt-5.5"
+      ]
+    },
+    {
+      "name": "GPT-5.4",
+      "id": "gpt-5.4",
+      "company": "openai",
+      "color": "#3FBE9D",
+      "aliases": [
+        "gpt-5.4",
+        "openai/gpt-5.4"
+      ]
+    },
+    {
+      "name": "Gemini 3.1 Pro",
+      "id": "gemini-3.1-pro-preview",
+      "company": "google",
+      "color": "#4285F4",
+      "aliases": [
+        "gemini-3.1-pro-preview",
+        "google/gemini-3.1-pro-preview",
+        "gemini/gemini-3.1-pro-preview"
+      ]
+    },
+    {
+      "name": "Gemini 3.1 Flash Lite",
+      "id": "gemini-3.1-flash-lite-preview",
+      "company": "google",
+      "color": "#7AAEF7",
+      "aliases": [
+        "gemini-3.1-flash-lite-preview",
+        "google/gemini-3.1-flash-lite-preview",
+        "gemini/gemini-3.1-flash-lite-preview"
+      ]
+    },
+    {
+      "name": "DeepSeek-V4 Pro",
+      "id": "deepseek-v4-pro",
+      "company": "deepseek",
+      "color": "#2A4ACF",
+      "aliases": [
+        "deepseek-v4-pro",
+        "deepseek/deepseek-v4-pro"
+      ]
+    },
+    {
+      "name": "DeepSeek-V4 Flash",
+      "id": "deepseek-v4-flash",
+      "company": "deepseek",
+      "color": "#7E96FE",
+      "aliases": [
+        "deepseek-v4-flash",
+        "deepseek/deepseek-v4-flash"
+      ]
+    },
+    {
+      "name": "DeepSeek-V3.2",
+      "id": "deepseek-reasoner",
+      "company": "deepseek",
+      "color": "#4D6BFE",
+      "aliases": [
+        "deepseek-reasoner",
+        "deepseek/deepseek-reasoner",
+        "vertex_ai/deepseek-ai/deepseek-v3.2-maas"
+      ]
+    },
+    {
+      "name": "Qwen 3.6 Max",
+      "id": "qwen3.6-max-preview",
+      "company": "qwen",
+      "color": "#4A2F9C",
+      "aliases": [
+        "qwen3.6-max-preview",
+        "qwen/qwen3.6-max-preview"
+      ]
+    },
+    {
+      "name": "Qwen 3.6 Plus",
+      "id": "qwen3.6-plus",
+      "company": "qwen",
+      "color": "#8E72D8",
+      "aliases": [
+        "qwen3.6-plus",
+        "qwen/qwen3.6-plus",
+        "qwen3.6-plus:free",
+        "qwen/qwen3.6-plus:free"
+      ]
+    },
+    {
+      "name": "Kimi K2.6",
+      "id": "kimi-k2.6",
+      "company": "moonshot",
+      "color": "#1F1F4D",
+      "aliases": [
+        "kimi-k2.6",
+        "moonshot/kimi-k2.6",
+        "kimi-k2-6"
+      ]
+    },
+    {
+      "name": "GLM 5.1",
+      "id": "glm-5.1",
+      "company": "zhipu",
+      "color": "#E0497A",
+      "aliases": [
+        "glm-5.1",
+        "zhipu/glm-5.1",
+        "glm-5-1"
+      ]
+    }
+  ]
+}

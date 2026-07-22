@@ -1,0 +1,6 @@
+[console_scripts]
+mlsbench = mlsbench.cli:main
+mlsbench-sacct = mlsbench.slurm_compat:sacct_main
+mlsbench-sbatch = mlsbench.slurm_compat:sbatch_main
+mlsbench-scancel = mlsbench.slurm_compat:scancel_main
+mlsbench-squeue = mlsbench.slurm_compat:squeue_main

@@ -1,0 +1,47 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y git wget sox libsndfile1 ffmpeg && rm -rf /var/lib/apt/lists/*",
+    "pip install speechbrain==1.0.3 torchaudio soundfile librosa pesq pystoi",
+    "python -c \"import speechbrain; print(f'SpeechBrain {speechbrain.__version__}')\"",
+    "python -c \"import torchaudio; print(f'torchaudio {torchaudio.__version__}')\""
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/speechbrain:${PYTHONPATH}",
+    "DATA_DIR": "/data/speech"
+  },
+  "data_deps": [
+    {
+      "name": "asr-data",
+      "description": "ASR datasets: LibriSpeech train-clean-100, AISHELL-1, MLS Spanish",
+      "host_path": "{data_root}/speech/asr",
+      "container_path": "/data/speech/asr",
+      "prepare": "vendor/data_scripts/speechbrain/prepare_asr.py"
+    },
+    {
+      "name": "tts-data",
+      "description": "TTS/Vocoder datasets: LJSpeech, VCTK subset, AISHELL-3 subset",
+      "host_path": "{data_root}/speech/tts",
+      "container_path": "/data/speech/tts",
+      "prepare": "vendor/data_scripts/speechbrain/prepare_tts.py"
+    },
+    {
+      "name": "se-data",
+      "description": "Speech enhancement datasets: VoiceBank-DEMAND, Noisy-VCTK-56spk, LibriMix",
+      "host_path": "{data_root}/speech/se",
+      "container_path": "/data/speech/se",
+      "prepare": "vendor/data_scripts/speechbrain/prepare_se.py"
+    },
+    {
+      "name": "spk-data",
+      "description": "Speaker datasets: VoxCeleb1, CN-Celeb eval subset",
+      "host_path": "{data_root}/speech/spk",
+      "container_path": "/data/speech/spk",
+      "prepare": "vendor/data_scripts/speechbrain/prepare_spk.py"
+    }
+  ],
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

@@ -1,0 +1,4 @@
+timestamp,model,is_final,seed,spearman_influenza,spearman_sars,spearman_her2,mse_influenza,elapsed_influenza,mse_sars,elapsed_sars,mse_her2,elapsed_her2,n_influenza,n_sars,n_her2
+2026-05-03T11:44:39.496781+00:00,baseline:delta_mlp,true,42,-0.66041,-0.417223,-0.150092,0.551772,691,0.420389,1784,2.446994,787,1887.0,5000.0,2080.0
+2026-05-03T11:45:39.487440+00:00,baseline:esm2_pll,true,42,0.232052,-0.034182,-0.22241,0.513128,752,0.376621,1923,1.812689,854,1887.0,5000.0,2080.0
+2026-05-03T11:15:39.188954+00:00,baseline:masked_marginal,true,42,-0.624461,-0.356991,0.217947,0.432607,88,0.345508,61,2.054834,62,1887.0,5000.0,2080.0

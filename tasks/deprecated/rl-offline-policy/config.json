@@ -1,0 +1,53 @@
+{
+  "allow_create": false,
+  "test_cmds": [
+    {
+      "cmd": "scripts/antmaze_navigate.sh",
+      "label": "antmaze-large-navigate",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "package": "fql"
+    },
+    {
+      "cmd": "scripts/cube_single_play.sh",
+      "label": "cube-single-play",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "package": "fql"
+    },
+    {
+      "cmd": "scripts/antsoccer_navigate.sh",
+      "label": "antsoccer-arena-navigate",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "package": "fql",
+      "hidden": true
+    }
+  ],
+  "rigorous_codebase": true,
+  "baselines": {
+    "fql": {
+      "edit_ops": "edits/fql.edit.py"
+    },
+    "iql": {
+      "edit_ops": "edits/iql.edit.py"
+    },
+    "rebrac": {
+      "edit_ops": "edits/rebrac.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "fql/custom_train.py",
+      "read": [
+        {"start": -1, "end": -1}
+      ],
+      "edit": [
+        {"start": 395, "end": 484}
+      ]
+    }
+  ]
+}

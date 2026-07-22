@@ -1,0 +1,617 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-classification-loss",
+  "task_folder": "tasks/cv-classification-loss",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "classification loss design for image classification",
+    "research_question": "Design a novel classification loss function for deep convolutional neural networks that improves test accuracy across architectures and datasets.",
+    "local_sources": {
+      "config_path": "tasks/cv-classification-loss/config.json",
+      "task_description_path": "tasks/cv-classification-loss/task_description.md"
+    },
+    "notes": [
+      "Task description constrains edits to the training loss; evaluation loss remains standard cross-entropy."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 15,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 7
+  },
+  "tests": [
+    {
+      "label": "resnet56-cifar100",
+      "cmd": "scripts/resnet56_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "ResNet-56 evaluation on CIFAR-100 links to the ResNet architecture paper and the CIFAR technical report citation record."
+    },
+    {
+      "label": "vgg16bn-cifar100",
+      "cmd": "scripts/vgg16bn_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1409.1556",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1502.03167",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "VGG-16-BN test links to the VGG architecture, BatchNorm, and CIFAR citation record."
+    },
+    {
+      "label": "mobilenetv2-fmnist",
+      "cmd": "scripts/mobilenetv2_fmnist.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2018.00474",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1708.07747",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Hidden test uses MobileNetV2 on Fashion-MNIST."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "label_smoothing",
+      "implementation": "edits/label_smoothing.edit.py",
+      "labels": [
+        "regularization",
+        "confidence_calibration"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.308",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps directly to the label smoothing formulation cited in the task description."
+    },
+    {
+      "name": "focal_loss",
+      "implementation": "edits/focal_loss.edit.py",
+      "labels": [
+        "example_reweighting",
+        "hard_example_mining"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/iccv.2017.324",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps to the original focal loss paper."
+    },
+    {
+      "name": "poly_loss",
+      "implementation": "edits/poly_loss.edit.py",
+      "labels": [
+        "loss_expansion",
+        "cross_entropy_variant"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2204.12511",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps to Poly-1 / PolyLoss as described in the task description."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.308",
+      "title": "Rethinking the Inception Architecture for Computer Vision",
+      "authors": [
+        "Christian Szegedy",
+        "Vincent Vanhoucke",
+        "Sergey Ioffe",
+        "Jon Shlens",
+        "Zbigniew Wojna"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2016.308",
+      "arxiv_id": "1512.00567",
+      "openalex_id": "https://openalex.org/W2183341477",
+      "landing_page": "https://doi.org/10.1109/CVPR.2016.308",
+      "source_urls": [
+        "https://openalex.org/W2183341477",
+        "https://doi.org/10.1109/CVPR.2016.308"
+      ],
+      "bibtex": "@inproceedings{Szegedy_2016, title={Rethinking the Inception Architecture for Computer Vision}, url={http://dx.doi.org/10.1109/cvpr.2016.308}, DOI={10.1109/cvpr.2016.308}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Szegedy, Christian and Vanhoucke, Vincent and Ioffe, Sergey and Shlens, Jon and Wojna, Zbigniew}, year={2016}, month=jun, pages={2818\u20132826} }",
+      "relevance_tags": [
+        "baseline",
+        "loss_function",
+        "image_classification"
+      ],
+      "baseline_links": [
+        "label_smoothing"
+      ],
+      "test_links": [],
+      "relevance": "Introduces label smoothing, one of the task baselines.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/iccv.2017.324",
+      "title": "Focal Loss for Dense Object Detection",
+      "authors": [
+        "Tsung-Yi Lin",
+        "Priya Goyal",
+        "Ross Girshick",
+        "Kaiming He",
+        "Piotr Dollar"
+      ],
+      "year": 2017,
+      "venue": "ICCV",
+      "doi": "10.1109/ICCV.2017.324",
+      "arxiv_id": "1708.02002",
+      "openalex_id": "https://openalex.org/W2963351448",
+      "landing_page": "https://doi.org/10.1109/ICCV.2017.324",
+      "source_urls": [
+        "https://openalex.org/W2963351448",
+        "https://doi.org/10.1109/ICCV.2017.324"
+      ],
+      "bibtex": "@inproceedings{Lin_2017, title={Focal Loss for Dense Object Detection}, url={http://dx.doi.org/10.1109/iccv.2017.324}, DOI={10.1109/iccv.2017.324}, booktitle={2017 IEEE International Conference on Computer Vision (ICCV)}, publisher={IEEE}, author={Lin, Tsung-Yi and Goyal, Priya and Girshick, Ross and He, Kaiming and Dollar, Piotr}, year={2017}, month=oct, pages={2999\u20133007} }",
+      "relevance_tags": [
+        "baseline",
+        "loss_function",
+        "hard_example_mining"
+      ],
+      "baseline_links": [
+        "focal_loss"
+      ],
+      "test_links": [],
+      "relevance": "Defines focal loss, a baseline cross-entropy variant included in the task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2204.12511",
+      "title": "PolyLoss: A Polynomial Expansion Perspective of Classification Loss Functions",
+      "authors": [
+        "Zhaoqi Leng",
+        "Mingxing Tan",
+        "Chenxi Liu",
+        "Ekin Dogus Cubuk",
+        "Xiaojie Shi",
+        "Shuyang Cheng",
+        "Dragomir Anguelov"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2204.12511",
+      "arxiv_id": "2204.12511",
+      "openalex_id": "https://openalex.org/W4225096589",
+      "landing_page": "https://doi.org/10.48550/ARXIV.2204.12511",
+      "source_urls": [
+        "https://openalex.org/W4225096589",
+        "https://doi.org/10.48550/ARXIV.2204.12511"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.2204.12511,\n  doi = {10.48550/ARXIV.2204.12511},\n  url = {https://arxiv.org/abs/2204.12511},\n  author = {Leng, Zhaoqi and Tan, Mingxing and Liu, Chenxi and Cubuk, Ekin Dogus and Shi, Xiaojie and Cheng, Shuyang and Anguelov, Dragomir},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {PolyLoss: A Polynomial Expansion Perspective of Classification Loss Functions},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {Creative Commons Attribution Share Alike 4.0 International}\n}",
+      "relevance_tags": [
+        "baseline",
+        "loss_function",
+        "classification"
+      ],
+      "baseline_links": [
+        "poly_loss"
+      ],
+      "test_links": [],
+      "relevance": "Introduces PolyLoss and Poly-1, the third task baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2007.07314",
+      "title": "Long-tail learning via logit adjustment",
+      "authors": [
+        "Aditya Krishna Menon",
+        "Sadeep Jayasumana",
+        "Ankit Singh Rawat",
+        "Himanshu Jain",
+        "Andreas Veit",
+        "Sanjiv Kumar"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2007.07314",
+      "arxiv_id": "2007.07314",
+      "openalex_id": "https://openalex.org/W3042496707",
+      "landing_page": "https://doi.org/10.48550/ARXIV.2007.07314",
+      "source_urls": [
+        "https://openalex.org/W3042496707",
+        "https://doi.org/10.48550/ARXIV.2007.07314"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2007.07314,\n  doi = {10.48550/ARXIV.2007.07314},\n  url = {https://arxiv.org/abs/2007.07314},\n  author = {Menon, Aditya Krishna and Jayasumana, Sadeep and Rawat, Ankit Singh and Jain, Himanshu and Veit, Andreas and Kumar, Sanjiv},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Long-tail learning via logit adjustment},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {Creative Commons Attribution Non Commercial Share Alike 4.0 International}\n}",
+      "relevance_tags": [
+        "loss_function",
+        "class_imbalance",
+        "logit_adjustment"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant prior art for class-frequency-aware loss shaping, matching the task's suggested design space.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1908.06112",
+      "title": "Symmetric Cross Entropy for Robust Learning with Noisy Labels",
+      "authors": [
+        "Yisen Wang",
+        "Xingjun Ma",
+        "Zaiyi Chen",
+        "Yuan Luo",
+        "Jinfeng Yi",
+        "James Bailey"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1908.06112",
+      "arxiv_id": "1908.06112",
+      "openalex_id": "https://openalex.org/W2966913949",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1908.06112",
+      "source_urls": [
+        "https://openalex.org/W2966913949",
+        "https://doi.org/10.48550/ARXIV.1908.06112"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1908.06112,\n  doi = {10.48550/ARXIV.1908.06112},\n  url = {https://arxiv.org/abs/1908.06112},\n  author = {Wang, Yisen and Ma, Xingjun and Chen, Zaiyi and Luo, Yuan and Yi, Jinfeng and Bailey, James},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Symmetric Cross Entropy for Robust Learning with Noisy Labels},\n  publisher = {arXiv},\n  year = {2019},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "loss_function",
+        "robustness",
+        "noisy_labels"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Matches an additional loss edit present in the task scaffold and broadens the space of robust classification losses.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1805.07836",
+      "title": "Generalized Cross Entropy Loss for Training Deep Neural Networks with Noisy Labels",
+      "authors": [
+        "Zhilu Zhang",
+        "Mert R. Sabuncu"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1805.07836",
+      "arxiv_id": "1805.07836",
+      "openalex_id": "https://openalex.org/W2803187616",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1805.07836",
+      "source_urls": [
+        "https://openalex.org/W2803187616",
+        "https://doi.org/10.48550/ARXIV.1805.07836"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1805.07836,\n  doi = {10.48550/ARXIV.1805.07836},\n  url = {https://arxiv.org/abs/1805.07836},\n  author = {Zhang, Zhilu and Sabuncu, Mert R.},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Generalized Cross Entropy Loss for Training Deep Neural Networks with Noisy Labels},\n  publisher = {arXiv},\n  year = {2018},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "loss_function",
+        "robustness",
+        "classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant prior work on cross-entropy variants for classification, including experiments on CIFAR-100 and Fashion-MNIST.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2019.00949",
+      "title": "Class-Balanced Loss Based on Effective Number of Samples",
+      "authors": [
+        "Yin Cui",
+        "Menglin Jia",
+        "Tsung-Yi Lin",
+        "Yang Song",
+        "Serge Belongie"
+      ],
+      "year": 2019,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2019.00949",
+      "arxiv_id": "1901.05555",
+      "openalex_id": "https://openalex.org/W2963691377",
+      "landing_page": "https://doi.org/10.1109/CVPR.2019.00949",
+      "source_urls": [
+        "https://openalex.org/W2963691377",
+        "https://doi.org/10.1109/CVPR.2019.00949"
+      ],
+      "bibtex": "@inproceedings{Cui_2019, title={Class-Balanced Loss Based on Effective Number of Samples}, url={http://dx.doi.org/10.1109/cvpr.2019.00949}, DOI={10.1109/cvpr.2019.00949}, booktitle={2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Cui, Yin and Jia, Menglin and Lin, Tsung-Yi and Song, Yang and Belongie, Serge}, year={2019}, month=jun, pages={9260\u20139269} }",
+      "relevance_tags": [
+        "loss_function",
+        "class_imbalance",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Strong prior art for class-count-aware reweighting, directly relevant to the task's allowed use of class counts.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1906.02629",
+      "title": "When Does Label Smoothing Help?",
+      "authors": [
+        "Rafael Rios Muller",
+        "Simon Kornblith",
+        "Geoffrey E. Hinton"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1906.02629",
+      "arxiv_id": "1906.02629",
+      "openalex_id": "https://openalex.org/W2948210185",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1906.02629",
+      "source_urls": [
+        "https://openalex.org/W2948210185",
+        "https://doi.org/10.48550/ARXIV.1906.02629"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1906.02629,\n  doi = {10.48550/ARXIV.1906.02629},\n  url = {https://arxiv.org/abs/1906.02629},\n  author = {M\u00fcller, Rafael and Kornblith, Simon and Hinton, Geoffrey},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {When Does Label Smoothing Help?},\n  publisher = {arXiv},\n  year = {2019},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "loss_function",
+        "label_smoothing",
+        "calibration"
+      ],
+      "baseline_links": [
+        "label_smoothing"
+      ],
+      "test_links": [],
+      "relevance": "Follow-up analysis of the label smoothing baseline, relevant for calibration-aware loss design.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2006.13554",
+      "title": "Normalized Loss Functions for Deep Learning with Noisy Labels",
+      "authors": [
+        "Xingjun Ma",
+        "Hanxun Huang",
+        "Yisen Wang",
+        "Simone Romano",
+        "Sarah Erfani",
+        "James Bailey"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2006.13554",
+      "arxiv_id": "2006.13554",
+      "openalex_id": "https://openalex.org/W3035429562",
+      "landing_page": "https://doi.org/10.48550/ARXIV.2006.13554",
+      "source_urls": [
+        "https://openalex.org/W3035429562",
+        "https://doi.org/10.48550/ARXIV.2006.13554"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2006.13554,\n  doi = {10.48550/ARXIV.2006.13554},\n  url = {https://arxiv.org/abs/2006.13554},\n  author = {Ma, Xingjun and Huang, Hanxun and Wang, Yisen and Romano, Simone and Erfani, Sarah and Bailey, James},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Normalized Loss Functions for Deep Learning with Noisy Labels},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "loss_function",
+        "normalization",
+        "robustness"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant loss-design prior art showing how normalization changes optimization and robustness behavior.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2016.90",
+      "arxiv_id": "1512.03385",
+      "openalex_id": "https://openalex.org/W2194775991",
+      "landing_page": "https://doi.org/10.1109/CVPR.2016.90",
+      "source_urls": [
+        "https://openalex.org/W2194775991",
+        "https://doi.org/10.1109/CVPR.2016.90"
+      ],
+      "bibtex": "@inproceedings{He_2016, title={Deep Residual Learning for Image Recognition}, url={http://dx.doi.org/10.1109/cvpr.2016.90}, DOI={10.1109/cvpr.2016.90}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian}, year={2016}, month=jun, pages={770\u2013778} }",
+      "relevance_tags": [
+        "architecture",
+        "test_model",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet56-cifar100"
+      ],
+      "relevance": "Architecture citation for the ResNet-56 CIFAR-100 test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1409.1556",
+      "title": "Very Deep Convolutional Networks for Large-Scale Image Recognition",
+      "authors": [
+        "Karen Simonyan",
+        "Andrew Zisserman"
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1409.1556",
+      "arxiv_id": "1409.1556",
+      "openalex_id": "https://openalex.org/W1686810756",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1409.1556",
+      "source_urls": [
+        "https://openalex.org/W1686810756",
+        "https://doi.org/10.48550/ARXIV.1409.1556"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1409.1556,\n  doi = {10.48550/ARXIV.1409.1556},\n  url = {https://arxiv.org/abs/1409.1556},\n  author = {Simonyan, Karen and Zisserman, Andrew},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Very Deep Convolutional Networks for Large-Scale Image Recognition},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "architecture",
+        "test_model",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "vgg16bn-cifar100"
+      ],
+      "relevance": "Architecture citation for the VGG-16-BN CIFAR-100 test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1502.03167",
+      "title": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+      "authors": [
+        "Sergey Ioffe",
+        "Christian Szegedy"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1502.03167",
+      "arxiv_id": "1502.03167",
+      "openalex_id": "https://openalex.org/W1836465849",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1502.03167",
+      "source_urls": [
+        "https://openalex.org/W1836465849",
+        "https://doi.org/10.48550/ARXIV.1502.03167"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1502.03167,\n  doi = {10.48550/ARXIV.1502.03167},\n  url = {https://arxiv.org/abs/1502.03167},\n  author = {Ioffe, Sergey and Szegedy, Christian},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift},\n  publisher = {arXiv},\n  year = {2015},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "training_recipe",
+        "normalization",
+        "test_model"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "vgg16bn-cifar100"
+      ],
+      "relevance": "Supports the batch-normalized VGG evaluation test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2018.00474",
+      "title": "MobileNetV2: Inverted Residuals and Linear Bottlenecks",
+      "authors": [
+        "Mark Sandler",
+        "Andrew Howard",
+        "Menglong Zhu",
+        "Andrey Zhmoginov",
+        "Liang-Chieh Chen"
+      ],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2018.00474",
+      "arxiv_id": "1801.04381",
+      "openalex_id": "https://openalex.org/W2963163009",
+      "landing_page": "https://doi.org/10.1109/CVPR.2018.00474",
+      "source_urls": [
+        "https://openalex.org/W2963163009",
+        "https://doi.org/10.1109/CVPR.2018.00474"
+      ],
+      "bibtex": "@inproceedings{Sandler_2018, title={MobileNetV2: Inverted Residuals and Linear Bottlenecks}, url={http://dx.doi.org/10.1109/cvpr.2018.00474}, DOI={10.1109/cvpr.2018.00474}, booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Sandler, Mark and Howard, Andrew and Zhu, Menglong and Zhmoginov, Andrey and Chen, Liang-Chieh}, year={2018}, month=jun, pages={4510\u20134520} }",
+      "relevance_tags": [
+        "architecture",
+        "test_model",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Architecture citation for the hidden MobileNetV2 Fashion-MNIST test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1708.07747",
+      "title": "Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms",
+      "authors": [
+        "Xiao Han",
+        "Kashif Rasul",
+        "Roland Vollgraf"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1708.07747",
+      "arxiv_id": "1708.07747",
+      "openalex_id": "https://openalex.org/W2750384547",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1708.07747",
+      "source_urls": [
+        "https://openalex.org/W2750384547",
+        "https://doi.org/10.48550/ARXIV.1708.07747"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1708.07747,\n  doi = {10.48550/ARXIV.1708.07747},\n  url = {https://arxiv.org/abs/1708.07747},\n  author = {Xiao, Han and Rasul, Kashif and Vollgraf, Roland},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "dataset",
+        "benchmark",
+        "test_dataset"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Benchmark citation for the hidden Fashion-MNIST test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/zp44cu3g",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB dataset record",
+      "doi": "10.57702/ZP44CU3G",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3118608800",
+      "landing_page": "https://doi.org/10.57702/ZP44CU3G",
+      "source_urls": [
+        "https://openalex.org/W3118608800",
+        "https://doi.org/10.57702/ZP44CU3G"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g,\n  doi = {10.57702/ZP44CU3G},\n  url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a},\n  author = {Krizhevsky, Alex},\n  keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images},\n  language = {en},\n  title = {Learning Multiple Layers of Features from Tiny Images},\n  publisher = {TIB},\n  year = {2024}\n}",
+      "relevance_tags": [
+        "dataset",
+        "benchmark",
+        "test_dataset"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet56-cifar100",
+        "vgg16bn-cifar100"
+      ],
+      "relevance": "Citation record covering the CIFAR-10/CIFAR-100 technical report used by the visible tests.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

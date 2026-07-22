@@ -1,0 +1,17 @@
+{
+  "base_image": "python:3.10-slim",
+  "install_cmds": [
+    "apt-get update && apt-get install -y git wget && rm -rf /var/lib/apt/lists/*",
+    "pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu",
+    "pip install --no-cache-dir scikit-learn numpy scipy openml torchfile",
+    "mkdir -p /workspace/badge/oml",
+    "python -c \"import openml; ds6 = openml.datasets.get_dataset(6); X6, y6, _, _ = ds6.get_data(target=ds6.default_target_attribute); import pickle; pickle.dump({'data': (X6.values, y6.values)}, open('/workspace/badge/oml/data_6.pk', 'wb'))\"",
+    "python -c \"import openml; ds44 = openml.datasets.get_dataset(44); X44, y44, _, _ = ds44.get_data(target=ds44.default_target_attribute); import pickle; pickle.dump({'data': (X44.values, y44.values)}, open('/workspace/badge/oml/data_44.pk', 'wb'))\"",
+    "python -c \"import openml; ds46 = openml.datasets.get_dataset(46); X46, y46, _, _ = ds46.get_data(target=ds46.default_target_attribute); import pickle; pickle.dump({'data': (X46.values, y46.values)}, open('/workspace/badge/oml/data_46.pk', 'wb'))\""
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/badge:${PYTHONPATH}"
+  },
+  "use_cuda": false,
+  "workdir": "/workspace"
+}

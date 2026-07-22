@@ -1,0 +1,5 @@
+timestamp,model,is_final,seed,temporal_quality_main_ucf-short,scene_retention_precision_ucf-short,drift_score_ucf-short,peak_kv_memory_mb_ucf-short,temporal_quality_main_dmlab-long,scene_retention_precision_dmlab-long,drift_score_dmlab-long,peak_kv_memory_mb_dmlab-long,temporal_quality_main_ucf-scene-cut,scene_retention_precision_ucf-scene-cut,drift_score_ucf-scene-cut,peak_kv_memory_mb_ucf-scene-cut
+2026-04-01T00:00:00+00:00,baseline:recent_window,true,mean,71.5873,0.0,0.0,1.0,71.7599,0.0,0.0,1.0,66.2461,1.0,0.0365,1.0
+2026-04-01T00:00:00+00:00,baseline:packcache,true,mean,79.9276,0.0,0.0,4.95,81.5794,0.0,0.0,4.5,60.9224,1.0,0.1005,3.0
+2026-04-01T00:00:00+00:00,baseline:causalcache_vdm,true,mean,79.4309,0.0,0.0,2.7,83.6207,0.0,0.0,4.35,44.4445,0.0,0.6429,5.45
+2026-04-01T00:00:00+00:00,baseline:flowcache,true,mean,88.3286,0.0,0.0,11.0,89.9395,0.0,0.0,8.54,72.2131,1.0,0.0714,5.0

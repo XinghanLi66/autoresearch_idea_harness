@@ -1,0 +1,23 @@
+{
+  "base_image": "pytorch/pytorch:2.3.0-cuda11.8-cudnn8-devel",
+  "install_cmds": [
+    "apt-get update && apt-get install -y git gcc g++ && rm -rf /var/lib/apt/lists/*",
+    "pip install numpy==1.23.5 pandas==1.5.3 scikit-learn==1.2.2 scipy tqdm lmdb",
+    "pip install subword-nmt==0.3.8",
+    "python -c \"import subword_nmt; from subword_nmt.apply_bpe import BPE; print('subword_nmt OK')\"",
+    "pip install 'torchdata==0.8.0'",
+    "pip install 'dgl==2.3.0+cu118' -f https://data.dgl.ai/wheels/torch-2.3/cu118/repo.html",
+    "pip install dgllife==0.3.2 rdkit-pypi",
+    "pip install PyTDC",
+    "python -c \"import lmdb, torch; print('lmdb+torch OK', torch.__version__)\"",
+    "python -c \"\nimport os\ndata_dir = '/workspace/DeepProtein/DeepProtein/data'\nfor d in ['beta_lactamase', 'fluorescence', 'solubility']:\n    for s in ['train', 'valid', 'test']:\n        f = os.path.join(data_dir, d, f'{d}_{s}.lmdb')\n        assert os.path.exists(f), f'Missing: {f}'\nprint('All LMDB data verified')\n\""
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/DeepProtein:${PYTHONPATH}",
+    "DATA_DIR": "/workspace/DeepProtein",
+    "DGL_SKIP_GRAPHBOLT": "1"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "workdir": "/workspace"
+}

@@ -1,0 +1,43 @@
+{
+  "base_image": "pytorch/pytorch:2.2.0-cuda12.1-cudnn8-devel",
+  "install_cmds": [
+    "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential git wget cmake hmmer && apt-get clean && rm -rf /var/lib/apt/lists/*",
+    "pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.2.0+cu121.html",
+    "pip install torch-geometric",
+    "pip install 'numpy<2' scipy pandas scikit-learn matplotlib biopython tqdm requests",
+    "pip install lmdb easydict loguru einops hydra-core pyyaml",
+    "pip install fair-esm>=2.0.0",
+    "pip install rdkit-pypi || true",
+    "pip install huggingface_hub",
+    "pip install anarci",
+    "pip install abnumber",
+    "python -c \"import torch, torch_geometric, esm; print('All imports OK')\"",
+    "python -c \"from anarci import run_anarci; r = run_anarci([('A','EVQLVESGGGLVQPGGSLRLSCAASGFTFSSYAMSWVRQAPGKGLEWVSAISGSGGSTYYADSVKGRFTISRDNSKNTLYLQMNSLRAEDTAFYYCAKDREL')], scheme='chothia', allowed_species=['mouse','human']); assert r[1][0] is not None; print('anarci OK')\"",
+    "python -c \"import abnumber; c = abnumber.Chain('EVQLVESGGGLVQPGGSLRLSCAASGFTFSSYAMSWVRQAPGKGLEWVSAISGSGGSTYYADSVKGRFTISRDNSKNTLYLQMNSLRAEDTAFYYCAKDREL', scheme='chothia'); print('abnumber OK', c.cdr1_seq)\"",
+    "python -c \"from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('facebook/esm2_t33_650M_UR50D')\" || true"
+  ],
+  "data_deps": [
+    {
+      "name": "chimera-bench",
+      "host_path": "{data_root}/chimera-bench",
+      "container_path": "/data/chimera-bench-v1.0",
+      "prepare": "vendor/data_scripts/chimera-bench/prepare_data.py",
+      "description": "CHIMERA-Bench v1.0 dataset (HF) + per-baseline preprocess (mean/dymean/diffab) ran inside container."
+    }
+  ],
+  "data_bind": [
+    "{data_root}/chimera-bench:/data/chimera-bench-v1.0",
+    "{data_root}/transformers_cache:/data/transformers_cache"
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/chimera-bench:/workspace/chimera-bench/baselines:${PYTHONPATH}",
+    "CHIMERA_DATA_ROOT": "/data/chimera-bench-v1.0",
+    "TRANSFORMERS_CACHE": "/data/transformers_cache",
+    "HF_HOME": "/data/transformers_cache",
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "workdir": "/workspace"
+}

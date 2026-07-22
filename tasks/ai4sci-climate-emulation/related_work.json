@@ -1,0 +1,392 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4sci-climate-emulation",
+  "task_folder": "tasks/ai4sci-climate-emulation",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "architecture design for climate physics emulation",
+    "research_question": "Design an improved neural network architecture for emulating sub-grid atmospheric physics processes in climate models.",
+    "local_sources": {
+      "config_path": "tasks/ai4sci-climate-emulation/config.json",
+      "task_description_path": "tasks/ai4sci-climate-emulation/task_description.md"
+    },
+    "notes": [
+      "Task is grounded in the ClimSim benchmark and its benchmark-derived baseline models."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 5,
+    "baseline_links_found": 9,
+    "test_entries": 3,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "short-10ep",
+      "cmd": "scripts/short.sh",
+      "package": "ClimSim",
+      "group": 1,
+      "compute": 0.33,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.52202/075280-0968",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "10-epoch training-budget evaluation from the ClimSim benchmark task."
+    },
+    {
+      "label": "medium-30ep",
+      "cmd": "scripts/medium.sh",
+      "package": "ClimSim",
+      "group": 1,
+      "compute": 0.33,
+      "time": "06:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.52202/075280-0968",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "30-epoch training-budget evaluation from the ClimSim benchmark task."
+    },
+    {
+      "label": "long-60ep",
+      "cmd": "scripts/long.sh",
+      "package": "ClimSim",
+      "group": 1,
+      "compute": 0.33,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.52202/075280-0968",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "60-epoch training-budget evaluation from the ClimSim benchmark task."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "mlp",
+      "implementation": "edits/mlp.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.52202/075280-0968",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Default ClimSim MLP baseline."
+    },
+    {
+      "name": "cnn",
+      "implementation": "edits/cnn.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.52202/075280-0968",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1029/2018ms001472",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Profile CNN baseline from ClimSim, with a close explicit subgrid-parameterization CNN reference."
+    },
+    {
+      "name": "ed",
+      "implementation": "edits/ed.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.52202/075280-0968",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1029/2018gl078510",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Encoder-decoder style baseline from ClimSim; related to multi-step stable physics parameterization."
+    },
+    {
+      "name": "unet",
+      "implementation": "edits/unet.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1007/978-3-319-24574-4_28",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2407.00124",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Climate-specific 1D U-Net variant."
+    },
+    {
+      "name": "hsr",
+      "implementation": "edits/hsr.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/icnn.1994.374138",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1703.04977",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Heteroskedastic regression baseline, tied to classical mean/variance prediction and aleatoric uncertainty modeling."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.52202/075280-0968",
+      "title": "ClimSim: A large multi-scale dataset for hybrid physics-ML climate emulation",
+      "authors": ["Ryan Abernathey", "Fiaz Ahmed", "Animashree Anandkumar", "Noah Brenowitz"],
+      "year": 2023,
+      "venue": "NeurIPS 2023",
+      "doi": "10.52202/075280-0968",
+      "landing_page": "https://doi.org/10.52202/075280-0968",
+      "source_urls": [
+        "https://api.openalex.org/works/W7133212227",
+        "https://doi.org/10.52202/075280-0968"
+      ],
+      "bibtex": "@inproceedings{Abernathey_2023, series={NeurIPS 2023}, title={ClimSim: A large multi-scale dataset for hybrid physics-ML climate emulation}, url={http://dx.doi.org/10.52202/075280-0968}, DOI={10.52202/075280-0968}, booktitle={Advances in Neural Information Processing Systems 36}, publisher={Neural Information Processing Systems Foundation, Inc. (NeurIPS)}, author={Abernathey, Ryan and Ahmed, Fiaz and Anandkumar, Animashree and Bader, David and Baldi, Pierre and Barnes, Elizabeth and Behrens, Gunnar and Beucler, Tom and Bhouri, Mohamed Aziz and Brenowitz, Noah and Bretherton, Christopher and Busecke, Julius and Caldwell, Peter and Chuang, Wayne and Eyring, Veronika and Ferretti, Savannah L. and Geneva, Nicholas and Gentine, Pierre and Gupta, Ritwik and Han, Yilun and Hannah, Walter and Harrop, Bryce and Hillman, Benjamin and Huang, Yu and Iglesias-Suarez, Fernando and Jantre, Sanket and Jenney, Andrea and Kashinath, Karthik and Khairoutdinov, Marat and Kurth, Thorsten and Lin, Jerry and Liu, Nana and Loose, Nora and Lütjens, Björn and Lutsko, Nicholas and Ma, Po-Lun and Mandt, Stephan and Mooers, Griffin and Neelin, J. David and Pathak, Jaideep and Peng, Liran and Pritchard, Mike and Randall, David and Shamekh, Sara and Stern, Charles and Subramaniam, Akshay and Taylor, Mark and Urban, Nathan and Vondrick, Carl and Will, Justus C. and Yu, Rose and Yu, Sungduk and Yuval, Janni and Zanna, Laure and Zhang, Guang and Zheng, Tian}, year={2023}, pages={22070–22084}, collection={NeurIPS 2023} }",
+      "relevance_tags": ["benchmark", "dataset", "climate_emulation"],
+      "baseline_links": ["mlp", "cnn", "ed", "unet", "hsr"],
+      "test_links": ["short-10ep", "medium-30ep", "long-60ep"],
+      "relevance": "Primary benchmark paper for the task and source of the climate-emulation dataset.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1007/978-3-319-24574-4_28",
+      "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+      "authors": ["Olaf Ronneberger", "Philipp Fischer", "Thomas Brox"],
+      "year": 2015,
+      "venue": "MICCAI 2015",
+      "doi": "10.1007/978-3-319-24574-4_28",
+      "landing_page": "https://doi.org/10.1007/978-3-319-24574-4_28",
+      "source_urls": [
+        "https://api.openalex.org/works/W1901129140",
+        "https://doi.org/10.1007/978-3-319-24574-4_28"
+      ],
+      "bibtex": "@inbook{Ronneberger_2015, title={U-Net: Convolutional Networks for Biomedical Image Segmentation}, ISBN={9783319245744}, ISSN={1611-3349}, url={http://dx.doi.org/10.1007/978-3-319-24574-4_28}, DOI={10.1007/978-3-319-24574-4_28}, booktitle={Medical Image Computing and Computer-Assisted Intervention – MICCAI 2015}, publisher={Springer International Publishing}, author={Ronneberger, Olaf and Fischer, Philipp and Brox, Thomas}, year={2015}, pages={234–241} }",
+      "relevance_tags": ["architecture", "encoder_decoder", "segmentation"],
+      "baseline_links": ["unet"],
+      "test_links": [],
+      "relevance": "Canonical U-Net architecture used as the closest explicit citation for the task's U-Net baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1029/2018gl078510",
+      "title": "Prognostic Validation of a Neural Network Unified Physics Parameterization",
+      "authors": ["Noah Brenowitz", "Christopher Bretherton"],
+      "year": 2018,
+      "venue": "Geophysical Research Letters",
+      "doi": "10.1029/2018gl078510",
+      "landing_page": "https://doi.org/10.1029/2018gl078510",
+      "source_urls": [
+        "https://api.openalex.org/works/W2808400960",
+        "https://doi.org/10.1029/2018gl078510"
+      ],
+      "bibtex": "@article{Brenowitz_2018, title={Prognostic Validation of a Neural Network Unified Physics Parameterization}, volume={45}, ISSN={1944-8007}, url={http://dx.doi.org/10.1029/2018gl078510}, DOI={10.1029/2018gl078510}, number={12}, journal={Geophysical Research Letters}, publisher={American Geophysical Union (AGU)}, author={Brenowitz, N. D. and Bretherton, C. S.}, year={2018}, month=jun, pages={6289–6298} }",
+      "relevance_tags": ["subgrid_parameterization", "stability", "training_recipe"],
+      "baseline_links": ["ed"],
+      "test_links": [],
+      "relevance": "Classic neural-network climate parameterization paper emphasizing multi-step stability.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1063/5.0038929",
+      "title": "Physics guided machine learning using simplified theories",
+      "authors": ["Suraj Pawar", "Omer San", "Burak Aksoylu"],
+      "year": 2021,
+      "venue": "Physics of Fluids",
+      "doi": "10.1063/5.0038929",
+      "landing_page": "https://doi.org/10.1063/5.0038929",
+      "source_urls": [
+        "https://api.openalex.org/works/W3115383201",
+        "https://doi.org/10.1063/5.0038929"
+      ],
+      "bibtex": "@article{Pawar_2021, title={Physics guided machine learning using simplified theories}, volume={33}, ISSN={1089-7666}, url={http://dx.doi.org/10.1063/5.0038929}, DOI={10.1063/5.0038929}, number={1}, journal={Physics of Fluids}, publisher={AIP Publishing}, author={Pawar, Suraj and San, Omer and Aksoylu, Burak and Rasheed, Adil and Kvamsdal, Trond}, year={2021}, month=jan }",
+      "relevance_tags": ["physics_guidance", "feature_injection", "generalization"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Physics-guided feature injection is relevant to modular architectural changes for climate emulators.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1029/2019ms002002",
+      "title": "Physically Interpretable Neural Networks for the Geosciences: Applications to Earth System Variability",
+      "authors": ["Benjamin A. Toms", "Elizabeth A. Barnes", "Imme Ebert-Uphoff"],
+      "year": 2020,
+      "venue": "Journal of Advances in Modeling Earth Systems",
+      "doi": "10.1029/2019ms002002",
+      "landing_page": "https://doi.org/10.1029/2019ms002002",
+      "source_urls": [
+        "https://api.openalex.org/works/W2993514765",
+        "https://doi.org/10.1029/2019ms002002"
+      ],
+      "bibtex": "@article{Toms_2020, title={Physically Interpretable Neural Networks for the Geosciences: Applications to Earth System Variability}, volume={12}, ISSN={1942-2466}, url={http://dx.doi.org/10.1029/2019ms002002}, DOI={10.1029/2019ms002002}, number={9}, journal={Journal of Advances in Modeling Earth Systems}, publisher={American Geophysical Union (AGU)}, author={Toms, Benjamin A. and Barnes, Elizabeth A. and Ebert‐Uphoff, Imme}, year={2020}, month=aug }",
+      "relevance_tags": ["interpretability", "geoscience", "physics_guidance"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Useful context for interpreting neural architectures in geoscience settings.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2407.00124",
+      "title": "Stable Machine-Learning Parameterization of Subgrid Processes in a Comprehensive Atmospheric Model Learned From Embedded Convection-Permitting Simulations",
+      "authors": ["Zeyuan Hu", "Akshay Subramaniam", "Zhiming Kuang"],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2407.00124",
+      "arxiv_id": "2407.00124",
+      "landing_page": "https://arxiv.org/abs/2407.00124",
+      "source_urls": [
+        "https://api.openalex.org/works/W4400267108",
+        "https://arxiv.org/abs/2407.00124"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2407.00124, doi = {10.48550/ARXIV.2407.00124}, url = {https://arxiv.org/abs/2407.00124}, author = {Hu, Zeyuan and Subramaniam, Akshay and Kuang, Zhiming and Lin, Jerry and Yu, Sungduk and Hannah, Walter M. and Brenowitz, Noah D. and Romero, Josh and Pritchard, Michael S.}, keywords = {Atmospheric and Oceanic Physics (physics.ao-ph), FOS: Physical sciences, FOS: Physical sciences}, title = {Stable Machine-Learning Parameterization of Subgrid Processes in a Comprehensive Atmospheric Model Learned From Embedded Convection-Permitting Simulations}, publisher = {arXiv}, year = {2024}, copyright = {Creative Commons Attribution 4.0 International} }",
+      "relevance_tags": ["climate_emulation", "u_net", "stability"],
+      "baseline_links": ["unet"],
+      "test_links": [],
+      "relevance": "Explicit climate-emulation paper citing a U-Net family architecture and stable hybrid simulation design.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2406.14798",
+      "title": "Probabilistic Emulation of a Global Climate Model with Spherical DYffusion",
+      "authors": ["Salva Rühling Cachay", "Brian Henn", "Oliver Watt-Meyer"],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2406.14798",
+      "arxiv_id": "2406.14798",
+      "landing_page": "https://arxiv.org/abs/2406.14798",
+      "source_urls": [
+        "https://api.openalex.org/works/W4399991985",
+        "https://arxiv.org/abs/2406.14798"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2406.14798, doi = {10.48550/ARXIV.2406.14798}, url = {https://arxiv.org/abs/2406.14798}, author = {Cachay, Salva Rühling and Henn, Brian and Watt-Meyer, Oliver and Bretherton, Christopher S. and Yu, Rose}, keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Atmospheric and Oceanic Physics (physics.ao-ph), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Physical sciences, FOS: Physical sciences}, title = {Probabilistic Emulation of a Global Climate Model with Spherical DYffusion}, publisher = {arXiv}, year = {2024}, copyright = {Creative Commons Attribution 4.0 International} }",
+      "relevance_tags": ["climate_emulation", "probabilistic_modeling", "diffusion"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Directly relevant climate-emulation work using a generative model and long rollouts.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1029/2024ms004485",
+      "title": "Online Learning of Entrainment Closures in a Hybrid Machine Learning Parameterization",
+      "authors": ["Costa Christopoulos", "Ignacio Lopez-Gomez", "Tom Beucler"],
+      "year": 2024,
+      "venue": "Journal of Advances in Modeling Earth Systems",
+      "doi": "10.1029/2024ms004485",
+      "landing_page": "https://doi.org/10.1029/2024ms004485",
+      "source_urls": [
+        "https://api.openalex.org/works/W4404430509",
+        "https://doi.org/10.1029/2024ms004485"
+      ],
+      "bibtex": "@article{Christopoulos_2024, title={Online Learning of Entrainment Closures in a Hybrid Machine Learning Parameterization}, volume={16}, ISSN={1942-2466}, url={http://dx.doi.org/10.1029/2024ms004485}, DOI={10.1029/2024ms004485}, number={11}, journal={Journal of Advances in Modeling Earth Systems}, publisher={American Geophysical Union (AGU)}, author={Christopoulos, Costa and Lopez‐Gomez, Ignacio and Beucler, Tom and Cohen, Yair and Kawczynski, Charles and Dunbar, Oliver R. A. and Schneider, Tapio}, year={2024}, month=nov }",
+      "relevance_tags": ["online_learning", "closure_model", "parameterization"],
+      "baseline_links": ["hsr"],
+      "test_links": [],
+      "relevance": "Shows the value of online learning and physical constraints for stable hybrid parameterizations.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1029/2018ms001472",
+      "title": "Applications of Deep Learning to Ocean Data Inference and Subgrid Parameterization",
+      "authors": ["Thomas Bolton", "Laure Zanna"],
+      "year": 2019,
+      "venue": "Journal of Advances in Modeling Earth Systems",
+      "doi": "10.1029/2018ms001472",
+      "landing_page": "https://doi.org/10.1029/2018ms001472",
+      "source_urls": [
+        "https://api.openalex.org/works/W2908155528",
+        "https://doi.org/10.1029/2018ms001472"
+      ],
+      "bibtex": "@article{Bolton_2019, title={Applications of Deep Learning to Ocean Data Inference and Subgrid Parameterization}, volume={11}, ISSN={1942-2466}, url={http://dx.doi.org/10.1029/2018ms001472}, DOI={10.1029/2018ms001472}, number={1}, journal={Journal of Advances in Modeling Earth Systems}, publisher={American Geophysical Union (AGU)}, author={Bolton, Thomas and Zanna, Laure}, year={2019}, month=jan, pages={376–399} }",
+      "relevance_tags": ["cnn", "subgrid_parameterization", "climate_emulation"],
+      "baseline_links": ["cnn"],
+      "test_links": [],
+      "relevance": "Directly relevant CNN-based subgrid parameterization paper in the geosciences.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.5194/gmd-11-3999-2018",
+      "title": "Challenges and design choices for global weather and climate models based on machine learning",
+      "authors": ["Peter Dueben", "Peter Bauer"],
+      "year": 2018,
+      "venue": "Geoscientific Model Development",
+      "doi": "10.5194/gmd-11-3999-2018",
+      "landing_page": "https://doi.org/10.5194/gmd-11-3999-2018",
+      "source_urls": [
+        "https://api.openalex.org/works/W2809789958",
+        "https://doi.org/10.5194/gmd-11-3999-2018"
+      ],
+      "bibtex": "@article{Dueben_2018, title={Challenges and design choices for global weather and climate models based on machine learning}, volume={11}, ISSN={1991-9603}, url={http://dx.doi.org/10.5194/gmd-11-3999-2018}, DOI={10.5194/gmd-11-3999-2018}, number={10}, journal={Geoscientific Model Development}, publisher={Copernicus GmbH}, author={Dueben, Peter D. and Bauer, Peter}, year={2018}, month=oct, pages={3999–4009} }",
+      "relevance_tags": ["benchmark", "architecture", "weather_climate_ml"],
+      "baseline_links": ["mlp", "cnn", "ed", "unet", "hsr"],
+      "test_links": [],
+      "relevance": "Useful climate-ML design reference for neural network forecast systems.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/icnn.1994.374138",
+      "title": "Estimating the mean and variance of the target probability distribution",
+      "authors": ["David A. Nix", "Andreas S. Weigend"],
+      "year": 1994,
+      "venue": "ICNN'94",
+      "doi": "10.1109/icnn.1994.374138",
+      "landing_page": "https://doi.org/10.1109/icnn.1994.374138",
+      "source_urls": [
+        "https://api.openalex.org/works/W1560021816",
+        "https://doi.org/10.1109/icnn.1994.374138"
+      ],
+      "bibtex": "@inproceedings{Nix_1994, title={Estimating the mean and variance of the target probability distribution}, url={http://dx.doi.org/10.1109/icnn.1994.374138}, DOI={10.1109/icnn.1994.374138}, booktitle={Proceedings of 1994 IEEE International Conference on Neural Networks (ICNN’94)}, publisher={IEEE}, author={Nix, D.A. and Weigend, A.S.}, year={1994}, pages={55–60 vol.1} }",
+      "relevance_tags": ["heteroscedastic_regression", "uncertainty", "regression"],
+      "baseline_links": ["hsr"],
+      "test_links": [],
+      "relevance": "Classic mean/variance prediction for heteroscedastic regression, relevant to the HSR baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1703.04977",
+      "title": "What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?",
+      "authors": ["Alex Kendall", "Yarin Gal"],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1703.04977",
+      "arxiv_id": "1703.04977",
+      "landing_page": "https://arxiv.org/abs/1703.04977",
+      "source_urls": [
+        "https://api.openalex.org/works/W2600383743",
+        "https://arxiv.org/abs/1703.04977"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1703.04977, doi = {10.48550/ARXIV.1703.04977}, url = {https://arxiv.org/abs/1703.04977}, author = {Kendall, Alex and Gal, Yarin}, keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?}, publisher = {arXiv}, year = {2017}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": ["heteroscedastic_regression", "aleatoric_uncertainty", "uncertainty"],
+      "baseline_links": ["hsr"],
+      "test_links": [],
+      "relevance": "Provides a modern deep-learning treatment of aleatoric uncertainty that aligns with the HSR baseline's uncertainty-aware regression design.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

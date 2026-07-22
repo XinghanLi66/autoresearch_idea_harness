@@ -1,0 +1,54 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/ttt_eval_345m.sh",
+      "label": "ttt-eval-345m",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:00:00",
+      "package": "nanoGPT"
+    }
+  ],
+  "baselines": {
+    "no_adaptation": {
+      "edit_ops": "edits/no_adaptation.edit.py"
+    },
+    "lora_ttt": {
+      "edit_ops": "edits/lora_ttt.edit.py"
+    },
+    "selfsup_ttt": {
+      "edit_ops": "edits/selfsup_ttt.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "nanoGPT/custom_ttt_eval.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 276,
+          "end": 346
+        }
+      ]
+    },
+    {
+      "filename": "nanoGPT/model.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-rl-advantage",
+  "task_folder": "tasks/llm-rl-advantage",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/llm-rl-advantage/config.json",
+      "task_description_path": "tasks/llm-rl-advantage/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 1,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "deepmath-3bench",
+      "cmd": "scripts/train.sh",
+      "package": "verl",
+      "group": 1,
+      "compute": 4,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "grpo",
+      "implementation": "baselines/grpo.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "rloo",
+      "implementation": "baselines/rloo.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "reinforce_pp",
+      "implementation": "baselines/reinforce_pp.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dr_grpo",
+      "implementation": "baselines/dr_grpo.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

@@ -1,0 +1,30 @@
+{
+  "base_image": "pytorch/pytorch:2.4.1-cuda12.4-cudnn9-runtime",
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y cmake build-essential zlib1g-dev libxcb1 libglib2.0-0 libsm6 libxrender1 libxext6 libgl1-mesa-glx && apt-get clean",
+    "cd /workspace/d3rlpy && pip install --no-deps -e .",
+    "pip install 'tqdm>=4.66.3' h5py click typing-extensions structlog colorama dataclasses-json scikit-learn",
+    "pip install ale-py==0.8.1 AutoROM 'gymnasium==0.29.1' 'shimmy[atari]'",
+    "AutoROM --accept-license",
+    "pip install gym==0.23.1",
+    "pip install https://github.com/takuseno/d4rl-atari/archive/refs/heads/master.zip",
+    "pip install opencv-python-headless"
+  ],
+  "data_bind": "{data_root}/data_staging/d4rl_atari:/root/.d4rl/datasets",
+  "data_deps": [
+    {
+      "name": "d4rl_atari",
+      "host_path": "{data_root}/data_staging/d4rl_atari",
+      "container_path": "/root/.d4rl/datasets",
+      "prepare": "vendor/data_scripts/d3rlpy/prepare_data.py",
+      "description": "RL Unplugged Atari datasets (Breakout/Pong/Qbert x 50 epochs) converted to numpy gzip format. Requires gsutil and tensorflow."
+    }
+  ],
+  "env": {
+    "HOME": "/root"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

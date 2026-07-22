@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "task_name": "graph-graph-classification",
+  "task_folder": "tasks/graph-graph-classification",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/graph-graph-classification/config.json",
+      "task_description_path": "tasks/graph-graph-classification/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "MUTAG",
+      "cmd": "scripts/mutag.sh",
+      "package": "pytorch-geometric",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "PROTEINS",
+      "cmd": "scripts/proteins.sh",
+      "package": "pytorch-geometric",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "NCI1",
+      "cmd": "scripts/nci1.sh",
+      "package": "pytorch-geometric",
+      "group": 1,
+      "compute": 0.33,
+      "time": "03:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "gin_sum",
+      "implementation": "edits/gin_sum.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "sortpool",
+      "implementation": "edits/sortpool.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "set2set",
+      "implementation": "edits/set2set.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "sagpool",
+      "implementation": "edits/sagpool.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "diffpool",
+      "implementation": "edits/diffpool.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gmt",
+      "implementation": "edits/gmt.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "safe-rl",
+  "task_folder": "tasks/safe-rl",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/safe-rl/config.json",
+      "task_description_path": "tasks/safe-rl/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "SafetyPointGoal1-v0",
+      "cmd": "scripts/point_goal.sh",
+      "package": "omnisafe",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "SafetyCarGoal1-v0",
+      "cmd": "scripts/car_goal.sh",
+      "package": "omnisafe",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "SafetyPointButton1-v0",
+      "cmd": "scripts/point_button.sh",
+      "package": "omnisafe",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "naive",
+      "implementation": "edits/naive.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "ppo_lag",
+      "implementation": "edits/ppo_lag.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "pid_lag",
+      "implementation": "edits/pid_lag.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

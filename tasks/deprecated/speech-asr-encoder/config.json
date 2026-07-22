@@ -1,0 +1,75 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/librispeech_100h.sh",
+      "label": "librispeech-100h",
+      "group": 1,
+      "compute": 1.0,
+      "time": "12:00:00",
+      "package": "speechbrain"
+    },
+    {
+      "cmd": "scripts/aishell_1.sh",
+      "label": "aishell-1",
+      "group": 1,
+      "compute": 1.0,
+      "time": "12:00:00",
+      "package": "speechbrain"
+    },
+    {
+      "cmd": "scripts/mls_spanish.sh",
+      "label": "mls-spanish",
+      "group": 1,
+      "compute": 1.0,
+      "time": "12:00:00",
+      "package": "speechbrain",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "conformer": {
+      "edit_ops": "edits/conformer.edit.py"
+    },
+    "transformer": {
+      "edit_ops": "edits/transformer.edit.py"
+    },
+    "branchformer": {
+      "edit_ops": "edits/branchformer.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "speechbrain/custom_asr_encoder.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 61,
+          "end": 220
+        },
+        {
+          "start": 452,
+          "end": 452
+        }
+      ]
+    },
+    {
+      "filename": "speechbrain/speechbrain/nnet/attention.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

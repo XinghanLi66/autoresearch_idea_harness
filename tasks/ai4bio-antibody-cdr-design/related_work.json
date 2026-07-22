@@ -1,0 +1,453 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4bio-antibody-cdr-design",
+  "task_folder": "tasks/ai4bio-antibody-cdr-design",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "epitope-conditioned antibody CDR sequence-structure co-design",
+    "research_question": "Design a novel generative architecture for antibody complementarity-determining region (CDR) loop sequence-structure co-design conditioned on the antigen-antibody framework context.",
+    "local_sources": {
+      "config_path": "tasks/ai4bio-antibody-cdr-design/config.json",
+      "task_description_path": "tasks/ai4bio-antibody-cdr-design/task_description.md"
+    },
+    "notes": [
+      "Baselines were mapped to exact method papers.",
+      "All three test splits map to the CHIMERA-Bench benchmark paper."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "epitope_group",
+      "cmd": "scripts/epitope_group.sh",
+      "package": "chimera-bench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2603.13431",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "CHIMERA-Bench split for unseen epitopes."
+    },
+    {
+      "label": "antigen_fold",
+      "cmd": "scripts/antigen_fold.sh",
+      "package": "chimera-bench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2603.13431",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "CHIMERA-Bench split for unseen antigen folds."
+    },
+    {
+      "label": "temporal",
+      "cmd": "scripts/temporal.sh",
+      "package": "chimera-bench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2603.13431",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "CHIMERA-Bench temporal split."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "diffab",
+      "implementation": "edits/diffab.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1101/2022.07.10.499510",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "DiffAb is the diffusion-based antibody CDR co-design baseline."
+    },
+    {
+      "name": "dymean",
+      "implementation": "edits/dymean.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2302.00203",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "dyMEAN is the end-to-end full-atom antibody design baseline."
+    },
+    {
+      "name": "mean",
+      "implementation": "edits/mean.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2208.06073",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "MEAN is the conditional antibody CDR design baseline."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.2603.13431",
+      "title": "CHIMERA-Bench: A Benchmark Dataset for Epitope-Specific Antibody Design",
+      "authors": [
+        "Mansoor Ahmed",
+        "Nadeem Taj",
+        "Imdad Ullah Khan",
+        "Hemanth Venkateswara",
+        "Murray Patterson"
+      ],
+      "year": 2026,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2603.13431",
+      "arxiv_id": "2603.13431",
+      "landing_page": "https://arxiv.org/abs/2603.13431",
+      "source_urls": [
+        "https://arxiv.org/abs/2603.13431",
+        "https://doi.org/10.48550/arxiv.2603.13431"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2603.13431, doi = {10.48550/ARXIV.2603.13431}, url = {https://arxiv.org/abs/2603.13431}, author = {Ahmed, Mansoor and Taj, Nadeem and Khan, Imdad Ullah and Venkateswara, Hemanth and Patterson, Murray}, keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {CHIMERA-Bench: A Benchmark Dataset for Epitope-Specific Antibody Design}, publisher = {arXiv}, year = {2026}, copyright = {Creative Commons Attribution 4.0 International} }",
+      "relevance_tags": [
+        "benchmark",
+        "dataset",
+        "antibody_design"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "epitope_group",
+        "antigen_fold",
+        "temporal"
+      ],
+      "relevance": "Direct benchmark for epitope-conditioned CDR sequence-structure co-design with the same split structure used by this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2022.07.10.499510",
+      "title": "Antigen-Specific Antibody Design and Optimization with Diffusion-Based Generative Models for Protein Structures",
+      "authors": [
+        "Shitong Luo",
+        "Yufeng Su",
+        "Xingang Peng",
+        "Sheng Wang",
+        "Jian Peng",
+        "Jianzhu Ma"
+      ],
+      "year": 2022,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2022.07.10.499510",
+      "arxiv_id": null,
+      "landing_page": "http://dx.doi.org/10.1101/2022.07.10.499510",
+      "source_urls": [
+        "http://dx.doi.org/10.1101/2022.07.10.499510"
+      ],
+      "bibtex": "@article{Luo_2022, title={Antigen-Specific Antibody Design and Optimization with Diffusion-Based Generative Models for Protein Structures}, url={http://dx.doi.org/10.1101/2022.07.10.499510}, DOI={10.1101/2022.07.10.499510}, publisher={openRxiv}, author={Luo, Shitong and Su, Yufeng and Peng, Xingang and Wang, Sheng and Peng, Jian and Ma, Jianzhu}, year={2022}, month=jul }",
+      "relevance_tags": [
+        "baseline_method",
+        "diffusion",
+        "antibody_design",
+        "sequence_structure_codesign"
+      ],
+      "baseline_links": [
+        "diffab"
+      ],
+      "test_links": [],
+      "relevance": "Diffusion-based antibody sequence-structure co-design baseline closely matching the task objective.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2208.06073",
+      "title": "Conditional Antibody Design as 3D Equivariant Graph Translation",
+      "authors": [
+        "Xiangzhe Kong",
+        "Wenbing Huang",
+        "Yang Liu"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2208.06073",
+      "arxiv_id": "2208.06073",
+      "landing_page": "https://arxiv.org/abs/2208.06073",
+      "source_urls": [
+        "https://arxiv.org/abs/2208.06073",
+        "https://doi.org/10.48550/arxiv.2208.06073"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2208.06073, doi = {10.48550/ARXIV.2208.06073}, url = {https://arxiv.org/abs/2208.06073}, author = {Kong, Xiangzhe and Huang, Wenbing and Liu, Yang}, keywords = {Biomolecules (q-bio.BM), Machine Learning (cs.LG), FOS: Biological sciences, FOS: Biological sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Conditional Antibody Design as 3D Equivariant Graph Translation}, publisher = {arXiv}, year = {2022}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "baseline_method",
+        "equivariant_gnn",
+        "antibody_design",
+        "cdr_generation"
+      ],
+      "baseline_links": [
+        "mean"
+      ],
+      "test_links": [],
+      "relevance": "MEAN is the direct conditional antibody CDR design baseline used by this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2302.00203",
+      "title": "End-to-End Full-Atom Antibody Design",
+      "authors": [
+        "Xiangzhe Kong",
+        "Wenbing Huang",
+        "Yang Liu"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2302.00203",
+      "arxiv_id": "2302.00203",
+      "landing_page": "https://arxiv.org/abs/2302.00203",
+      "source_urls": [
+        "https://arxiv.org/abs/2302.00203",
+        "https://doi.org/10.48550/arxiv.2302.00203"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2302.00203, doi = {10.48550/ARXIV.2302.00203}, url = {https://arxiv.org/abs/2302.00203}, author = {Kong, Xiangzhe and Huang, Wenbing and Liu, Yang}, keywords = {Biomolecules (q-bio.BM), Machine Learning (cs.LG), FOS: Biological sciences, FOS: Biological sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {End-to-End Full-Atom Antibody Design}, publisher = {arXiv}, year = {2023}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "baseline_method",
+        "full_atom_modeling",
+        "antibody_design",
+        "sequence_structure_codesign"
+      ],
+      "baseline_links": [
+        "dymean"
+      ],
+      "test_links": [],
+      "relevance": "dyMEAN is the full-atom antibody design baseline and the closest prior to the task's co-design setting.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1371/journal.pcbi.1006112",
+      "title": "RosettaAntibodyDesign (RAbD): A general framework for computational antibody design",
+      "authors": [
+        "Jared Adolf-Bryfogle",
+        "Oleksandr Kalyuzhniy",
+        "Michael Kubitz",
+        "Brian D. Weitzner",
+        "Xiaozhen Hu",
+        "Yumiko Adachi",
+        "William R. Schief",
+        "Roland L. Dunbrack"
+      ],
+      "year": 2018,
+      "venue": "PLOS Computational Biology",
+      "doi": "10.1371/journal.pcbi.1006112",
+      "arxiv_id": null,
+      "landing_page": "http://dx.doi.org/10.1371/journal.pcbi.1006112",
+      "source_urls": [
+        "http://dx.doi.org/10.1371/journal.pcbi.1006112"
+      ],
+      "bibtex": "@article{Adolf_Bryfogle_2018, title={RosettaAntibodyDesign (RAbD): A general framework for computational antibody design}, volume={14}, ISSN={1553-7358}, url={http://dx.doi.org/10.1371/journal.pcbi.1006112}, DOI={10.1371/journal.pcbi.1006112}, number={4}, journal={PLOS Computational Biology}, publisher={Public Library of Science (PLoS)}, author={Adolf-Bryfogle, Jared and Kalyuzhniy, Oleks and Kubitz, Michael and Weitzner, Brian D. and Hu, Xiaozhen and Adachi, Yumiko and Schief, William R. and Dunbrack, Roland L.}, editor={Ben-Tal, Nir}, year={2018}, month=apr, pages={e1006112} }",
+      "relevance_tags": [
+        "antibody_design",
+        "baseline_method",
+        "rosetta",
+        "cdr_design"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Canonical antibody design framework that anchors the pre-deep-learning side of the literature.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1093/bioinformatics/btac016",
+      "title": "ABlooper: fast accurate antibody CDR loop structure prediction with accuracy estimation",
+      "authors": [
+        "Brennan Abanades",
+        "Guy Georges",
+        "Alexander Bujotzek",
+        "Charlotte M. Deane"
+      ],
+      "year": 2022,
+      "venue": "Bioinformatics",
+      "doi": "10.1093/bioinformatics/btac016",
+      "arxiv_id": null,
+      "landing_page": "https://academic.oup.com/bioinformatics/article/38/7/1877/6517780",
+      "source_urls": [
+        "https://doi.org/10.1093/bioinformatics/btac016"
+      ],
+      "bibtex": "@article{Abanades_2022, title={ABlooper: fast accurate antibody CDR loop structure prediction with accuracy estimation}, volume={38}, ISSN={1367-4811}, url={http://dx.doi.org/10.1093/bioinformatics/btac016}, DOI={10.1093/bioinformatics/btac016}, number={7}, journal={Bioinformatics}, publisher={Oxford University Press (OUP)}, author={Abanades, Brennan and Georges, Guy and Bujotzek, Alexander and Deane, Charlotte M}, editor={Xu, Jinbo}, year={2022}, month=jan, pages={1877–1880} }",
+      "relevance_tags": [
+        "antibody_structure_prediction",
+        "cdr_loop_modeling",
+        "related_work"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant loop-structure prediction work for the structural component of the task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41467-023-38063-x",
+      "title": "Fast, accurate antibody structure prediction from deep learning on massive set of natural antibodies",
+      "authors": [
+        "Jeffrey A. Ruffolo",
+        "Lee-Shin Chu",
+        "Sai Pooja Mahajan",
+        "Jeffrey J. Gray"
+      ],
+      "year": 2023,
+      "venue": "Nature Communications",
+      "doi": "10.1038/s41467-023-38063-x",
+      "arxiv_id": null,
+      "landing_page": "https://www.nature.com/articles/s41467-023-38063-x",
+      "source_urls": [
+        "https://doi.org/10.1038/s41467-023-38063-x"
+      ],
+      "bibtex": "@article{Ruffolo_2023, title={Fast, accurate antibody structure prediction from deep learning on massive set of natural antibodies}, volume={14}, ISSN={2041-1723}, url={http://dx.doi.org/10.1038/s41467-023-38063-x}, DOI={10.1038/s41467-023-38063-x}, number={1}, journal={Nature Communications}, publisher={Springer Science and Business Media LLC}, author={Ruffolo, Jeffrey A. and Chu, Lee-Shin and Mahajan, Sai Pooja and Gray, Jeffrey J.}, year={2023}, month=apr }",
+      "relevance_tags": [
+        "antibody_structure_prediction",
+        "sequence_modeling",
+        "related_work"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Directly relevant structure-prediction work for antibody loop modeling.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s42003-023-04927-7",
+      "title": "ImmuneBuilder: Deep-Learning models for predicting the structures of immune proteins",
+      "authors": [
+        "Brennan Abanades",
+        "Wing Ki Wong",
+        "Fergus Boyles",
+        "Guy Georges",
+        "Alexander Bujotzek",
+        "Charlotte M. Deane"
+      ],
+      "year": 2023,
+      "venue": "Communications Biology",
+      "doi": "10.1038/s42003-023-04927-7",
+      "arxiv_id": null,
+      "landing_page": "https://www.nature.com/articles/s42003-023-04927-7",
+      "source_urls": [
+        "https://doi.org/10.1038/s42003-023-04927-7"
+      ],
+      "bibtex": "@article{Abanades_2023, title={ImmuneBuilder: Deep-Learning models for predicting the structures of immune proteins}, volume={6}, ISSN={2399-3642}, url={http://dx.doi.org/10.1038/s42003-023-04927-7}, DOI={10.1038/s42003-023-04927-7}, number={1}, journal={Communications Biology}, publisher={Springer Science and Business Media LLC}, author={Abanades, Brennan and Wong, Wing Ki and Boyles, Fergus and Georges, Guy and Bujotzek, Alexander and Deane, Charlotte M.}, year={2023}, month=may }",
+      "relevance_tags": [
+        "antibody_structure_prediction",
+        "immune_protein_structure",
+        "related_work"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Immune structure prediction context for the CDR backbone generation problem.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2306.01005",
+      "title": "AbODE: Ab Initio Antibody Design using Conjoined ODEs",
+      "authors": [
+        "Yogesh Kumar Verma",
+        "Markus Heinonen",
+        "Vikas Garg"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2306.01005",
+      "arxiv_id": "2306.01005",
+      "landing_page": "https://arxiv.org/abs/2306.01005",
+      "source_urls": [
+        "https://arxiv.org/abs/2306.01005",
+        "https://doi.org/10.48550/arxiv.2306.01005"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2306.01005, doi = {10.48550/ARXIV.2306.01005}, url = {https://arxiv.org/abs/2306.01005}, author = {Verma, Yogesh and Heinonen, Markus and Garg, Vikas}, keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Biomolecules (q-bio.BM), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Biological sciences, FOS: Biological sciences}, title = {AbODE: Ab Initio Antibody Design using Conjoined ODEs}, publisher = {arXiv}, year = {2023}, copyright = {Creative Commons Attribution 4.0 International} }",
+      "relevance_tags": [
+        "antibody_design",
+        "sequence_structure_codesign",
+        "related_work"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Recent generative antibody co-design work closely aligned with the task objective.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2410.15040",
+      "title": "Retrieval Augmented Diffusion Model for Structure-informed Antibody Design and Optimization",
+      "authors": [
+        "Zichen Wang",
+        "Yaokun Ji",
+        "Jianing Tian",
+        "Shuangjia Zheng"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2410.15040",
+      "arxiv_id": "2410.15040",
+      "landing_page": "https://arxiv.org/abs/2410.15040",
+      "source_urls": [
+        "https://arxiv.org/abs/2410.15040",
+        "https://doi.org/10.48550/arxiv.2410.15040"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2410.15040, doi = {10.48550/ARXIV.2410.15040}, url = {https://arxiv.org/abs/2410.15040}, author = {Wang, Zichen and Ji, Yaokun and Tian, Jianing and Zheng, Shuangjia}, keywords = {Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Retrieval Augmented Diffusion Model for Structure-informed Antibody Design and Optimization}, publisher = {arXiv}, year = {2024}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "antibody_design",
+        "diffusion",
+        "optimization",
+        "related_work"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Retrieval-augmented diffusion work for structure-informed antibody design and optimization.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1093/nar/gkab1050",
+      "title": "SAbDab in the age of biotherapeutics: updates including SAbDab-nano, the nanobody structure tracker",
+      "authors": [
+        "Constantin Schneider",
+        "Matthew I. J. Raybould",
+        "Charlotte M. Deane"
+      ],
+      "year": 2021,
+      "venue": "Nucleic Acids Research",
+      "doi": "10.1093/nar/gkab1050",
+      "arxiv_id": null,
+      "landing_page": "https://academic.oup.com/nar/article/50/D1/D1368/6431822",
+      "source_urls": [
+        "https://doi.org/10.1093/nar/gkab1050"
+      ],
+      "bibtex": "@article{Schneider_2021, title={SAbDab in the age of biotherapeutics: updates including SAbDab-nano, the nanobody structure tracker}, volume={50}, ISSN={1362-4962}, url={http://dx.doi.org/10.1093/nar/gkab1050}, DOI={10.1093/nar/gkab1050}, number={D1}, journal={Nucleic Acids Research}, publisher={Oxford University Press (OUP)}, author={Schneider, Constantin and Raybould, Matthew I J and Deane, Charlotte M}, year={2021}, month=nov, pages={D1368–D1372} }",
+      "relevance_tags": [
+        "dataset",
+        "antibody_structure",
+        "related_work"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Key structural antibody database underlying antibody design and evaluation workflows.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

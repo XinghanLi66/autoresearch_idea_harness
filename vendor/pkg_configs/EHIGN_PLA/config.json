@@ -1,0 +1,14 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "pip install scikit-learn pandas scipy tqdm"
+  ],
+  "data_bind": "{data_root}/EHIGN_PLA:/data",
+  "env": {
+    "PYTHONPATH": "/workspace/EHIGN_PLA:${PYTHONPATH}",
+    "DATA_DIR": "/data"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "workdir": "/workspace"
+}

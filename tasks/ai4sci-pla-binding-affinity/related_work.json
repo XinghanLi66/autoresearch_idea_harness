@@ -1,0 +1,545 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4sci-pla-binding-affinity",
+  "task_folder": "tasks/ai4sci-pla-binding-affinity",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "protein-ligand binding affinity prediction from 3D structures",
+    "research_question": "Design a GNN architecture that effectively models protein-ligand interactions to predict binding affinity (-logKd/Ki) from 3D structural data.",
+    "local_sources": {
+      "config_path": "tasks/ai4sci-pla-binding-affinity/config.json",
+      "task_description_path": "tasks/ai4sci-pla-binding-affinity/task_description.md"
+    },
+    "notes": [
+      "rigorous_codebase=true",
+      "Baselines and tests are mapped to the PDBbind/CASF literature and related 3D affinity-prediction papers."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 4,
+    "baseline_links_found": 4,
+    "test_entries": 3,
+    "test_links_found": 6
+  },
+  "tests": [
+    {
+      "label": "PDBbind2013",
+      "cmd": "scripts/test2013.sh",
+      "package": "EHIGN_PLA",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1093/bioinformatics/btu626",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.1021/ci500080q",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1021/ci500081m",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Uses the PDBbind 2013 release and the CASF-2013 benchmark papers."
+    },
+    {
+      "label": "PDBbind2016",
+      "cmd": "scripts/test2016.sh",
+      "package": "EHIGN_PLA",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1093/bioinformatics/btu626",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.1021/acs.jcim.8b00545",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "The 2016 core set aligns with the CASF-2016 update and the PDBbind database family."
+    },
+    {
+      "label": "PDBbind2019",
+      "cmd": "scripts/test2019.sh",
+      "package": "EHIGN_PLA",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1093/bioinformatics/btu626",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Temporal holdout derived from the PDBbind release stream; no single canonical benchmark paper was found in the search results."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ehign",
+      "implementation": "edits/ehign.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/tpami.2024.3400515",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Explainable heterogeneous interaction GNN used as the task's primary baseline."
+    },
+    {
+      "name": "gign",
+      "implementation": "edits/gign.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1021/acs.jpclett.2c03906",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Geometric interaction GNN baseline for 3D protein-ligand affinity prediction."
+    },
+    {
+      "name": "schnet",
+      "implementation": "edits/schnet.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1063/1.5019779",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "General atomistic continuous-filter convolution baseline adapted to the PLA graph setting."
+    },
+    {
+      "name": "egnn",
+      "implementation": "edits/egnn.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2102.09844",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "E(n)-equivariant message-passing baseline for geometry-aware prediction."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1109/tpami.2024.3400515",
+      "title": "Interaction-Based Inductive Bias in Graph Neural Networks: Enhancing Protein-Ligand Binding Affinity Predictions From 3D Structures",
+      "authors": [
+        "Ziduo Yang",
+        "Weihe Zhong",
+        "Qiujie Lv",
+        "Tiejun Dong",
+        "Guanxing Chen",
+        "Calvin Yu-Chian Chen"
+      ],
+      "year": 2024,
+      "venue": "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+      "doi": "10.1109/tpami.2024.3400515",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4396877733",
+      "landing_page": "https://doi.org/10.1109/tpami.2024.3400515",
+      "source_urls": [
+        "https://openalex.org/W4396877733",
+        "https://doi.org/10.1109/tpami.2024.3400515"
+      ],
+      "bibtex": "@article{Yang_2024, title={Interaction-Based Inductive Bias in Graph Neural Networks: Enhancing Protein-Ligand Binding Affinity Predictions From 3D Structures}, volume={46}, ISSN={1939-3539}, url={http://dx.doi.org/10.1109/tpami.2024.3400515}, DOI={10.1109/tpami.2024.3400515}, number={12}, journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Yang, Ziduo and Zhong, Weihe and Lv, Qiujie and Dong, Tiejun and Chen, Guanxing and Chen, Calvin Yu-Chian}, year={2024}, month=dec, pages={8191–8208} }",
+      "relevance_tags": [
+        "baseline",
+        "protein_ligand_binding_affinity",
+        "heterogeneous_gnn"
+      ],
+      "baseline_links": [
+        "ehign"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the EHIGN baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/acs.jpclett.2c03906",
+      "title": "Geometric Interaction Graph Neural Network for Predicting Protein-Ligand Binding Affinities from 3D Structures (GIGN)",
+      "authors": [
+        "Ziduo Yang",
+        "Weihe Zhong",
+        "Qiujie Lv",
+        "Tiejun Dong",
+        "Calvin Yu-Chian Chen"
+      ],
+      "year": 2023,
+      "venue": "The Journal of Physical Chemistry Letters",
+      "doi": "10.1021/acs.jpclett.2c03906",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4321004126",
+      "landing_page": "https://doi.org/10.1021/acs.jpclett.2c03906",
+      "source_urls": [
+        "https://openalex.org/W4321004126",
+        "https://doi.org/10.1021/acs.jpclett.2c03906"
+      ],
+      "bibtex": "@article{Yang_2023, title={Geometric Interaction Graph Neural Network for Predicting Protein-Ligand Binding Affinities from 3D Structures (GIGN)}, volume={14}, ISSN={1948-7185}, url={http://dx.doi.org/10.1021/acs.jpclett.2c03906}, DOI={10.1021/acs.jpclett.2c03906}, number={8}, journal={The Journal of Physical Chemistry Letters}, publisher={American Chemical Society (ACS)}, author={Yang, Ziduo and Zhong, Weihe and Lv, Qiujie and Dong, Tiejun and Yu-Chian Chen, Calvin}, year={2023}, month=feb, pages={2020–2033} }",
+      "relevance_tags": [
+        "baseline",
+        "protein_ligand_binding_affinity",
+        "geometric_gnn"
+      ],
+      "baseline_links": [
+        "gign"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the GIGN baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1063/1.5019779",
+      "title": "SchNet - A deep learning architecture for molecules and materials",
+      "authors": [
+        "Kristof T. Schütt",
+        "Huziel E. Sauceda",
+        "Pieter-Jan Kindermans",
+        "Alexandre Tkatchenko",
+        "K.-R. Müller"
+      ],
+      "year": 2018,
+      "venue": "The Journal of Chemical Physics",
+      "doi": "10.1063/1.5019779",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2778051509",
+      "landing_page": "https://doi.org/10.1063/1.5019779",
+      "source_urls": [
+        "https://openalex.org/W2778051509",
+        "https://doi.org/10.1063/1.5019779"
+      ],
+      "bibtex": "@article{Sch_tt_2018, title={SchNet – A deep learning architecture for molecules and materials}, volume={148}, ISSN={1089-7690}, url={http://dx.doi.org/10.1063/1.5019779}, DOI={10.1063/1.5019779}, number={24}, journal={The Journal of Chemical Physics}, publisher={AIP Publishing}, author={Schütt, K. T. and Sauceda, H. E. and Kindermans, P.-J. and Tkatchenko, A. and Müller, K.-R.}, year={2018}, month=mar }",
+      "relevance_tags": [
+        "baseline",
+        "continuous_filter_convolution",
+        "molecular_graphs"
+      ],
+      "baseline_links": [
+        "schnet"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the SchNet baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "arxiv:2102.09844",
+      "title": "E(n) Equivariant Graph Neural Networks",
+      "authors": [
+        "Victor Garcia Satorras",
+        "Emiel Hoogeboom",
+        "Max Welling"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2102.09844",
+      "arxiv_id": "2102.09844",
+      "openalex_id": "https://openalex.org/W3131204112",
+      "landing_page": "https://arxiv.org/abs/2102.09844",
+      "source_urls": [
+        "https://openalex.org/W3131204112",
+        "https://arxiv.org/abs/2102.09844"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2102.09844,\n  doi = {10.48550/ARXIV.2102.09844},\n  url = {https://arxiv.org/abs/2102.09844},\n  author = {Satorras, Victor Garcia and Hoogeboom, Emiel and Welling, Max},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {E(n) Equivariant Graph Neural Networks},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "equivariant_gnn",
+        "molecular_properties"
+      ],
+      "baseline_links": [
+        "egnn"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the EGNN baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/acscentsci.8b00507",
+      "title": "PotentialNet for Molecular Property Prediction",
+      "authors": [
+        "Evan N. Feinberg",
+        "Debnil Sur",
+        "Zhenqin Wu",
+        "Brooke E. Husic",
+        "Huanghao Mai",
+        "Yang Li",
+        "Saisai Sun",
+        "Jianyi Yang",
+        "Bharath Ramsundar",
+        "Vijay S. Pande"
+      ],
+      "year": 2018,
+      "venue": "ACS Central Science",
+      "doi": "10.1021/acscentsci.8b00507",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2895884529",
+      "landing_page": "https://doi.org/10.1021/acscentsci.8b00507",
+      "source_urls": [
+        "https://openalex.org/W2895884529",
+        "https://doi.org/10.1021/acscentsci.8b00507"
+      ],
+      "bibtex": "@article{Feinberg_2018, title={PotentialNet for Molecular Property Prediction}, volume={4}, ISSN={2374-7951}, url={http://dx.doi.org/10.1021/acscentsci.8b00507}, DOI={10.1021/acscentsci.8b00507}, number={11}, journal={ACS Central Science}, publisher={American Chemical Society (ACS)}, author={Feinberg, Evan N. and Sur, Debnil and Wu, Zhenqin and Husic, Brooke E. and Mai, Huanghao and Li, Yang and Sun, Saisai and Yang, Jianyi and Ramsundar, Bharath and Pande, Vijay S.}, year={2018}, month=nov, pages={1520–1530} }",
+      "relevance_tags": [
+        "related_work",
+        "graph_convolution",
+        "protein_ligand_binding_affinity"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational graph-convolution work for molecular property prediction and protein-ligand affinity.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1186/s13321-021-00536-w",
+      "title": "Learning protein-ligand binding affinity with atomic environment vectors",
+      "authors": [
+        "Rocco Meli",
+        "Andrew Anighoro",
+        "Mike J. Bodkin",
+        "Garrett M. Morris",
+        "Philip C. Biggin"
+      ],
+      "year": 2021,
+      "venue": "Journal of Cheminformatics",
+      "doi": "10.1186/s13321-021-00536-w",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3194618792",
+      "landing_page": "https://jcheminf.biomedcentral.com/articles/10.1186/s13321-021-00536-w",
+      "source_urls": [
+        "https://openalex.org/W3194618792",
+        "https://jcheminf.biomedcentral.com/articles/10.1186/s13321-021-00536-w"
+      ],
+      "bibtex": "@article{Meli_2021, title={Learning protein-ligand binding affinity with atomic environment vectors}, volume={13}, ISSN={1758-2946}, url={http://dx.doi.org/10.1186/s13321-021-00536-w}, DOI={10.1186/s13321-021-00536-w}, number={1}, journal={Journal of Cheminformatics}, publisher={Springer Science and Business Media LLC}, author={Meli, Rocco and Anighoro, Andrew and Bodkin, Mike J. and Morris, Garrett M. and Biggin, Philip C.}, year={2021}, month=aug }",
+      "relevance_tags": [
+        "related_work",
+        "binding_affinity",
+        "atomic_environment_vectors"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Affinity scorer based on atomic environment vectors and a neural network potential style representation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/acs.jcim.0c00026",
+      "title": "Binding Affinity Prediction by Pairwise Function Based on Neural Network",
+      "authors": [
+        "Fangqiang Zhu",
+        "Xiaohua Zhang",
+        "Jonathan Allen",
+        "Derek Jones",
+        "Felice C. Lightstone"
+      ],
+      "year": 2020,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/acs.jcim.0c00026",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3020511336",
+      "landing_page": "https://doi.org/10.1021/acs.jcim.0c00026",
+      "source_urls": [
+        "https://openalex.org/W3020511336",
+        "https://doi.org/10.1021/acs.jcim.0c00026"
+      ],
+      "bibtex": "@article{Zhu_2020, title={Binding Affinity Prediction by Pairwise Function Based on Neural Network}, volume={60}, ISSN={1549-960X}, url={http://dx.doi.org/10.1021/acs.jcim.0c00026}, DOI={10.1021/acs.jcim.0c00026}, number={6}, journal={Journal of Chemical Information and Modeling}, publisher={American Chemical Society (ACS)}, author={Zhu, Fangqiang and Zhang, Xiaohua and Allen, Jonathan and Jones, Derek and Lightstone, Felice C.}, year={2020}, month=apr, pages={2766–2772} }",
+      "relevance_tags": [
+        "related_work",
+        "pairwise_decomposition",
+        "protein_ligand_binding_affinity"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Pairwise neural scoring formulation closely aligned with the additive interaction bias used by this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1093/bioinformatics/btu626",
+      "title": "PDB-wide collection of binding data: current status of the PDBbind database",
+      "authors": [
+        "Zhihai Liu",
+        "Yan Li",
+        "Li Han",
+        "Jie Li",
+        "Jie Liu",
+        "Zhixiong Zhao",
+        "Wei Nie",
+        "Yuchen Liu",
+        "Renxiao Wang"
+      ],
+      "year": 2014,
+      "venue": "Bioinformatics",
+      "doi": "10.1093/bioinformatics/btu626",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2114162221",
+      "landing_page": "https://doi.org/10.1093/bioinformatics/btu626",
+      "source_urls": [
+        "https://openalex.org/W2114162221",
+        "https://doi.org/10.1093/bioinformatics/btu626"
+      ],
+      "bibtex": "@article{Liu_2014, title={PDB-wide collection of binding data: current status of the PDBbind database}, volume={31}, ISSN={1367-4803}, url={http://dx.doi.org/10.1093/bioinformatics/btu626}, DOI={10.1093/bioinformatics/btu626}, number={3}, journal={Bioinformatics}, publisher={Oxford University Press (OUP)}, author={Liu, Zhihai and Li, Yan and Han, Li and Li, Jie and Liu, Jie and Zhao, Zhixiong and Nie, Wei and Liu, Yuchen and Wang, Renxiao}, year={2014}, month=oct, pages={405–412} }",
+      "relevance_tags": [
+        "dataset",
+        "pdbbind",
+        "binding_affinity"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "PDBbind2013",
+        "PDBbind2016",
+        "PDBbind2019"
+      ],
+      "relevance": "Core dataset reference for the PDBbind-derived evaluation splits used by the task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/ci500080q",
+      "title": "Comparative Assessment of Scoring Functions on an Updated Benchmark: 1. Compilation of the Test Set",
+      "authors": [
+        "Yan Li",
+        "Zhihai Liu",
+        "Jie Li",
+        "Li Han",
+        "Jie Liu",
+        "Zhixiong Zhao",
+        "Renxiao Wang"
+      ],
+      "year": 2014,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/ci500080q",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W1969017960",
+      "landing_page": "https://doi.org/10.1021/ci500080q",
+      "source_urls": [
+        "https://openalex.org/W1969017960",
+        "https://doi.org/10.1021/ci500080q"
+      ],
+      "bibtex": "@article{Li_2014, title={Comparative Assessment of Scoring Functions on an Updated Benchmark: 1. Compilation of the Test Set}, volume={54}, ISSN={1549-960X}, url={http://dx.doi.org/10.1021/ci500080q}, DOI={10.1021/ci500080q}, number={6}, journal={Journal of Chemical Information and Modeling}, publisher={American Chemical Society (ACS)}, author={Li, Yan and Liu, Zhihai and Li, Jie and Han, Li and Liu, Jie and Zhao, Zhixiong and Wang, Renxiao}, year={2014}, month=jun, pages={1700–1716} }",
+      "relevance_tags": [
+        "benchmark",
+        "casf",
+        "scoring_function"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "PDBbind2013"
+      ],
+      "relevance": "CASF-2013 test-set construction paper for the 2013 core benchmark.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/ci500081m",
+      "title": "Comparative Assessment of Scoring Functions on an Updated Benchmark: 2. Evaluation Methods and General Results",
+      "authors": [
+        "Yan Li",
+        "Li Han",
+        "Zhihai Liu",
+        "Renxiao Wang"
+      ],
+      "year": 2014,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/ci500081m",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2013085020",
+      "landing_page": "https://doi.org/10.1021/ci500081m",
+      "source_urls": [
+        "https://openalex.org/W2013085020",
+        "https://doi.org/10.1021/ci500081m"
+      ],
+      "bibtex": "@article{Li_2014, title={Comparative Assessment of Scoring Functions on an Updated Benchmark: 2. Evaluation Methods and General Results}, volume={54}, ISSN={1549-960X}, url={http://dx.doi.org/10.1021/ci500081m}, DOI={10.1021/ci500081m}, number={6}, journal={Journal of Chemical Information and Modeling}, publisher={American Chemical Society (ACS)}, author={Li, Yan and Han, Li and Liu, Zhihai and Wang, Renxiao}, year={2014}, month=jun, pages={1717–1736} }",
+      "relevance_tags": [
+        "benchmark",
+        "casf",
+        "scoring_function"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "PDBbind2013"
+      ],
+      "relevance": "CASF-2013 evaluation paper for the 2013 core benchmark.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/acs.jcim.8b00545",
+      "title": "Comparative Assessment of Scoring Functions: The CASF-2016 Update",
+      "authors": [
+        "Minyi Su",
+        "Qifan Yang",
+        "Yu Du",
+        "Guoqin Feng",
+        "Zhihai Liu",
+        "Yan Li",
+        "Renxiao Wang"
+      ],
+      "year": 2018,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/acs.jcim.8b00545",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1021/acs.jcim.8b00545",
+      "source_urls": [
+        "https://doi.org/10.1021/acs.jcim.8b00545"
+      ],
+      "bibtex": "@article{Su_2018, title={Comparative Assessment of Scoring Functions: The CASF-2016 Update}, volume={59}, ISSN={1549-960X}, url={http://dx.doi.org/10.1021/acs.jcim.8b00545}, DOI={10.1021/acs.jcim.8b00545}, number={2}, journal={Journal of Chemical Information and Modeling}, publisher={American Chemical Society (ACS)}, author={Su, Minyi and Yang, Qifan and Du, Yu and Feng, Guoqin and Liu, Zhihai and Li, Yan and Wang, Renxiao}, year={2018}, month=nov, pages={895–913} }",
+      "relevance_tags": [
+        "benchmark",
+        "casf",
+        "scoring_function"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "PDBbind2016"
+      ],
+      "relevance": "Direct benchmark paper for the 2016 core-set evaluation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1039/d1sc06946b",
+      "title": "PIGNet: a physics-informed deep learning model toward generalized drug-target interaction predictions",
+      "authors": [
+        "Seokhyun Moon",
+        "Wonho Zhung",
+        "Soojung Yang",
+        "Jaechang Lim",
+        "Woo Youn Kim"
+      ],
+      "year": 2022,
+      "venue": "Chemical Science",
+      "doi": "10.1039/d1sc06946b",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3080588469",
+      "landing_page": "https://doi.org/10.1039/d1sc06946b",
+      "source_urls": [
+        "https://openalex.org/W3080588469",
+        "https://doi.org/10.1039/d1sc06946b"
+      ],
+      "bibtex": "@article{Moon_2022, title={PIGNet: a physics-informed deep learning model toward generalized drug–target interaction predictions}, volume={13}, ISSN={2041-6539}, url={http://dx.doi.org/10.1039/d1sc06946b}, DOI={10.1039/d1sc06946b}, number={13}, journal={Chemical Science}, publisher={Royal Society of Chemistry (RSC)}, author={Moon, Seokhyun and Zhung, Wonho and Yang, Soojung and Lim, Jaechang and Kim, Woo Youn}, year={2022}, pages={3661–3673} }",
+      "relevance_tags": [
+        "related_work",
+        "physics_informed",
+        "drug_target_interaction"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Physics-informed 3D drug-target interaction model closely related to additive affinity prediction.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

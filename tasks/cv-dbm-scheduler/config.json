@@ -1,0 +1,58 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/run_e2h.sh",
+      "label": "edges2handbags",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "package": "dbim-codebase"
+    },
+    {
+      "cmd": "scripts/run_Imagenet.sh",
+      "label": "Imagenet",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "package": "dbim-codebase",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "karras": {
+      "edit_ops": "edits/karras.py"
+    },
+    "uniform": {
+      "edit_ops": "edits/uniform.py"
+    },
+    "cosine": {
+      "edit_ops": "edits/cosine.py"
+    },
+    "loglinear": {
+      "edit_ops": "edits/loglinear.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "dbim-codebase/ddbm/karras_diffusion.py",
+      "_comment": "Only show the editable template (get_sigmas_uniform scheduler, the function actually consumed by the dbim sampler). Line span is 310-320 AFTER vendor pre_edit OP 6d inserts +9 lines of NFE-budget instrumentation above; pristine numbering was 301-311. All sibling schedulers and sampler implementations in this file are hidden \u2014 agent learns allowed APIs only from the baseline variants (karras/uniform/cosine/loglinear).",
+      "read": [
+        {
+          "start": 310,
+          "end": 320
+        }
+      ],
+      "edit": [
+        {
+          "start": 310,
+          "end": 320
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

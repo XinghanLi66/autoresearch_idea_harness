@@ -1,0 +1,7 @@
+timestamp,model,is_final,seed,fid_train_medium,best_fid_train_medium,fid_train_small,best_fid_train_small,fid_train_large,best_fid_train_large,elapsed_train_small,elapsed_train_large,fid_train_small_std,best_fid_train_small_std,elapsed_train_small_std
+2026-04-01T12:30:14.035440+00:00,baseline:lsd,false,42,8.73,8.73,,,,,,,,
+2026-04-01T21:04:23.720449+00:00,baseline:psd_uniform,false,42,11.28,11.28,,,,,,,,
+2026-04-02T13:30:25.290301+00:00,baseline:psd_midpoint,false,42,11.59,11.59,,,,,,,,
+2026-04-03T10:20:45.967860+00:00,baseline:psd_midpoint,true,42,,,10.79,10.79,,,12976.2,,,
+2026-04-03T13:08:51.084912+00:00,baseline:lsd,true,42,,,10.35,10.35,,,6282.4,,,
+2026-04-03T14:42:15.253265+00:00,baseline:psd_uniform,true,42,,,14.99,14.99,,,5604.0,,,

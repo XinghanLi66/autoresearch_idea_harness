@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "task_name": "meta-rl-algorithm",
+  "task_folder": "tasks/meta-rl-algorithm",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/meta-rl-algorithm/config.json",
+      "task_description_path": "tasks/meta-rl-algorithm/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 3,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "cheetah-vel",
+      "cmd": "scripts/cheetah_vel.sh",
+      "package": "oyster",
+      "group": 1,
+      "compute": 0.33,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "sparse-point-robot",
+      "cmd": "scripts/sparse_point_robot.sh",
+      "package": "oyster",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:59:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "point-robot",
+      "cmd": "scripts/point_robot.sh",
+      "package": "oyster",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "pearl",
+      "implementation": "edits/pearl.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1903.08254",
+          "url": "https://arxiv.org/abs/1903.08254",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical PEARL baseline."
+    },
+    {
+      "name": "focal",
+      "implementation": "edits/focal.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2010.01112",
+          "url": "https://arxiv.org/abs/2010.01112",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical FOCAL baseline."
+    },
+    {
+      "name": "varibad",
+      "implementation": "edits/varibad.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1910.08348",
+          "url": "https://arxiv.org/abs/1910.08348",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical VariBAD baseline."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "arxiv:1903.08254",
+      "id": "arxiv:1903.08254",
+      "title": "Efficient Off-Policy Meta-Reinforcement Learning via Probabilistic Context Variables",
+      "authors": ["Kate Rakelly", "Aurick Zhou", "Chelsea Finn", "Sergey Levine", "Deirdre Quillen"],
+      "year": 2019,
+      "venue": "ICML",
+      "doi": null,
+      "arxiv_id": "1903.08254",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1903.08254",
+      "url": "https://arxiv.org/abs/1903.08254",
+      "source_urls": ["https://arxiv.org/abs/1903.08254"],
+      "bibtex": "@inproceedings{rakelly2019efficient, title={Efficient Off-Policy Meta-Reinforcement Learning via Probabilistic Context Variables}, author={Rakelly, Kate and Zhou, Aurick and Finn, Chelsea and Levine, Sergey and Quillen, Deirdre}, booktitle={International Conference on Machine Learning}, year={2019}}",
+      "relevance_tags": ["baseline", "meta_rl"],
+      "baseline_links": ["pearl"],
+      "test_links": [],
+      "relevance": "Defines the PEARL baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:2010.01112",
+      "id": "arxiv:2010.01112",
+      "title": "FOCAL: Efficient Fully-Offline Meta-RL via Distance Metric Learning and Behavior Regularization",
+      "authors": ["Li et al."],
+      "year": 2021,
+      "venue": "ICLR",
+      "doi": null,
+      "arxiv_id": "2010.01112",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2010.01112",
+      "url": "https://arxiv.org/abs/2010.01112",
+      "source_urls": ["https://arxiv.org/abs/2010.01112"],
+      "bibtex": "@inproceedings{li2021focal, title={FOCAL: Efficient Fully-Offline Meta-RL via Distance Metric Learning and Behavior Regularization}, author={Li et al.}, booktitle={International Conference on Learning Representations}, year={2021}}",
+      "relevance_tags": ["baseline", "meta_rl"],
+      "baseline_links": ["focal"],
+      "test_links": [],
+      "relevance": "Defines the FOCAL baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:1910.08348",
+      "id": "arxiv:1910.08348",
+      "title": "VariBAD: A Very Good Method for Bayes-Adaptive Deep RL via Meta-Learning",
+      "authors": ["Luisa M. Zintgraf", "Kyriacos Shiarlis", "Vitaly Kurin", "Katja Hofmann", "Shimon Whiteson"],
+      "year": 2020,
+      "venue": "ICLR",
+      "doi": null,
+      "arxiv_id": "1910.08348",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1910.08348",
+      "url": "https://arxiv.org/abs/1910.08348",
+      "source_urls": ["https://arxiv.org/abs/1910.08348"],
+      "bibtex": "@inproceedings{zintgraf2020varibad, title={VariBAD: A Very Good Method for Bayes-Adaptive Deep RL via Meta-Learning}, author={Zintgraf, Luisa M. and Shiarlis, Kyriacos and Kurin, Vitaly and Hofmann, Katja and Whiteson, Shimon}, booktitle={International Conference on Learning Representations}, year={2020}}",
+      "relevance_tags": ["baseline", "meta_rl"],
+      "baseline_links": ["varibad"],
+      "test_links": [],
+      "relevance": "Defines the VariBAD baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    }
+  ]
+}

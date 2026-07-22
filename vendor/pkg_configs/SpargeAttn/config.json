@@ -1,0 +1,31 @@
+{
+  "base_image": "pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel",
+  "install_cmds": [
+    "apt-get update && apt-get install -y git ninja-build wget && rm -rf /var/lib/apt/lists/*",
+    "pip install --no-cache-dir einops triton packaging",
+    "pip install --no-cache-dir sageattention",
+    "cd /workspace/SpargeAttn && TORCH_CUDA_ARCH_LIST='8.0;9.0' python setup.py install",
+    "pip install --no-cache-dir 'diffusers[torch]>=0.33.0' 'transformers>=4.44.0' accelerate sentencepiece protobuf ftfy",
+    "pip install --no-cache-dir opencv-python-headless imageio imageio-ffmpeg lpips easydict"
+  ],
+  "data_deps": [
+    {
+      "name": "sparse-attn-models",
+      "description": "Diffusion models (CogVideoX-2b, PixArt-XL-2-1024-MS, Wan2.1-T2V-1.3B) + AlexNet for LPIPS (~18GB)",
+      "host_path": "{data_root}/SpargeAttn/models",
+      "container_path": "/workspace/models",
+      "prepare": "vendor/data_scripts/SpargeAttn/prepare_models.py"
+    }
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace:${PYTHONPATH}",
+    "HF_HOME": "/workspace/models/hf_cache",
+    "TORCH_HOME": "/workspace/models/torch_cache",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_HUB_OFFLINE": "1"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

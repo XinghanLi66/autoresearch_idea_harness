@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "task_name": "meta-inner-loop-optimizer",
+  "task_folder": "tasks/meta-inner-loop-optimizer",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/meta-inner-loop-optimizer/config.json",
+      "task_description_path": "tasks/meta-inner-loop-optimizer/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 4,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "mini_imagenet_1shot",
+      "cmd": "scripts/mini_imagenet_1shot.sh",
+      "package": "learn2learn",
+      "group": 1,
+      "compute": 0.5,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mini_imagenet_5shot",
+      "cmd": "scripts/mini_imagenet_5shot.sh",
+      "package": "learn2learn",
+      "group": 1,
+      "compute": 0.5,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "cifar_fs_5shot",
+      "cmd": "scripts/cifar_fs_5shot.sh",
+      "package": "learn2learn",
+      "group": 1,
+      "compute": 0.5,
+      "time": "4:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "maml",
+      "implementation": "edits/maml.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1703.03400",
+          "url": "https://arxiv.org/abs/1703.03400",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical MAML baseline."
+    },
+    {
+      "name": "meta_sgd",
+      "implementation": "edits/meta_sgd.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1707.09835",
+          "url": "https://arxiv.org/abs/1707.09835",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical Meta-SGD baseline."
+    },
+    {
+      "name": "anil",
+      "implementation": "edits/anil.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1909.09157",
+          "url": "https://arxiv.org/abs/1909.09157",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "Canonical ANIL baseline from the Raghu et al. feature-reuse analysis."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "arxiv:1703.03400",
+      "id": "arxiv:1703.03400",
+      "title": "Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks",
+      "authors": ["Chelsea Finn", "Pieter Abbeel", "Sergey Levine"],
+      "year": 2017,
+      "venue": "ICML",
+      "doi": null,
+      "arxiv_id": "1703.03400",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1703.03400",
+      "url": "https://arxiv.org/abs/1703.03400",
+      "source_urls": ["https://arxiv.org/abs/1703.03400"],
+      "bibtex": "@inproceedings{finn2017modelagnostic, title={Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks}, author={Finn, Chelsea and Abbeel, Pieter and Levine, Sergey}, booktitle={International Conference on Machine Learning}, year={2017}}",
+      "relevance_tags": ["baseline", "meta_learning", "inner_loop_optimizer"],
+      "baseline_links": ["maml"],
+      "test_links": [],
+      "relevance": "Defines the MAML baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:1707.09835",
+      "id": "arxiv:1707.09835",
+      "title": "Meta-SGD: Learning to Learn Quickly for Few-Shot Learning",
+      "authors": ["Zhenguo Li", "Fengwei Zhou", "Fei Chen", "Hang Li"],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": null,
+      "arxiv_id": "1707.09835",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1707.09835",
+      "url": "https://arxiv.org/abs/1707.09835",
+      "source_urls": ["https://arxiv.org/abs/1707.09835"],
+      "bibtex": "@article{li2017metasgd, title={Meta-SGD: Learning to Learn Quickly for Few-Shot Learning}, author={Li, Zhenguo and Zhou, Fengwei and Chen, Fei and Li, Hang}, journal={arXiv preprint arXiv:1707.09835}, year={2017}}",
+      "relevance_tags": ["baseline", "meta_learning", "inner_loop_optimizer"],
+      "baseline_links": ["meta_sgd"],
+      "test_links": [],
+      "relevance": "Defines the Meta-SGD baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "arxiv:1909.09157",
+      "id": "arxiv:1909.09157",
+      "title": "Rapid Learning or Feature Reuse? Towards Understanding the Effectiveness of MAML",
+      "authors": ["Aniruddh Raghu", "Maithra Raghu", "Samy Bengio", "Oriol Vinyals"],
+      "year": 2020,
+      "venue": "ICLR",
+      "doi": null,
+      "arxiv_id": "1909.09157",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1909.09157",
+      "url": "https://arxiv.org/abs/1909.09157",
+      "source_urls": ["https://arxiv.org/abs/1909.09157"],
+      "bibtex": "@inproceedings{raghu2020rapid, title={Rapid Learning or Feature Reuse? Towards Understanding the Effectiveness of MAML}, author={Raghu, Aniruddh and Raghu, Maithra and Bengio, Samy and Vinyals, Oriol}, booktitle={International Conference on Learning Representations}, year={2020}}",
+      "relevance_tags": ["baseline", "meta_learning", "inner_loop_optimizer"],
+      "baseline_links": ["anil"],
+      "test_links": [],
+      "relevance": "Defines ANIL and the feature-reuse comparison baseline used in this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    },
+    {
+      "paper_id": "github:learnables/learn2learn",
+      "id": "github:learnables/learn2learn",
+      "title": "learn2learn: A Library for Meta-Learning Research",
+      "authors": ["learn2learn contributors"],
+      "year": 2020,
+      "venue": "GitHub",
+      "doi": null,
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://github.com/learnables/learn2learn",
+      "url": "https://github.com/learnables/learn2learn",
+      "source_urls": ["https://github.com/learnables/learn2learn"],
+      "bibtex": "@misc{learn2learn2020, title={learn2learn: A Library for Meta-Learning Research}, author={learn2learn contributors}, year={2020}, howpublished={GitHub repository}}",
+      "relevance_tags": ["reference_implementation", "meta_learning"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Reference library supplying the MAML/Meta-SGD/GBML context used by this task.",
+      "notes": "Additional implementation reference supplied by the meta-task audit orchestrator.",
+      "verified_by": "user_provided_orchestrator_citation"
+    }
+  ]
+}

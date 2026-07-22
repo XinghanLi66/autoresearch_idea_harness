@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "task_name": "security-adversarial-attack-white-box-linf",
+  "task_folder": "tasks/security-adversarial-attack-white-box-linf",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/security-adversarial-attack-white-box-linf/config.json",
+      "task_description_path": "tasks/security-adversarial-attack-white-box-linf/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 5,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "ResNet20-C10",
+      "cmd": "scripts/eval_resnet20_cifar10.sh",
+      "package": "torchattacks",
+      "group": 1,
+      "compute": 0.5,
+      "time": "0:20:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "VGG11BN-C10",
+      "cmd": "scripts/eval_vgg11bn_cifar10.sh",
+      "package": "torchattacks",
+      "group": 1,
+      "compute": 0.5,
+      "time": "0:20:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "ResNet20-C100",
+      "cmd": "scripts/eval_resnet20_cifar100.sh",
+      "package": "torchattacks",
+      "group": 1,
+      "compute": 0.5,
+      "time": "0:20:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "VGG11BN-C100",
+      "cmd": "scripts/eval_vgg11bn_cifar100.sh",
+      "package": "torchattacks",
+      "group": 1,
+      "compute": 0.5,
+      "time": "0:20:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "MobileNetV2-C100",
+      "cmd": "scripts/eval_mobilenetv2_cifar100.sh",
+      "package": "torchattacks",
+      "group": 1,
+      "compute": 0.5,
+      "time": "0:20:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "fgsm",
+      "implementation": "edits/fgsm.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "pgd",
+      "implementation": "edits/pgd.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "mifgsm",
+      "implementation": "edits/mifgsm.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "autoattack",
+      "implementation": "edits/autoattack.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

@@ -1,0 +1,38 @@
+{
+  "base_image": "hiyouga/pytorch:th2.6.0-cu124-flashattn2.7.4-cxx11abi0-devel",
+  "install_cmds": [
+    "pip install --no-cache-dir --upgrade pip packaging wheel setuptools editables 'hatchling>=1.18.0'",
+    "pip install --no-cache-dir --no-build-isolation -e .",
+    "pip install --no-cache-dir --no-build-isolation -r requirements/metrics.txt -r requirements/deepspeed.txt"
+  ],
+  "data_deps": [
+    {
+      "name": "Meta-Llama-3-8B-SFT",
+      "description": "SFT-finetuned LLaMA-3-8B (legacy; not used by current llm-offline-rl)",
+      "host_path": "{data_root}/models/Meta-Llama-3-8B-SFT",
+      "container_path": "/models/Meta-Llama-3-8B-SFT"
+    },
+    {
+      "name": "Qwen3-1.7B",
+      "description": "Qwen3-1.7B base model (shared with verl; provided by vendor/data_scripts/verl/prepare_models.py)",
+      "host_path": "{data_root}/models/Qwen3-1.7B",
+      "container_path": "/models/Qwen3-1.7B"
+    },
+    {
+      "name": "Qwen2.5-Math-1.5B-Instruct",
+      "description": "Qwen2.5-Math-1.5B-Instruct (math-specialized SFT) — base model for llm-offline-rl DPO training",
+      "host_path": "{data_root}/models/Qwen2.5-Math-1.5B-Instruct",
+      "container_path": "/models/Qwen2.5-Math-1.5B-Instruct",
+      "prepare": "vendor/data_scripts/LLaMA-Factory/prepare_data.py"
+    },
+    {
+      "name": "llama-factory-data",
+      "description": "Pre-processed sharegpt datasets for LLaMA-Factory: math_step_dpo (xinlai/Math-Step-DPO-10K) and metamathqa (MetaMathQA ~50K)",
+      "host_path": "{data_root}/llama-factory-data",
+      "container_path": "/data/llama-factory-data",
+      "prepare": "vendor/data_scripts/LLaMA-Factory/prepare_data.py"
+    }
+  ],
+  "use_cuda": true,
+  "workdir": "/app"
+}

@@ -1,0 +1,474 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-meanflow-training",
+  "task_folder": "tasks/cv-meanflow-training",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "training objectives for flow matching and mean-velocity generative image models",
+    "research_question": "Can we improve upon MeanFlow's training objective to achieve better FID on CIFAR-10 with a small DiT and a 10-step Euler sampler?",
+    "local_sources": {
+      "config_path": "tasks/cv-meanflow-training/config.json",
+      "task_description_path": "tasks/cv-meanflow-training/task_description.md"
+    },
+    "notes": [
+      "Baseline-to-paper mappings were verified against edits/meanflow.edit.py, edits/alphaflow.edit.py, and edits/pureflow.edit.py.",
+      "All BibTeX entries were obtained via the paper_cite MCP tool; none were handwritten."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 9
+  },
+  "tests": [
+    {
+      "label": "train_small",
+      "cmd": "scripts/train_small.sh",
+      "package": "alphaflow-main",
+      "group": 1,
+      "compute": 1.0,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/iccv51070.2023.00387",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Small-budget CIFAR-10 training/evaluation on a DiT-style backbone using FID."
+    },
+    {
+      "label": "train_medium",
+      "cmd": "scripts/train_medium.sh",
+      "package": "alphaflow-main",
+      "group": 2,
+      "compute": 1.0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/iccv51070.2023.00387",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Medium-budget CIFAR-10 training/evaluation on a DiT-style backbone using FID."
+    },
+    {
+      "label": "train_large",
+      "cmd": "scripts/train_large.sh",
+      "package": "alphaflow-main",
+      "group": 3,
+      "compute": 1.0,
+      "time": "8:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/iccv51070.2023.00387",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Largest-budget CIFAR-10 training/evaluation on a DiT-style backbone using FID."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "meanflow",
+      "implementation": "edits/meanflow.edit.py",
+      "labels": [
+        "mean_velocity",
+        "jvp_target"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2505.13447",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the MeanFlow objective described in the edit stub: average-velocity training with JVP-based targets."
+    },
+    {
+      "name": "alphaflow",
+      "implementation": "edits/alphaflow.edit.py",
+      "labels": [
+        "curriculum",
+        "discrete_continuous_hybrid"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2510.20771",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the AlphaFlow edit stub: annealing from discrete trajectory training toward MeanFlow."
+    },
+    {
+      "name": "pureflow",
+      "implementation": "edits/pureflow.edit.py",
+      "labels": [
+        "flow_matching",
+        "instantaneous_velocity"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2210.02747",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "The baseline is plain flow matching with instantaneous velocity targets; the nearest canonical paper is Flow Matching for Generative Modeling."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.2505.13447",
+      "title": "Mean Flows for One-step Generative Modeling",
+      "authors": [
+        "Zhengyang Geng",
+        "Mingyang Deng",
+        "Xingjian Bai",
+        "J. Zico Kolter",
+        "Kaiming He"
+      ],
+      "year": 2025,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2505.13447",
+      "arxiv_id": "2505.13447",
+      "openalex_id": "https://openalex.org/W4417298370",
+      "landing_page": "https://arxiv.org/abs/2505.13447",
+      "source_urls": [
+        "https://openalex.org/W4417298370",
+        "https://arxiv.org/abs/2505.13447"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2505.13447,\n  doi = {10.48550/ARXIV.2505.13447},\n  url = {https://arxiv.org/abs/2505.13447},\n  author = {Geng, Zhengyang and Deng, Mingyang and Bai, Xingjian and Kolter, J. Zico and He, Kaiming},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Mean Flows for One-step Generative Modeling},\n  publisher = {arXiv},\n  year = {2025},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "baseline",
+        "mean_velocity",
+        "one_step_generation"
+      ],
+      "baseline_links": [
+        "meanflow"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the MeanFlow objective that the task asks the agent to improve upon.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2510.20771",
+      "title": "AlphaFlow: Understanding and Improving MeanFlow Models",
+      "authors": [
+        "Huijie Zhang",
+        "Aliaksandr Siarohin",
+        "Willi Menapace",
+        "Michael Vasilkovsky",
+        "Sergey Tulyakov",
+        "Qing Qu",
+        "Ivan Skorokhodov"
+      ],
+      "year": 2025,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2510.20771",
+      "arxiv_id": "2510.20771",
+      "openalex_id": "https://openalex.org/W4417082410",
+      "landing_page": "https://arxiv.org/abs/2510.20771",
+      "source_urls": [
+        "https://openalex.org/W4417082410",
+        "https://arxiv.org/abs/2510.20771"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2510.20771,\n  doi = {10.48550/ARXIV.2510.20771},\n  url = {https://arxiv.org/abs/2510.20771},\n  author = {Zhang, Huijie and Siarohin, Aliaksandr and Menapace, Willi and Vasilkovsky, Michael and Tulyakov, Sergey and Qu, Qing and Skorokhodov, Ivan},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {AlphaFlow: Understanding and Improving MeanFlow Models},\n  publisher = {arXiv},\n  year = {2025},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "baseline",
+        "curriculum_learning",
+        "mean_velocity"
+      ],
+      "baseline_links": [
+        "alphaflow"
+      ],
+      "test_links": [],
+      "relevance": "Directly matches the AlphaFlow baseline that anneals from trajectory flow matching toward MeanFlow.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2210.02747",
+      "title": "Flow Matching for Generative Modeling",
+      "authors": [
+        "Yaron Lipman",
+        "Ricky T. Q. Chen",
+        "Heli Ben-Hamu",
+        "Maximilian Nickel",
+        "Matt Le"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2210.02747",
+      "arxiv_id": "2210.02747",
+      "openalex_id": "https://openalex.org/W4303647933",
+      "landing_page": "https://arxiv.org/abs/2210.02747",
+      "source_urls": [
+        "https://openalex.org/W4303647933",
+        "https://arxiv.org/abs/2210.02747"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2210.02747,\n  doi = {10.48550/ARXIV.2210.02747},\n  url = {https://arxiv.org/abs/2210.02747},\n  author = {Lipman, Yaron and Chen, Ricky T. Q. and Ben-Hamu, Heli and Nickel, Maximilian and Le, Matt},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Flow Matching for Generative Modeling},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "flow_matching",
+        "cnf"
+      ],
+      "baseline_links": [
+        "pureflow"
+      ],
+      "test_links": [],
+      "relevance": "Canonical flow-matching paper for the pure instantaneous-velocity baseline used as the task's simplest comparator.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2302.00482",
+      "title": "Improving and generalizing flow-based generative models with minibatch optimal transport",
+      "authors": [
+        "Alexander Tong",
+        "Kilian Fatras",
+        "Nikolay Malkin",
+        "Guillaume Huguet",
+        "Yanlei Zhang",
+        "Jarrid Rector-Brooks",
+        "Guy Wolf",
+        "Yoshua Bengio"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2302.00482",
+      "arxiv_id": "2302.00482",
+      "openalex_id": "https://openalex.org/W4319050105",
+      "landing_page": "https://arxiv.org/abs/2302.00482",
+      "source_urls": [
+        "https://openalex.org/W4319050105",
+        "https://arxiv.org/abs/2302.00482"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2302.00482,\n  doi = {10.48550/ARXIV.2302.00482},\n  url = {https://arxiv.org/abs/2302.00482},\n  author = {Tong, Alexander and Fatras, Kilian and Malkin, Nikolay and Huguet, Guillaume and Zhang, Yanlei and Rector-Brooks, Jarrid and Wolf, Guy and Bengio, Yoshua},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Improving and generalizing flow-based generative models with minibatch optimal transport},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "related_work",
+        "conditional_flow_matching",
+        "optimal_transport"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Extends flow matching into generalized and optimal-transport variants, directly relevant to alternative training objectives for this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2209.03003",
+      "title": "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow",
+      "authors": [
+        "Xingchao Liu",
+        "Chengyue Gong",
+        "Qiang Liu"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2209.03003",
+      "arxiv_id": "2209.03003",
+      "openalex_id": "https://openalex.org/W4297676498",
+      "landing_page": "https://arxiv.org/abs/2209.03003",
+      "source_urls": [
+        "https://openalex.org/W4297676498",
+        "https://arxiv.org/abs/2209.03003"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2209.03003,\n  doi = {10.48550/ARXIV.2209.03003},\n  url = {https://arxiv.org/abs/2209.03003},\n  author = {Liu, Xingchao and Gong, Chengyue and Liu, Qiang},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "related_work",
+        "rectified_flow",
+        "few_step_sampling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "A major antecedent for few-step flow-based generation, useful context for improving low-NFE generation quality.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2303.08797",
+      "title": "Stochastic Interpolants: A Unifying Framework for Flows and Diffusions",
+      "authors": [
+        "Michael S. Albergo",
+        "Nicholas M. Boffi",
+        "Eric Vanden-Eijnden"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2303.08797",
+      "arxiv_id": "2303.08797",
+      "openalex_id": "https://openalex.org/W4327673663",
+      "landing_page": "https://arxiv.org/abs/2303.08797",
+      "source_urls": [
+        "https://openalex.org/W4327673663",
+        "https://arxiv.org/abs/2303.08797"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2303.08797,\n  doi = {10.48550/ARXIV.2303.08797},\n  url = {https://arxiv.org/abs/2303.08797},\n  author = {Albergo, Michael S. and Boffi, Nicholas M. and Vanden-Eijnden, Eric},\n  keywords = {Machine Learning (cs.LG), Disordered Systems and Neural Networks (cond-mat.dis-nn), Probability (math.PR), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Physical sciences, FOS: Physical sciences, FOS: Mathematics, FOS: Mathematics},\n  title = {Stochastic Interpolants: A Unifying Framework for Flows and Diffusions},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "related_work",
+        "interpolants",
+        "flows_and_diffusions"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Provides theoretical context for objective design across continuous-time transport, diffusion, and flow formulations.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/iccv51070.2023.00387",
+      "title": "Scalable Diffusion Models with Transformers",
+      "authors": [
+        "William Peebles",
+        "Saining Xie"
+      ],
+      "year": 2023,
+      "venue": "ICCV",
+      "doi": "10.1109/ICCV51070.2023.00387",
+      "openalex_id": "https://openalex.org/W4390872297",
+      "landing_page": "https://doi.org/10.1109/ICCV51070.2023.00387",
+      "source_urls": [
+        "https://openalex.org/W4390872297",
+        "https://doi.org/10.1109/ICCV51070.2023.00387"
+      ],
+      "bibtex": "@inproceedings{Peebles_2023, title={Scalable Diffusion Models with Transformers}, url={http://dx.doi.org/10.1109/iccv51070.2023.00387}, DOI={10.1109/iccv51070.2023.00387}, booktitle={2023 IEEE/CVF International Conference on Computer Vision (ICCV)}, publisher={IEEE}, author={Peebles, William and Xie, Saining}, year={2023}, month=oct, pages={4172-4182} }",
+      "relevance_tags": [
+        "architecture",
+        "dit",
+        "transformer_backbone"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "The task description specifies a small DiT backbone; this is the defining DiT architecture paper.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2401.08740",
+      "title": "SiT: Exploring Flow and Diffusion-based Generative Models with Scalable Interpolant Transformers",
+      "authors": [
+        "Nanye Ma",
+        "Mark Goldstein",
+        "Michael S. Albergo",
+        "Nicholas M. Boffi",
+        "Eric Vanden-Eijnden",
+        "Saining Xie"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2401.08740",
+      "arxiv_id": "2401.08740",
+      "openalex_id": "https://openalex.org/W4391012857",
+      "landing_page": "https://arxiv.org/abs/2401.08740",
+      "source_urls": [
+        "https://openalex.org/W4391012857",
+        "https://arxiv.org/abs/2401.08740"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2401.08740,\n  doi = {10.48550/ARXIV.2401.08740},\n  url = {https://arxiv.org/abs/2401.08740},\n  author = {Ma, Nanye and Goldstein, Mark and Albergo, Michael S. and Boffi, Nicholas M. and Vanden-Eijnden, Eric and Xie, Saining},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {SiT: Exploring Flow and Diffusion-based Generative Models with Scalable Interpolant Transformers},\n  publisher = {arXiv},\n  year = {2024},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "related_work",
+        "transformer_backbone",
+        "interpolant_models"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Extends DiT-style backbones to interpolant and flow objectives, making it directly relevant to objective changes on transformer generators.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1706.08500",
+      "title": "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium",
+      "authors": [
+        "Martin Heusel",
+        "Hubert Ramsauer",
+        "Thomas Unterthiner",
+        "Bernhard Nessler",
+        "Sepp Hochreiter"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.08500",
+      "arxiv_id": "1706.08500",
+      "openalex_id": "https://openalex.org/W2963981733",
+      "landing_page": "https://arxiv.org/abs/1706.08500",
+      "source_urls": [
+        "https://openalex.org/W2963981733",
+        "https://arxiv.org/abs/1706.08500"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1706.08500,\n  doi = {10.48550/ARXIV.1706.08500},\n  url = {https://arxiv.org/abs/1706.08500},\n  author = {Heusel, Martin and Ramsauer, Hubert and Unterthiner, Thomas and Nessler, Bernhard and Hochreiter, Sepp},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "metric",
+        "fid",
+        "evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Introduces the Fréchet Inception Distance used as the task's optimization target and evaluation metric.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/zp44cu3g",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB record for the CIFAR technical report",
+      "doi": "10.57702/ZP44CU3G",
+      "openalex_id": "https://openalex.org/W3118608800",
+      "landing_page": "https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a",
+      "source_urls": [
+        "https://openalex.org/W3118608800",
+        "https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g,\n  doi = {10.57702/ZP44CU3G},\n  url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a},\n  author = {Krizhevsky, Alex},\n  keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images},\n  language = {en},\n  title = {Learning Multiple Layers of Features from Tiny Images},\n  publisher = {TIB},\n  year = {2024}\n}",
+      "relevance_tags": [
+        "dataset",
+        "cifar10",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "This record covers the original CIFAR technical report that defines the CIFAR-10 dataset used by the task.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

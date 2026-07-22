@@ -1,0 +1,34 @@
+Metadata-Version: 2.4
+Name: mlsbench
+Version: 0.1.0
+Requires-Python: >=3.10
+Requires-Dist: pyyaml
+Provides-Extra: agent
+Requires-Dist: anthropic; extra == "agent"
+Requires-Dist: openai; extra == "agent"
+Provides-Extra: relay
+Requires-Dist: fastapi; extra == "relay"
+Requires-Dist: uvicorn; extra == "relay"
+Provides-Extra: openevolve
+Requires-Dist: openai>=1.0.0; extra == "openevolve"
+Requires-Dist: numpy>=1.22.0; extra == "openevolve"
+Requires-Dist: tqdm>=4.64.0; extra == "openevolve"
+Requires-Dist: flask; extra == "openevolve"
+Requires-Dist: dacite>=1.9.2; extra == "openevolve"
+Provides-Extra: discover
+Requires-Dist: ttt-discover>=0.1.0; extra == "discover"
+Requires-Dist: tinker>=0.18; extra == "discover"
+Provides-Extra: web-search
+Requires-Dist: tavily-python; extra == "web-search"
+Provides-Extra: all
+Requires-Dist: anthropic; extra == "all"
+Requires-Dist: openai; extra == "all"
+Requires-Dist: fastapi; extra == "all"
+Requires-Dist: uvicorn; extra == "all"
+Requires-Dist: tavily-python; extra == "all"
+Requires-Dist: numpy>=1.22.0; extra == "all"
+Requires-Dist: tqdm>=4.64.0; extra == "all"
+Requires-Dist: flask; extra == "all"
+Requires-Dist: dacite>=1.9.2; extra == "all"
+Requires-Dist: ttt-discover>=0.1.0; extra == "all"
+Requires-Dist: tinker>=0.18; extra == "all"

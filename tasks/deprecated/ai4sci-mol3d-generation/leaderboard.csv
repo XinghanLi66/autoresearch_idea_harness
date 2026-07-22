@@ -1,0 +1,4 @@
+timestamp,model,is_final,seed,atom_stable_QM9,mol_stable_QM9,valid_QM9,unique_QM9,elapsed_QM9,elapsed_GEOM-DRUG,comp_valid_MP-20,struct_valid_MP-20,valid_MP-20,elapsed_MP-20,atom_stable_GEOM-DRUG,mol_stable_GEOM-DRUG,valid_GEOM-DRUG,unique_GEOM-DRUG
+2026-04-10T04:42:45.270804+00:00,baseline:edm,true,42,0.922073,0.2771,0.6944,0.994816,21692,82913,,,,,0.619385,0.0,0.6912,0.980035
+2026-04-06T05:17:47.372360+00:00,baseline:geobfn,true,42,0.807041,0.0783,0.3088,0.999676,21929,84614,0.639,0.035,0.035,3174,0.55615,0.0,0.2774,1.0
+2026-04-04T12:57:16.249900+00:00,baseline:geoldm,true,42,0.652946,0.0073,0.2497,1.0,41013,,0.777,0.764,0.592,5498,,,,

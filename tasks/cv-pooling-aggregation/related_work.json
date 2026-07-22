@@ -1,0 +1,493 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-pooling-aggregation",
+  "task_folder": "tasks/cv-pooling-aggregation",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "global pooling and feature aggregation design for CNN-based image classification",
+    "research_question": "Design a novel global pooling or feature aggregation strategy for image classification that improves test accuracy across different CNN architectures and datasets.",
+    "local_sources": {
+      "config_path": "tasks/cv-pooling-aggregation/config.json",
+      "task_description_path": "tasks/cv-pooling-aggregation/task_description.md"
+    },
+    "notes": [
+      "The GeM baseline maps directly to the generalized-mean pooling paper used in the baseline edit stub.",
+      "The avg_max baseline is linked approximately to CBAM because CBAM explicitly combines global average and max pooled descriptors, while the repo baseline uses the same statistics without learned attention weights.",
+      "The global_max baseline is left as no_explicit_paper because the repo baseline names a standard operator rather than a uniquely attributable standalone method paper.",
+      "CIFAR-based tests are linked to their architecture papers; a dedicated auditable BibTeX source for the original CIFAR technical report was not recovered through MCP during this run."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 3,
+    "baseline_links_found": 2,
+    "test_entries": 3,
+    "test_links_found": 4
+  },
+  "tests": [
+    {
+      "label": "resnet56-cifar100",
+      "cmd": "scripts/resnet56_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        }
+      ],
+      "notes": "ResNet-56 evaluation linked to the canonical ResNet paper."
+    },
+    {
+      "label": "vgg16bn-cifar100",
+      "cmd": "scripts/vgg16bn_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1409.1556",
+          "role": "architecture"
+        }
+      ],
+      "notes": "VGG-16-BN evaluation linked to the VGG architecture paper."
+    },
+    {
+      "label": "mobilenetv2-fmnist",
+      "cmd": "scripts/mobilenetv2_fmnist.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2018.00474",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1708.07747",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Hidden evaluation links MobileNetV2 and Fashion-MNIST."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "global_max",
+      "implementation": "edits/global_max.edit.py",
+      "labels": [
+        "global_max_pooling"
+      ],
+      "paper_links": [],
+      "status": "no_explicit_paper",
+      "notes": "The baseline is a standard adaptive global max pooling operator, but the stub does not point to a uniquely attributable standalone method paper."
+    },
+    {
+      "name": "gem",
+      "implementation": "edits/gem.edit.py",
+      "labels": [
+        "generalized_mean_pooling",
+        "learnable_pooling"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/tpami.2018.2846566",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Direct match to the GeM pooling method named in the baseline edit."
+    },
+    {
+      "name": "avg_max",
+      "implementation": "edits/avg_max.edit.py",
+      "labels": [
+        "average_plus_max",
+        "hybrid_pooling"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1007/978-3-030-01234-2_1",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Approximate match to CBAM, which explicitly combines global average and max pooled statistics before channel reweighting."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.1312.4400",
+      "title": "Network In Network",
+      "authors": [
+        "Min Lin",
+        "Qiang Chen",
+        "Shuicheng Yan"
+      ],
+      "year": 2013,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1312.4400",
+      "arxiv_id": "1312.4400",
+      "openalex_id": "https://openalex.org/W1799366690",
+      "landing_page": "https://arxiv.org/abs/1312.4400",
+      "source_urls": [
+        "https://openalex.org/W1799366690",
+        "https://arxiv.org/abs/1312.4400"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1312.4400,\n  doi = {10.48550/ARXIV.1312.4400},\n  url = {https://arxiv.org/abs/1312.4400},\n  author = {Lin, Min and Chen, Qiang and Yan, Shuicheng},\n  keywords = {Neural and Evolutionary Computing (cs.NE), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Network In Network},\n  publisher = {arXiv},\n  year = {2013},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "global_average_pooling",
+        "classification",
+        "pooling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Canonical introduction of global average pooling in CNN classifiers, which is the default family of methods this task asks agents to improve on.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/tpami.2018.2846566",
+      "title": "Fine-Tuning CNN Image Retrieval with No Human Annotation",
+      "authors": [
+        "Filip Radenovic",
+        "Giorgos Tolias",
+        "Ondrej Chum"
+      ],
+      "year": 2019,
+      "venue": "TPAMI",
+      "doi": "10.1109/tpami.2018.2846566",
+      "arxiv_id": "1711.02512",
+      "openalex_id": "https://openalex.org/W2767621619",
+      "landing_page": "https://doi.org/10.1109/tpami.2018.2846566",
+      "source_urls": [
+        "https://openalex.org/W2767621619",
+        "https://doi.org/10.1109/tpami.2018.2846566"
+      ],
+      "bibtex": "@article{Radenovic_2019, title={Fine-Tuning CNN Image Retrieval with No Human Annotation}, volume={41}, ISSN={1939-3539}, url={http://dx.doi.org/10.1109/tpami.2018.2846566}, DOI={10.1109/tpami.2018.2846566}, number={7}, journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Radenovic, Filip and Tolias, Giorgos and Chum, Ondrej}, year={2019}, month=jul, pages={1655–1668} }",
+      "relevance_tags": [
+        "baseline",
+        "gem",
+        "learnable_pooling"
+      ],
+      "baseline_links": [
+        "gem"
+      ],
+      "test_links": [],
+      "relevance": "Introduces generalized mean pooling (GeM), the exact baseline method already present in the task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1007/978-3-030-01234-2_1",
+      "title": "CBAM: Convolutional Block Attention Module",
+      "authors": [
+        "Sanghyun Woo",
+        "Jongchan Park",
+        "Joon-Young Lee",
+        "In So Kweon"
+      ],
+      "year": 2018,
+      "venue": "ECCV",
+      "doi": "10.1007/978-3-030-01234-2_1",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2884585870",
+      "landing_page": "https://doi.org/10.1007/978-3-030-01234-2_1",
+      "source_urls": [
+        "https://openalex.org/W2884585870",
+        "https://doi.org/10.1007/978-3-030-01234-2_1"
+      ],
+      "bibtex": "@inbook{Woo_2018, title={CBAM: Convolutional Block Attention Module}, ISBN={9783030012342}, ISSN={1611-3349}, url={http://dx.doi.org/10.1007/978-3-030-01234-2_1}, DOI={10.1007/978-3-030-01234-2_1}, booktitle={Computer Vision – ECCV 2018}, publisher={Springer International Publishing}, author={Woo, Sanghyun and Park, Jongchan and Lee, Joon-Young and Kweon, In So}, year={2018}, pages={3–19} }",
+      "relevance_tags": [
+        "hybrid_pooling",
+        "average_max",
+        "attention"
+      ],
+      "baseline_links": [
+        "avg_max"
+      ],
+      "test_links": [],
+      "relevance": "Uses both global average pooling and global max pooling to form channel descriptors, making it a defensible approximate citation for the avg+max baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/iccv.2015.170",
+      "title": "Bilinear CNN Models for Fine-Grained Visual Recognition",
+      "authors": [
+        "Tsung-Yu Lin",
+        "Aruni RoyChowdhury",
+        "Subhransu Maji"
+      ],
+      "year": 2015,
+      "venue": "ICCV",
+      "doi": "10.1109/iccv.2015.170",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2104657103",
+      "landing_page": "https://doi.org/10.1109/iccv.2015.170",
+      "source_urls": [
+        "https://openalex.org/W2104657103",
+        "https://doi.org/10.1109/iccv.2015.170"
+      ],
+      "bibtex": "@inproceedings{Lin_2015, title={Bilinear CNN Models for Fine-Grained Visual Recognition}, url={http://dx.doi.org/10.1109/iccv.2015.170}, DOI={10.1109/iccv.2015.170}, booktitle={2015 IEEE International Conference on Computer Vision (ICCV)}, publisher={IEEE}, author={Lin, Tsung-Yu and RoyChowdhury, Aruni and Maji, Subhransu}, year={2015}, month=dec, pages={1449–1457} }",
+      "relevance_tags": [
+        "second_order_pooling",
+        "feature_aggregation",
+        "classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Representative second-order feature aggregation paper showing that richer global pooling statistics can outperform first-order averaging.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.41",
+      "title": "Compact Bilinear Pooling",
+      "authors": [
+        "Yang Gao",
+        "Oscar Beijbom",
+        "Ning Zhang",
+        "Trevor Darrell"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2016.41",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2963066927",
+      "landing_page": "https://doi.org/10.1109/cvpr.2016.41",
+      "source_urls": [
+        "https://openalex.org/W2963066927",
+        "https://doi.org/10.1109/cvpr.2016.41"
+      ],
+      "bibtex": "@inproceedings{Gao_2016, title={Compact Bilinear Pooling}, url={http://dx.doi.org/10.1109/cvpr.2016.41}, DOI={10.1109/cvpr.2016.41}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Gao, Yang and Beijbom, Oscar and Zhang, Ning and Darrell, Trevor}, year={2016}, month=jun, pages={317–326} }",
+      "relevance_tags": [
+        "compact_aggregation",
+        "bilinear_pooling",
+        "classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Shows a practical compact alternative to full bilinear pooling, relevant as prior art on global feature aggregation design.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.5244/c.31.117",
+      "title": "Improved Bilinear Pooling with CNNs",
+      "authors": [
+        "Tsung-Yu Lin",
+        "Subhransu Maji"
+      ],
+      "year": 2017,
+      "venue": "BMVC",
+      "doi": "10.5244/c.31.117",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2964350570",
+      "landing_page": "https://doi.org/10.5244/c.31.117",
+      "source_urls": [
+        "https://openalex.org/W2964350570",
+        "https://doi.org/10.5244/c.31.117"
+      ],
+      "bibtex": "@inproceedings{Lin_2017, series={BMVC 2017}, title={Improved Bilinear Pooling with CNNs}, url={http://dx.doi.org/10.5244/c.31.117}, DOI={10.5244/c.31.117}, booktitle={Procedings of the British Machine Vision Conference 2017}, publisher={British Machine Vision Association}, author={Lin, Tsung-Yu and Maji, Subhransu}, year={2017}, collection={BMVC 2017} }",
+      "relevance_tags": [
+        "matrix_normalization",
+        "bilinear_pooling",
+        "classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Improves bilinear pooling through normalization, giving additional related work on richer global aggregation operators.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2018.00105",
+      "title": "Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization",
+      "authors": [
+        "Peihua Li",
+        "Jiangtao Xie",
+        "Qilong Wang",
+        "Zilin Gao"
+      ],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2018.00105",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2962761264",
+      "landing_page": "https://doi.org/10.1109/cvpr.2018.00105",
+      "source_urls": [
+        "https://openalex.org/W2962761264",
+        "https://doi.org/10.1109/cvpr.2018.00105"
+      ],
+      "bibtex": "@inproceedings{Li_2018, title={Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization}, url={http://dx.doi.org/10.1109/cvpr.2018.00105}, DOI={10.1109/cvpr.2018.00105}, booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Li, Peihua and Xie, Jiangtao and Wang, Qilong and Gao, Zilin}, year={2018}, month=jun, pages={947–955} }",
+      "relevance_tags": [
+        "global_covariance_pooling",
+        "second_order_pooling",
+        "classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Representative work on global covariance pooling, relevant to the task's search space of richer spatial summary statistics.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2018.00745",
+      "title": "Squeeze-and-Excitation Networks",
+      "authors": [
+        "Jie Hu",
+        "Li Shen",
+        "Gang Sun"
+      ],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2018.00745",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2752782242",
+      "landing_page": "https://doi.org/10.1109/cvpr.2018.00745",
+      "source_urls": [
+        "https://openalex.org/W2752782242",
+        "https://doi.org/10.1109/cvpr.2018.00745"
+      ],
+      "bibtex": "@inproceedings{Hu_2018, title={Squeeze-and-Excitation Networks}, url={http://dx.doi.org/10.1109/cvpr.2018.00745}, DOI={10.1109/cvpr.2018.00745}, booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Hu, Jie and Shen, Li and Sun, Gang}, year={2018}, month=jun, pages={7132–7141} }",
+      "relevance_tags": [
+        "channel_reweighting",
+        "global_pooling",
+        "classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Uses global pooled channel descriptors for feature recalibration and is closely adjacent to learnable global aggregation design.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2016.90",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2194775991",
+      "landing_page": "https://doi.org/10.1109/cvpr.2016.90",
+      "source_urls": [
+        "https://openalex.org/W2194775991",
+        "https://doi.org/10.1109/cvpr.2016.90"
+      ],
+      "bibtex": "@inproceedings{He_2016, title={Deep Residual Learning for Image Recognition}, url={http://dx.doi.org/10.1109/cvpr.2016.90}, DOI={10.1109/cvpr.2016.90}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian}, year={2016}, month=jun, pages={770–778} }",
+      "relevance_tags": [
+        "architecture",
+        "resnet",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet56-cifar100"
+      ],
+      "relevance": "Architecture paper for the ResNet-based visible test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1409.1556",
+      "title": "Very Deep Convolutional Networks for Large-Scale Image Recognition",
+      "authors": [
+        "Karen Simonyan",
+        "Andrew Zisserman"
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1409.1556",
+      "arxiv_id": "1409.1556",
+      "openalex_id": "https://openalex.org/W1686810756",
+      "landing_page": "https://arxiv.org/abs/1409.1556",
+      "source_urls": [
+        "https://openalex.org/W1686810756",
+        "https://arxiv.org/abs/1409.1556"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1409.1556,\n  doi = {10.48550/ARXIV.1409.1556},\n  url = {https://arxiv.org/abs/1409.1556},\n  author = {Simonyan, Karen and Zisserman, Andrew},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Very Deep Convolutional Networks for Large-Scale Image Recognition},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "architecture",
+        "vgg",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "vgg16bn-cifar100"
+      ],
+      "relevance": "Architecture paper for the VGG-16-BN visible test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2018.00474",
+      "title": "MobileNetV2: Inverted Residuals and Linear Bottlenecks",
+      "authors": [
+        "Mark Sandler",
+        "Andrew Howard",
+        "Menglong Zhu",
+        "Andrey Zhmoginov",
+        "Liang-Chieh Chen"
+      ],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2018.00474",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2963163009",
+      "landing_page": "https://doi.org/10.1109/cvpr.2018.00474",
+      "source_urls": [
+        "https://openalex.org/W2963163009",
+        "https://doi.org/10.1109/cvpr.2018.00474"
+      ],
+      "bibtex": "@inproceedings{Sandler_2018, title={MobileNetV2: Inverted Residuals and Linear Bottlenecks}, url={http://dx.doi.org/10.1109/cvpr.2018.00474}, DOI={10.1109/cvpr.2018.00474}, booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Sandler, Mark and Howard, Andrew and Zhu, Menglong and Zhmoginov, Andrey and Chen, Liang-Chieh}, year={2018}, month=jun, pages={4510–4520} }",
+      "relevance_tags": [
+        "architecture",
+        "mobilenetv2",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Architecture paper for the hidden MobileNetV2 test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1708.07747",
+      "title": "Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms",
+      "authors": [
+        "Han Xiao",
+        "Kashif Rasul",
+        "Roland Vollgraf"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1708.07747",
+      "arxiv_id": "1708.07747",
+      "openalex_id": "https://openalex.org/W2750384547",
+      "landing_page": "https://arxiv.org/abs/1708.07747",
+      "source_urls": [
+        "https://openalex.org/W2750384547",
+        "https://arxiv.org/abs/1708.07747"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1708.07747,\n  doi = {10.48550/ARXIV.1708.07747},\n  url = {https://arxiv.org/abs/1708.07747},\n  author = {Xiao, Han and Rasul, Kashif and Vollgraf, Roland},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "dataset",
+        "fashion_mnist",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Dataset paper for the hidden Fashion-MNIST evaluation.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

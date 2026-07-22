@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-bayesian-acquisition",
+  "task_folder": "tasks/optimization-bayesian-acquisition",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-bayesian-acquisition/config.json",
+      "task_description_path": "tasks/optimization-bayesian-acquisition/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "branin",
+      "cmd": "scripts/branin.sh",
+      "package": "botorch",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "hartmann6",
+      "cmd": "scripts/hartmann6.sh",
+      "package": "botorch",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mlp_hpo",
+      "cmd": "scripts/mlp_hpo.sh",
+      "package": "botorch",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ei",
+      "implementation": "edits/ei.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "ucb",
+      "implementation": "edits/ucb.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "kg",
+      "implementation": "edits/kg.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

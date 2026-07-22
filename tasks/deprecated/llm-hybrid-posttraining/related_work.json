@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-hybrid-posttraining",
+  "task_folder": "tasks/llm-hybrid-posttraining",
+  "task_metadata": {
+    "status": "draft_v2",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "Question-level routing design for hybrid LLM post-training",
+    "research_question": "How should a fixed off_sft + grpo_split hybrid scaffold route each question among on-policy RL, off-policy RL, and off-policy SFT using current and historical training signals?",
+    "local_sources": {
+      "config_path": "tasks/llm-hybrid-posttraining/config.json",
+      "task_description_path": "tasks/llm-hybrid-posttraining/task_description.md"
+    },
+    "notes": [
+      "V2 widens the editable surface from a single threshold function to trainer-side hybrid routing regions.",
+      "The benchmark uses three OpenR1 source-split settings instead of paper-scale 7B/8-GPU evaluation.",
+      "LUFFY and SRFT remain read-only references; the visible baselines stay SFT, GRPO, and HPT."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 3,
+    "paper_count": 3,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "amc_aime",
+      "cmd": "scripts/run_source_split.sh",
+      "package": "Unify-Post-Training",
+      "group": 1,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": "OpenR1 source split, 256 train + 64 val."
+    },
+    {
+      "label": "cn_contest",
+      "cmd": "scripts/run_source_split.sh",
+      "package": "Unify-Post-Training",
+      "group": 1,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": "OpenR1 source split, 256 train + 64 val."
+    },
+    {
+      "label": "olympiads",
+      "cmd": "scripts/run_source_split.sh",
+      "package": "Unify-Post-Training",
+      "group": 1,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": "Hardest OpenR1 source split, hidden in v1."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "sft",
+      "implementation": "baselines/sft.edit.py",
+      "labels": [],
+      "paper_links": [
+        "https://arxiv.org/abs/2509.04419"
+      ],
+      "status": "mapped",
+      "notes": "Shared-scaffold pure-SFT limit: always replace a question's on-policy samples with one off-policy SFT demonstration."
+    },
+    {
+      "name": "grpo",
+      "implementation": "baselines/grpo.edit.py",
+      "labels": [],
+      "paper_links": [
+        "https://arxiv.org/abs/2402.03300"
+      ],
+      "status": "mapped",
+      "notes": "Shared-scaffold pure on-policy controller: never switch into off-policy samples."
+    },
+    {
+      "name": "hpt",
+      "implementation": "baselines/hpt.edit.py",
+      "labels": [],
+      "paper_links": [
+        "https://arxiv.org/abs/2509.04419"
+      ],
+      "status": "mapped",
+      "notes": "Original Unify-Post-Training switch logic on the V2 off_sft + grpo_split scaffold."
+    }
+  ],
+  "papers": [
+    {
+      "title": "Towards a Unified View of Large Language Model Post-Training",
+      "url": "https://arxiv.org/abs/2509.04419"
+    },
+    {
+      "title": "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models",
+      "url": "https://arxiv.org/abs/2402.03300"
+    },
+    {
+      "title": "LUFFY: Learning to Reason under Off-Policy Guidance",
+      "url": "https://arxiv.org/abs/2504.14945"
+    }
+  ]
+}

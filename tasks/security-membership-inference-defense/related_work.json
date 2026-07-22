@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "security-membership-inference-defense",
+  "task_folder": "tasks/security-membership-inference-defense",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/security-membership-inference-defense/config.json",
+      "task_description_path": "tasks/security-membership-inference-defense/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "resnet20-cifar10",
+      "cmd": "scripts/resnet20_cifar10.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "vgg16bn-cifar100",
+      "cmd": "scripts/vgg16bn_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mobilenetv2-fmnist",
+      "cmd": "scripts/mobilenetv2_fmnist.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "erm",
+      "implementation": "edits/erm.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "label_smoothing",
+      "implementation": "edits/label_smoothing.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "confidence_penalty",
+      "implementation": "edits/confidence_penalty.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "relaxloss",
+      "implementation": "edits/relaxloss.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

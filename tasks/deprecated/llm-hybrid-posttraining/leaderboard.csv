@@ -1,0 +1,10 @@
+timestamp,model,is_final,seed,test_score_aime24,test_score_amc23,test_score_math_500,elapsed_AIME24,elapsed_AMC23,elapsed_MATH-500
+2026-04-28T17:26:55.132398+00:00,baseline:grpo,false,42,,,,,,
+2026-04-28T17:26:57.787036+00:00,baseline:hpt,false,42,,,,,,
+2026-04-28T17:27:51.974977+00:00,baseline:sft,false,42,,,,,,
+2026-04-28T21:22:31.296049+00:00,baseline:sft,false,42,,,,,,
+2026-04-28T21:24:35.938954+00:00,baseline:grpo,false,42,,,,,,
+2026-04-28T21:25:35.947142+00:00,baseline:hpt,false,42,,,,,,
+2026-04-30T06:32:32.064752+00:00,baseline:grpo,false,42,,,,,,
+2026-04-30T07:36:37.985359+00:00,baseline:sft,false,42,,,,,,
+2026-04-30T07:36:40.587351+00:00,baseline:hpt,false,42,,,,,,

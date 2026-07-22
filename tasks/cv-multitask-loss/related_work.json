@@ -1,0 +1,537 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-multitask-loss",
+  "task_folder": "tasks/cv-multitask-loss",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "multi-task loss combination for hierarchical fine/coarse CIFAR-100 classification",
+    "research_question": "Design a novel multi-task loss combination strategy for jointly training fine-grained (100-class) and coarse (20-superclass) classification on CIFAR-100 that maximizes fine-class test accuracy.",
+    "local_sources": {
+      "config_path": "tasks/cv-multitask-loss/config.json",
+      "task_description_path": "tasks/cv-multitask-loss/task_description.md"
+    },
+    "notes": [
+      "The DWA baseline is linked to the MTAN paper, which explicitly introduces Dynamic Weight Average in the task description and experiments.",
+      "The CIFAR-100 source paper resolves through a DOI-backed mirror of Krizhevsky's original tiny-images technical report."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 13,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "resnet20-cifar100mt",
+      "cmd": "scripts/resnet20_cifar100mt.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        }
+      ],
+      "notes": "ResNet backbone evaluated on the CIFAR-100 fine/coarse hierarchy."
+    },
+    {
+      "label": "resnet56-cifar100mt",
+      "cmd": "scripts/resnet56_cifar100mt.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Deeper ResNet test on the same CIFAR-100 multitask setup."
+    },
+    {
+      "label": "vgg16bn-cifar100mt",
+      "cmd": "scripts/vgg16bn_cifar100mt.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1409.1556",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1502.03167",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        }
+      ],
+      "notes": "VGG16 with batch normalization on CIFAR-100 multitask classification."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "uncertainty",
+      "implementation": "edits/uncertainty.edit.py",
+      "labels": [
+        "adaptive_weighting",
+        "learned_loss_weights"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2018.00781",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches homoscedastic uncertainty weighting for multitask losses."
+    },
+    {
+      "name": "dwa",
+      "implementation": "edits/dwa.edit.py",
+      "labels": [
+        "adaptive_weighting",
+        "loss_history_based"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2019.00197",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps to Dynamic Weight Average as introduced in the MTAN paper."
+    },
+    {
+      "name": "pcgrad",
+      "implementation": "edits/pcgrad.edit.py",
+      "labels": [
+        "gradient_surgery",
+        "conflict_mitigation"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2001.06782",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Implements projected conflicting gradients for multitask optimization."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1023/a:1007379606734",
+      "title": "Multitask Learning",
+      "authors": [
+        "Rich Caruana"
+      ],
+      "year": 1997,
+      "venue": "Machine Learning",
+      "doi": "10.1023/A:1007379606734",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2913340405",
+      "landing_page": "https://doi.org/10.1023/A:1007379606734",
+      "source_urls": [
+        "https://doi.org/10.1023/A:1007379606734",
+        "https://openalex.org/W2913340405"
+      ],
+      "bibtex": "@article{Caruana_1997, title={Multitask Learning}, volume={28}, ISSN={1573-0565}, url={http://dx.doi.org/10.1023/a:1007379606734}, DOI={10.1023/a:1007379606734}, number={1}, journal={Machine Learning}, publisher={Springer Science and Business Media LLC}, author={Caruana, Rich}, year={1997}, month=jul, pages={41–75} }",
+      "relevance_tags": [
+        "foundational",
+        "multitask_learning"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational multitask learning reference for why shared supervision can improve generalization.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/zp44cu3g",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB mirror of original technical report",
+      "doi": "10.57702/ZP44CU3G",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3118608800",
+      "landing_page": "https://doi.org/10.57702/zp44cu3g",
+      "source_urls": [
+        "https://doi.org/10.57702/zp44cu3g",
+        "https://openalex.org/W3118608800"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g,\n  doi = {10.57702/ZP44CU3G},\n  url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a},\n  author = {Krizhevsky, Alex},\n  keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images},\n  language = {en},\n  title = {Learning Multiple Layers of Features from Tiny Images},\n  publisher = {TIB},\n  year = {2024}\n}",
+      "relevance_tags": [
+        "dataset",
+        "cifar100"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet20-cifar100mt",
+        "resnet56-cifar100mt",
+        "vgg16bn-cifar100mt"
+      ],
+      "relevance": "Primary source for the CIFAR-100 fine-label dataset and its 20-way coarse superclass hierarchy used by this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2016.90",
+      "arxiv_id": "1512.03385",
+      "openalex_id": "https://openalex.org/W2194775991",
+      "landing_page": "https://doi.org/10.1109/CVPR.2016.90",
+      "source_urls": [
+        "https://doi.org/10.1109/CVPR.2016.90",
+        "https://openalex.org/W2194775991"
+      ],
+      "bibtex": "@inproceedings{He_2016, title={Deep Residual Learning for Image Recognition}, url={http://dx.doi.org/10.1109/CVPR.2016.90}, DOI={10.1109/cvpr.2016.90}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian}, year={2016}, month=jun, pages={770–778} }",
+      "relevance_tags": [
+        "architecture",
+        "resnet"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet20-cifar100mt",
+        "resnet56-cifar100mt"
+      ],
+      "relevance": "Backbone family for the two visible ResNet evaluation scripts.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1409.1556",
+      "title": "Very Deep Convolutional Networks for Large-Scale Image Recognition",
+      "authors": [
+        "Karen Simonyan",
+        "Andrew Zisserman"
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1409.1556",
+      "arxiv_id": "1409.1556",
+      "openalex_id": "https://openalex.org/W1686810756",
+      "landing_page": "https://doi.org/10.48550/arXiv.1409.1556",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.1409.1556",
+        "https://openalex.org/W1686810756"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1409.1556,\n  doi = {10.48550/ARXIV.1409.1556},\n  url = {https://arxiv.org/abs/1409.1556},\n  author = {Simonyan, Karen and Zisserman, Andrew},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Very Deep Convolutional Networks for Large-Scale Image Recognition},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "architecture",
+        "vgg"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "vgg16bn-cifar100mt"
+      ],
+      "relevance": "Canonical VGG family reference for the hidden VGG16-based test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1502.03167",
+      "title": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+      "authors": [
+        "Sergey Ioffe",
+        "Christian Szegedy"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1502.03167",
+      "arxiv_id": "1502.03167",
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.48550/arXiv.1502.03167",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.1502.03167"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1502.03167,\n  doi = {10.48550/ARXIV.1502.03167},\n  url = {https://arxiv.org/abs/1502.03167},\n  author = {Ioffe, Sergey and Szegedy, Christian},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift},\n  publisher = {arXiv},\n  year = {2015},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "training_recipe",
+        "batch_normalization"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "vgg16bn-cifar100mt"
+      ],
+      "relevance": "Explains the batch-normalized variant used by the VGG16BN test script.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2018.00781",
+      "title": "Multi-task Learning Using Uncertainty to Weigh Losses for Scene Geometry and Semantics",
+      "authors": [
+        "Roberto Cipolla",
+        "Yarin Gal",
+        "Alex Kendall"
+      ],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2018.00781",
+      "arxiv_id": "1705.07115",
+      "openalex_id": "https://openalex.org/W2963677766",
+      "landing_page": "https://doi.org/10.1109/CVPR.2018.00781",
+      "source_urls": [
+        "https://doi.org/10.1109/CVPR.2018.00781",
+        "https://openalex.org/W2963677766"
+      ],
+      "bibtex": "@inproceedings{Cipolla_2018, title={Multi-task Learning Using Uncertainty to Weigh Losses for Scene Geometry and Semantics}, url={http://dx.doi.org/10.1109/CVPR.2018.00781}, DOI={10.1109/cvpr.2018.00781}, booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Cipolla, Roberto and Gal, Yarin and Kendall, Alex}, year={2018}, month=jun, pages={7482–7491} }",
+      "relevance_tags": [
+        "baseline",
+        "adaptive_weighting",
+        "uncertainty_weighting"
+      ],
+      "baseline_links": [
+        "uncertainty"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the learned homoscedastic uncertainty weighting baseline used directly in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1711.02257",
+      "title": "GradNorm: Gradient Normalization for Adaptive Loss Balancing in Deep Multitask Networks",
+      "authors": [
+        "Zhao Chen",
+        "Vijay Badrinarayanan",
+        "Chen-Yu Lee",
+        "Andrew Rabinovich"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1711.02257",
+      "arxiv_id": "1711.02257",
+      "openalex_id": "https://openalex.org/W2767434619",
+      "landing_page": "https://doi.org/10.48550/arXiv.1711.02257",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.1711.02257",
+        "https://openalex.org/W2767434619"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1711.02257,\n  doi = {10.48550/ARXIV.1711.02257},\n  url = {https://arxiv.org/abs/1711.02257},\n  author = {Chen, Zhao and Badrinarayanan, Vijay and Lee, Chen-Yu and Rabinovich, Andrew},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {GradNorm: Gradient Normalization for Adaptive Loss Balancing in Deep Multitask Networks},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "adaptive_weighting",
+        "loss_balancing",
+        "gradient_norms"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Closely related adaptive loss-balancing method for multitask networks and a natural comparator for new weighting strategies.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2019.00197",
+      "title": "End-To-End Multi-Task Learning With Attention",
+      "authors": [
+        "Shikun Liu",
+        "Edward Johns",
+        "Andrew J. Davison"
+      ],
+      "year": 2019,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2019.00197",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2963430933",
+      "landing_page": "https://doi.org/10.1109/cvpr.2019.00197",
+      "source_urls": [
+        "https://doi.org/10.1109/cvpr.2019.00197",
+        "https://openalex.org/W2963430933"
+      ],
+      "bibtex": "@inproceedings{Liu_2019, title={End-To-End Multi-Task Learning With Attention}, url={http://dx.doi.org/10.1109/cvpr.2019.00197}, DOI={10.1109/cvpr.2019.00197}, booktitle={2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Liu, Shikun and Johns, Edward and Davison, Andrew J.}, year={2019}, month=jun, pages={1871–1880} }",
+      "relevance_tags": [
+        "baseline",
+        "dynamic_weight_average",
+        "mtl_architecture"
+      ],
+      "baseline_links": [
+        "dwa"
+      ],
+      "test_links": [],
+      "relevance": "MTAN paper that introduces Dynamic Weight Average, the exact DWA baseline named in the task description.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1810.04650",
+      "title": "Multi-Task Learning as Multi-Objective Optimization",
+      "authors": [
+        "Ozan Sener",
+        "Vladlen Koltun"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1810.04650",
+      "arxiv_id": "1810.04650",
+      "openalex_id": "https://openalex.org/W2890538051",
+      "landing_page": "https://doi.org/10.48550/arXiv.1810.04650",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.1810.04650",
+        "https://openalex.org/W2890538051"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1810.04650,\n  doi = {10.48550/ARXIV.1810.04650},\n  url = {https://arxiv.org/abs/1810.04650},\n  author = {Sener, Ozan and Koltun, Vladlen},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Multi-Task Learning as Multi-Objective Optimization},\n  publisher = {arXiv},\n  year = {2018},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "multi_objective_optimization",
+        "pareto_mtl"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Frames multitask training as Pareto optimization rather than scalar loss summation, directly relevant to designing improved combination rules.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2001.06782",
+      "title": "Gradient Surgery for Multi-Task Learning",
+      "authors": [
+        "Tianhe Yu",
+        "Saurabh Kumar",
+        "Abhishek Gupta",
+        "Sergey Levine",
+        "Karol Hausman",
+        "Chelsea Finn"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2001.06782",
+      "arxiv_id": "2001.06782",
+      "openalex_id": "https://openalex.org/W2997359900",
+      "landing_page": "https://doi.org/10.48550/arXiv.2001.06782",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2001.06782",
+        "https://openalex.org/W2997359900"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2001.06782,\n  doi = {10.48550/ARXIV.2001.06782},\n  url = {https://arxiv.org/abs/2001.06782},\n  author = {Yu, Tianhe and Kumar, Saurabh and Gupta, Abhishek and Levine, Sergey and Hausman, Karol and Finn, Chelsea},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Robotics (cs.RO), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Gradient Surgery for Multi-Task Learning},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "gradient_surgery",
+        "pcgrad"
+      ],
+      "baseline_links": [
+        "pcgrad"
+      ],
+      "test_links": [],
+      "relevance": "Direct source for the PCGrad baseline implemented in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2110.14048",
+      "title": "Conflict-Averse Gradient Descent for Multi-task Learning",
+      "authors": [
+        "Bo Liu",
+        "Xingchao Liu",
+        "Xiaojie Jin",
+        "Peter Stone",
+        "Qiang Liu"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2110.14048",
+      "arxiv_id": "2110.14048",
+      "openalex_id": "https://openalex.org/W3209347846",
+      "landing_page": "https://doi.org/10.48550/arXiv.2110.14048",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2110.14048",
+        "https://openalex.org/W3209347846"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2110.14048,\n  doi = {10.48550/ARXIV.2110.14048},\n  url = {https://arxiv.org/abs/2110.14048},\n  author = {Liu, Bo and Liu, Xingchao and Jin, Xiaojie and Stone, Peter and Liu, Qiang},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Conflict-Averse Gradient Descent for Multi-task Learning},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "gradient_conflict",
+        "multi_objective_optimization",
+        "cagrad"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Representative follow-up to PCGrad on conflict-aware gradient combination for multitask optimization.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2202.01017",
+      "title": "Multi-Task Learning as a Bargaining Game",
+      "authors": [
+        "Aviv Navon",
+        "Aviv Shamsian",
+        "Idan Achituve",
+        "Haggai Maron",
+        "Kenji Kawaguchi",
+        "Gal Chechik",
+        "Ethan Fetaya"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2202.01017",
+      "arxiv_id": "2202.01017",
+      "openalex_id": "https://openalex.org/W4225981399",
+      "landing_page": "https://doi.org/10.48550/arXiv.2202.01017",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2202.01017",
+        "https://openalex.org/W4225981399"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2202.01017,\n  doi = {10.48550/ARXIV.2202.01017},\n  url = {https://arxiv.org/abs/2202.01017},\n  author = {Navon, Aviv and Shamsian, Aviv and Achituve, Idan and Maron, Haggai and Kawaguchi, Kenji and Chechik, Gal and Fetaya, Ethan},\n  keywords = {Machine Learning (cs.LG), Computer Science and Game Theory (cs.GT), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Multi-Task Learning as a Bargaining Game},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "nash_mtl",
+        "gradient_combination",
+        "multi_objective_optimization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Recent principled alternative for combining task gradients when task objectives conflict.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2202.03091",
+      "title": "Auto-Lambda: Disentangling Dynamic Task Relationships",
+      "authors": [
+        "Shikun Liu",
+        "Stephen James",
+        "Andrew J. Davison",
+        "Edward Johns"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2202.03091",
+      "arxiv_id": "2202.03091",
+      "openalex_id": "https://openalex.org/W4225452291",
+      "landing_page": "https://doi.org/10.48550/arXiv.2202.03091",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2202.03091",
+        "https://openalex.org/W4225452291"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2202.03091,\n  doi = {10.48550/ARXIV.2202.03091},\n  url = {https://arxiv.org/abs/2202.03091},\n  author = {Liu, Shikun and James, Stephen and Davison, Andrew J. and Johns, Edward},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Auto-Lambda: Disentangling Dynamic Task Relationships},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "adaptive_weighting",
+        "meta_learning",
+        "task_relationships"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Meta-learned dynamic weighting paper directly relevant to discovering better fine/coarse loss schedules.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

@@ -1,0 +1,552 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-meanflow-perceptual-loss",
+  "task_folder": "tasks/cv-meanflow-perceptual-loss",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "perceptual auxiliary losses for flow-matching-based image generation",
+    "research_question": "Can adding perceptual losses to flow matching training improve FID on CIFAR-10 image generation with a DiT backbone?",
+    "local_sources": {
+      "config_path": "tasks/cv-meanflow-perceptual-loss/config.json",
+      "task_description_path": "tasks/cv-meanflow-perceptual-loss/task_description.md"
+    },
+    "notes": [
+      "The scaffold uses a task-specific MeanFlow/mean-velocity objective with JVP-based targets; no exact paper match was found for that exact MLS-Bench formulation, so related links use the closest flow-matching and rectified-flow literature.",
+      "The CIFAR-10 source resolved via citation lookup to a DOI-backed mirror of the classic technical report; this is recorded explicitly instead of hand-writing a non-DOI citation."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 3,
+    "baseline_links_found": 7,
+    "test_entries": 3,
+    "test_links_found": 15
+  },
+  "tests": [
+    {
+      "label": "train_small",
+      "cmd": "scripts/train_small.sh",
+      "package": "alphaflow-main",
+      "group": 1,
+      "compute": 1.0,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2210.02747",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.1109/ICCV51070.2023.00387",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.1007/978-3-031-72980-5_2",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Small-scale run of the same flow-matching, DiT-based, CIFAR-10 FID evaluation stack."
+    },
+    {
+      "label": "train_medium",
+      "cmd": "scripts/train_medium.sh",
+      "package": "alphaflow-main",
+      "group": 2,
+      "compute": 1.0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2210.02747",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.1109/ICCV51070.2023.00387",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.1007/978-3-031-72980-5_2",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Medium-scale run of the same flow-matching, DiT-based, CIFAR-10 FID evaluation stack."
+    },
+    {
+      "label": "train_large",
+      "cmd": "scripts/train_large.sh",
+      "package": "alphaflow-main",
+      "group": 3,
+      "compute": 1.0,
+      "time": "8:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2210.02747",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.1109/ICCV51070.2023.00387",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.1007/978-3-031-72980-5_2",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Large-scale run of the same flow-matching, DiT-based, CIFAR-10 FID evaluation stack."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "mse_base",
+      "implementation": "edits/mse_base.edit.py",
+      "labels": [
+        "velocity_regression",
+        "flow_matching"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2210.02747",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps to the standard flow-matching-style MSE regression objective on the predicted velocity field."
+    },
+    {
+      "name": "lpips_grad",
+      "implementation": "edits/lpips_grad.edit.py",
+      "labels": [
+        "velocity_regression",
+        "perceptual_loss",
+        "lpips"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.1801.03924",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1603.08155",
+          "role": "other"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1409.1556",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Baseline explicitly adds LPIPS on denoised images; VGG-feature perceptual-loss predecessors are linked for context."
+    },
+    {
+      "name": "lpips_spectral",
+      "implementation": "edits/lpips_spectral.edit.py",
+      "labels": [
+        "velocity_regression",
+        "perceptual_loss",
+        "lpips",
+        "gradient_loss"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.1801.03924",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1603.08155",
+          "role": "other"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1409.1556",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "LPIPS is paper-backed, but the specific Sobel-style gradient loss plus timestep-adaptive weighting appears task-specific rather than a clean reproduction of one named paper."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/ARXIV.2210.02747",
+      "title": "Flow Matching for Generative Modeling",
+      "authors": [
+        "Yaron Lipman",
+        "Ricky T. Q. Chen",
+        "Heli Ben-Hamu",
+        "Maximilian Nickel",
+        "Matt Le"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2210.02747",
+      "arxiv_id": "2210.02747",
+      "openalex_id": "https://openalex.org/W4303647933",
+      "landing_page": "https://doi.org/10.48550/ARXIV.2210.02747",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2210.02747",
+        "https://openalex.org/W4303647933"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2210.02747,\n  doi = {10.48550/ARXIV.2210.02747},\n  url = {https://arxiv.org/abs/2210.02747},\n  author = {Lipman, Yaron and Chen, Ricky T. Q. and Ben-Hamu, Heli and Nickel, Maximilian and Le, Matt},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Flow Matching for Generative Modeling},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "flow_matching",
+        "generative_modeling",
+        "baseline"
+      ],
+      "baseline_links": [
+        "mse_base"
+      ],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Primary paper for the task's flow-matching training setup and the closest exact citation for the MSE-only baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2209.03003",
+      "title": "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow",
+      "authors": [
+        "Xingchao Liu",
+        "Chengyue Gong",
+        "Qiang Liu"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2209.03003",
+      "arxiv_id": "2209.03003",
+      "openalex_id": "https://openalex.org/W4297676498",
+      "landing_page": "https://doi.org/10.48550/ARXIV.2209.03003",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2209.03003",
+        "https://openalex.org/W4297676498"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2209.03003,\n  doi = {10.48550/ARXIV.2209.03003},\n  url = {https://arxiv.org/abs/2209.03003},\n  author = {Liu, Xingchao and Gong, Chengyue and Liu, Qiang},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "rectified_flow",
+        "ode_sampling",
+        "flow_matching"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant background for the task's continuous-time flow formulation and Euler-style reverse integration.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/ICCV51070.2023.00387",
+      "title": "Scalable Diffusion Models with Transformers",
+      "authors": [
+        "William Peebles",
+        "Saining Xie"
+      ],
+      "year": 2023,
+      "venue": "ICCV",
+      "doi": "10.1109/ICCV51070.2023.00387",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4390872297",
+      "landing_page": "https://doi.org/10.1109/ICCV51070.2023.00387",
+      "source_urls": [
+        "https://doi.org/10.1109/ICCV51070.2023.00387",
+        "https://openalex.org/W4390872297"
+      ],
+      "bibtex": "@inproceedings{Peebles_2023, title={Scalable Diffusion Models with Transformers}, url={http://dx.doi.org/10.1109/ICCV51070.2023.00387}, DOI={10.1109/iccv51070.2023.00387}, booktitle={2023 IEEE/CVF International Conference on Computer Vision (ICCV)}, publisher={IEEE}, author={Peebles, William and Xie, Saining}, year={2023}, month=oct, pages={4172–4182} }",
+      "relevance_tags": [
+        "dit",
+        "transformer_backbone",
+        "architecture"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Best match for the task's SmallDiT/medium/large DiT architecture family.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1007/978-3-031-72980-5_2",
+      "title": "SiT: Exploring Flow and Diffusion-Based Generative Models with Scalable Interpolant Transformers",
+      "authors": [
+        "Nanye Ma",
+        "Mark Goldstein",
+        "Michael S. Albergo",
+        "Nicholas M. Boffi",
+        "Eric Vanden-Eijnden",
+        "Saining Xie"
+      ],
+      "year": 2024,
+      "venue": "ECCV",
+      "doi": "10.1007/978-3-031-72980-5_2",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4403840763",
+      "landing_page": "https://doi.org/10.1007/978-3-031-72980-5_2",
+      "source_urls": [
+        "https://doi.org/10.1007/978-3-031-72980-5_2",
+        "https://openalex.org/W4403840763"
+      ],
+      "bibtex": "@inbook{Ma_2024, title={SiT: Exploring Flow and Diffusion-Based Generative Models with Scalable Interpolant Transformers}, ISBN={9783031729805}, ISSN={1611-3349}, url={http://dx.doi.org/10.1007/978-3-031-72980-5_2}, DOI={10.1007/978-3-031-72980-5_2}, booktitle={Computer Vision – ECCV 2024}, publisher={Springer Nature Switzerland}, author={Ma, Nanye and Goldstein, Mark and Albergo, Michael S. and Boffi, Nicholas M. and Vanden-Eijnden, Eric and Xie, Saining}, year={2024}, pages={23–40} }",
+      "relevance_tags": [
+        "flow_transformer",
+        "dit",
+        "training_recipe"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Bridges transformer backbones with flow/diffusion interpolant training, closely matching the task's DiT-plus-flow setting.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1801.03924",
+      "title": "The Unreasonable Effectiveness of Deep Features as a Perceptual Metric",
+      "authors": [
+        "Richard Zhang",
+        "Phillip Isola",
+        "Alexei A. Efros",
+        "Eli Shechtman",
+        "Oliver Wang"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1801.03924",
+      "arxiv_id": "1801.03924",
+      "openalex_id": "https://openalex.org/W2783879794",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1801.03924",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1801.03924",
+        "https://openalex.org/W2783879794"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1801.03924,\n  doi = {10.48550/ARXIV.1801.03924},\n  url = {https://arxiv.org/abs/1801.03924},\n  author = {Zhang, Richard and Isola, Phillip and Efros, Alexei A. and Shechtman, Eli and Wang, Oliver},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Graphics (cs.GR), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {The Unreasonable Effectiveness of Deep Features as a Perceptual Metric},\n  publisher = {arXiv},\n  year = {2018},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "lpips",
+        "perceptual_loss",
+        "baseline"
+      ],
+      "baseline_links": [
+        "lpips_grad",
+        "lpips_spectral"
+      ],
+      "test_links": [],
+      "relevance": "Direct citation for the LPIPS perceptual loss used in the auxiliary-loss baselines.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1603.08155",
+      "title": "Perceptual Losses for Real-Time Style Transfer and Super-Resolution",
+      "authors": [
+        "Justin Johnson",
+        "Alexandre Alahi",
+        "Li Fei-Fei"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1603.08155",
+      "arxiv_id": "1603.08155",
+      "openalex_id": "https://openalex.org/W2950689937",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1603.08155",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1603.08155",
+        "https://openalex.org/W2950689937"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1603.08155,\n  doi = {10.48550/ARXIV.1603.08155},\n  url = {https://arxiv.org/abs/1603.08155},\n  author = {Johnson, Justin and Alahi, Alexandre and Fei-Fei, Li},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Perceptual Losses for Real-Time Style Transfer and Super-Resolution},\n  publisher = {arXiv},\n  year = {2016},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "perceptual_loss",
+        "vgg_features",
+        "image_synthesis"
+      ],
+      "baseline_links": [
+        "lpips_grad",
+        "lpips_spectral"
+      ],
+      "test_links": [],
+      "relevance": "Canonical precursor for using pretrained deep feature losses in image synthesis, relevant to denoised-image auxiliary losses in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1409.1556",
+      "title": "Very Deep Convolutional Networks for Large-Scale Image Recognition",
+      "authors": [
+        "Karen Simonyan",
+        "Andrew Zisserman"
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1409.1556",
+      "arxiv_id": "1409.1556",
+      "openalex_id": "https://openalex.org/W1686810756",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1409.1556",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1409.1556",
+        "https://openalex.org/W1686810756"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1409.1556,\n  doi = {10.48550/ARXIV.1409.1556},\n  url = {https://arxiv.org/abs/1409.1556},\n  author = {Simonyan, Karen and Zisserman, Andrew},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Very Deep Convolutional Networks for Large-Scale Image Recognition},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "vgg",
+        "feature_backbone",
+        "perceptual_loss"
+      ],
+      "baseline_links": [
+        "lpips_grad",
+        "lpips_spectral"
+      ],
+      "test_links": [],
+      "relevance": "The task description specifies LPIPS with VGG features; this is the relevant backbone citation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/ZP44CU3G",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB",
+      "doi": "10.57702/ZP44CU3G",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3118608800",
+      "landing_page": "https://doi.org/10.57702/ZP44CU3G",
+      "source_urls": [
+        "https://doi.org/10.57702/ZP44CU3G",
+        "https://openalex.org/W3118608800"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g,\n  doi = {10.57702/ZP44CU3G},\n  url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a},\n  author = {Krizhevsky, Alex},\n  keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images},\n  language = {en},\n  title = {Learning Multiple Layers of Features from Tiny Images},\n  publisher = {TIB},\n  year = {2024}\n}",
+      "relevance_tags": [
+        "cifar10",
+        "dataset",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Citation lookup resolved this DOI-backed mirror of the classic CIFAR technical report; it is the closest concrete paper-like source for the task's CIFAR-10 dataset.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1706.08500",
+      "title": "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium",
+      "authors": [
+        "Martin Heusel",
+        "Hubert Ramsauer",
+        "Thomas Unterthiner",
+        "Bernhard Nessler",
+        "Sepp Hochreiter"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.08500",
+      "arxiv_id": "1706.08500",
+      "openalex_id": "https://openalex.org/W2963981733",
+      "landing_page": "https://doi.org/10.48550/ARXIV.1706.08500",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1706.08500",
+        "https://openalex.org/W2963981733"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1706.08500,\n  doi = {10.48550/ARXIV.1706.08500},\n  url = {https://arxiv.org/abs/1706.08500},\n  author = {Heusel, Martin and Ramsauer, Hubert and Unterthiner, Thomas and Nessler, Bernhard and Hochreiter, Sepp},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "fid",
+        "evaluation_metric",
+        "benchmarking"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Original FID paper, directly relevant because the task evaluates models by FID.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2104.11222",
+      "title": "On Aliased Resizing and Surprising Subtleties in GAN Evaluation",
+      "authors": [
+        "Gaurav Parmar",
+        "Richard Zhang",
+        "Jun-Yan Zhu"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2104.11222",
+      "arxiv_id": "2104.11222",
+      "openalex_id": "https://openalex.org/W4285546176",
+      "landing_page": "https://doi.org/10.48550/ARXIV.2104.11222",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2104.11222",
+        "https://openalex.org/W4285546176"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2104.11222,\n  doi = {10.48550/ARXIV.2104.11222},\n  url = {https://arxiv.org/abs/2104.11222},\n  author = {Parmar, Gaurav and Zhang, Richard and Zhu, Jun-Yan},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Graphics (cs.GR), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {On Aliased Resizing and Surprising Subtleties in GAN Evaluation},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "clean_fid",
+        "evaluation",
+        "fid"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant to the task's use of clean-fid and the preprocessing subtleties behind FID computation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2206.00364",
+      "title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+      "authors": [
+        "Tero Karras",
+        "Miika Aittala",
+        "Timo Aila",
+        "Samuli Laine"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.00364",
+      "arxiv_id": "2206.00364",
+      "openalex_id": "https://openalex.org/W4281969232",
+      "landing_page": "https://doi.org/10.48550/ARXIV.2206.00364",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2206.00364",
+        "https://openalex.org/W4281969232"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00364,\n  doi = {10.48550/ARXIV.2206.00364},\n  url = {https://arxiv.org/abs/2206.00364},\n  author = {Karras, Tero and Aittala, Miika and Aila, Timo and Laine, Samuli},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Elucidating the Design Space of Diffusion-Based Generative Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "sampler_design",
+        "euler_sampling",
+        "fid"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant background for the task's short-step Euler sampling regime and its effect on FID.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

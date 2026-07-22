@@ -1,0 +1,524 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-data-augmentation",
+  "task_folder": "tasks/cv-data-augmentation",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "data augmentation strategy design for image classification",
+    "research_question": "Design a novel data augmentation strategy for image classification that improves test accuracy across different architectures and datasets.",
+    "local_sources": {
+      "config_path": "tasks/cv-data-augmentation/config.json",
+      "task_description_path": "tasks/cv-data-augmentation/task_description.md"
+    },
+    "notes": [
+      "Baselines and evaluation settings were read from the local config and task description.",
+      "The canonical CIFAR citation currently resolves through a DOI-backed archival record for Krizhevsky's original tiny-images technical report."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 6
+  },
+  "tests": [
+    {
+      "label": "resnet20-cifar10",
+      "cmd": "scripts/resnet20_cifar10.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Links the ResNet architecture paper and the canonical CIFAR source."
+    },
+    {
+      "label": "resnet56-cifar100",
+      "cmd": "scripts/resnet56_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Links the deeper CIFAR ResNet evaluation to the original ResNet and CIFAR sources."
+    },
+    {
+      "label": "mobilenetv2-fmnist",
+      "cmd": "scripts/mobilenetv2_fmnist.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2018.00474",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1708.07747",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Hidden test links the MobileNetV2 architecture and Fashion-MNIST dataset papers."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "cutout",
+      "implementation": "edits/cutout.edit.py",
+      "labels": [
+        "masking",
+        "occlusion"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1708.04552",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Baseline maps directly to the Cutout masking strategy."
+    },
+    {
+      "name": "randaugment",
+      "implementation": "edits/randaugment.edit.py",
+      "labels": [
+        "automated_augmentation"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvprw50498.2020.00359",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Baseline maps directly to RandAugment."
+    },
+    {
+      "name": "trivialaugment",
+      "implementation": "edits/trivialaugment.edit.py",
+      "labels": [
+        "automated_augmentation"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/iccv48922.2021.00081",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Baseline maps directly to TrivialAugmentWide / TrivialAugment."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.1708.04552",
+      "title": "Improved Regularization of Convolutional Neural Networks with Cutout",
+      "authors": [
+        "Terrance DeVries",
+        "Graham W. Taylor"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1708.04552",
+      "arxiv_id": "1708.04552",
+      "openalex_id": "https://openalex.org/W2746314669",
+      "landing_page": "https://doi.org/10.48550/arXiv.1708.04552",
+      "source_urls": [
+        "https://openalex.org/W2746314669",
+        "https://doi.org/10.48550/arXiv.1708.04552"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1708.04552, doi = {10.48550/ARXIV.1708.04552}, url = {https://arxiv.org/abs/1708.04552}, author = {DeVries, Terrance and Taylor, Graham W.}, keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Improved Regularization of Convolutional Neural Networks with Cutout}, publisher = {arXiv}, year = {2017}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "baseline",
+        "augmentation",
+        "masking",
+        "image_classification"
+      ],
+      "baseline_links": [
+        "cutout"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the Cutout baseline used in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvprw50498.2020.00359",
+      "title": "Randaugment: Practical automated data augmentation with a reduced search space",
+      "authors": [
+        "Ekin D. Cubuk",
+        "Barret Zoph",
+        "Jonathon Shlens",
+        "Quoc V. Le"
+      ],
+      "year": 2020,
+      "venue": "CVPRW",
+      "doi": "10.1109/cvprw50498.2020.00359",
+      "arxiv_id": "1909.13719",
+      "openalex_id": "https://openalex.org/W2993466051",
+      "landing_page": "https://doi.org/10.1109/CVPRW50498.2020.00359",
+      "source_urls": [
+        "https://openalex.org/W2993466051",
+        "https://doi.org/10.1109/CVPRW50498.2020.00359"
+      ],
+      "bibtex": "@inproceedings{Cubuk_2020, title={Randaugment: Practical automated data augmentation with a reduced search space}, url={http://dx.doi.org/10.1109/CVPRW50498.2020.00359}, DOI={10.1109/cvprw50498.2020.00359}, booktitle={2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)}, publisher={IEEE}, author={Cubuk, Ekin D. and Zoph, Barret and Shlens, Jonathon and Le, Quoc V.}, year={2020}, month=jun, pages={3008–3017} }",
+      "relevance_tags": [
+        "baseline",
+        "augmentation",
+        "automated_augmentation",
+        "image_classification"
+      ],
+      "baseline_links": [
+        "randaugment"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the RandAugment baseline used in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/iccv48922.2021.00081",
+      "title": "TrivialAugment: Tuning-free Yet State-of-the-Art Data Augmentation",
+      "authors": [
+        "Samuel G. Muller",
+        "Frank Hutter"
+      ],
+      "year": 2021,
+      "venue": "ICCV",
+      "doi": "10.1109/iccv48922.2021.00081",
+      "arxiv_id": "2103.10158",
+      "openalex_id": "https://openalex.org/W3138959866",
+      "landing_page": "https://doi.org/10.1109/ICCV48922.2021.00081",
+      "source_urls": [
+        "https://openalex.org/W3138959866",
+        "https://doi.org/10.1109/ICCV48922.2021.00081"
+      ],
+      "bibtex": "@inproceedings{Muller_2021, title={TrivialAugment: Tuning-free Yet State-of-the-Art Data Augmentation}, url={http://dx.doi.org/10.1109/ICCV48922.2021.00081}, DOI={10.1109/iccv48922.2021.00081}, booktitle={2021 IEEE/CVF International Conference on Computer Vision (ICCV)}, publisher={IEEE}, author={Muller, Samuel G. and Hutter, Frank}, year={2021}, month=oct, pages={754–762} }",
+      "relevance_tags": [
+        "baseline",
+        "augmentation",
+        "automated_augmentation",
+        "image_classification"
+      ],
+      "baseline_links": [
+        "trivialaugment"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the TrivialAugment baseline used in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1805.09501",
+      "title": "AutoAugment: Learning Augmentation Policies from Data",
+      "authors": [
+        "Ekin D. Cubuk",
+        "Barret Zoph",
+        "Dandelion Mane",
+        "Vijay Vasudevan",
+        "Quoc V. Le"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1805.09501",
+      "arxiv_id": "1805.09501",
+      "openalex_id": "https://openalex.org/W2804047946",
+      "landing_page": "https://doi.org/10.48550/arXiv.1805.09501",
+      "source_urls": [
+        "https://openalex.org/W2804047946",
+        "https://doi.org/10.48550/arXiv.1805.09501"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1805.09501, doi = {10.48550/ARXIV.1805.09501}, url = {https://arxiv.org/abs/1805.09501}, author = {Cubuk, Ekin D. and Zoph, Barret and Mane, Dandelion and Vasudevan, Vijay and Le, Quoc V.}, keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {AutoAugment: Learning Augmentation Policies from Data}, publisher = {arXiv}, year = {2018}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "augmentation",
+        "automated_augmentation",
+        "policy_search",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Canonical automated augmentation paper directly relevant to this task's search space.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1912.02781",
+      "title": "AugMix: A Simple Data Processing Method to Improve Robustness and Uncertainty",
+      "authors": [
+        "Dan Hendrycks",
+        "Norman Mu",
+        "Ekin D. Cubuk",
+        "Barret Zoph",
+        "Justin Gilmer",
+        "Balaji Lakshminarayanan"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1912.02781",
+      "arxiv_id": "1912.02781",
+      "openalex_id": "https://openalex.org/W2994088087",
+      "landing_page": "https://doi.org/10.48550/arXiv.1912.02781",
+      "source_urls": [
+        "https://openalex.org/W2994088087",
+        "https://doi.org/10.48550/arXiv.1912.02781"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1912.02781, doi = {10.48550/ARXIV.1912.02781}, url = {https://arxiv.org/abs/1912.02781}, author = {Hendrycks, Dan and Mu, Norman and Cubuk, Ekin D. and Zoph, Barret and Gilmer, Justin and Lakshminarayanan, Balaji}, keywords = {Machine Learning (stat.ML), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {AugMix: A Simple Data Processing Method to Improve Robustness and Uncertainty}, publisher = {arXiv}, year = {2019}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "augmentation",
+        "robustness",
+        "uncertainty",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant related work because the task explicitly allows AugMix-style policy design.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1710.09412",
+      "title": "mixup: Beyond Empirical Risk Minimization",
+      "authors": [
+        "Hongyi Zhang",
+        "Moustapha Cisse",
+        "Yann N. Dauphin",
+        "David Lopez-Paz"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1710.09412",
+      "arxiv_id": "1710.09412",
+      "openalex_id": "https://openalex.org/W2765407302",
+      "landing_page": "https://doi.org/10.48550/arXiv.1710.09412",
+      "source_urls": [
+        "https://openalex.org/W2765407302",
+        "https://doi.org/10.48550/arXiv.1710.09412"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1710.09412, doi = {10.48550/ARXIV.1710.09412}, url = {https://arxiv.org/abs/1710.09412}, author = {Zhang, Hongyi and Cisse, Moustapha and Dauphin, Yann N. and Lopez-Paz, David}, keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {mixup: Beyond Empirical Risk Minimization}, publisher = {arXiv}, year = {2017}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "augmentation",
+        "regularization",
+        "sample_mixing",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Important augmentation baseline family relevant to the task's broader design space.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/iccv.2019.00612",
+      "title": "CutMix: Regularization Strategy to Train Strong Classifiers With Localizable Features",
+      "authors": [
+        "Sangdoo Yun",
+        "Dongyoon Han",
+        "Sanghyuk Chun",
+        "Seong Joon Oh",
+        "Youngjoon Yoo",
+        "Junsuk Choe"
+      ],
+      "year": 2019,
+      "venue": "ICCV",
+      "doi": "10.1109/iccv.2019.00612",
+      "arxiv_id": "1905.04899",
+      "openalex_id": "https://openalex.org/W2992308087",
+      "landing_page": "https://doi.org/10.1109/ICCV.2019.00612",
+      "source_urls": [
+        "https://openalex.org/W2992308087",
+        "https://doi.org/10.1109/ICCV.2019.00612"
+      ],
+      "bibtex": "@inproceedings{Yun_2019, title={CutMix: Regularization Strategy to Train Strong Classifiers With Localizable Features}, url={http://dx.doi.org/10.1109/ICCV.2019.00612}, DOI={10.1109/iccv.2019.00612}, booktitle={2019 IEEE/CVF International Conference on Computer Vision (ICCV)}, publisher={IEEE}, author={Yun, Sangdoo and Han, Dongyoon and Chun, Sanghyuk and Oh, Seong Joon and Yoo, Youngjoon and Choe, Junsuk}, year={2019}, month=oct, pages={6022–6031} }",
+      "relevance_tags": [
+        "augmentation",
+        "masking",
+        "sample_mixing",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Strong related augmentation baseline that combines regional masking and label mixing.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1609/aaai.v34i07.7000",
+      "title": "Random Erasing Data Augmentation",
+      "authors": [
+        "Zhun Zhong",
+        "Liang Zheng",
+        "Guoliang Kang",
+        "Shaozi Li",
+        "Yi Yang"
+      ],
+      "year": 2020,
+      "venue": "AAAI",
+      "doi": "10.1609/aaai.v34i07.7000",
+      "arxiv_id": "1708.04896",
+      "openalex_id": "https://openalex.org/W2998508940",
+      "landing_page": "https://doi.org/10.1609/AAAI.V34I07.7000",
+      "source_urls": [
+        "https://openalex.org/W2998508940",
+        "https://doi.org/10.1609/AAAI.V34I07.7000"
+      ],
+      "bibtex": "@article{Zhong_2020, title={Random Erasing Data Augmentation}, volume={34}, ISSN={2159-5399}, url={http://dx.doi.org/10.1609/AAAI.V34I07.7000}, DOI={10.1609/aaai.v34i07.7000}, number={07}, journal={Proceedings of the AAAI Conference on Artificial Intelligence}, publisher={Association for the Advancement of Artificial Intelligence (AAAI)}, author={Zhong, Zhun and Zheng, Liang and Kang, Guoliang and Li, Shaozi and Yang, Yi}, year={2020}, month=apr, pages={13001–13008} }",
+      "relevance_tags": [
+        "augmentation",
+        "masking",
+        "occlusion",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Task description explicitly permits random erasing style augmentations, so this is directly relevant related work.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2016.90",
+      "arxiv_id": "1512.03385",
+      "openalex_id": "https://openalex.org/W2194775991",
+      "landing_page": "https://doi.org/10.1109/cvpr.2016.90",
+      "source_urls": [
+        "https://openalex.org/W2194775991",
+        "https://doi.org/10.1109/cvpr.2016.90"
+      ],
+      "bibtex": "@inproceedings{He_2016, title={Deep Residual Learning for Image Recognition}, url={http://dx.doi.org/10.1109/cvpr.2016.90}, DOI={10.1109/cvpr.2016.90}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian}, year={2016}, month=jun, pages={770–778} }",
+      "relevance_tags": [
+        "architecture",
+        "benchmark",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet20-cifar10",
+        "resnet56-cifar100"
+      ],
+      "relevance": "Architecture paper for the visible CIFAR ResNet evaluation tests.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2018.00474",
+      "title": "MobileNetV2: Inverted Residuals and Linear Bottlenecks",
+      "authors": [
+        "Mark Sandler",
+        "Andrew Howard",
+        "Menglong Zhu",
+        "Andrey Zhmoginov",
+        "Liang-Chieh Chen"
+      ],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2018.00474",
+      "arxiv_id": "1801.04381",
+      "openalex_id": "https://openalex.org/W2963163009",
+      "landing_page": "https://doi.org/10.1109/CVPR.2018.00474",
+      "source_urls": [
+        "https://openalex.org/W2963163009",
+        "https://doi.org/10.1109/CVPR.2018.00474"
+      ],
+      "bibtex": "@inproceedings{Sandler_2018, title={MobileNetV2: Inverted Residuals and Linear Bottlenecks}, url={http://dx.doi.org/10.1109/CVPR.2018.00474}, DOI={10.1109/cvpr.2018.00474}, booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Sandler, Mark and Howard, Andrew and Zhu, Menglong and Zhmoginov, Andrey and Chen, Liang-Chieh}, year={2018}, month=jun, pages={4510–4520} }",
+      "relevance_tags": [
+        "architecture",
+        "benchmark",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Architecture paper for the hidden MobileNetV2 evaluation test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/zp44cu3g",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB",
+      "doi": "10.57702/ZP44CU3G",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3118608800",
+      "landing_page": "https://doi.org/10.57702/zp44cu3g",
+      "source_urls": [
+        "https://openalex.org/W3118608800",
+        "https://doi.org/10.57702/zp44cu3g"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g, doi = {10.57702/ZP44CU3G}, url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a}, author = {Krizhevsky, Alex}, keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images}, language = {en}, title = {Learning Multiple Layers of Features from Tiny Images}, publisher = {TIB}, year = {2024} }",
+      "relevance_tags": [
+        "dataset",
+        "benchmark",
+        "cifar10",
+        "cifar100"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet20-cifar10",
+        "resnet56-cifar100"
+      ],
+      "relevance": "Canonical source for CIFAR-10 and CIFAR-100, which define two visible task evaluations.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1708.07747",
+      "title": "Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms",
+      "authors": [
+        "Han Xiao",
+        "Kashif Rasul",
+        "Roland Vollgraf"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1708.07747",
+      "arxiv_id": "1708.07747",
+      "openalex_id": "https://openalex.org/W2750384547",
+      "landing_page": "https://doi.org/10.48550/arXiv.1708.07747",
+      "source_urls": [
+        "https://openalex.org/W2750384547",
+        "https://doi.org/10.48550/arXiv.1708.07747"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1708.07747, doi = {10.48550/ARXIV.1708.07747}, url = {https://arxiv.org/abs/1708.07747}, author = {Xiao, Han and Rasul, Kashif and Vollgraf, Roland}, keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms}, publisher = {arXiv}, year = {2017}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "dataset",
+        "benchmark",
+        "fashion_mnist",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Dataset paper for the hidden Fashion-MNIST evaluation test.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

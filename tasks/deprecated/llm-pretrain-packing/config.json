@@ -1,0 +1,57 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train.sh",
+      "label": "depth-4",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "package": "nanochat"
+    }
+  ],
+  "baselines": {
+    "best_fit": {
+      "edit_ops": "edits/best_fit.edit.py"
+    },
+    "first_fit_decreasing": {
+      "edit_ops": "edits/first_fit_decreasing.edit.py"
+    },
+    "spfhp": {
+      "edit_ops": "edits/spfhp.edit.py"
+    },
+    "multipack_split": {
+      "edit_ops": "edits/multipack_split.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "nanochat/nanochat/custom_dataloader.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 69,
+          "end": 140
+        }
+      ]
+    },
+    {
+      "filename": "nanochat/nanochat/dataloader.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

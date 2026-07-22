@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "rl-offpolicy-continuous",
+  "task_folder": "tasks/rl-offpolicy-continuous",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/rl-offpolicy-continuous/config.json",
+      "task_description_path": "tasks/rl-offpolicy-continuous/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "halfcheetah-v4",
+      "cmd": "scripts/halfcheetah.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.33,
+      "time": "05:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "reacher-v4",
+      "cmd": "scripts/reacher.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.33,
+      "time": "05:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "ant-v4",
+      "cmd": "scripts/ant.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.5,
+      "time": "06:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ddpg",
+      "implementation": "edits/ddpg.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "td3",
+      "implementation": "edits/td3.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "sac",
+      "implementation": "edits/sac.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

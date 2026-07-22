@@ -1,0 +1,4 @@
+timestamp,model,is_final,seed,elapsed_antigen_fold,elapsed_temporal,elapsed_epitope_group,aar_epitope_group,rmsd_epitope_group,tm_score_epitope_group,aar_antigen_fold,rmsd_antigen_fold,tm_score_antigen_fold,aar_temporal,rmsd_temporal,tm_score_temporal
+2026-05-04T12:57:08.264470+00:00,baseline:diffab,true,42,7466,7403,7483,0.2,2.57,0.28,0.23,2.16,0.29,0.19,2.89,0.24
+2026-05-04T11:23:04.313273+00:00,baseline:dymean,true,42,1963,1962,1949,0.39,2.15,0.22,0.38,2.2,0.21,0.32,2.63,0.19
+2026-05-04T11:44:04.781917+00:00,baseline:mean,true,42,1069,1062,1046,0.390453,1.932789,0.19549,0.388345,1.928688,0.20201,0.327172,2.163106,0.183591

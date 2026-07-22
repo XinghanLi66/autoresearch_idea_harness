@@ -1,0 +1,4 @@
+timestamp,model,is_final,seed,fid,best_fid,fid_train_small,best_fid_train_small,fid_train_medium,best_fid_train_medium,fid_train_large,best_fid_train_large,elapsed_train_small,elapsed_train_medium,elapsed_train_large
+2026-04-08T20:21:19.237614+00:00,baseline:alphaflow,true,42,48.27,48.62,,,,,,,3816,6389,5339
+2026-04-08T20:41:29.108128+00:00,baseline:meanflow,true,42,41.03,41.81,,,,,,,5025,12,5408
+2026-04-08T19:59:06.499100+00:00,baseline:pureflow,true,42,85.1,86.21,,,,,,,2475,5338,4778

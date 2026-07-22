@@ -1,0 +1,299 @@
+{
+  "schema_version": "1.0",
+  "task_name": "dlm-dkv-policy",
+  "task_folder": "tasks/dlm-dkv-policy",
+  "task_metadata": {
+    "status": "updated",
+    "notes": [
+      "The baseline surface uses one shared LLaDA denoising rollout with paper-backed cache-plan mechanisms mapped onto common hooks, not a menu of black-box backends.",
+      "Tests use benchmark-native final scores on MATH-500, HumanEval, and ARC-Challenge/lm-eval style workloads."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 4,
+    "paper_backed_baselines": 3,
+    "baseline_links_found": 4,
+    "test_entries": 3,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "math",
+      "cmd": "scripts/math.sh",
+      "package": "dLLM-cache",
+      "group": 1,
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2103.03874",
+          "role": "benchmark"
+        }
+      ]
+    },
+    {
+      "label": "humaneval",
+      "cmd": "scripts/humaneval.sh",
+      "package": "dLLM-cache",
+      "group": 2,
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2107.03374",
+          "role": "benchmark"
+        }
+      ]
+    },
+    {
+      "label": "lm-eval",
+      "cmd": "scripts/lm_eval.sh",
+      "package": "dLLM-cache",
+      "group": 3,
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1803.05457",
+          "role": "benchmark"
+        }
+      ]
+    }
+  ],
+  "baselines": [
+    {
+      "name": "vanilla_uncached",
+      "implementation": "edits/vanilla_uncached.edit.py",
+      "labels": [
+        "control"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2502.09992",
+          "role": "model_family"
+        }
+      ],
+      "status": "control",
+      "notes": "No-cache LLaDA control used to anchor cache-consistency quality."
+    },
+    {
+      "name": "dllm_cache",
+      "implementation": "edits/dllm_cache.edit.py",
+      "labels": [
+        "published",
+        "official-repo"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2506.06295",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "official_repo_snapshot",
+      "notes": "Official dLLM-Cache refresh/reuse mechanism mapped onto the shared cache-plan hooks."
+    },
+    {
+      "name": "d2cache",
+      "implementation": "edits/d2cache.edit.py",
+      "labels": [
+        "published",
+        "official-repo"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2509.23094",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "official_repo_snapshot",
+      "notes": "Official d2Cache active-query, attention-rollout, and certainty-prior mechanism mapped onto the shared cache-plan hooks with one fixed parameterization across workloads, not a Math-500-specific retuned setting."
+    },
+    {
+      "name": "elastic_cache",
+      "implementation": "edits/elastic_cache.edit.py",
+      "labels": [
+        "published",
+        "official-repo"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2510.14973",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "official_repo_snapshot",
+      "notes": "Official Elastic-Cache tracked-token and attention-similarity reset mechanism mapped onto the shared cache-plan hooks."
+    }
+  ],
+  "screened_not_selected": [
+    {
+      "name": "dKV-Cache",
+      "paper_id": "arxiv:2505.15781",
+      "reason": "Runnable code exists, but the inspected repository snapshot did not include a license file suitable for task-local vendoring."
+    },
+    {
+      "name": "Sparse-dLLM",
+      "paper_id": "arxiv:2508.02558",
+      "reason": "The inspected repository snapshot was license-ambiguous and requires a sparse-attention surface outside the current KV-cache policy hook."
+    },
+    {
+      "name": "SparseD",
+      "paper_id": "arxiv:2509.24014",
+      "reason": "Related sparse-attention acceleration method, but it requires a sparse-attention/kernel surface outside the current cache-policy hook."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "arxiv:2502.09992",
+      "title": "Large Language Diffusion Models",
+      "year": 2025,
+      "bibtex": "@misc{nie2025largelanguagediffusionmodels,title={Large Language Diffusion Models},year={2025},eprint={2502.09992},archivePrefix={arXiv}}",
+      "landing_page": "https://arxiv.org/abs/2502.09992",
+      "source_urls": [
+        "https://arxiv.org/abs/2502.09992",
+        "https://github.com/ML-GSAI/LLaDA"
+      ],
+      "baseline_links": [
+        "vanilla_uncached"
+      ],
+      "test_links": [],
+      "relevance": "Host diffusion language-model family for the task."
+    },
+    {
+      "paper_id": "arxiv:2506.06295",
+      "title": "dLLM-Cache: Accelerating Diffusion Large Language Models with Adaptive Caching",
+      "year": 2025,
+      "bibtex": "@misc{liu2025dllmcache,title={dLLM-Cache: Accelerating Diffusion Large Language Models with Adaptive Caching},year={2025},eprint={2506.06295},archivePrefix={arXiv}}",
+      "landing_page": "https://arxiv.org/abs/2506.06295",
+      "source_urls": [
+        "https://arxiv.org/abs/2506.06295",
+        "https://github.com/maomaocun/dLLM-Cache"
+      ],
+      "baseline_links": [
+        "dllm_cache"
+      ],
+      "test_links": [],
+      "relevance": "Official adaptive cache baseline."
+    },
+    {
+      "paper_id": "arxiv:2509.23094",
+      "title": "d2Cache: Accelerating Diffusion-Based LLMs via Dual Adaptive Caching",
+      "year": 2025,
+      "bibtex": "@misc{jiang2025d2cache,title={d2Cache: Accelerating Diffusion-Based LLMs via Dual Adaptive Caching},year={2025},eprint={2509.23094},archivePrefix={arXiv}}",
+      "landing_page": "https://arxiv.org/abs/2509.23094",
+      "source_urls": [
+        "https://arxiv.org/abs/2509.23094",
+        "https://github.com/Kamichanw/d2Cache"
+      ],
+      "baseline_links": [
+        "d2cache"
+      ],
+      "test_links": [],
+      "relevance": "Official dual adaptive cache baseline."
+    },
+    {
+      "paper_id": "arxiv:2510.14973",
+      "title": "Elastic-Cache",
+      "year": 2025,
+      "bibtex": "@misc{elasticcache2025,title={Elastic-Cache},year={2025},eprint={2510.14973},archivePrefix={arXiv}}",
+      "landing_page": "https://arxiv.org/abs/2510.14973",
+      "source_urls": [
+        "https://arxiv.org/abs/2510.14973",
+        "https://github.com/VILA-Lab/Elastic-Cache"
+      ],
+      "baseline_links": [
+        "elastic_cache"
+      ],
+      "test_links": [],
+      "relevance": "Official sliding-window elastic cache baseline."
+    },
+    {
+      "paper_id": "arxiv:2505.15781",
+      "title": "dKV-Cache: The Cache for Diffusion Language Models",
+      "year": 2025,
+      "bibtex": "@misc{ma2025dkvcache,title={dKV-Cache: The Cache for Diffusion Language Models},year={2025},eprint={2505.15781},archivePrefix={arXiv}}",
+      "landing_page": "https://arxiv.org/abs/2505.15781",
+      "source_urls": [
+        "https://arxiv.org/abs/2505.15781",
+        "https://github.com/horseee/dKV-Cache"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Screened related cache method; not vendored because of license uncertainty in the inspected source snapshot."
+    },
+    {
+      "paper_id": "arxiv:2508.02558",
+      "title": "Sparse-dLLM: Accelerating Diffusion LLMs with Dynamic Cache Eviction",
+      "year": 2025,
+      "bibtex": "@misc{song2025sparsedllm,title={Sparse-dLLM: Accelerating Diffusion LLMs with Dynamic Cache Eviction},year={2025},eprint={2508.02558},archivePrefix={arXiv}}",
+      "landing_page": "https://arxiv.org/abs/2508.02558",
+      "source_urls": [
+        "https://arxiv.org/abs/2508.02558"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Screened related cache/eviction method."
+    },
+    {
+      "paper_id": "arxiv:2509.24014",
+      "title": "SparseD: Sparse Attention for Diffusion Language Models",
+      "year": 2025,
+      "bibtex": "@misc{wang2025sparsed,title={SparseD: Sparse Attention for Diffusion Language Models},year={2025},eprint={2509.24014},archivePrefix={arXiv}}",
+      "landing_page": "https://arxiv.org/abs/2509.24014",
+      "source_urls": [
+        "https://arxiv.org/abs/2509.24014",
+        "https://github.com/INV-WZQ/SparseD"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Screened related sparse-attention acceleration method outside the current cache-policy hook surface."
+    },
+        {
+            "paper_id": "arxiv:2103.03874",
+            "title": "Measuring Mathematical Problem Solving With the MATH Dataset",
+            "year": 2021,
+            "bibtex": "@misc{hendrycks2021measuringmathematicalproblemsolving,title={Measuring Mathematical Problem Solving With the MATH Dataset},year={2021},eprint={2103.03874},archivePrefix={arXiv}}",
+            "landing_page": "https://arxiv.org/abs/2103.03874",
+            "source_urls": [
+                "https://arxiv.org/abs/2103.03874",
+                "https://huggingface.co/datasets/HuggingFaceH4/MATH-500"
+            ],
+            "baseline_links": [],
+            "test_links": [
+                "math"
+            ],
+            "relevance": "MATH-500 final-answer workload source."
+        },
+        {
+            "paper_id": "arxiv:2107.03374",
+            "title": "Evaluating Large Language Models Trained on Code",
+            "year": 2021,
+            "bibtex": "@misc{chen2021evaluatinglargelanguagemodelstrainedcode,title={Evaluating Large Language Models Trained on Code},year={2021},eprint={2107.03374},archivePrefix={arXiv}}",
+            "landing_page": "https://arxiv.org/abs/2107.03374",
+            "source_urls": [
+                "https://arxiv.org/abs/2107.03374",
+                "https://huggingface.co/datasets/openai_humaneval"
+            ],
+            "baseline_links": [],
+            "test_links": [
+                "humaneval"
+            ],
+            "relevance": "HumanEval pass@1 workload source."
+        },
+        {
+            "paper_id": "arxiv:1803.05457",
+            "title": "Think you have Solved Question Answering? Try ARC, the AI2 Reasoning Challenge",
+            "year": 2018,
+            "bibtex": "@misc{clark2018thinksolvedquestionanswering,title={Think you have Solved Question Answering? Try ARC, the AI2 Reasoning Challenge},year={2018},eprint={1803.05457},archivePrefix={arXiv}}",
+            "landing_page": "https://arxiv.org/abs/1803.05457",
+            "source_urls": [
+                "https://arxiv.org/abs/1803.05457",
+                "https://huggingface.co/datasets/allenai/ai2_arc"
+            ],
+            "baseline_links": [],
+            "test_links": [
+                "lm-eval"
+            ],
+            "relevance": "ARC-Challenge multiple-choice workload source for the lm-eval-style setting."
+        }
+  ]
+}

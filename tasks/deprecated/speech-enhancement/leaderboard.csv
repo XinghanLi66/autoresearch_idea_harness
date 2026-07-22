@@ -1,0 +1,10 @@
+timestamp,model,is_final,seed,si_snr_voicebank-demand,pesq_voicebank-demand,stoi_voicebank-demand,elapsed_voicebank-demand,si_snr_noisy-vctk-56spk,pesq_noisy-vctk-56spk,stoi_noisy-vctk-56spk,elapsed_noisy-vctk-56spk,si_snr_librimix-2spk,pesq_librimix-2spk,stoi_librimix-2spk,elapsed_librimix-2spk
+2026-04-05T16:59:27.804908+00:00,baseline:dptnet,true,42,19.0396,2.4822,0.9362,15625,18.9924,2.4445,0.937,15416,10.2331,1.775,0.9127,11009
+2026-04-05T23:44:56.807214+00:00,baseline:conv_tasnet,true,42,19.5361,2.6826,0.9432,14029,18.8452,2.7364,0.9431,13912,12.6072,2.1896,0.9369,10693
+2026-04-05T23:44:56.807214+00:00,baseline:dccrn,true,42,18.665,2.6142,0.9393,,18.6788,2.7104,0.9411,,12.3006,2.2997,0.937,5843
+2026-04-13T09:59:59.640595+00:00,baseline:dptnet,false,42,15.9745,2.1329,0.9241,16984,14.7935,2.102,0.9189,17061,,,,
+2026-04-13T18:27:20.484884+00:00,baseline:dptnet,false,42,19.0036,2.5113,0.9363,16710,18.8128,2.5329,0.9371,17020,,,,
+2026-04-19T23:29:37.637241+00:00,baseline:dccrn,false,42,18.857,2.6158,0.9373,1467,18.3427,2.6253,0.9393,1459,12.3146,2.3031,0.9372,5906
+2026-04-20T03:38:04.246416+00:00,baseline:dptnet,false,42,,,,,,,,,,,,
+2026-04-20T06:24:22.363516+00:00,baseline:conv_tasnet,false,42,19.5549,2.718,0.9414,15004,10.5109,2.2674,0.9314,14984,,,,
+2026-04-21T13:37:46.435169+00:00,baseline:dptnet,false,42,,,,,,,,,,,,

@@ -1,0 +1,517 @@
+{
+  "schema_version": "1.0",
+  "task_name": "causal-observational-linear-non-gaussian",
+  "task_folder": "tasks/causal-observational-linear-non-gaussian",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "causal discovery for observational linear non-Gaussian structural equation models",
+    "research_question": "Design a causal discovery algorithm that more accurately recovers DAG structure from purely observational linear non-Gaussian acyclic data.",
+    "local_sources": {
+      "config_path": "tasks/causal-observational-linear-non-gaussian/config.json",
+      "task_description_path": "tasks/causal-observational-linear-non-gaussian/task_description.md"
+    },
+    "notes": [
+      "The task_description lists ER15, ER50-LowSample, and ER20-Dense scenarios, but only the five config/stub test commands are mirrored in tests as required by the format.",
+      "All three configured baselines map to named LiNGAM-family papers."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 5,
+    "test_links_found": 10
+  },
+  "tests": [
+    {
+      "label": "ER10",
+      "cmd": "scripts/eval_er10.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "openalex:W2151226328",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Synthetic observational LiNGAM recovery benchmark on a small Erdos-Renyi DAG."
+    },
+    {
+      "label": "SF12",
+      "cmd": "scripts/eval_sf12.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "openalex:W2151226328",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1126/science.286.5439.509",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "LiNGAM recovery benchmark instantiated on a Barabasi-Albert scale-free graph family."
+    },
+    {
+      "label": "ER30",
+      "cmd": "scripts/eval_er30.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "openalex:W2151226328",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "pmid:24102128",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Larger observational LiNGAM setting where pairwise likelihood-ratio methods are directly relevant."
+    },
+    {
+      "label": "ER50",
+      "cmd": "scripts/eval_er50.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "openalex:W2151226328",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "pmid:24102128",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Higher-dimensional observational LiNGAM benchmark; pairwise likelihood-ratio work is especially relevant in low-sample or noisier regimes."
+    },
+    {
+      "label": "SF100",
+      "cmd": "scripts/eval_sf100.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "3:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "openalex:W2151226328",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1126/science.286.5439.509",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "pmid:24102128",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Hidden large-scale scale-free LiNGAM benchmark combining the task model assumptions with a Barabasi-Albert graph prior."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "icalingam",
+      "implementation": "edits/icalingam.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "openalex:W2151226328",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the ICA-based LiNGAM baseline named in the task stub and baseline edit."
+    },
+    {
+      "name": "directlingam",
+      "implementation": "edits/directlingam.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1101.2489",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the DirectLiNGAM baseline implemented in the edit file."
+    },
+    {
+      "name": "rcd",
+      "implementation": "edits/rcd.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "openalex:W2999813118",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the Repetitive Causal Discovery baseline implemented in the edit file."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "openalex:W2151226328",
+      "title": "A Linear Non-Gaussian Acyclic Model for Causal Discovery",
+      "authors": [
+        "Shohei Shimizu",
+        "Patrik O. Hoyer",
+        "Aapo Hyvarinen",
+        "Antti J. Kerminen"
+      ],
+      "year": 2006,
+      "venue": "Journal of Machine Learning Research",
+      "doi": null,
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2151226328",
+      "landing_page": "https://openalex.org/W2151226328",
+      "source_urls": [
+        "https://openalex.org/W2151226328",
+        "https://academictorrents.com/details/93d1e449f56dc5ca9bd39f5675da569323b8865f"
+      ],
+      "bibtex": "@article{Shimizu2006LinearNonGaussian, title={A Linear Non-Gaussian Acyclic Model for Causal Discovery}, author={Shimizu, Shohei and Hoyer, Patrik O and Hyvarinen, Aapo and Kerminen, Antti}, journal={Journal of Machine Learning Research}, volume={7}, pages={2003--2030}, year={2006} }",
+      "relevance_tags": [
+        "lingam",
+        "baseline",
+        "benchmark"
+      ],
+      "baseline_links": [
+        "icalingam"
+      ],
+      "test_links": [
+        "ER10",
+        "SF12",
+        "ER30",
+        "ER50",
+        "SF100"
+      ],
+      "relevance": "Foundational LiNGAM paper defining the identifiable observational linear non-Gaussian setting used throughout the task.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "arxiv:1101.2489",
+      "title": "DirectLiNGAM: A direct method for learning a linear non-Gaussian structural equation model",
+      "authors": [
+        "Shohei Shimizu",
+        "T. Inazumi",
+        "Y. Sogawa",
+        "Aapo Hyvarinen",
+        "Y. Kawahara",
+        "T. Washio",
+        "Patrik Hoyer",
+        "K. Bollen"
+      ],
+      "year": 2011,
+      "venue": "Journal of Machine Learning Research",
+      "doi": null,
+      "arxiv_id": "1101.2489",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1101.2489",
+      "source_urls": [
+        "https://researchportal.helsinki.fi/en/publications/directlingam-a-direct-method-for-learning-a-linear-non-gaussian-s/",
+        "https://arxiv.org/abs/1101.2489"
+      ],
+      "bibtex": "@article{2945b64d036041d0ab6797541a698b32, title = \"DirectLiNGAM: A direct method for learning a linear non-Gaussian structural equation model\", keywords = \"113 Computer and information sciences\", author = \"Shohei Shimizu and T Inazumi and Y Sogawa and Aapo Hyv{\\\"a}rinen and Y Kawahara and T Washio and Patrik Hoyer and K Bollen\", year = \"2011\", language = \"English\", volume = \"12\", journal = \"Journal of Machine Learning Research\", issn = \"1532-4435\", publisher = \"Microtome Publishing\" }",
+      "relevance_tags": [
+        "lingam",
+        "baseline",
+        "causal_ordering"
+      ],
+      "baseline_links": [
+        "directlingam"
+      ],
+      "test_links": [],
+      "relevance": "DirectLiNGAM is one of the exact configured baselines and a core reference point for stronger observational LiNGAM estimators.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "openalex:W2999813118",
+      "title": "RCD: Repetitive causal discovery of linear non-Gaussian acyclic models with latent confounders",
+      "authors": [
+        "Takashi Nicholas Maeda",
+        "Shohei Shimizu"
+      ],
+      "year": 2020,
+      "venue": "Proceedings of the Twenty Third International Conference on Artificial Intelligence and Statistics",
+      "doi": null,
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2999813118",
+      "landing_page": "https://proceedings.mlr.press/v108/maeda20a.html",
+      "source_urls": [
+        "https://proceedings.mlr.press/v108/maeda20a.html",
+        "https://openalex.org/W2999813118"
+      ],
+      "bibtex": "@InProceedings{pmlr-v108-maeda20a, title = {RCD: Repetitive causal discovery of linear non-Gaussian acyclic models with latent confounders}, author = {Maeda, Takashi Nicholas and Shimizu, Shohei}, booktitle = {Proceedings of the Twenty Third International Conference on Artificial Intelligence and Statistics}, pages = {735--745}, year = {2020}, editor = {Chiappa, Silvia and Calandra, Roberto}, volume = {108}, series = {Proceedings of Machine Learning Research}, month = {26--28 Aug}, publisher = {PMLR}, pdf = {http://proceedings.mlr.press/v108/maeda20a/maeda20a.pdf}, url = {https://proceedings.mlr.press/v108/maeda20a.html} }",
+      "relevance_tags": [
+        "lingam",
+        "baseline",
+        "latent_confounders"
+      ],
+      "baseline_links": [
+        "rcd"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the configured RCD baseline edit.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "pmid:24102128",
+      "title": "Pairwise Likelihood Ratios for Estimation of Non-Gaussian Structural Equation Models",
+      "authors": [
+        "Aapo Hyvarinen",
+        "Stephen M. Smith"
+      ],
+      "year": 2013,
+      "venue": "Journal of Machine Learning Research",
+      "doi": null,
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://pubmed.ncbi.nlm.nih.gov/24102128/",
+      "source_urls": [
+        "https://researchportal.helsinki.fi/en/publications/pairwise-likelihood-ratios-for-estimation-of-non-gaussian-structu/",
+        "https://pubmed.ncbi.nlm.nih.gov/24102128/"
+      ],
+      "bibtex": "@article{7f89f402d97b4de9a2987008785ed940, title = \"Pairwise Likelihood Ratios for Estimation of Non-Gaussian Structural Equation Models\", keywords = \"structural equation model, Bayesian network, non-Gaussianity, causality, independent component analysis, INDEPENDENT COMPONENT ANALYSIS, BLIND SEPARATION, BRAIN, 113 Computer and information sciences\", author = \"Aapo Hyv{\\\"a}rinen and Smith, {Stephen M.}\", year = \"2013\", month = jan, language = \"English\", volume = \"14\", pages = \"111--152\", journal = \"Journal of Machine Learning Research\", issn = \"1532-4435\", publisher = \"Microtome Publishing\" }",
+      "relevance_tags": [
+        "lingam",
+        "observational",
+        "high_dimensional"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "ER30",
+        "ER50",
+        "SF100"
+      ],
+      "relevance": "Introduces pairwise likelihood-ratio estimators that remain relevant for larger observational LiNGAM settings and small-sample regimes.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1162/NECO_a_00533",
+      "title": "ParceLiNGAM: A causal ordering method robust against latent confounders",
+      "authors": [
+        "Tatsuya Tashiro",
+        "Shohei Shimizu",
+        "Aapo Hyvarinen",
+        "Takashi Washio"
+      ],
+      "year": 2014,
+      "venue": "Neural Computation",
+      "doi": "10.1162/NECO_a_00533",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1162/NECO_a_00533",
+      "source_urls": [
+        "https://researchportal.helsinki.fi/en/publications/parcelingam-a-causal-ordering-method-robust-against-latent-confou/",
+        "https://doi.org/10.1162/NECO_a_00533"
+      ],
+      "bibtex": "@article{f8bb6bd4ab7545ccac528d1d5ab07969, title = \"ParceLiNGAM: A causal ordering method robust against latent confounders\", author = \"Tatsuya Tashiro and Shohei Shimizu and Aapo Hyv{\\\"a}rinen and Takashi Washio\", year = \"2014\", month = feb, doi = \"10.1162/NECO_a_00533\", language = \"English\", volume = \"26\", pages = \"57--83\", journal = \"Neural Computation\", issn = \"0899-7667\", publisher = \"MIT Press Journals\", number = \"1\" }",
+      "relevance_tags": [
+        "lingam",
+        "latent_confounders",
+        "causal_ordering"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant LiNGAM-family extension focused on robustness to latent confounding, closely related to the task's RCD baseline family.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1016/j.jspi.2006.01.017",
+      "title": "Use of non-normality in structural equation modeling: Application to direction of causation",
+      "authors": [
+        "Aapo Hyvarinen",
+        "Shohei Shimizu",
+        "Patrik O. Hoyer"
+      ],
+      "year": 2006,
+      "venue": "Journal of Statistical Planning and Inference",
+      "doi": "10.1016/j.jspi.2006.01.017",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1016/j.jspi.2006.01.017",
+      "source_urls": [
+        "https://researchportal.helsinki.fi/en/publications/use-of-non-normality-in-structural-equation-modeling-application-2/",
+        "https://doi.org/10.1016/j.jspi.2006.01.017"
+      ],
+      "bibtex": "@article{6ff08d0b73d745ff949d4ecf7cf66d98, title = \"Use of non-normality in structural equation modeling: Application to direction of causation\", author = \"Aapo Hyv{\\\"a}rinen and Shohei Shimizu and Patrik O Hoyer\", year = \"2006\", month = nov, doi = \"10.1016/j.jspi.2006.01.017\", language = \"English\", volume = \"138\", pages = \"148--160\", journal = \"Journal of Statistical Planning and Inference\", issn = \"0378-3758\", publisher = \"Elsevier\", number = \"1\" }",
+      "relevance_tags": [
+        "identifiability",
+        "non_gaussianity",
+        "causal_direction"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Early identifiability result showing how non-Gaussianity can orient causal relations beyond covariance-only SEMs.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "openalex:W2165582599",
+      "title": "Nonlinear causal discovery with additive noise models",
+      "authors": [
+        "Patrik O. Hoyer",
+        "Dominik Janzing",
+        "Joris M. Mooij",
+        "Jonas Peters",
+        "Bernhard Scholkopf"
+      ],
+      "year": 2009,
+      "venue": "Advances in Neural Information Processing Systems 21",
+      "doi": null,
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2165582599",
+      "landing_page": "https://openalex.org/W2165582599",
+      "source_urls": [
+        "https://researchprofiles.ku.dk/en/publications/nonlinear-causal-discovery-with-additive-noise-models/",
+        "https://openalex.org/W2165582599"
+      ],
+      "bibtex": "@inbook{66c93c5a45d9451889fcacf6a1ec7fda, title = \"Nonlinear causal discovery with additive noise models\", author = \"P.O. Hoyer and D. Janzing and J.M. Mooij and J. Peters and B. Sch{\\\"o}lkopf\", year = \"2009\", language = \"English\", pages = \"689--696\", booktitle = \"Advances in Neural Information Processing Systems 21 (NIPS)\" }",
+      "relevance_tags": [
+        "causal_functional_models",
+        "observational",
+        "identifiability"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Important adjacent identifiable observational causal-discovery line; useful contrast to the strictly linear LiNGAM setting.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1007/s10994-006-6889-7",
+      "title": "The max-min hill-climbing Bayesian network structure learning algorithm",
+      "authors": [
+        "Ioannis Tsamardinos",
+        "Laura E. Brown",
+        "Constantin F. Aliferis"
+      ],
+      "year": 2006,
+      "venue": "Machine Learning",
+      "doi": "10.1007/s10994-006-6889-7",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1007/s10994-006-6889-7",
+      "source_urls": [
+        "https://experts.umn.edu/en/publications/the-max-min-hill-climbing-bayesian-network-structure-learning-alg/",
+        "https://doi.org/10.1007/s10994-006-6889-7"
+      ],
+      "bibtex": "@article{fd947c2701d64b079723d5d18251d23a, title = \"The max-min hill-climbing Bayesian network structure learning algorithm\", abstract = \"We present a new algorithm for Bayesian network structure learning, called Max-Min Hill-Climbing (MMHC). The algorithm combines ideas from local learning, constraint-based, and search-and-score techniques in a principled and effective way. It first reconstructs the skeleton of a Bayesian network and then performs a Bayesian-scoring greedy hill-climbing search to orient the edges. In our extensive empirical evaluation MMHC outperforms on average and in terms of various metrics several prototypical and state-of-the-art algorithms, namely the PC, Sparse Candidate, Three Phase Dependency Analysis, Optimal Reinsertion, Greedy Equivalence Search, and Greedy Search.\", keywords = \"Bayesian networks, Graphical models, Structure learning\", author = \"Ioannis Tsamardinos and Brown, {Laura E.} and Aliferis, {Constantin F.}\", year = \"2006\", month = oct, doi = \"10.1007/s10994-006-6889-7\", language = \"English (US)\", volume = \"65\", pages = \"31--78\", journal = \"Machine Learning\", issn = \"0885-6125\", publisher = \"Springer Netherlands\", number = \"1\" }",
+      "relevance_tags": [
+        "constraint_based",
+        "score_based",
+        "background"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Representative non-LiNGAM baseline family cited by the task background as limited to Markov equivalence classes under purely observational Gaussian-style assumptions.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1126/science.286.5439.509",
+      "title": "Emergence of scaling in random networks",
+      "authors": [
+        "Albert Laszlo Barabasi",
+        "Reka Albert"
+      ],
+      "year": 1999,
+      "venue": "Science",
+      "doi": "10.1126/science.286.5439.509",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1126/science.286.5439.509",
+      "source_urls": [
+        "https://pure.psu.edu/en/publications/emergence-of-scaling-in-random-networks-2/",
+        "https://doi.org/10.1126/science.286.5439.509"
+      ],
+      "bibtex": "@article{dec997a4dcf4425888ab0fade1b78626, title = \"Emergence of scaling in random networks\", abstract = \"Systems as diverse as genetic networks or the World Wide Web are best described as networks with complex topology. A common property of many large networks is that the vertex connectivities follow a scale-free power-law distribution. This feature was found to be a consequence of two generic mechanisms: (i) networks expand continuously by the addition of new vertices, and (ii) new vertices attach preferentially to sites that are already well connected.\", author = \"Barab{\\'a}si, {Albert L{\\'a}szl{\\'o}} and R{\\'e}ka Albert\", year = \"1999\", month = oct, day = \"15\", doi = \"10.1126/science.286.5439.509\", language = \"English (US)\", volume = \"286\", pages = \"509--512\", journal = \"Science\", issn = \"0036-8075\", publisher = \"American Association for the Advancement of Science\", number = \"5439\" }",
+      "relevance_tags": [
+        "graph_generator",
+        "scale_free",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "SF12",
+        "SF100"
+      ],
+      "relevance": "Canonical Barabasi-Albert scale-free graph reference matching the task's SF evaluation scenarios.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1145/2700476",
+      "title": "Causal Discovery with Continuous Additive Noise Models",
+      "authors": [
+        "Joris M. Mooij",
+        "Jonas Peters",
+        "Dominik Janzing",
+        "Jakob Zscheischler",
+        "Bernhard Scholkopf"
+      ],
+      "year": 2016,
+      "venue": "Journal of Machine Learning Research",
+      "doi": "10.1145/2700476",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1145/2700476",
+      "source_urls": [
+        "https://research-portal.uu.nl/en/publications/causal-discovery-with-continuous-additive-noise-models",
+        "https://doi.org/10.1145/2700476"
+      ],
+      "bibtex": "@article{fd6575e5102b4297821f7fb771e2667c, title = \"Causal Discovery with Continuous Additive Noise Models\", abstract = \"We consider the problem of learning causal graph structures from i.i.d. samples of a distribution generated by a Structural Equation Model with additive noise. For the bivariate case, the graph can be identified from the joint distribution under very mild conditions. The multivariate case can be solved consistently by examining conditional independences among regression residuals.\", author = \"J.M. Mooij and Peters, J. and Janzing, D. and Zscheischler, J. and B. Sch{\\\"o}lkopf\", year = \"2016\", month = jan, doi = \"10.1145/2700476\", language = \"English\", volume = \"15\", pages = \"303--351\", journal = \"Journal of Machine Learning Research\", issn = \"1533-7928\", publisher = \"JMLR. org\", number = \"1\" }",
+      "relevance_tags": [
+        "causal_functional_models",
+        "observational",
+        "identifiability"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Broader identifiable observational causal-discovery reference useful for situating LiNGAM against continuous additive-noise alternatives.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "arxiv:1205.2599",
+      "title": "On the Identifiability of the Post-Nonlinear Causal Model",
+      "authors": [
+        "Kun Zhang",
+        "Aapo Hyvarinen"
+      ],
+      "year": 2009,
+      "venue": "Proceedings of the Twenty-Fifth Conference on Uncertainty in Artificial Intelligence",
+      "doi": null,
+      "arxiv_id": "1205.2599",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1205.2599",
+      "source_urls": [
+        "https://dblp.org/rec/conf/uai/ZhangH09",
+        "https://arxiv.org/abs/1205.2599"
+      ],
+      "bibtex": "@inproceedings{conf/uai/ZhangH09, author = {Kun Zhang and Aapo Hyv{\\\"a}rinen}, title = {On the Identifiability of the Post-Nonlinear Causal Model}, booktitle = {UAI 2009, Proceedings of the Twenty-Fifth Conference on Uncertainty in Artificial Intelligence, Montreal, QC, Canada, June 18-21, 2009}, pages = {647--655}, year = {2009} }",
+      "relevance_tags": [
+        "causal_functional_models",
+        "observational",
+        "identifiability"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Another identifiable observational causal model that helps frame what is special about the linear non-Gaussian assumptions exploited by LiNGAM.",
+      "verified_by": "web_search"
+    }
+  ]
+}

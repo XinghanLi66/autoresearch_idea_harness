@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "dl-residual-connection",
+  "task_folder": "tasks/dl-residual-connection",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/dl-residual-connection/config.json",
+      "task_description_path": "tasks/dl-residual-connection/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "resnet20-cifar10",
+      "cmd": "scripts/resnet20_cifar10.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 0.5,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "resnet56-cifar100",
+      "cmd": "scripts/resnet56_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 0.5,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "resnet110-cifar100",
+      "cmd": "scripts/resnet110_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 0.5,
+      "time": "04:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "pre_activation",
+      "implementation": "edits/pre_activation.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gated_residual",
+      "implementation": "edits/gated_residual.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dense_shortcut",
+      "implementation": "edits/dense_shortcut.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

@@ -1,0 +1,12 @@
+#!/bin/bash
+# Train and evaluate protein encoder on Fluorescence intensity prediction (regression)
+cd /workspace
+
+python DeepProtein/custom_protein.py \
+    --dataset Fluorescence \
+    --data-dir /workspace/DeepProtein \
+    --epochs 100 \
+    --batch-size 32 \
+    --lr 1e-4 \
+    --seed ${SEED:-42} \
+    --output-dir ${OUTPUT_DIR}/${ENV}

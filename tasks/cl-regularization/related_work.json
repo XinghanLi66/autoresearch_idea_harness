@@ -1,0 +1,418 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cl-regularization",
+  "task_folder": "tasks/cl-regularization",
+  "task_metadata": {
+    "status": "missing_config",
+    "topic_inferred_from_task_name": true,
+    "research_topic": "continual learning regularization methods for mitigating catastrophic forgetting",
+    "research_question": "Develop or improve a regularization-based continual learning method that preserves prior-task performance while learning new tasks sequentially.",
+    "local_sources": {
+      "config_path": null,
+      "task_description_path": null
+    },
+    "notes": [
+      "Task directory has no config.json; topic was inferred from the directory name 'cl-regularization'.",
+      "Task directory has no task_description.md; no repo-local baseline or test metadata is available."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 0,
+    "baseline_links_found": 0,
+    "test_entries": 0,
+    "test_links_found": 0
+  },
+  "tests": [],
+  "baselines": [],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.1612.00796",
+      "title": "Overcoming catastrophic forgetting in neural networks",
+      "authors": [
+        "James Kirkpatrick",
+        "Razvan Pascanu",
+        "Neil Rabinowitz",
+        "Joel Veness",
+        "Guillaume Desjardins",
+        "Andrei A. Rusu",
+        "Kieran Milan",
+        "John Quan",
+        "Tiago Ramalho",
+        "Agnieszka Grabska-Barwinska",
+        "Demis Hassabis",
+        "Claudia Clopath",
+        "Dharshan Kumaran",
+        "Raia Hadsell"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1612.00796",
+      "arxiv_id": "1612.00796",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1612.00796",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1612.00796",
+        "https://arxiv.org/abs/1612.00796"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1612.00796,\n  doi = {10.48550/ARXIV.1612.00796},\n  url = {https://arxiv.org/abs/1612.00796},\n  author = {Kirkpatrick, James and Pascanu, Razvan and Rabinowitz, Neil and Veness, Joel and Desjardins, Guillaume and Rusu, Andrei A. and Milan, Kieran and Quan, John and Ramalho, Tiago and Grabska-Barwinska, Agnieszka and Hassabis, Demis and Clopath, Claudia and Kumaran, Dharshan and Hadsell, Raia},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Overcoming catastrophic forgetting in neural networks},\n  publisher = {arXiv},\n  year = {2016},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "ewc",
+        "catastrophic_forgetting"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Introduces Elastic Weight Consolidation, the canonical Fisher-weighted quadratic regularizer for continual learning.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/tpami.2017.2773081",
+      "title": "Learning without Forgetting",
+      "authors": [
+        "Zhizhong Li",
+        "Derek Hoiem"
+      ],
+      "year": 2018,
+      "venue": "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+      "doi": "10.1109/tpami.2017.2773081",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2473930607",
+      "landing_page": "https://doi.org/10.1109/tpami.2017.2773081",
+      "source_urls": [
+        "https://doi.org/10.1109/tpami.2017.2773081",
+        "https://openalex.org/W2473930607"
+      ],
+      "bibtex": "@article{Li_2018, title={Learning without Forgetting}, volume={40}, ISSN={1939-3539}, url={http://dx.doi.org/10.1109/tpami.2017.2773081}, DOI={10.1109/tpami.2017.2773081}, number={12}, journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Li, Zhizhong and Hoiem, Derek}, year={2018}, month=dec, pages={2935–2947} }",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "distillation",
+        "lwf"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "A foundational distillation-based regularization method that preserves prior-task outputs without storing old data.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1703.04200",
+      "title": "Continual Learning Through Synaptic Intelligence",
+      "authors": [
+        "Friedemann Zenke",
+        "Ben Poole",
+        "Surya Ganguli"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1703.04200",
+      "arxiv_id": "1703.04200",
+      "openalex_id": "https://openalex.org/W2949268663",
+      "landing_page": "https://arxiv.org/abs/1703.04200",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1703.04200",
+        "https://openalex.org/W2949268663"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1703.04200,\n  doi = {10.48550/ARXIV.1703.04200},\n  url = {https://arxiv.org/abs/1703.04200},\n  author = {Zenke, Friedemann and Poole, Ben and Ganguli, Surya},\n  keywords = {Machine Learning (cs.LG), Neurons and Cognition (q-bio.NC), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Biological sciences, FOS: Biological sciences},\n  title = {Continual Learning Through Synaptic Intelligence},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "parameter_importance",
+        "synaptic_intelligence"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Defines Synaptic Intelligence, an online path-integral alternative to EWC for parameter-importance regularization.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1007/978-3-030-01219-9_9",
+      "title": "Memory Aware Synapses: Learning What (not) to Forget",
+      "authors": [
+        "Rahaf Aljundi",
+        "Francesca Babiloni",
+        "Mohamed Elhoseiny",
+        "Marcus Rohrbach",
+        "Tinne Tuytelaars"
+      ],
+      "year": 2018,
+      "venue": "ECCV",
+      "doi": "10.1007/978-3-030-01219-9_9",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2768412495",
+      "landing_page": "https://doi.org/10.1007/978-3-030-01219-9_9",
+      "source_urls": [
+        "https://doi.org/10.1007/978-3-030-01219-9_9",
+        "https://openalex.org/W2768412495"
+      ],
+      "bibtex": "@inbook{Aljundi_2018, title={Memory Aware Synapses: Learning What (not) to Forget}, ISBN={9783030012199}, ISSN={1611-3349}, url={http://dx.doi.org/10.1007/978-3-030-01219-9_9}, DOI={10.1007/978-3-030-01219-9_9}, booktitle={Computer Vision – ECCV 2018}, publisher={Springer International Publishing}, author={Aljundi, Rahaf and Babiloni, Francesca and Elhoseiny, Mohamed and Rohrbach, Marcus and Tuytelaars, Tinne}, year={2018}, pages={144–161} }",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "parameter_importance",
+        "mas"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Introduces Memory Aware Synapses, which regularizes parameters according to function sensitivity rather than Fisher information.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1007/978-3-030-01252-6_33",
+      "title": "Riemannian Walk for Incremental Learning: Understanding Forgetting and Intransigence",
+      "authors": [
+        "Arslan Chaudhry",
+        "Puneet K. Dokania",
+        "Thalaiyasingam Ajanthan",
+        "Philip H. S. Torr"
+      ],
+      "year": 2018,
+      "venue": "ECCV",
+      "doi": "10.1007/978-3-030-01252-6_33",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2786446225",
+      "landing_page": "https://doi.org/10.1007/978-3-030-01252-6_33",
+      "source_urls": [
+        "https://doi.org/10.1007/978-3-030-01252-6_33",
+        "https://openalex.org/W2786446225"
+      ],
+      "bibtex": "@inbook{Chaudhry_2018, title={Riemannian Walk for Incremental Learning: Understanding Forgetting and Intransigence}, ISBN={9783030012526}, ISSN={1611-3349}, url={http://dx.doi.org/10.1007/978-3-030-01252-6_33}, DOI={10.1007/978-3-030-01252-6_33}, booktitle={Computer Vision – ECCV 2018}, publisher={Springer International Publishing}, author={Chaudhry, Arslan and Dokania, Puneet K. and Ajanthan, Thalaiyasingam and Torr, Philip H. S.}, year={2018}, pages={556–572} }",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "parameter_importance",
+        "rwalk"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Extends importance-weighted regularization with a Riemannian interpretation and forgetting/intransigence analysis.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1801.01423",
+      "title": "Overcoming catastrophic forgetting with hard attention to the task",
+      "authors": [
+        "Joan Serrà",
+        "Dídac Surís",
+        "Marius Miron",
+        "Alexandros Karatzoglou"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1801.01423",
+      "arxiv_id": "1801.01423",
+      "openalex_id": "https://openalex.org/W2782276075",
+      "landing_page": "https://arxiv.org/abs/1801.01423",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1801.01423",
+        "https://openalex.org/W2782276075"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1801.01423,\n  doi = {10.48550/ARXIV.1801.01423},\n  url = {https://arxiv.org/abs/1801.01423},\n  author = {Serrà, Joan and Surís, Dídac and Miron, Marius and Karatzoglou, Alexandros},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Overcoming catastrophic forgetting with hard attention to the task},\n  publisher = {arXiv},\n  year = {2018},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "attention_masks",
+        "hat"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Uses task-specific hard attention masks to regularize updates and protect parameters used by earlier tasks.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1703.08475",
+      "title": "Overcoming Catastrophic Forgetting by Incremental Moment Matching",
+      "authors": [
+        "Sang-Woo Lee",
+        "Jin-Hwa Kim",
+        "Jaehyun Jun",
+        "Jung-Woo Ha",
+        "Byoung-Tak Zhang"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1703.08475",
+      "arxiv_id": "1703.08475",
+      "openalex_id": "https://openalex.org/W2605043629",
+      "landing_page": "https://arxiv.org/abs/1703.08475",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1703.08475",
+        "https://openalex.org/W2605043629"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1703.08475,\n  doi = {10.48550/ARXIV.1703.08475},\n  url = {https://arxiv.org/abs/1703.08475},\n  author = {Lee, Sang-Woo and Kim, Jin-Hwa and Jun, Jaehyun and Ha, Jung-Woo and Zhang, Byoung-Tak},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Overcoming Catastrophic Forgetting by Incremental Moment Matching},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "bayesian_merging",
+        "imm"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Matches posterior moments across tasks, making it a Bayesian regularization approach to sequential learning.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1710.10628",
+      "title": "Variational Continual Learning",
+      "authors": [
+        "Cuong V. Nguyen",
+        "Yingzhen Li",
+        "Thang D. Bui",
+        "Richard E. Turner"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1710.10628",
+      "arxiv_id": "1710.10628",
+      "openalex_id": "https://openalex.org/W2765101016",
+      "landing_page": "https://arxiv.org/abs/1710.10628",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1710.10628",
+        "https://openalex.org/W2765101016"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1710.10628,\n  doi = {10.48550/ARXIV.1710.10628},\n  url = {https://arxiv.org/abs/1710.10628},\n  author = {Nguyen, Cuong V. and Li, Yingzhen and Bui, Thang D. and Turner, Richard E.},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Variational Continual Learning},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "variational_inference",
+        "vcl"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Frames continual learning as online variational inference, yielding a principled posterior-regularization objective.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1901.11356",
+      "title": "Functional Regularisation for Continual Learning with Gaussian Processes",
+      "authors": [
+        "Michalis K. Titsias",
+        "Jonathan Schwarz",
+        "Alexander G. de G. Matthews",
+        "Razvan Pascanu",
+        "Yee Whye Teh"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1901.11356",
+      "arxiv_id": "1901.11356",
+      "openalex_id": "https://openalex.org/W2912515466",
+      "landing_page": "https://arxiv.org/abs/1901.11356",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1901.11356",
+        "https://openalex.org/W2912515466"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1901.11356,\n  doi = {10.48550/ARXIV.1901.11356},\n  url = {https://arxiv.org/abs/1901.11356},\n  author = {Titsias, Michalis K. and Schwarz, Jonathan and Matthews, Alexander G. de G. and Pascanu, Razvan and Teh, Yee Whye},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Functional Regularisation for Continual Learning with Gaussian Processes},\n  publisher = {arXiv},\n  year = {2019},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "functional_regularization",
+        "gaussian_processes"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Regularizes function-space posteriors rather than only weights, a direct match for continual-learning regularization research.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.3929/ethz-b-000465911",
+      "title": "Continual learning with hypernetworks",
+      "authors": [
+        "Johannes von Oswald",
+        "Christian Henning",
+        "Benjamin F. Grewe",
+        "João Sacramento"
+      ],
+      "year": 2020,
+      "venue": "ETH Zurich",
+      "doi": "10.3929/ETHZ-B-000465911",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2946894912",
+      "landing_page": "http://hdl.handle.net/20.500.11850/465911",
+      "source_urls": [
+        "https://doi.org/10.3929/ETHZ-B-000465911",
+        "https://openalex.org/W2946894912"
+      ],
+      "bibtex": "@article{https://doi.org/10.3929/ethz-b-000465911,\n  doi = {10.3929/ETHZ-B-000465911},\n  url = {http://hdl.handle.net/20.500.11850/465911},\n  author = {{von Oswald, Johannes} and {Henning, Christian} and {Grewe, Benjamin F.} and {Sacramento, João}},\n  keywords = {Capacity, Catastrophic forgetting, Continual learning, Hypernetworks, Memory, Transfer learning},\n  language = {en},\n  title = {Continual learning with hypernetworks},\n  publisher = {ETH Zurich},\n  year = {2020},\n  copyright = {http://rightsstatements.org/page/InC-NC/1.0/}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "hypernetworks",
+        "weight_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Uses task-conditioned hypernetworks with regularization over generated weights to preserve prior tasks without replay.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1805.06370",
+      "title": "Progress & Compress: A scalable framework for continual learning",
+      "authors": [
+        "Jonathan Schwarz",
+        "Jelena Luketina",
+        "Wojciech M. Czarnecki",
+        "Agnieszka Grabska-Barwinska",
+        "Yee Whye Teh",
+        "Razvan Pascanu",
+        "Raia Hadsell"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1805.06370",
+      "arxiv_id": "1805.06370",
+      "openalex_id": "https://openalex.org/W4295271036",
+      "landing_page": "https://arxiv.org/abs/1805.06370",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1805.06370",
+        "https://openalex.org/W4295271036"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1805.06370,\n  doi = {10.48550/ARXIV.1805.06370},\n  url = {https://arxiv.org/abs/1805.06370},\n  author = {Schwarz, Jonathan and Luketina, Jelena and Czarnecki, Wojciech M. and Grabska-Barwinska, Agnieszka and Teh, Yee Whye and Pascanu, Razvan and Hadsell, Raia},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Progress &amp; Compress: A scalable framework for continual learning},\n  publisher = {arXiv},\n  year = {2018},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "distillation",
+        "progress_compress"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Combines progressive task learning with consolidation regularization during compression into a shared knowledge base.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2004.14070",
+      "title": "Continual Deep Learning by Functional Regularisation of Memorable Past",
+      "authors": [
+        "Pingbo Pan",
+        "Siddharth Swaroop",
+        "Alexander Immer",
+        "Runa Eschenhagen",
+        "Richard E. Turner",
+        "Mohammad Emtiyaz Khan"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2004.14070",
+      "arxiv_id": "2004.14070",
+      "openalex_id": "https://openalex.org/W2999368783",
+      "landing_page": "https://arxiv.org/abs/2004.14070",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2004.14070",
+        "https://openalex.org/W2999368783"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2004.14070,\n  doi = {10.48550/ARXIV.2004.14070},\n  url = {https://arxiv.org/abs/2004.14070},\n  author = {Pan, Pingbo and Swaroop, Siddharth and Immer, Alexander and Eschenhagen, Runa and Turner, Richard E. and Khan, Mohammad Emtiyaz},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Continual Deep Learning by Functional Regularisation of Memorable Past},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "continual_learning",
+        "regularization",
+        "functional_regularization",
+        "memorable_past"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Extends functional regularization with memorable examples, directly targeting continual-learning regularization tradeoffs.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

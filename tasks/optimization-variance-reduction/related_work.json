@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-variance-reduction",
+  "task_folder": "tasks/optimization-variance-reduction",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-variance-reduction/config.json",
+      "task_description_path": "tasks/optimization-variance-reduction/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "logistic",
+      "cmd": "scripts/logistic.sh",
+      "package": "opt-vr-bench",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mlp",
+      "cmd": "scripts/mlp.sh",
+      "package": "opt-vr-bench",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "conditioned",
+      "cmd": "scripts/conditioned.sh",
+      "package": "opt-vr-bench",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "svrg",
+      "implementation": "edits/svrg.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "sarah",
+      "implementation": "edits/sarah.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "storm",
+      "implementation": "edits/storm.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

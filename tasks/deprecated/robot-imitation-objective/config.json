@@ -1,0 +1,62 @@
+{
+  "allow_create": false,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train_lift.sh",
+      "label": "lift",
+      "group": 1,
+      "compute": 1,
+      "time": "04:00:00",
+      "package": "CleanDiffuser"
+    },
+    {
+      "cmd": "scripts/train_can.sh",
+      "label": "can",
+      "group": 2,
+      "compute": 1,
+      "time": "04:00:00",
+      "package": "CleanDiffuser"
+    },
+    {
+      "cmd": "scripts/train_square.sh",
+      "label": "square",
+      "group": 3,
+      "compute": 1,
+      "time": "04:00:00",
+      "package": "CleanDiffuser",
+      "hidden": true
+    }
+  ],
+  "rigorous_codebase": true,
+  "baselines": {
+    "mse_regression": {
+      "edit_ops": "edits/mse_regression.edit.py"
+    },
+    "ddpm": {
+      "edit_ops": "edits/ddpm.edit.py"
+    },
+    "flow_matching": {
+      "edit_ops": "edits/flow_matching.edit.py"
+    },
+    "cvae": {
+      "edit_ops": "edits/cvae.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "CleanDiffuser/train_custom.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 74,
+          "end": 129
+        }
+      ]
+    }
+  ]
+}

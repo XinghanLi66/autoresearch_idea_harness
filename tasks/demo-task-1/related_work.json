@@ -1,0 +1,386 @@
+{
+  "schema_version": "1.0",
+  "task_name": "demo-task-1",
+  "task_folder": "tasks/demo-task-1",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "convolutional neural network architecture design for MNIST digit classification",
+    "research_question": "Can a better neural network architecture than the default PyTorch MNIST CNN improve MNIST accuracy under the fixed 14-epoch Adadelta training pipeline?",
+    "local_sources": {
+      "config_path": "tasks/demo-task-1/config.json",
+      "task_description_path": "tasks/demo-task-1/task_description.md"
+    },
+    "notes": [
+      "The default baseline is linked approximately to the LeNet-style CNN literature because the shipped PyTorch example is a modernized two-convolution MNIST classifier rather than an exact reproduction of LeNet-5.",
+      "The fixed scheduler is StepLR, but no single canonical paper is cited for that implementation detail."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 2,
+    "baseline_links_found": 2,
+    "test_entries": 1,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "train",
+      "cmd": "scripts/train.sh",
+      "package": "pytorch-examples",
+      "group": 1,
+      "compute": 1,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/5.726791",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1207.0580",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1212.5701",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "The train command evaluates MNIST classification with a LeNet-style CNN, dropout regularization, and the fixed Adadelta-based training recipe."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "default",
+      "implementation": "scripts/default.sh",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/5.726791",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "The default network is best described as a modernized LeNet-style MNIST convnet with dropout, not an exact LeNet-5 implementation."
+    },
+    {
+      "name": "batchnorm",
+      "implementation": "edits/batchnorm.edit.py",
+      "labels": [
+        "train"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.1502.03167",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "This baseline explicitly inserts BatchNorm layers into the MNIST CNN."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1109/5.726791",
+      "title": "Gradient-based learning applied to document recognition",
+      "authors": [
+        "Y. Lecun",
+        "L. Bottou",
+        "Y. Bengio",
+        "P. Haffner"
+      ],
+      "year": 1998,
+      "venue": "Proceedings of the IEEE",
+      "doi": "10.1109/5.726791",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1109/5.726791",
+      "source_urls": [
+        "https://doi.org/10.1109/5.726791",
+        "http://ieeexplore.ieee.org/document/726791/"
+      ],
+      "bibtex": "@article{Lecun_1998, title={Gradient-based learning applied to document recognition}, volume={86}, ISSN={0018-9219}, url={http://dx.doi.org/10.1109/5.726791}, DOI={10.1109/5.726791}, number={11}, journal={Proceedings of the IEEE}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Lecun, Y. and Bottou, L. and Bengio, Y. and Haffner, P.}, year={1998}, pages={2278–2324} }",
+      "relevance_tags": [
+        "benchmark",
+        "mnist",
+        "cnn_architecture",
+        "baseline"
+      ],
+      "baseline_links": [
+        "default"
+      ],
+      "test_links": [
+        "train"
+      ],
+      "relevance": "Foundational LeNet-style MNIST paper and the closest literature match for the task's default CNN baseline and benchmark.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1502.03167",
+      "title": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+      "authors": [
+        "Sergey Ioffe",
+        "Christian Szegedy"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1502.03167",
+      "arxiv_id": "1502.03167",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1502.03167",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1502.03167",
+        "https://arxiv.org/abs/1502.03167"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1502.03167,\n  doi = {10.48550/ARXIV.1502.03167},\n  url = {https://arxiv.org/abs/1502.03167},\n  author = {Ioffe, Sergey and Szegedy, Christian},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift},\n  publisher = {arXiv},\n  year = {2015},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "normalization",
+        "cnn_architecture"
+      ],
+      "baseline_links": [
+        "batchnorm"
+      ],
+      "test_links": [],
+      "relevance": "Direct paper match for the explicit BatchNorm architecture baseline provided in the task stub.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1207.0580",
+      "title": "Improving neural networks by preventing co-adaptation of feature detectors",
+      "authors": [
+        "Geoffrey E. Hinton",
+        "Nitish Srivastava",
+        "Alex Krizhevsky",
+        "Ilya Sutskever",
+        "Ruslan R. Salakhutdinov"
+      ],
+      "year": 2012,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1207.0580",
+      "arxiv_id": "1207.0580",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1207.0580",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1207.0580",
+        "https://arxiv.org/abs/1207.0580"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1207.0580,\n  doi = {10.48550/ARXIV.1207.0580},\n  url = {https://arxiv.org/abs/1207.0580},\n  author = {Hinton, Geoffrey E. and Srivastava, Nitish and Krizhevsky, Alex and Sutskever, Ilya and Salakhutdinov, Ruslan R.},\n  keywords = {Neural and Evolutionary Computing (cs.NE), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Improving neural networks by preventing co-adaptation of feature detectors},\n  publisher = {arXiv},\n  year = {2012},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "regularization",
+        "dropout",
+        "training_recipe"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train"
+      ],
+      "relevance": "The shipped PyTorch MNIST model uses dropout layers, so this paper is part of the task's fixed training/architecture recipe.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1212.5701",
+      "title": "ADADELTA: An Adaptive Learning Rate Method",
+      "authors": [
+        "Matthew D. Zeiler"
+      ],
+      "year": 2012,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1212.5701",
+      "arxiv_id": "1212.5701",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1212.5701",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1212.5701",
+        "https://arxiv.org/abs/1212.5701"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1212.5701,\n  doi = {10.48550/ARXIV.1212.5701},\n  url = {https://arxiv.org/abs/1212.5701},\n  author = {Zeiler, Matthew D.},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {ADADELTA: An Adaptive Learning Rate Method},\n  publisher = {arXiv},\n  year = {2012},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "optimizer",
+        "training_recipe",
+        "mnist"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train"
+      ],
+      "relevance": "The task description fixes Adadelta as the optimizer, making this paper directly relevant to the scaffold all agents must use.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1512.03385",
+      "title": "Deep Residual Learning for Image Recognition",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1512.03385",
+      "arxiv_id": "1512.03385",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1512.03385",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1512.03385",
+        "https://arxiv.org/abs/1512.03385"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1512.03385,\n  doi = {10.48550/ARXIV.1512.03385},\n  url = {https://arxiv.org/abs/1512.03385},\n  author = {He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Deep Residual Learning for Image Recognition},\n  publisher = {arXiv},\n  year = {2015},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "cnn_architecture",
+        "residual_connections",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Residual connections are a standard architecture modification that could plausibly transfer to compact MNIST CNN redesigns under this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1608.06993",
+      "title": "Densely Connected Convolutional Networks",
+      "authors": [
+        "Gao Huang",
+        "Zhuang Liu",
+        "Laurens van der Maaten",
+        "Kilian Q. Weinberger"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1608.06993",
+      "arxiv_id": "1608.06993",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1608.06993",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1608.06993",
+        "https://arxiv.org/abs/1608.06993"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1608.06993,\n  doi = {10.48550/ARXIV.1608.06993},\n  url = {https://arxiv.org/abs/1608.06993},\n  author = {Huang, Gao and Liu, Zhuang and van der Maaten, Laurens and Weinberger, Kilian Q.},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Densely Connected Convolutional Networks},\n  publisher = {arXiv},\n  year = {2016},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "cnn_architecture",
+        "dense_connections",
+        "image_classification"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Dense connectivity is another transferable architecture idea relevant to the task's mandate to improve a small CNN by structural changes.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1409.1556",
+      "title": "Very Deep Convolutional Networks for Large-Scale Image Recognition",
+      "authors": [
+        "Karen Simonyan",
+        "Andrew Zisserman"
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1409.1556",
+      "arxiv_id": "1409.1556",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1409.1556",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1409.1556",
+        "https://arxiv.org/abs/1409.1556"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1409.1556,\n  doi = {10.48550/ARXIV.1409.1556},\n  url = {https://arxiv.org/abs/1409.1556},\n  author = {Simonyan, Karen and Zisserman, Andrew},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Very Deep Convolutional Networks for Large-Scale Image Recognition},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "cnn_architecture",
+        "depth",
+        "small_filters"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "VGG-style use of repeated small convolutions is directly relevant when redesigning the fixed small MNIST CNN for better accuracy.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1505.00387",
+      "title": "Highway Networks",
+      "authors": [
+        "Rupesh Kumar Srivastava",
+        "Klaus Greff",
+        "Jürgen Schmidhuber"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1505.00387",
+      "arxiv_id": "1505.00387",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1505.00387",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1505.00387",
+        "https://arxiv.org/abs/1505.00387"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1505.00387,\n  doi = {10.48550/ARXIV.1505.00387},\n  url = {https://arxiv.org/abs/1505.00387},\n  author = {Srivastava, Rupesh Kumar and Greff, Klaus and Schmidhuber, Jürgen},\n  keywords = {Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), FOS: Computer and information sciences, FOS: Computer and information sciences, I.2.6; G.1.6, 68T01},\n  title = {Highway Networks},\n  publisher = {arXiv},\n  year = {2015},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "cnn_architecture",
+        "gating",
+        "deep_networks"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Highway-style gating is a relevant predecessor to residual-style architecture improvements for deeper CNNs.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1312.4400",
+      "title": "Network In Network",
+      "authors": [
+        "Min Lin",
+        "Qiang Chen",
+        "Shuicheng Yan"
+      ],
+      "year": 2013,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1312.4400",
+      "arxiv_id": "1312.4400",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1312.4400",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1312.4400",
+        "https://arxiv.org/abs/1312.4400"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1312.4400,\n  doi = {10.48550/ARXIV.1312.4400},\n  url = {https://arxiv.org/abs/1312.4400},\n  author = {Lin, Min and Chen, Qiang and Yan, Shuicheng},\n  keywords = {Neural and Evolutionary Computing (cs.NE), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Network In Network},\n  publisher = {arXiv},\n  year = {2013},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "cnn_architecture",
+        "mlpconv",
+        "global_average_pooling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Network In Network proposes stronger local nonlinear modeling and global average pooling, both reasonable architecture directions for this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1905.11946",
+      "title": "EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",
+      "authors": [
+        "Mingxing Tan",
+        "Quoc V. Le"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1905.11946",
+      "arxiv_id": "1905.11946",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1905.11946",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1905.11946",
+        "https://arxiv.org/abs/1905.11946"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1905.11946,\n  doi = {10.48550/ARXIV.1905.11946},\n  url = {https://arxiv.org/abs/1905.11946},\n  author = {Tan, Mingxing and Le, Quoc V.},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks},\n  publisher = {arXiv},\n  year = {2019},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "cnn_architecture",
+        "model_scaling",
+        "efficiency"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "EfficientNet is relevant because the task asks for architecture changes under a fixed training budget, making parameter-efficient scaling ideas pertinent.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

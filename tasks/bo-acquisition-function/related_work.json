@@ -1,0 +1,263 @@
+{
+  "schema_version": "1.0",
+  "task_name": "bo-acquisition-function",
+  "task_folder": "tasks/bo-acquisition-function",
+  "task_metadata": {
+    "status": "missing_config",
+    "topic_inferred_from_task_name": true,
+    "research_topic": "Bayesian optimization acquisition functions",
+    "research_question": "Study and improve acquisition functions for Bayesian optimization of expensive black-box objectives.",
+    "local_sources": {
+      "config_path": null,
+      "task_description_path": null
+    },
+    "notes": [
+      "Task directory has no config.json or task_description.md; the topic was inferred from the directory name.",
+      "Tests and baselines are left empty because there is no repo metadata to mirror."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 0,
+    "baseline_links_found": 0,
+    "test_entries": 0,
+    "test_links_found": 0
+  },
+  "tests": [],
+  "baselines": [],
+  "papers": [
+    {
+      "paper_id": "doi:10.1023/a:1008306431147",
+      "title": "Efficient Global Optimization of Expensive Black-Box Functions",
+      "authors": ["Donald R. Jones", "Matthias Schonlau", "William J. Welch"],
+      "year": 1998,
+      "venue": "Journal of Global Optimization",
+      "doi": "10.1023/a:1008306431147",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W1510052597",
+      "landing_page": "https://doi.org/10.1023/a:1008306431147",
+      "source_urls": [
+        "https://doi.org/10.1023/a:1008306431147",
+        "https://openalex.org/W1510052597"
+      ],
+      "bibtex": "@article{Jones_1998, title={Efficient Global Optimization of Expensive Black-Box Functions}, volume={13}, ISSN={1573-2916}, url={http://dx.doi.org/10.1023/a:1008306431147}, DOI={10.1023/a:1008306431147}, number={4}, journal={Journal of Global Optimization}, publisher={Springer Science and Business Media LLC}, author={Jones, Donald R. and Schonlau, Matthias and Welch, William J.}, year={1998}, month=dec, pages={455–492} }",
+      "relevance_tags": ["bayesian_optimization", "expected_improvement", "global_optimization"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Canonical expected-improvement paper for Bayesian optimization.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.0912.3995",
+      "title": "Gaussian Process Optimization in the Bandit Setting: No Regret and Experimental Design",
+      "authors": ["Niranjan Srinivas", "Andreas Krause", "Sham M. Kakade", "Matthias Seeger"],
+      "year": 2009,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.0912.3995",
+      "arxiv_id": "0912.3995",
+      "openalex_id": "https://openalex.org/W2951665052",
+      "landing_page": "https://arxiv.org/abs/0912.3995",
+      "source_urls": [
+        "https://arxiv.org/abs/0912.3995",
+        "https://openalex.org/W2951665052"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.0912.3995,\n  doi = {10.48550/ARXIV.0912.3995},\n  url = {https://arxiv.org/abs/0912.3995},\n  author = {Srinivas, Niranjan and Krause, Andreas and Kakade, Sham M. and Seeger, Matthias},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Gaussian Process Optimization in the Bandit Setting: No Regret and Experimental Design},\n  publisher = {arXiv},\n  year = {2009},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": ["bayesian_optimization", "ucb", "bandits"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Introduces GP-UCB in the Bayesian optimization bandit setting.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/tit.2011.2182033",
+      "title": "Information-Theoretic Regret Bounds for Gaussian Process Optimization in the Bandit Setting",
+      "authors": ["Niranjan Srinivas", "Andreas Krause", "Sham M. Kakade", "Matthias W. Seeger"],
+      "year": 2012,
+      "venue": "IEEE Transactions on Information Theory",
+      "doi": "10.1109/tit.2011.2182033",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2166566250",
+      "landing_page": "https://doi.org/10.1109/tit.2011.2182033",
+      "source_urls": [
+        "https://doi.org/10.1109/tit.2011.2182033",
+        "https://openalex.org/W2166566250"
+      ],
+      "bibtex": "@article{Srinivas_2012, title={Information-Theoretic Regret Bounds for Gaussian Process Optimization in the Bandit Setting}, volume={58}, ISSN={1557-9654}, url={http://dx.doi.org/10.1109/tit.2011.2182033}, DOI={10.1109/tit.2011.2182033}, number={5}, journal={IEEE Transactions on Information Theory}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Srinivas, Niranjan and Krause, Andreas and Kakade, Sham M. and Seeger, Matthias W.}, year={2012}, month=may, pages={3250–3265} }",
+      "relevance_tags": ["bayesian_optimization", "ucb", "theory"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Gives regret bounds for GP-UCB and links acquisition design to information gain.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1206.2944",
+      "title": "Practical Bayesian Optimization of Machine Learning Algorithms",
+      "authors": ["Jasper Snoek", "Hugo Larochelle", "Ryan P. Adams"],
+      "year": 2012,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1206.2944",
+      "arxiv_id": "1206.2944",
+      "openalex_id": "https://openalex.org/W2131241448",
+      "landing_page": "https://arxiv.org/abs/1206.2944",
+      "source_urls": [
+        "https://arxiv.org/abs/1206.2944",
+        "https://openalex.org/W2131241448"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1206.2944,\n  doi = {10.48550/ARXIV.1206.2944},\n  url = {https://arxiv.org/abs/1206.2944},\n  author = {Snoek, Jasper and Larochelle, Hugo and Adams, Ryan P.},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Practical Bayesian Optimization of Machine Learning Algorithms},\n  publisher = {arXiv},\n  year = {2012},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": ["bayesian_optimization", "hyperparameter_optimization", "acquisition_function"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Practical BO system paper for hyperparameter tuning with acquisition-driven search.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1206.6402",
+      "title": "Parallelizing Exploration-Exploitation Tradeoffs with Gaussian Process Bandit Optimization",
+      "authors": ["Thomas Desautels", "Andreas Krause", "Joel W. Burdick"],
+      "year": 2012,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1206.6402",
+      "arxiv_id": "1206.6402",
+      "openalex_id": "https://openalex.org/W2146409231",
+      "landing_page": "https://arxiv.org/abs/1206.6402",
+      "source_urls": [
+        "https://arxiv.org/abs/1206.6402",
+        "https://openalex.org/W2146409231"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1206.6402,\n  doi = {10.48550/ARXIV.1206.6402},\n  url = {https://arxiv.org/abs/1206.6402},\n  author = {Desautels, Thomas and Krause, Andreas and Burdick, Joel},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Parallelizing Exploration-Exploitation Tradeoffs with Gaussian Process Bandit Optimization},\n  publisher = {arXiv},\n  year = {2012},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": ["bayesian_optimization", "batch", "ucb"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Batch GP-UCB variant for parallel acquisition selection.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1406.2541",
+      "title": "Predictive Entropy Search for Efficient Global Optimization of Black-box Functions",
+      "authors": ["José Miguel Hernández-Lobato", "Matthew W. Hoffman", "Zoubin Ghahramani"],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1406.2541",
+      "arxiv_id": "1406.2541",
+      "openalex_id": "https://openalex.org/W2167789032",
+      "landing_page": "https://arxiv.org/abs/1406.2541",
+      "source_urls": [
+        "https://arxiv.org/abs/1406.2541",
+        "https://openalex.org/W2167789032"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1406.2541,\n  doi = {10.48550/ARXIV.1406.2541},\n  url = {https://arxiv.org/abs/1406.2541},\n  author = {Hernández-Lobato, José Miguel and Hoffman, Matthew W. and Ghahramani, Zoubin},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Predictive Entropy Search for Efficient Global Optimization of Black-box Functions},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": ["bayesian_optimization", "entropy_search", "information_theoretic"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Information-theoretic acquisition that targets the optimizer rather than only the objective value.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1406.3896",
+      "title": "Freeze-Thaw Bayesian Optimization",
+      "authors": ["Kevin Swersky", "Jasper Snoek", "Ryan Prescott Adams"],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1406.3896",
+      "arxiv_id": "1406.3896",
+      "openalex_id": "https://openalex.org/W1569788011",
+      "landing_page": "https://arxiv.org/abs/1406.3896",
+      "source_urls": [
+        "https://arxiv.org/abs/1406.3896",
+        "https://openalex.org/W1569788011"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1406.3896,\n  doi = {10.48550/ARXIV.1406.3896},\n  url = {https://arxiv.org/abs/1406.3896},\n  author = {Swersky, Kevin and Snoek, Jasper and Adams, Ryan Prescott},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Freeze-Thaw Bayesian Optimization},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": ["bayesian_optimization", "batch", "multi_fidelity"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Uses partial training curves as additional acquisition signal in BO.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1402.0929",
+      "title": "Input Warping for Bayesian Optimization of Non-stationary Functions",
+      "authors": ["Jasper Snoek", "Kevin Swersky", "Rich Zemel", "Ryan P. Adams"],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1402.0929",
+      "arxiv_id": "1402.0929",
+      "openalex_id": "https://openalex.org/W1533803232",
+      "landing_page": "https://arxiv.org/abs/1402.0929",
+      "source_urls": [
+        "https://arxiv.org/abs/1402.0929",
+        "https://openalex.org/W1533803232"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1402.0929,\n  doi = {10.48550/ARXIV.1402.0929},\n  url = {https://arxiv.org/abs/1402.0929},\n  author = {Snoek, Jasper and Swersky, Kevin and Zemel, Richard S. and Adams, Ryan P.},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Input Warping for Bayesian Optimization of Non-stationary Functions},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": ["bayesian_optimization", "nonstationary", "acquisition_function"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Model-side improvement that changes how the acquisition function is evaluated on warped inputs.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1403.5607",
+      "title": "Bayesian Optimization with Unknown Constraints",
+      "authors": ["Michael A. Gelbart", "Jasper Snoek", "Ryan P. Adams"],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1403.5607",
+      "arxiv_id": "1403.5607",
+      "openalex_id": "https://openalex.org/W1701825639",
+      "landing_page": "https://arxiv.org/abs/1403.5607",
+      "source_urls": [
+        "https://arxiv.org/abs/1403.5607",
+        "https://openalex.org/W1701825639"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1403.5607,\n  doi = {10.48550/ARXIV.1403.5607},\n  url = {https://arxiv.org/abs/1403.5607},\n  author = {Gelbart, Michael A. and Snoek, Jasper and Adams, Ryan P.},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Bayesian Optimization with Unknown Constraints},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": ["bayesian_optimization", "constraints", "acquisition_function"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Constrains acquisition-driven search when feasibility is unknown.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1703.01968",
+      "title": "Max-value Entropy Search for Efficient Bayesian Optimization",
+      "authors": ["Zi Wang", "Stefanie Jegelka"],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1703.01968",
+      "arxiv_id": "1703.01968",
+      "openalex_id": "https://openalex.org/W2593660867",
+      "landing_page": "https://arxiv.org/abs/1703.01968",
+      "source_urls": [
+        "https://arxiv.org/abs/1703.01968",
+        "https://openalex.org/W2593660867"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1703.01968,\n  doi = {10.48550/ARXIV.1703.01968},\n  url = {https://arxiv.org/abs/1703.01968},\n  author = {Wang, Zi and Jegelka, Stefanie},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), Optimization and Control (math.OC), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Mathematics, FOS: Mathematics},\n  title = {Max-value Entropy Search for Efficient Bayesian Optimization},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": ["bayesian_optimization", "entropy_search", "efficient_acquisition"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "A lighter-weight entropy search objective based on the maximum value.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/access.2020.2966228",
+      "title": "Bayesian Optimization for Adaptive Experimental Design: A Review",
+      "authors": ["Stewart Greenhill", "Santu Rana", "Sunil Gupta", "Pratibha Vellanki", "Svetha Venkatesh"],
+      "year": 2020,
+      "venue": "IEEE Access",
+      "doi": "10.1109/access.2020.2966228",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2998788451",
+      "landing_page": "https://doi.org/10.1109/access.2020.2966228",
+      "source_urls": [
+        "https://doi.org/10.1109/access.2020.2966228",
+        "https://openalex.org/W2998788451",
+        "https://ieeexplore.ieee.org/ielx7/6287639/8948470/08957442.pdf"
+      ],
+      "bibtex": "@article{Greenhill_2020, title={Bayesian Optimization for Adaptive Experimental Design: A Review}, volume={8}, ISSN={2169-3536}, url={http://dx.doi.org/10.1109/access.2020.2966228}, DOI={10.1109/access.2020.2966228}, journal={IEEE Access}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Greenhill, Stewart and Rana, Santu and Gupta, Sunil and Vellanki, Pratibha and Venkatesh, Svetha}, year={2020}, pages={13937–13948} }",
+      "relevance_tags": ["bayesian_optimization", "survey", "experimental_design"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Survey that summarizes acquisition-function choices across experimental-design settings.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

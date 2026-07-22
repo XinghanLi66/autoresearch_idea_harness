@@ -1,0 +1,59 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train.sh",
+      "label": "lift_ph",
+      "compute": 1,
+      "time": "4:00:00",
+      "package": "CleanDiffuser"
+    },
+    {
+      "cmd": "scripts/train.sh",
+      "label": "can_ph",
+      "compute": 1,
+      "time": "4:00:00",
+      "package": "CleanDiffuser"
+    },
+    {
+      "cmd": "scripts/train.sh",
+      "label": "square_ph",
+      "compute": 1,
+      "time": "4:00:00",
+      "package": "CleanDiffuser",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "concatenation": {
+      "edit_ops": "edits/concatenation.edit.py"
+    },
+    "film": {
+      "edit_ops": "edits/film.edit.py"
+    },
+    "cross_attention": {
+      "edit_ops": "edits/cross_attention.edit.py"
+    },
+    "adaln": {
+      "edit_ops": "edits/adaln.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "CleanDiffuser/custom_conditioning.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 70,
+          "end": 131
+        }
+      ]
+    }
+  ]
+}

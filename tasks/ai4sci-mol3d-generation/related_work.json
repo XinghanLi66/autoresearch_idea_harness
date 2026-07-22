@@ -1,0 +1,518 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4sci-mol3d-generation",
+  "task_folder": "tasks/ai4sci-mol3d-generation",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "unconditional 3D structure generation across molecular and crystalline domains",
+    "research_question": "Design a generative model for unconditional 3D structure generation that works across both molecular (QM9, GEOM-DRUG) and crystalline (MP-20) domains.",
+    "local_sources": {
+      "config_path": "tasks/ai4sci-mol3d-generation/config.json",
+      "task_description_path": "tasks/ai4sci-mol3d-generation/task_description.md"
+    },
+    "notes": [
+      "Baselines and tests were linked to concrete citation records.",
+      "MP-20 is represented through crystal-generation benchmark papers because the task scaffold does not name a dedicated MP-20 source paper."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 5
+  },
+  "tests": [
+    {
+      "label": "QM9",
+      "cmd": "scripts/qm9.sh",
+      "package": "Uni-3DAR",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1038/sdata.2014.22",
+          "role": "dataset"
+        }
+      ],
+      "notes": "QM9 benchmark dataset paper."
+    },
+    {
+      "label": "MP-20",
+      "cmd": "scripts/mp20.sh",
+      "package": "Uni-3DAR",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2110.06197",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1038/s41524-023-00987-9",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2311.09235",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Crystal-generation benchmark lineage for periodic materials."
+    },
+    {
+      "label": "GEOM-DRUG",
+      "cmd": "scripts/geom_drug.sh",
+      "package": "Uni-3DAR",
+      "group": 2,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1038/s41597-022-01288-4",
+          "role": "dataset"
+        }
+      ],
+      "notes": "GEOM dataset paper covering conformational ensembles for molecular generation."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "edm",
+      "implementation": "edits/edm.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2203.17003",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Equivariant diffusion baseline for 3D molecule generation."
+    },
+    {
+      "name": "geobfn",
+      "implementation": "edits/geobfn.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2403.15441",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Geometric Bayesian Flow Networks baseline."
+    },
+    {
+      "name": "geoldm",
+      "implementation": "edits/geoldm.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2305.01140",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Geometric latent diffusion baseline for 3D molecule generation."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.2203.17003",
+      "title": "Equivariant Diffusion for Molecule Generation in 3D",
+      "authors": [
+        "Emiel Hoogeboom",
+        "Victor Garcia Satorras",
+        "Clément Vignac",
+        "Max Welling"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2203.17003",
+      "arxiv_id": "2203.17003",
+      "openalex_id": "https://openalex.org/W4226070784",
+      "landing_page": "https://arxiv.org/abs/2203.17003",
+      "source_urls": [
+        "https://openalex.org/W4226070784",
+        "https://arxiv.org/abs/2203.17003"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2203.17003, doi = {10.48550/ARXIV.2203.17003}, url = {https://arxiv.org/abs/2203.17003}, author = {Hoogeboom, Emiel and Satorras, Victor Garcia and Vignac, Clément and Welling, Max}, keywords = {Machine Learning (cs.LG), Quantitative Methods (q-bio.QM), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Biological sciences, FOS: Biological sciences}, title = {Equivariant Diffusion for Molecule Generation in 3D}, publisher = {arXiv}, year = {2022}, copyright = {arXiv.org perpetual, non-exclusive license}}",
+      "relevance_tags": [
+        "baseline",
+        "diffusion",
+        "equivariant",
+        "molecule_generation"
+      ],
+      "baseline_links": [
+        "edm"
+      ],
+      "test_links": [],
+      "relevance": "Direct baseline for E(3)-equivariant diffusion in 3D molecular generation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2403.15441",
+      "title": "Unified Generative Modeling of 3D Molecules via Bayesian Flow Networks",
+      "authors": [
+        "Yuxuan Song",
+        "Jingjing Gong",
+        "Yanru Qu",
+        "Hao Zhou",
+        "Mingyue Zheng",
+        "Jingjing Liu",
+        "Wei-Ying Ma"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2403.15441",
+      "arxiv_id": "2403.15441",
+      "openalex_id": "https://openalex.org/W4393212077",
+      "landing_page": "https://arxiv.org/abs/2403.15441",
+      "source_urls": [
+        "https://openalex.org/W4393212077",
+        "https://arxiv.org/abs/2403.15441"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2403.15441, doi = {10.48550/ARXIV.2403.15441}, url = {https://arxiv.org/abs/2403.15441}, author = {Song, Yuxuan and Gong, Jingjing and Qu, Yanru and Zhou, Hao and Zheng, Mingyue and Liu, Jingjing and Ma, Wei-Ying}, keywords = {Chemical Physics (physics.chem-ph), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Biomolecules (q-bio.BM), FOS: Physical sciences, FOS: Physical sciences, FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Biological sciences, FOS: Biological sciences}, title = {Unified Generative Modeling of 3D Molecules via Bayesian Flow Networks}, publisher = {arXiv}, year = {2024}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "baseline",
+        "bayesian_flow",
+        "equivariant",
+        "molecule_generation"
+      ],
+      "baseline_links": [
+        "geobfn"
+      ],
+      "test_links": [],
+      "relevance": "Primary reference for the GeoBFN baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2305.01140",
+      "title": "Geometric Latent Diffusion Models for 3D Molecule Generation",
+      "authors": [
+        "Minkai Xu",
+        "Alexander K. Powers",
+        "Ron O. Dror",
+        "Stefano Ermon",
+        "Jure Leskovec"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2305.01140",
+      "arxiv_id": "2305.01140",
+      "openalex_id": "https://openalex.org/W4367859989",
+      "landing_page": "https://arxiv.org/abs/2305.01140",
+      "source_urls": [
+        "https://openalex.org/W4367859989",
+        "https://arxiv.org/abs/2305.01140"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2305.01140, doi = {10.48550/ARXIV.2305.01140}, url = {https://arxiv.org/abs/2305.01140}, author = {Xu, Minkai and Powers, Alexander and Dror, Ron and Ermon, Stefano and Leskovec, Jure}, keywords = {Machine Learning (cs.LG), Quantitative Methods (q-bio.QM), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Biological sciences, FOS: Biological sciences}, title = {Geometric Latent Diffusion Models for 3D Molecule Generation}, publisher = {arXiv}, year = {2023}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "baseline",
+        "latent_diffusion",
+        "equivariant",
+        "molecule_generation"
+      ],
+      "baseline_links": [
+        "geoldm"
+      ],
+      "test_links": [],
+      "relevance": "Primary reference for the GeoLDM baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/sdata.2014.22",
+      "title": "Quantum chemistry structures and properties of 134 kilo molecules",
+      "authors": [
+        "Raghunathan Ramakrishnan",
+        "Pavlo O. Dral",
+        "Matthias Rupp",
+        "O. Anatole von Lilienfeld"
+      ],
+      "year": 2014,
+      "venue": "Scientific Data",
+      "doi": "10.1038/sdata.2014.22",
+      "openalex_id": "https://openalex.org/W2080635178",
+      "landing_page": "https://doi.org/10.1038/sdata.2014.22",
+      "source_urls": [
+        "https://openalex.org/W2080635178",
+        "https://doi.org/10.1038/sdata.2014.22"
+      ],
+      "bibtex": "@article{Ramakrishnan_2014, title={Quantum chemistry structures and properties of 134 kilo molecules}, volume={1}, ISSN={2052-4463}, url={http://dx.doi.org/10.1038/sdata.2014.22}, DOI={10.1038/sdata.2014.22}, number={1}, journal={Scientific Data}, publisher={Springer Science and Business Media LLC}, author={Ramakrishnan, Raghunathan and Dral, Pavlo O. and Rupp, Matthias and von Lilienfeld, O. Anatole}, year={2014}, month=aug }",
+      "relevance_tags": [
+        "dataset",
+        "benchmark",
+        "molecule_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "QM9"
+      ],
+      "relevance": "Canonical QM9 dataset paper used by the molecular benchmark.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41597-022-01288-4",
+      "title": "GEOM, energy-annotated molecular conformations for property prediction and molecular generation",
+      "authors": [
+        "Simon Axelrod",
+        "Rafael Gómez-Bombarelli"
+      ],
+      "year": 2022,
+      "venue": "Scientific Data",
+      "doi": "10.1038/s41597-022-01288-4",
+      "openalex_id": "https://openalex.org/W3034806393",
+      "landing_page": "https://doi.org/10.1038/s41597-022-01288-4",
+      "source_urls": [
+        "https://openalex.org/W3034806393",
+        "https://doi.org/10.1038/s41597-022-01288-4"
+      ],
+      "bibtex": "@article{Axelrod_2022, title={GEOM, energy-annotated molecular conformations for property prediction and molecular generation}, volume={9}, ISSN={2052-4463}, url={http://dx.doi.org/10.1038/s41597-022-01288-4}, DOI={10.1038/s41597-022-01288-4}, number={1}, journal={Scientific Data}, publisher={Springer Science and Business Media LLC}, author={Axelrod, Simon and Gómez-Bombarelli, Rafael}, year={2022}, month=apr }",
+      "relevance_tags": [
+        "dataset",
+        "benchmark",
+        "molecule_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "GEOM-DRUG"
+      ],
+      "relevance": "GEOM dataset paper supporting the GEOM-DRUG benchmark.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2110.06197",
+      "title": "Crystal Diffusion Variational Autoencoder for Periodic Material Generation",
+      "authors": [
+        "Tian Xie",
+        "Xiang Fu",
+        "Octavian-Eugen Ganea",
+        "Regina Barzilay",
+        "Tommi Jaakkola"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2110.06197",
+      "arxiv_id": "2110.06197",
+      "openalex_id": "https://openalex.org/W3207367439",
+      "landing_page": "https://arxiv.org/abs/2110.06197",
+      "source_urls": [
+        "https://openalex.org/W3207367439",
+        "https://arxiv.org/abs/2110.06197"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2110.06197, doi = {10.48550/ARXIV.2110.06197}, url = {https://arxiv.org/abs/2110.06197}, author = {Xie, Tian and Fu, Xiang and Ganea, Octavian-Eugen and Barzilay, Regina and Jaakkola, Tommi}, keywords = {Machine Learning (cs.LG), Materials Science (cond-mat.mtrl-sci), Computational Physics (physics.comp-ph), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Physical sciences, FOS: Physical sciences}, title = {Crystal Diffusion Variational Autoencoder for Periodic Material Generation}, publisher = {arXiv}, year = {2021}, copyright = {arXiv.org perpetual, non-exclusive license}}",
+      "relevance_tags": [
+        "crystal_generation",
+        "diffusion",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "MP-20"
+      ],
+      "relevance": "Foundational crystal-generation paper for periodic materials.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41524-023-00987-9",
+      "title": "Physics guided deep learning for generative design of crystal materials with symmetry constraints",
+      "authors": [
+        "Yong Zhao",
+        "Edirisuriya M. Dilanga Siriwardane",
+        "Zhenyao Wu",
+        "Nihang Fu",
+        "Mohammed Al-Fahdi",
+        "Ming Hu",
+        "Jianjun Hu"
+      ],
+      "year": 2023,
+      "venue": "npj Computational Materials",
+      "doi": "10.1038/s41524-023-00987-9",
+      "openalex_id": "https://openalex.org/W4360976356",
+      "landing_page": "https://doi.org/10.1038/s41524-023-00987-9",
+      "source_urls": [
+        "https://openalex.org/W4360976356",
+        "https://doi.org/10.1038/s41524-023-00987-9"
+      ],
+      "bibtex": "@article{Zhao_2023, title={Physics guided deep learning for generative design of crystal materials with symmetry constraints}, volume={9}, ISSN={2057-3960}, url={http://dx.doi.org/10.1038/s41524-023-00987-9}, DOI={10.1038/s41524-023-00987-9}, number={1}, journal={npj Computational Materials}, publisher={Springer Science and Business Media LLC}, author={Zhao, Yong and Siriwardane, Edirisuriya M. Dilanga and Wu, Zhenyao and Fu, Nihang and Al-Fahdi, Mohammed and Hu, Ming and Hu, Jianjun}, year={2023}, month=mar }",
+      "relevance_tags": [
+        "crystal_generation",
+        "symmetry",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "MP-20"
+      ],
+      "relevance": "Crystal generative model with symmetry constraints, relevant to MP-20 generation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2311.09235",
+      "title": "Scalable Diffusion for Materials Generation",
+      "authors": [
+        "Sherry Yang",
+        "KwangHwan Cho",
+        "Amil Merchant",
+        "Pieter Abbeel",
+        "Dale Schuurmans",
+        "Igor Mordatch",
+        "Ekin Dogus Cubuk"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2311.09235",
+      "arxiv_id": "2311.09235",
+      "openalex_id": "https://openalex.org/W4388787339",
+      "landing_page": "https://arxiv.org/abs/2311.09235",
+      "source_urls": [
+        "https://openalex.org/W4388787339",
+        "https://arxiv.org/abs/2311.09235"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2311.09235, doi = {10.48550/ARXIV.2311.09235}, url = {https://arxiv.org/abs/2311.09235}, author = {Yang, Sherry and Cho, KwangHwan and Merchant, Amil and Abbeel, Pieter and Schuurmans, Dale and Mordatch, Igor and Cubuk, Ekin Dogus}, keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Scalable Diffusion for Materials Generation}, publisher = {arXiv}, year = {2023}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "crystal_generation",
+        "diffusion",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "MP-20"
+      ],
+      "relevance": "Scalable crystal diffusion model relevant to periodic materials generation benchmarks.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2102.09844",
+      "title": "E(n) Equivariant Graph Neural Networks",
+      "authors": [
+        "Victor Garcia Satorras",
+        "Emiel Hoogeboom",
+        "Max Welling"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2102.09844",
+      "arxiv_id": "2102.09844",
+      "openalex_id": "https://openalex.org/W3131204112",
+      "landing_page": "https://arxiv.org/abs/2102.09844",
+      "source_urls": [
+        "https://openalex.org/W3131204112",
+        "https://arxiv.org/abs/2102.09844"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2102.09844, doi = {10.48550/ARXIV.2102.09844}, url = {https://arxiv.org/abs/2102.09844}, author = {Satorras, Victor Garcia and Hoogeboom, Emiel and Welling, Max}, keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {E(n) Equivariant Graph Neural Networks}, publisher = {arXiv}, year = {2021}, copyright = {arXiv.org perpetual, non-exclusive license}}",
+      "relevance_tags": [
+        "architecture",
+        "equivariant",
+        "molecule_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational EGNN architecture used by several 3D molecular generators.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2006.10503",
+      "title": "SE(3)-Transformers: 3D Roto-Translation Equivariant Attention Networks",
+      "authors": [
+        "Fabian B. Fuchs",
+        "Daniel E. Worrall",
+        "Volker Fischer",
+        "Max Welling"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2006.10503",
+      "arxiv_id": "2006.10503",
+      "openalex_id": "https://openalex.org/W3036737467",
+      "landing_page": "https://arxiv.org/abs/2006.10503",
+      "source_urls": [
+        "https://openalex.org/W3036737467",
+        "https://arxiv.org/abs/2006.10503"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2006.10503, doi = {10.48550/ARXIV.2006.10503}, url = {https://arxiv.org/abs/2006.10503}, author = {Fuchs, Fabian B. and Worrall, Daniel E. and Fischer, Volker and Welling, Max}, keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {SE(3)-Transformers: 3D Roto-Translation Equivariant Attention Networks}, publisher = {arXiv}, year = {2020}, copyright = {arXiv.org perpetual, non-exclusive license}}",
+      "relevance_tags": [
+        "architecture",
+        "equivariant",
+        "molecule_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Attention-based equivariant architecture relevant to 3D molecular modeling.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2106.07802",
+      "title": "GeoMol: Torsional Geometric Generation of Molecular 3D Conformer Ensembles",
+      "authors": [
+        "Octavian-Eugen Ganea",
+        "Lagnajit Pattanaik",
+        "Connor W. Coley",
+        "Regina Barzilay",
+        "Klavs F. Jensen",
+        "William H. Green",
+        "Tommi S. Jaakkola"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2106.07802",
+      "arxiv_id": "2106.07802",
+      "openalex_id": "https://openalex.org/W3172000897",
+      "landing_page": "https://arxiv.org/abs/2106.07802",
+      "source_urls": [
+        "https://openalex.org/W3172000897",
+        "https://arxiv.org/abs/2106.07802"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2106.07802, doi = {10.48550/ARXIV.2106.07802}, url = {https://arxiv.org/abs/2106.07802}, author = {Ganea, Octavian-Eugen and Pattanaik, Lagnajit and Coley, Connor W. and Barzilay, Regina and Jensen, Klavs F. and Green, William H. and Jaakkola, Tommi S.}, keywords = {Chemical Physics (physics.chem-ph), Machine Learning (cs.LG), FOS: Physical sciences, FOS: Physical sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {GeoMol: Torsional Geometric Generation of Molecular 3D Conformer Ensembles}, publisher = {arXiv}, year = {2021}, copyright = {arXiv.org perpetual, non-exclusive license}}",
+      "relevance_tags": [
+        "conformer_generation",
+        "molecule_generation",
+        "geometry"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "End-to-end 3D conformer generator relevant to geometry-aware molecular generation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.26434/chemrxiv-2022-jjm0j-v4",
+      "title": "Uni-Mol: A Universal 3D Molecular Representation Learning Framework",
+      "authors": [
+        "Gengmo Zhou",
+        "Zhifeng Gao",
+        "Qiankun Ding",
+        "Hang Zheng",
+        "Hongteng Xu",
+        "Zhewei Wei",
+        "Linfeng Zhang",
+        "Guolin Ke"
+      ],
+      "year": 2023,
+      "venue": "ChemRxiv",
+      "doi": "10.26434/chemrxiv-2022-jjm0j-v4",
+      "openalex_id": "https://openalex.org/W4323304388",
+      "landing_page": "https://chemrxiv.org/engage/api-gateway/chemrxiv/assets/orp/resource/item/6402990d37e01856dc1d1581/original/uni-mol-a-universal-3d-molecular-representation-learning-framework.pdf",
+      "source_urls": [
+        "https://openalex.org/W4323304388",
+        "https://chemrxiv.org/engage/api-gateway/chemrxiv/assets/orp/resource/item/6402990d37e01856dc1d1581/original/uni-mol-a-universal-3d-molecular-representation-learning-framework.pdf"
+      ],
+      "bibtex": "@article{Zhou_2023, title={Uni-Mol: A Universal 3D Molecular Representation Learning Framework}, url={http://dx.doi.org/10.26434/chemrxiv-2022-jjm0j-v4}, DOI={10.26434/chemrxiv-2022-jjm0j-v4}, publisher={American Chemical Society (ACS)}, author={Zhou, Gengmo and Gao, Zhifeng and Ding, Qiankun and Zheng, Hang and Xu, Hongteng and Wei, Zhewei and Zhang, Linfeng and Ke, Guolin}, year={2023}, month=mar }",
+      "relevance_tags": [
+        "representation_learning",
+        "equivariant",
+        "molecule_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Broad 3D molecular representation framework relevant to geometry generation.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

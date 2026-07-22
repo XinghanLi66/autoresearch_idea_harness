@@ -1,0 +1,12 @@
+{
+  "base_image": "python:3.10-slim",
+  "install_cmds": [
+    "apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*",
+    "pip install numpy pytransform3d pin nlopt anytree pyyaml lxml torch --extra-index-url https://download.pytorch.org/whl/cpu",
+    "cd /workspace/dex-retargeting && git submodule update --init assets",
+    "pip install -e /workspace/dex-retargeting"
+  ],
+  "use_cuda": false,
+  "workdir": "/workspace",
+  "env": {}
+}

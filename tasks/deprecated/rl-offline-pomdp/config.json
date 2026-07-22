@@ -1,0 +1,49 @@
+{
+  "allow_create": false,
+  "test_cmds": [
+    {
+      "cmd": "scripts/monk.sh",
+      "label": "mon-hum-neu",
+      "group": 1,
+      "compute": 0.5,
+      "mem": 300,
+      "cpus": 32,
+      "time": "23:29:00",
+      "package": "katakomba"
+    },
+    {
+      "cmd": "scripts/valkyrie.sh",
+      "label": "val-hum-neu",
+      "group": 1,
+      "compute": 0.5,
+      "mem": 300,
+      "cpus": 32,
+      "time": "23:29:00",
+      "package": "katakomba"
+    },
+    {
+      "cmd": "scripts/ranger.sh",
+      "label": "ran-hum-neu",
+      "group": 1,
+      "compute": 0.5,
+      "mem": 300,
+      "cpus": 32,
+      "time": "23:29:00",
+      "package": "katakomba",
+      "hidden": true
+    }
+  ],
+  "rigorous_codebase": true,
+  "baselines": {
+    "bc": {"edit_ops": "edits/bc.edit.py"},
+    "cql": {"edit_ops": "edits/cql.edit.py"},
+    "iql": {"edit_ops": "edits/iql.edit.py"}
+  },
+  "files": [
+    {
+      "filename": "katakomba/algorithms/small_scale/custom_nethack_pomdp.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": [{"start": 278, "end": 364}]
+    }
+  ]
+}

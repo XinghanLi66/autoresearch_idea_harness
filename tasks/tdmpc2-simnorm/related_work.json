@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "tdmpc2-simnorm",
+  "task_folder": "tasks/tdmpc2-simnorm",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/tdmpc2-simnorm/config.json",
+      "task_description_path": "tasks/tdmpc2-simnorm/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "walker-walk",
+      "cmd": "scripts/walker_walk.sh",
+      "package": "tdmpc2",
+      "group": 1,
+      "compute": 0.5,
+      "time": "3:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "cheetah-run",
+      "cmd": "scripts/cheetah_run.sh",
+      "package": "tdmpc2",
+      "group": 1,
+      "compute": 0.5,
+      "time": "3:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "cartpole-swingup",
+      "cmd": "scripts/cartpole_swingup.sh",
+      "package": "tdmpc2",
+      "group": 1,
+      "compute": 0.5,
+      "time": "3:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "l2norm",
+      "implementation": "edits/l2norm.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "rmsnorm",
+      "implementation": "edits/rmsnorm.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "identity",
+      "implementation": "edits/identity.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

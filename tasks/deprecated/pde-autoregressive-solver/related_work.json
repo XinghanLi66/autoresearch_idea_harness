@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "task_name": "pde-autoregressive-solver",
+  "task_folder": "tasks/pde-autoregressive-solver",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/pde-autoregressive-solver/config.json",
+      "task_description_path": "tasks/pde-autoregressive-solver/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 4,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "NS",
+      "cmd": "scripts/ns.sh",
+      "package": "Neural-Solver-Library",
+      "group": 1,
+      "compute": 0.5,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "DiffSorp",
+      "cmd": "scripts/diff_sorp.sh",
+      "package": "Neural-Solver-Library",
+      "group": 1,
+      "compute": 0.5,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "Advection",
+      "cmd": "scripts/advection.sh",
+      "package": "Neural-Solver-Library",
+      "group": 1,
+      "compute": 0.5,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "Burgers",
+      "cmd": "scripts/burgers.sh",
+      "package": "Neural-Solver-Library",
+      "group": 1,
+      "compute": 0.5,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "fno",
+      "implementation": "edits/fno.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "transformer",
+      "implementation": "edits/transformer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "transolver",
+      "implementation": "edits/transolver.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

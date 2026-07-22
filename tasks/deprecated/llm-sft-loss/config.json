@@ -1,0 +1,65 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train.sh",
+      "label": "metamathqa-sft",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "package": "LLaMA-Factory"
+    },
+    {
+      "cmd": "scripts/eval.sh",
+      "label": "lm-eval",
+      "group": 2,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "package": "lm-evaluation-harness"
+    }
+  ],
+  "baselines": {
+    "ce": {
+      "edit_ops": "baselines/ce.edit.py"
+    },
+    "label_smoothing": {
+      "edit_ops": "baselines/label_smoothing.edit.py"
+    },
+    "focal": {
+      "edit_ops": "baselines/focal.edit.py"
+    },
+    "gem": {
+      "edit_ops": "baselines/gem.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "LLaMA-Factory/src/llamafactory/train/sft/custom_sft_loss.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 15,
+          "end": 63
+        }
+      ]
+    },
+    {
+      "filename": "LLaMA-Factory/src/llamafactory/train/trainer_utils.py",
+      "read": [
+        {
+          "start": 638,
+          "end": 787
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

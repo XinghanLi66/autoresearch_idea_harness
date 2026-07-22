@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-pretrain-packing",
+  "task_folder": "tasks/llm-pretrain-packing",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/llm-pretrain-packing/config.json",
+      "task_description_path": "tasks/llm-pretrain-packing/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 1,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "depth-4",
+      "cmd": "scripts/train.sh",
+      "package": "nanochat",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "best_fit",
+      "implementation": "edits/best_fit.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "first_fit_decreasing",
+      "implementation": "edits/first_fit_decreasing.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "spfhp",
+      "implementation": "edits/spfhp.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "multipack_split",
+      "implementation": "edits/multipack_split.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

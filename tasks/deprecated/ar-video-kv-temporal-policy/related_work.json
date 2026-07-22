@@ -1,0 +1,534 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ar-video-kv-temporal-policy",
+  "task_folder": "tasks/ar-video-kv-temporal-policy",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "temporal frame-retention policy for autoregressive video generation",
+    "research_question": "Design a better temporal frame-retention policy for autoregressive video generation under a fixed frame budget.",
+    "local_sources": {
+      "config_path": "tasks/ar-video-kv-temporal-policy/config.json",
+      "task_description_path": "tasks/ar-video-kv-temporal-policy/task_description.md"
+    },
+    "notes": [
+      "The canonical FAR host-model paper was not returned by citation lookup, so the visible tests are linked to the nearest concrete video-generation and environment papers.",
+      "The recent_window baseline has no single canonical paper; it is linked approximately to StreamingLLM's window-attention / attention-sink family."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 4,
+    "baseline_links_found": 4,
+    "test_entries": 3,
+    "test_links_found": 5
+  },
+  "tests": [
+    {
+      "label": "ucf-short",
+      "cmd": "scripts/ucf_short.sh",
+      "package": "FAR",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2104.10157",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1609.02612",
+          "role": "other"
+        }
+      ],
+      "notes": "UCF-101 short-prediction workload; linked to UCF-101 video-generation and future-prediction papers."
+    },
+    {
+      "label": "dmlab-long",
+      "cmd": "scripts/dmlab_long.sh",
+      "package": "FAR",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1612.03801",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "DeepMind Lab long-horizon prediction workload."
+    },
+    {
+      "label": "ucf-scene-cut",
+      "cmd": "scripts/ucf_scene_cut.sh",
+      "package": "FAR",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2104.10157",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1609.02612",
+          "role": "other"
+        }
+      ],
+      "notes": "UCF-101 scene-cut workload; linked to video-generation papers that study temporal prediction in natural video."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "recent_window",
+      "implementation": "edits/recent_window.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2309.17453",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Naive sliding-window retention; mapped approximately to StreamingLLM because it explicitly studies window attention and KV cache retention."
+    },
+    {
+      "name": "packcache",
+      "implementation": "edits/packcache.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2601.04359",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Exact match to PackCache."
+    },
+    {
+      "name": "causalcache_vdm",
+      "implementation": "edits/causalcache_vdm.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2411.16375",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Exact match to Ca2-VDM / CausalCache-VDM."
+    },
+    {
+      "name": "flowcache",
+      "implementation": "edits/flowcache.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2602.10825",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Exact match to FlowCache."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.2601.04359",
+      "title": "PackCache: A Training-Free Acceleration Method for Unified Autoregressive Video Generation via Compact KV-Cache",
+      "authors": [
+        "Kunyang Li",
+        "Mubarak Shah",
+        "Yuzhang Shang"
+      ],
+      "year": 2026,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2601.04359",
+      "arxiv_id": "2601.04359",
+      "openalex_id": "https://openalex.org/W7120084681",
+      "landing_page": "https://arxiv.org/abs/2601.04359",
+      "source_urls": [
+        "https://api.openalex.org/works/W7120084681",
+        "https://arxiv.org/abs/2601.04359"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2601.04359,\\n  doi = {10.48550/ARXIV.2601.04359},\\n  url = {https://arxiv.org/abs/2601.04359},\\n  author = {Li, Kunyang and Shah, Mubarak and Shang, Yuzhang},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {PackCache: A Training-Free Acceleration Method for Unified Autoregressive Video Generation via Compact KV-Cache},\\n  publisher = {arXiv},\\n  year = {2026},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "baseline",
+        "kv_cache",
+        "video_generation"
+      ],
+      "baseline_links": [
+        "packcache"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the PackCache baseline used in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2602.10825",
+      "title": "Flow caching for autoregressive video generation",
+      "authors": [
+        "Yuexiao Ma",
+        "Xuzhe Zheng",
+        "Jing Xu",
+        "Xiwei Xu",
+        "Feng Ling",
+        "Xiawu Zheng",
+        "Huafeng Kuang",
+        "Huixia Li",
+        "Xing D. Wang",
+        "Xuefeng Xiao",
+        "Fei Chao",
+        "Rongrong Ji"
+      ],
+      "year": 2026,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2602.10825",
+      "arxiv_id": "2602.10825",
+      "openalex_id": "https://openalex.org/W7128678997",
+      "landing_page": "https://arxiv.org/abs/2602.10825",
+      "source_urls": [
+        "https://api.openalex.org/works/W7128678997",
+        "https://arxiv.org/abs/2602.10825"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2602.10825,\\n  doi = {10.48550/ARXIV.2602.10825},\\n  url = {https://arxiv.org/abs/2602.10825},\\n  author = {Ma, Yuexiao and Zheng, Xuzhe and Xu, Jing and Xu, Xiwei and Ling, Feng and Zheng, Xiawu and Kuang, Huafeng and Li, Huixia and Wang, Xing and Xiao, Xuefeng and Chao, Fei and Ji, Rongrong},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Flow caching for autoregressive video generation},\\n  publisher = {arXiv},\\n  year = {2026},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "baseline",
+        "kv_cache",
+        "chunkwise_caching",
+        "video_generation"
+      ],
+      "baseline_links": [
+        "flowcache"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the FlowCache baseline; chunkwise adaptive caching is directly aligned with the task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2411.16375",
+      "title": "Ca2-VDM: Efficient Autoregressive Video Diffusion Model with Causal Generation and Cache Sharing",
+      "authors": [
+        "Kaifeng Gao",
+        "Jiaxin Shi",
+        "Hanwang Zhang",
+        "Chunping Wang",
+        "Jun Xiao",
+        "Long Chen"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2411.16375",
+      "arxiv_id": "2411.16375",
+      "openalex_id": "https://openalex.org/W4404987471",
+      "landing_page": "https://arxiv.org/abs/2411.16375",
+      "source_urls": [
+        "https://api.openalex.org/works/W4404987471",
+        "https://arxiv.org/abs/2411.16375"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2411.16375,\\n  doi = {10.48550/ARXIV.2411.16375},\\n  url = {https://arxiv.org/abs/2411.16375},\\n  author = {Gao, Kaifeng and Shi, Jiaxin and Zhang, Hanwang and Wang, Chunping and Xiao, Jun and Chen, Long},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Ca2-VDM: Efficient Autoregressive Video Diffusion Model with Causal Generation and Cache Sharing},\\n  publisher = {arXiv},\\n  year = {2024},\\n  copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International}\\n}",
+      "relevance_tags": [
+        "baseline",
+        "cache_sharing",
+        "autoregressive_video_diffusion"
+      ],
+      "baseline_links": [
+        "causalcache_vdm"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the CausalCache-VDM baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2309.17453",
+      "title": "Efficient Streaming Language Models with Attention Sinks",
+      "authors": [
+        "Guangxuan Xiao",
+        "Yuandong Tian",
+        "Beidi Chen",
+        "Song Han",
+        "Mike Lewis"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2309.17453",
+      "arxiv_id": "2309.17453",
+      "openalex_id": "https://openalex.org/W4387294617",
+      "landing_page": "https://arxiv.org/abs/2309.17453",
+      "source_urls": [
+        "https://api.openalex.org/works/W4387294617",
+        "https://arxiv.org/abs/2309.17453"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2309.17453,\\n  doi = {10.48550/ARXIV.2309.17453},\\n  url = {https://arxiv.org/abs/2309.17453},\\n  author = {Xiao, Guangxuan and Tian, Yuandong and Chen, Beidi and Han, Song and Lewis, Mike},\\n  keywords = {Computation and Language (cs.CL), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Efficient Streaming Language Models with Attention Sinks},\\n  publisher = {arXiv},\\n  year = {2023},\\n  copyright = {Creative Commons Attribution 4.0 International}\\n}",
+      "relevance_tags": [
+        "kv_cache",
+        "sliding_window",
+        "streaming"
+      ],
+      "baseline_links": [
+        "recent_window"
+      ],
+      "test_links": [],
+      "relevance": "Approximate link for the recent-window baseline; the paper studies window attention and KV retention under streaming constraints.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1145/3600006.3613165",
+      "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+      "authors": [
+        "Woosuk Kwon",
+        "Zhuohan Li",
+        "Siyuan Zhuang",
+        "Ying Sheng",
+        "Lianmin Zheng",
+        "Cody Hao Yu",
+        "Joseph E. Gonzalez",
+        "Hao Zhang",
+        "Ion Stoica"
+      ],
+      "year": 2023,
+      "venue": "SOSP",
+      "doi": "10.1145/3600006.3613165",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4387321091",
+      "landing_page": "https://dl.acm.org/doi/10.1145/3600006.3613165",
+      "source_urls": [
+        "https://api.openalex.org/works/W4387321091",
+        "https://dl.acm.org/doi/10.1145/3600006.3613165"
+      ],
+      "bibtex": "@inproceedings{Kwon_2023, series={SOSP ’23}, title={Efficient Memory Management for Large Language Model Serving with PagedAttention}, url={http://dx.doi.org/10.1145/3600006.3613165}, DOI={10.1145/3600006.3613165}, booktitle={Proceedings of the 29th Symposium on Operating Systems Principles}, publisher={ACM}, author={Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph and Zhang, Hao and Stoica, Ion}, year={2023}, month=oct, pages={611–626}, collection={SOSP ’23} }",
+      "relevance_tags": [
+        "kv_cache",
+        "memory_management",
+        "serving"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "KV-cache paging and memory management are directly relevant to fixed-budget history retention.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2205.14135",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "authors": [
+        "Tri Dao",
+        "Daniel Y. Fu",
+        "Stefano Ermon",
+        "Atri Rudra",
+        "Christopher Ré"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2205.14135",
+      "arxiv_id": "2205.14135",
+      "openalex_id": "https://openalex.org/W4281758439",
+      "landing_page": "https://arxiv.org/abs/2205.14135",
+      "source_urls": [
+        "https://api.openalex.org/works/W4281758439",
+        "https://arxiv.org/abs/2205.14135"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2205.14135,\\n  doi = {10.48550/ARXIV.2205.14135},\\n  url = {https://arxiv.org/abs/2205.14135},\\n  author = {Dao, Tri and Fu, Daniel Y. and Ermon, Stefano and Rudra, Atri and Ré, Christopher},\\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness},\\n  publisher = {arXiv},\\n  year = {2022},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "attention",
+        "kv_cache",
+        "memory_efficiency"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational exact-attention kernel for memory-efficient transformer inference.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2104.10157",
+      "title": "VideoGPT: Video Generation using VQ-VAE and Transformers",
+      "authors": [
+        "Wilson Yan",
+        "Yunzhi Zhang",
+        "Pieter Abbeel",
+        "Aravind Srinivas"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2104.10157",
+      "arxiv_id": "2104.10157",
+      "openalex_id": "https://openalex.org/W3152733922",
+      "landing_page": "https://arxiv.org/abs/2104.10157",
+      "source_urls": [
+        "https://api.openalex.org/works/W3152733922",
+        "https://arxiv.org/abs/2104.10157"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2104.10157,\\n  doi = {10.48550/ARXIV.2104.10157},\\n  url = {https://arxiv.org/abs/2104.10157},\\n  author = {Yan, Wilson and Zhang, Yunzhi and Abbeel, Pieter and Srinivas, Aravind},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {VideoGPT: Video Generation using VQ-VAE and Transformers},\\n  publisher = {arXiv},\\n  year = {2021},\\n  copyright = {Creative Commons Attribution 4.0 International}\\n}",
+      "relevance_tags": [
+        "video_generation",
+        "autoregressive_generation",
+        "transformer"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "ucf-short",
+        "ucf-scene-cut"
+      ],
+      "relevance": "Autoregressive video generation on UCF-101; a close architectural reference for the UCF workloads.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2209.14792",
+      "title": "Make-A-Video: Text-to-Video Generation without Text-Video Data",
+      "authors": [
+        "Uriel Singer",
+        "Adam Polyak",
+        "Thomas Hayes",
+        "Xi Yin",
+        "Jie An",
+        "Songyang Zhang",
+        "Qiyuan Hu",
+        "Harry Yang",
+        "Oron Ashual",
+        "Oran Gafni",
+        "Devi Parikh",
+        "Sonal Gupta",
+        "Yaniv Taigman"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2209.14792",
+      "arxiv_id": "2209.14792",
+      "openalex_id": "https://openalex.org/W4298185919",
+      "landing_page": "https://arxiv.org/abs/2209.14792",
+      "source_urls": [
+        "https://api.openalex.org/works/W4298185919",
+        "https://arxiv.org/abs/2209.14792"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2209.14792,\\n  doi = {10.48550/ARXIV.2209.14792},\\n  url = {https://arxiv.org/abs/2209.14792},\\n  author = {Singer, Uriel and Polyak, Adam and Hayes, Thomas and Yin, Xi and An, Jie and Zhang, Songyang and Hu, Qiyuan and Yang, Harry and Ashual, Oron and Gafni, Oran and Parikh, Devi and Gupta, Sonal and Taigman, Yaniv},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Make-A-Video: Text-to-Video Generation without Text-Video Data},\\n  publisher = {arXiv},\\n  year = {2022},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "video_generation",
+        "temporal_modules",
+        "text_to_video"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Text-to-video generation paper with explicit temporal modeling and variable-length generation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2210.02399",
+      "title": "Phenaki: Variable Length Video Generation From Open Domain Textual Description",
+      "authors": [
+        "Ruben Villegas",
+        "Mohammad Babaeizadeh",
+        "Pieter-Jan Kindermans",
+        "Hernan Moraldo",
+        "Han Zhang",
+        "Mohammad Saffar",
+        "Santiago Castro",
+        "Julius Kunze",
+        "Dumitru Erhan"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2210.02399",
+      "arxiv_id": "2210.02399",
+      "openalex_id": "https://openalex.org/W4303441850",
+      "landing_page": "https://arxiv.org/abs/2210.02399",
+      "source_urls": [
+        "https://api.openalex.org/works/W4303441850",
+        "https://arxiv.org/abs/2210.02399"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2210.02399,\\n  doi = {10.48550/ARXIV.2210.02399},\\n  url = {https://arxiv.org/abs/2210.02399},\\n  author = {Villegas, Ruben and Babaeizadeh, Mohammad and Kindermans, Pieter-Jan and Moraldo, Hernan and Zhang, Han and Saffar, Mohammad Taghi and Castro, Santiago and Kunze, Julius and Erhan, Dumitru},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Phenaki: Variable Length Video Generation From Open Domain Textual Description},\\n  publisher = {arXiv},\\n  year = {2022},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "video_generation",
+        "variable_length",
+        "autoregressive_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Variable-length video generation with causal temporal tokenization is directly relevant to long-horizon frame retention.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1612.03801",
+      "title": "DeepMind Lab",
+      "authors": [
+        "Charles Beattie",
+        "Joel Z. Leibo",
+        "Denis Teplyashin",
+        "Tom Ward",
+        "Marcus Wainwright",
+        "Heinrich Küttler",
+        "Andrew Lefrancq",
+        "Simon Green",
+        "Víctor Valdés",
+        "Amir Sadik",
+        "Julian Schrittwieser",
+        "Keith Anderson",
+        "Sarah York",
+        "Max Cant",
+        "Adam Cain",
+        "Adrian Bolton",
+        "Stephen G. Gaffney",
+        "Helen King",
+        "Demis Hassabis",
+        "Shane Legg",
+        "Stig Petersen"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1612.03801",
+      "arxiv_id": "1612.03801",
+      "openalex_id": "https://openalex.org/W4394652010",
+      "landing_page": "https://arxiv.org/abs/1612.03801",
+      "source_urls": [
+        "https://api.openalex.org/works/W4394652010",
+        "https://arxiv.org/abs/1612.03801"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1612.03801,\\n  doi = {10.48550/ARXIV.1612.03801},\\n  url = {https://arxiv.org/abs/1612.03801},\\n  author = {Beattie, Charles and Leibo, Joel Z. and Teplyashin, Denis and Ward, Tom and Wainwright, Marcus and Küttler, Heinrich and Lefrancq, Andrew and Green, Simon and Valdés, Víctor and Sadik, Amir and Schrittwieser, Julian and Anderson, Keith and York, Sarah and Cant, Max and Cain, Adam and Bolton, Adrian and Gaffney, Stephen and King, Helen and Hassabis, Demis and Legg, Shane and Petersen, Stig},\\n  keywords = {Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {DeepMind Lab},\\n  publisher = {arXiv},\\n  year = {2016},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "benchmark",
+        "environment",
+        "video_prediction"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "dmlab-long"
+      ],
+      "relevance": "Benchmark / environment source for the DMLab long-horizon workload.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1609.02612",
+      "title": "Generating Videos with Scene Dynamics",
+      "authors": [
+        "Carl Vondrick",
+        "Hamed Pirsiavash",
+        "Antonio Torralba"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1609.02612",
+      "arxiv_id": "1609.02612",
+      "openalex_id": "https://openalex.org/W2949099979",
+      "landing_page": "https://arxiv.org/abs/1609.02612",
+      "source_urls": [
+        "https://api.openalex.org/works/W2949099979",
+        "https://arxiv.org/abs/1609.02612"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1609.02612,\\n  doi = {10.48550/ARXIV.1609.02612},\\n  url = {https://arxiv.org/abs/1609.02612},\\n  author = {Vondrick, Carl and Pirsiavash, Hamed and Torralba, Antonio},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Graphics (cs.GR), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Generating Videos with Scene Dynamics},\\n  publisher = {arXiv},\\n  year = {2016},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "video_generation",
+        "future_prediction",
+        "temporal_dynamics"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "ucf-short",
+        "ucf-scene-cut"
+      ],
+      "relevance": "Early video future-prediction work; relevant to temporal-history management on natural video clips.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

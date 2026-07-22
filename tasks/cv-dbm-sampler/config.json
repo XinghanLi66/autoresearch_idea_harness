@@ -1,0 +1,55 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/run_e2h.sh",
+      "label": "edges2handbags",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "package": "dbim-codebase"
+    },
+    {
+      "cmd": "scripts/run_Imagenet.sh",
+      "label": "Imagenet",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "package": "dbim-codebase",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "dbim": {
+      "edit_ops": "edits/dbim_edit.py"
+    },
+    "ddbm": {
+      "edit_ops": "edits/ddbm_edit.py"
+    },
+    "ecsi": {
+      "edit_ops": "edits/ecsi_edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "dbim-codebase/ddbm/karras_diffusion.py",
+      "_comment": "Only show the editable template (sample_dbim, L448-509). All other hint code is hidden \u2014 agent learns allowed APIs only from the baseline variants (dbim/ddbm/ecsi).",
+      "read": [
+        {
+          "start": 448,
+          "end": 509
+        }
+      ],
+      "edit": [
+        {
+          "start": 448,
+          "end": 509
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

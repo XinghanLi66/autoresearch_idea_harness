@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "speech-enhancement",
+  "task_folder": "tasks/speech-enhancement",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/speech-enhancement/config.json",
+      "task_description_path": "tasks/speech-enhancement/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "voicebank-demand",
+      "cmd": "scripts/voicebank_demand.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "06:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "noisy-vctk-56spk",
+      "cmd": "scripts/noisy_vctk_56spk.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "06:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "librimix-2spk",
+      "cmd": "scripts/librimix_2spk.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "06:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "conv_tasnet",
+      "implementation": "edits/conv_tasnet.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dccrn",
+      "implementation": "edits/dccrn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dptnet",
+      "implementation": "edits/dptnet.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

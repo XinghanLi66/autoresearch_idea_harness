@@ -1,0 +1,438 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-kv-selection-budgeting",
+  "task_folder": "tasks/llm-kv-selection-budgeting",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "KV-cache token selection for long-context LLM inference",
+    "research_question": "Which prefill-time KV token-retention rule best preserves benchmark accuracy under a fixed cache-retention budget?",
+    "local_sources": {
+      "config_path": "tasks/llm-kv-selection-budgeting/config.json",
+      "task_description_path": "tasks/llm-kv-selection-budgeting/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 8,
+    "paper_count": 8,
+    "baseline_entries": 4,
+    "baseline_links_found": 3,
+    "test_entries": 5,
+    "test_links_found": 7
+  },
+  "tests": [
+    {
+      "label": "longbench-hotpotqa",
+      "cmd": "scripts/longbench_hotpotqa.sh",
+      "package": "transformers-kv-lab",
+      "group": 1,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2308.14508",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.18653/v1/D18-1259",
+          "role": "dataset"
+        }
+      ],
+      "notes": "LongBench-E HotpotQA multi-hop QA final score."
+    },
+    {
+      "label": "longbench-passage-retrieval",
+      "cmd": "scripts/longbench_passage_retrieval.sh",
+      "package": "transformers-kv-lab",
+      "group": 2,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2308.14508",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "LongBench-E passage retrieval final score."
+    },
+    {
+      "label": "longbench-repobench",
+      "cmd": "scripts/longbench_repobench.sh",
+      "package": "transformers-kv-lab",
+      "group": 3,
+      "compute": 1.0,
+      "time": "03:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2308.14508",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "arxiv:2306.03091",
+          "role": "dataset"
+        }
+      ],
+      "notes": "LongBench-E RepoBench-P code-completion similarity score."
+    },
+    {
+      "label": "longbench-v2",
+      "cmd": "scripts/longbench_v2.sh",
+      "package": "transformers-kv-lab",
+      "group": 4,
+      "compute": 1.0,
+      "time": "06:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2412.15204",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "LongBench v2 multiple-choice long-context accuracy on the train split."
+    },
+    {
+      "label": "gsm8k",
+      "cmd": "scripts/gsm8k.sh",
+      "package": "transformers-kv-lab",
+      "group": 5,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2110.14168",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Hidden GSM8K main-test exact final-answer accuracy with numeric normalization."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "full_attention",
+      "implementation": "edits/full_attention.edit.py",
+      "labels": [
+        "oracle",
+        "uncompressed-reference"
+      ],
+      "paper_links": [],
+      "status": "no_explicit_paper",
+      "notes": "Controlled full-cache upper-bound anchor."
+    },
+    {
+      "name": "streamingllm",
+      "implementation": "edits/streamingllm.edit.py",
+      "labels": [
+        "published",
+        "naive-window-anchor"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2309.17453",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_shared_hook",
+      "notes": "Source-backed attention sinks plus recent-window retention on the shared full-attention prefill hook, with RoPE-aware key rerotation."
+    },
+    {
+      "name": "expected_attention",
+      "implementation": "edits/expected_attention.edit.py",
+      "labels": [
+        "published",
+        "recent",
+        "strong-baseline"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2510.00636",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_shared_hook",
+      "notes": "Source-backed NVIDIA KVPRESS ExpectedAttentionPress defaults on the shared full-attention prefill hook."
+    },
+    {
+      "name": "lagkv",
+      "implementation": "edits/lagkv.edit.py",
+      "labels": [
+        "published",
+        "recent",
+        "query-free-baseline"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2504.04704",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_shared_hook",
+      "notes": "Source-backed KVPRESS LagKV lag-relative key/value information scorer on the shared full-attention prefill hook."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "arxiv:2308.14508",
+      "title": "LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding",
+      "authors": [
+        "Yushi Bai",
+        "Xin Lv",
+        "Jiajie Zhang",
+        "Hongchang Lyu",
+        "Jiankai Tang",
+        "Zhidian Huang",
+        "Zhengxiao Du",
+        "Xiao Liu",
+        "Aohan Zeng",
+        "Lei Hou",
+        "Yuxiao Dong",
+        "Jie Tang",
+        "Juanzi Li"
+      ],
+      "year": 2023,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2308.14508",
+      "landing_page": "https://arxiv.org/abs/2308.14508",
+      "source_urls": [
+        "https://github.com/THUDM/LongBench"
+      ],
+      "relevance_tags": [
+        "long-context",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "longbench-hotpotqa",
+        "longbench-passage-retrieval",
+        "longbench-repobench"
+      ],
+      "relevance": "Source benchmark for visible LongBench-E workloads.",
+      "verified_by": "codex-review-2026-04-23"
+    },
+    {
+      "paper_id": "doi:10.18653/v1/D18-1259",
+      "title": "HotpotQA: A Dataset for Diverse, Explainable Multi-hop Question Answering",
+      "authors": [
+        "Zhilin Yang",
+        "Peng Qi",
+        "Saizheng Zhang",
+        "Yoshua Bengio",
+        "William Cohen",
+        "Ruslan Salakhutdinov",
+        "Christopher D. Manning"
+      ],
+      "year": 2018,
+      "venue": "EMNLP",
+      "doi": "10.18653/v1/D18-1259",
+      "arxiv_id": "",
+      "landing_page": "https://aclanthology.org/D18-1259/",
+      "source_urls": [
+        "https://aclanthology.org/D18-1259/"
+      ],
+      "relevance_tags": [
+        "multi-hop-qa",
+        "dataset"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "longbench-hotpotqa"
+      ],
+      "relevance": "Original dataset lineage for the HotpotQA LongBench-E slice.",
+      "verified_by": "codex-review-2026-04-23"
+    },
+    {
+      "paper_id": "arxiv:2306.03091",
+      "title": "RepoBench: Benchmarking Repository-Level Code Auto-Completion Systems",
+      "authors": [
+        "Tianyang Liu",
+        "Canwen Xu",
+        "Julian McAuley"
+      ],
+      "year": 2023,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2306.03091",
+      "landing_page": "https://arxiv.org/abs/2306.03091",
+      "source_urls": [
+        "https://arxiv.org/abs/2306.03091"
+      ],
+      "relevance_tags": [
+        "code-completion",
+        "dataset"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "longbench-repobench"
+      ],
+      "relevance": "Original code-completion benchmark lineage for LongBench RepoBench-P.",
+      "verified_by": "codex-review-2026-04-23"
+    },
+    {
+      "paper_id": "arxiv:2412.15204",
+      "title": "LongBench v2: Towards Deeper Understanding and Reasoning on Realistic Long-context Multitasks",
+      "authors": [
+        "Yushi Bai",
+        "Shangqing Tu",
+        "Jiajie Zhang",
+        "Hao Peng",
+        "Xiaozhi Wang",
+        "Xin Lv",
+        "Shulin Cao",
+        "Jiazheng Xu",
+        "Lei Hou",
+        "Yuxiao Dong",
+        "Jie Tang",
+        "Juanzi Li"
+      ],
+      "year": 2024,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2412.15204",
+      "landing_page": "https://arxiv.org/abs/2412.15204",
+      "source_urls": [
+        "https://github.com/THUDM/LongBench",
+        "https://huggingface.co/datasets/zai-org/LongBench-v2"
+      ],
+      "relevance_tags": [
+        "long-context",
+        "multiple-choice",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "longbench-v2"
+      ],
+      "relevance": "Replacement long-context workload with realistic tasks and deterministic multiple-choice accuracy.",
+      "verified_by": "codex-review-2026-04-23"
+    },
+    {
+      "paper_id": "arxiv:2110.14168",
+      "title": "Training Verifiers to Solve Math Word Problems",
+      "authors": [
+        "Karl Cobbe",
+        "Vineet Kosaraju",
+        "Mohammad Bavarian",
+        "Mark Chen",
+        "Heewoo Jun",
+        "Lukasz Kaiser",
+        "Matthias Plappert",
+        "Jerry Tworek",
+        "Jacob Hilton",
+        "Reiichiro Nakano",
+        "Christopher Hesse",
+        "John Schulman"
+      ],
+      "year": 2021,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2110.14168",
+      "landing_page": "https://arxiv.org/abs/2110.14168",
+      "source_urls": [
+        "https://huggingface.co/datasets/openai/gsm8k"
+      ],
+      "relevance_tags": [
+        "math-reasoning",
+        "dataset"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "gsm8k"
+      ],
+      "relevance": "Hidden arithmetic reasoning workload source.",
+      "verified_by": "codex-review-2026-04-23"
+    },
+    {
+      "paper_id": "arxiv:2309.17453",
+      "title": "Efficient Streaming Language Models with Attention Sinks",
+      "authors": [
+        "Guangxuan Xiao",
+        "Yuandong Tian",
+        "Beidi Chen",
+        "Song Han",
+        "Mike Lewis"
+      ],
+      "year": 2023,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2309.17453",
+      "landing_page": "https://arxiv.org/abs/2309.17453",
+      "source_urls": [
+        "https://github.com/mit-han-lab/streaming-llm",
+        "https://github.com/NVIDIA/kvpress"
+      ],
+      "relevance_tags": [
+        "kv-cache",
+        "attention-sink",
+        "baseline"
+      ],
+      "baseline_links": [
+        "streamingllm"
+      ],
+      "test_links": [],
+      "relevance": "Attention-sink and recent-token baseline.",
+      "verified_by": "codex-review-2026-04-23"
+    },
+    {
+      "paper_id": "arxiv:2510.00636",
+      "title": "Expected Attention: KV Cache Compression by Estimating Attention from Future Queries Distribution",
+      "authors": [
+        "Alessio Devoto",
+        "Maximilian Jeblick",
+        "Simon Jegou"
+      ],
+      "year": 2025,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2510.00636",
+      "landing_page": "https://arxiv.org/abs/2510.00636",
+      "source_urls": [
+        "https://github.com/NVIDIA/kvpress"
+      ],
+      "relevance_tags": [
+        "kv-cache",
+        "expected-attention",
+        "baseline"
+      ],
+      "baseline_links": [
+        "expected_attention"
+      ],
+      "test_links": [],
+      "relevance": "Recent source-backed expected future-attention scorer.",
+      "verified_by": "codex-review-2026-04-23"
+    },
+    {
+      "paper_id": "arxiv:2504.04704",
+      "title": "LagKV: Lag-Relative Information for KV Cache Compression",
+      "authors": [
+        "Manlai Liang",
+        "JiaMing Zhang",
+        "Xiong Li",
+        "Jinlong Li"
+      ],
+      "year": 2025,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2504.04704",
+      "landing_page": "https://arxiv.org/abs/2504.04704",
+      "source_urls": [
+        "https://github.com/NVIDIA/kvpress"
+      ],
+      "relevance_tags": [
+        "kv-cache",
+        "query-free",
+        "baseline"
+      ],
+      "baseline_links": [
+        "lagkv"
+      ],
+      "test_links": [],
+      "relevance": "Recent query-free lag-relative scoring baseline.",
+      "verified_by": "codex-review-2026-04-23"
+    }
+  ]
+}

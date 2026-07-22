@@ -1,0 +1,4 @@
+timestamp,model,is_final,seed,last_step_rel_err_NS2D,all_avg_rel_err_NS2D,last_step_rel_err_COMPRESSIBLE2D,all_avg_rel_err_COMPRESSIBLE2D,last_step_rel_err_EULER2D,all_avg_rel_err_EULER2D,last_step_rel_err_NS2D_std,all_avg_rel_err_NS2D_std,last_step_rel_err_COMPRESSIBLE2D_std,all_avg_rel_err_COMPRESSIBLE2D_std,last_step_rel_err_EULER2D_std,all_avg_rel_err_EULER2D_std
+2026-04-11T21:11:20.368142+00:00,baseline:icon,false,42,,,,,,,,,,,,
+2026-04-11T21:13:04.013844+00:00,baseline:mpp,false,42,,,,,,,,,,,,
+2026-04-11T21:15:15.703462+00:00,baseline:dpot,false,42,,,,,,,,,,,,

@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "task_name": "stf-traffic-forecast",
+  "task_folder": "tasks/stf-traffic-forecast",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/stf-traffic-forecast/config.json",
+      "task_description_path": "tasks/stf-traffic-forecast/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 7,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "METR-LA",
+      "cmd": "scripts/metr_la.sh",
+      "package": "BasicTS",
+      "group": 1,
+      "compute": 0.11,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "PEMS-BAY",
+      "cmd": "scripts/pems_bay.sh",
+      "package": "BasicTS",
+      "group": 1,
+      "compute": 0.11,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "PEMS04",
+      "cmd": "scripts/pems04.sh",
+      "package": "BasicTS",
+      "group": 1,
+      "compute": 0.11,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "stid",
+      "implementation": "edits/stid.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dlinear",
+      "implementation": "edits/dlinear.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "stemgnn",
+      "implementation": "edits/stemgnn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "itransformer",
+      "implementation": "edits/itransformer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "timesnet",
+      "implementation": "edits/timesnet.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "softs",
+      "implementation": "edits/softs.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "timemixer",
+      "implementation": "edits/timemixer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

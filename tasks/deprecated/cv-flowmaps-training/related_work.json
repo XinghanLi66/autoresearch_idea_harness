@@ -1,0 +1,548 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-flowmaps-training",
+  "task_folder": "tasks/cv-flowmaps-training",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "self-distillation objective design for flow-map generative models",
+    "research_question": "How should the diagonal and self-distillation loss terms for flow maps be designed to improve CIFAR-10 generation quality under a fixed training budget?",
+    "local_sources": {
+      "config_path": "tasks/cv-flowmaps-training/config.json",
+      "task_description_path": "tasks/cv-flowmaps-training/task_description.md"
+    },
+    "notes": [
+      "The task description identifies flow-maps as a NeurIPS 2025 project; the literature entries below are grounded in citation API results, which currently resolve the core paper via its arXiv DOI."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 13,
+    "baseline_entries": 1,
+    "baseline_links_found": 1,
+    "test_entries": 4,
+    "test_links_found": 12
+  },
+  "tests": [
+    {
+      "label": "bench-lsd",
+      "cmd": "scripts/bench_lsd.sh",
+      "package": "flow-maps",
+      "group": 1,
+      "compute": 0.35,
+      "time": "12:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2505.18825",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Benchmarks the Lagrangian Self-Distillation loss family on CIFAR-10 using FID."
+    },
+    {
+      "label": "bench-psd-uniform",
+      "cmd": "scripts/bench_psd_uniform.sh",
+      "package": "flow-maps",
+      "group": 1,
+      "compute": 0.35,
+      "time": "12:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2505.18825",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Benchmarks Progressive Self-Distillation with uniform teacher mixing on CIFAR-10 using FID."
+    },
+    {
+      "label": "bench-psd-midpoint",
+      "cmd": "scripts/bench_psd_midpoint.sh",
+      "package": "flow-maps",
+      "group": 1,
+      "compute": 0.35,
+      "time": "12:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2505.18825",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Benchmarks Progressive Self-Distillation with midpoint teacher mixing on CIFAR-10 using FID."
+    },
+    {
+      "label": "bench-esd",
+      "cmd": "scripts/bench_esd.sh",
+      "package": "flow-maps",
+      "group": 1,
+      "compute": 0.35,
+      "time": "12:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2505.18825",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Benchmarks Eulerian Self-Distillation on CIFAR-10 using FID."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "paper",
+      "implementation": "edits/paper.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2505.18825",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Restores the official flow-maps loss terms from Boffi et al."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/ARXIV.2505.18825",
+      "title": "How to build a consistency model: Learning flow maps via self-distillation",
+      "authors": [
+        "Nicholas M. Boffi",
+        "Michael S. Albergo",
+        "Eric Vanden-Eijnden"
+      ],
+      "year": 2025,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2505.18825",
+      "arxiv_id": "2505.18825",
+      "openalex_id": "https://openalex.org/W4414581693",
+      "landing_page": "https://arxiv.org/abs/2505.18825",
+      "source_urls": [
+        "https://openalex.org/W4414581693",
+        "https://doi.org/10.48550/arXiv.2505.18825"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2505.18825,\n  doi = {10.48550/ARXIV.2505.18825},\n  url = {https://arxiv.org/abs/2505.18825},\n  author = {Boffi, Nicholas M. and Albergo, Michael S. and Vanden-Eijnden, Eric},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {How to build a consistency model: Learning flow maps via self-distillation},\n  publisher = {arXiv},\n  year = {2025},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "flow_maps",
+        "self_distillation",
+        "generative_modeling"
+      ],
+      "baseline_links": [
+        "paper"
+      ],
+      "test_links": [
+        "bench-lsd",
+        "bench-psd-uniform",
+        "bench-psd-midpoint",
+        "bench-esd"
+      ],
+      "relevance": "This is the core flow-maps paper for the task and explicitly introduces the Eulerian, Lagrangian, and Progressive self-distillation families benchmarked by the scripts.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2406.07507",
+      "title": "Flow map matching with stochastic interpolants: A mathematical framework for consistency models",
+      "authors": [
+        "Nicholas M. Boffi",
+        "Michael S. Albergo",
+        "Eric Vanden-Eijnden"
+      ],
+      "year": 2024,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2406.07507",
+      "arxiv_id": "2406.07507",
+      "openalex_id": "https://openalex.org/W4399655935",
+      "landing_page": "https://arxiv.org/abs/2406.07507",
+      "source_urls": [
+        "https://openalex.org/W4399655935",
+        "https://doi.org/10.48550/arXiv.2406.07507"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2406.07507,\n  doi = {10.48550/ARXIV.2406.07507},\n  url = {https://arxiv.org/abs/2406.07507},\n  author = {Boffi, Nicholas M. and Albergo, Michael S. and Vanden-Eijnden, Eric},\n  keywords = {Machine Learning (cs.LG), Dynamical Systems (math.DS), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Mathematics, FOS: Mathematics},\n  title = {Flow map matching with stochastic interpolants: A mathematical framework for consistency models},\n  publisher = {arXiv},\n  year = {2024},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "theory",
+        "flow_maps",
+        "consistency_models",
+        "stochastic_interpolants"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Provides the mathematical framework underlying flow-map learning and directly positions flow maps as a unifying view over consistency and progressive distillation methods.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2303.08797",
+      "title": "Stochastic Interpolants: A Unifying Framework for Flows and Diffusions",
+      "authors": [
+        "Michael S. Albergo",
+        "Nicholas M. Boffi",
+        "Eric Vanden-Eijnden"
+      ],
+      "year": 2023,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2303.08797",
+      "arxiv_id": "2303.08797",
+      "openalex_id": "https://openalex.org/W4327673663",
+      "landing_page": "https://arxiv.org/abs/2303.08797",
+      "source_urls": [
+        "https://openalex.org/W4327673663",
+        "https://doi.org/10.48550/arXiv.2303.08797"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2303.08797,\n  doi = {10.48550/ARXIV.2303.08797},\n  url = {https://arxiv.org/abs/2303.08797},\n  author = {Albergo, Michael S. and Boffi, Nicholas M. and Vanden-Eijnden, Eric},\n  keywords = {Machine Learning (cs.LG), Disordered Systems and Neural Networks (cond-mat.dis-nn), Probability (math.PR), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Physical sciences, FOS: Physical sciences, FOS: Mathematics, FOS: Mathematics},\n  title = {Stochastic Interpolants: A Unifying Framework for Flows and Diffusions},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "theory",
+        "stochastic_interpolants",
+        "flows",
+        "diffusions"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Flow-map matching in this task builds on stochastic interpolants, so this paper is part of the immediate theoretical lineage for the editable loss terms.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2303.01469",
+      "title": "Consistency Models",
+      "authors": [
+        "Yang Song",
+        "Prafulla Dhariwal",
+        "Mark Chen",
+        "Ilya Sutskever"
+      ],
+      "year": 2023,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2303.01469",
+      "arxiv_id": "2303.01469",
+      "landing_page": "https://arxiv.org/abs/2303.01469",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2303.01469"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2303.01469,\n  doi = {10.48550/ARXIV.2303.01469},\n  url = {https://arxiv.org/abs/2303.01469},\n  author = {Song, Yang and Dhariwal, Prafulla and Chen, Mark and Sutskever, Ilya},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Consistency Models},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "consistency_models",
+        "one_step_generation",
+        "distillation"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Introduces the broader consistency-model perspective that flow maps generalize, making it directly relevant background for the task's self-distillation objective design.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2310.14189",
+      "title": "Improved Techniques for Training Consistency Models",
+      "authors": [
+        "Yang Song",
+        "Prafulla Dhariwal"
+      ],
+      "year": 2023,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2310.14189",
+      "arxiv_id": "2310.14189",
+      "openalex_id": "https://openalex.org/W4387928896",
+      "landing_page": "https://arxiv.org/abs/2310.14189",
+      "source_urls": [
+        "https://openalex.org/W4387928896",
+        "https://doi.org/10.48550/arXiv.2310.14189"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2310.14189,\n  doi = {10.48550/ARXIV.2310.14189},\n  url = {https://arxiv.org/abs/2310.14189},\n  author = {Song, Yang and Dhariwal, Prafulla},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Improved Techniques for Training Consistency Models},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "consistency_models",
+        "training_recipe",
+        "loss_design",
+        "fid"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Discusses concrete objective and training refinements for consistency-style models, which is closely aligned with this task's goal of redesigning self-distillation losses under a fixed budget.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2310.02279",
+      "title": "Consistency Trajectory Models: Learning Probability Flow ODE Trajectory of Diffusion",
+      "authors": [
+        "Dongjun Kim",
+        "Chieh-Hsin Lai",
+        "Wei-Hsiang Liao",
+        "Naoki Murata",
+        "Yuhta Takida",
+        "Toshimitsu Uesaka",
+        "Yutong He",
+        "Yuki Mitsufuji",
+        "Stefano Ermon"
+      ],
+      "year": 2023,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2310.02279",
+      "arxiv_id": "2310.02279",
+      "openalex_id": "https://openalex.org/W4387389604",
+      "landing_page": "https://arxiv.org/abs/2310.02279",
+      "source_urls": [
+        "https://openalex.org/W4387389604",
+        "https://doi.org/10.48550/arXiv.2310.02279"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2310.02279,\n  doi = {10.48550/ARXIV.2310.02279},\n  url = {https://arxiv.org/abs/2310.02279},\n  author = {Kim, Dongjun and Lai, Chieh-Hsin and Liao, Wei-Hsiang and Murata, Naoki and Takida, Yuhta and Uesaka, Toshimitsu and He, Yutong and Mitsufuji, Yuki and Ermon, Stefano},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Consistency Trajectory Models: Learning Probability Flow ODE Trajectory of Diffusion},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {Creative Commons Attribution Non Commercial Share Alike 4.0 International}\n}",
+      "relevance_tags": [
+        "consistency_models",
+        "trajectory_learning",
+        "few_step_generation",
+        "fid"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "An important neighboring approach in the same few-step consistency/flow-map design space, explicitly discussed as part of the unification in the flow-map matching paper.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2210.02747",
+      "title": "Flow Matching for Generative Modeling",
+      "authors": [
+        "Yaron Lipman",
+        "Ricky T. Q. Chen",
+        "Heli Ben-Hamu",
+        "Maximilian Nickel",
+        "Matt Le"
+      ],
+      "year": 2022,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2210.02747",
+      "arxiv_id": "2210.02747",
+      "openalex_id": "https://openalex.org/W4303647933",
+      "landing_page": "https://arxiv.org/abs/2210.02747",
+      "source_urls": [
+        "https://openalex.org/W4303647933",
+        "https://doi.org/10.48550/arXiv.2210.02747"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2210.02747,\n  doi = {10.48550/ARXIV.2210.02747},\n  url = {https://arxiv.org/abs/2210.02747},\n  author = {Lipman, Yaron and Chen, Ricky T. Q. and Ben-Hamu, Heli and Nickel, Maximilian and Le, Matt},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Flow Matching for Generative Modeling},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "flow_matching",
+        "generative_modeling",
+        "cnf"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Provides a major training paradigm for continuous-time generative flows and serves as direct background for flow-map objectives built around learned solution operators.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2202.00512",
+      "title": "Progressive Distillation for Fast Sampling of Diffusion Models",
+      "authors": [
+        "Tim Salimans",
+        "Jonathan Ho"
+      ],
+      "year": 2022,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2202.00512",
+      "arxiv_id": "2202.00512",
+      "openalex_id": "https://openalex.org/W4221159371",
+      "landing_page": "https://arxiv.org/abs/2202.00512",
+      "source_urls": [
+        "https://openalex.org/W4221159371",
+        "https://doi.org/10.48550/arXiv.2202.00512"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2202.00512,\n  doi = {10.48550/ARXIV.2202.00512},\n  url = {https://arxiv.org/abs/2202.00512},\n  author = {Salimans, Tim and Ho, Jonathan},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Progressive Distillation for Fast Sampling of Diffusion Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "progressive_distillation",
+        "fast_sampling",
+        "diffusion_models"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Directly relevant antecedent for the task's Progressive Self-Distillation family and for the broader objective of reducing sampling cost with distilled multi-time dynamics.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2209.14577",
+      "title": "Rectified Flow: A Marginal Preserving Approach to Optimal Transport",
+      "authors": [
+        "Qiang Liu"
+      ],
+      "year": 2022,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2209.14577",
+      "arxiv_id": "2209.14577",
+      "openalex_id": "https://openalex.org/W4298183953",
+      "landing_page": "https://arxiv.org/abs/2209.14577",
+      "source_urls": [
+        "https://openalex.org/W4298183953",
+        "https://doi.org/10.48550/arXiv.2209.14577"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2209.14577,\n  doi = {10.48550/ARXIV.2209.14577},\n  url = {https://arxiv.org/abs/2209.14577},\n  author = {Liu, Qiang},\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Rectified Flow: A Marginal Preserving Approach to Optimal Transport},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "rectified_flow",
+        "optimal_transport",
+        "flow_models"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Rectified-flow objectives are part of the modern continuous-time generative modeling landscape that informs flow-map training and alternative transport-based loss constructions.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2011.13456",
+      "title": "Score-Based Generative Modeling through Stochastic Differential Equations",
+      "authors": [
+        "Yang Song",
+        "Jascha Sohl-Dickstein",
+        "Diederik P. Kingma",
+        "Abhishek Kumar",
+        "Stefano Ermon",
+        "Ben Poole"
+      ],
+      "year": 2020,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2011.13456",
+      "arxiv_id": "2011.13456",
+      "openalex_id": "https://openalex.org/W3110257065",
+      "landing_page": "https://arxiv.org/abs/2011.13456",
+      "source_urls": [
+        "https://openalex.org/W3110257065",
+        "https://doi.org/10.48550/arXiv.2011.13456"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2011.13456,\n  doi = {10.48550/ARXIV.2011.13456},\n  url = {https://arxiv.org/abs/2011.13456},\n  author = {Song, Yang and Sohl-Dickstein, Jascha and Kingma, Diederik P. and Kumar, Abhishek and Ermon, Stefano and Poole, Ben},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Score-Based Generative Modeling through Stochastic Differential Equations},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "score_based_models",
+        "sde",
+        "diffusion_models",
+        "cifar10"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant foundational work for diffusion/flow generative modeling that motivates the continuous-time dynamics and sample-quality regime this task operates in.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2206.00364",
+      "title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+      "authors": [
+        "Tero Karras",
+        "Miika Aittala",
+        "Timo Aila",
+        "Samuli Laine"
+      ],
+      "year": 2022,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.2206.00364",
+      "arxiv_id": "2206.00364",
+      "openalex_id": "https://openalex.org/W4281969232",
+      "landing_page": "https://arxiv.org/abs/2206.00364",
+      "source_urls": [
+        "https://openalex.org/W4281969232",
+        "https://doi.org/10.48550/arXiv.2206.00364"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00364,\n  doi = {10.48550/ARXIV.2206.00364},\n  url = {https://arxiv.org/abs/2206.00364},\n  author = {Karras, Tero and Aittala, Miika and Aila, Timo and Laine, Samuli},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Elucidating the Design Space of Diffusion-Based Generative Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion_models",
+        "design_space",
+        "training_recipe",
+        "fid"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Useful related work on objective and preconditioning design in high-performing diffusion models, which is relevant when redesigning the loss geometry of flow-map training.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/ZP44CU3G",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB dataset record",
+      "doi": "10.57702/ZP44CU3G",
+      "openalex_id": "https://openalex.org/W3118608800",
+      "landing_page": "https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a",
+      "source_urls": [
+        "https://openalex.org/W3118608800",
+        "https://doi.org/10.57702/zp44cu3g"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g,\n  doi = {10.57702/ZP44CU3G},\n  url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a},\n  author = {Krizhevsky, Alex},\n  keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images},\n  language = {en},\n  title = {Learning Multiple Layers of Features from Tiny Images},\n  publisher = {TIB},\n  year = {2024}\n}",
+      "relevance_tags": [
+        "dataset",
+        "cifar10",
+        "benchmark_data"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "bench-lsd",
+        "bench-psd-uniform",
+        "bench-psd-midpoint",
+        "bench-esd"
+      ],
+      "relevance": "This is the citation record surfaced by the citation API for CIFAR-10, the dataset used by every benchmark script in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1706.08500",
+      "title": "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium",
+      "authors": [
+        "Martin Heusel",
+        "Hubert Ramsauer",
+        "Thomas Unterthiner",
+        "Bernhard Nessler",
+        "Sepp Hochreiter"
+      ],
+      "year": 2017,
+      "venue": "arXiv preprint",
+      "doi": "10.48550/ARXIV.1706.08500",
+      "arxiv_id": "1706.08500",
+      "openalex_id": "https://openalex.org/W2963981733",
+      "landing_page": "https://arxiv.org/abs/1706.08500",
+      "source_urls": [
+        "https://openalex.org/W2963981733",
+        "https://doi.org/10.48550/arXiv.1706.08500"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1706.08500,\n  doi = {10.48550/ARXIV.1706.08500},\n  url = {https://arxiv.org/abs/1706.08500},\n  author = {Heusel, Martin and Ramsauer, Hubert and Unterthiner, Thomas and Nessler, Bernhard and Hochreiter, Sepp},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "metric",
+        "fid",
+        "evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "bench-lsd",
+        "bench-psd-uniform",
+        "bench-psd-midpoint",
+        "bench-esd"
+      ],
+      "relevance": "Introduces the Fréchet Inception Distance used as the task's primary evaluation metric across all four benchmark scripts.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

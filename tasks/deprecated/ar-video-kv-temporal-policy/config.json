@@ -1,0 +1,65 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/ucf_short.sh",
+      "label": "ucf-short",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:30:00",
+      "package": "FAR"
+    },
+    {
+      "cmd": "scripts/dmlab_long.sh",
+      "label": "dmlab-long",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:30:00",
+      "package": "FAR"
+    },
+    {
+      "cmd": "scripts/ucf_scene_cut.sh",
+      "label": "ucf-scene-cut",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:30:00",
+      "package": "FAR",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "recent_window": {
+      "edit_ops": "edits/recent_window.edit.py"
+    },
+    "packcache": {
+      "edit_ops": "edits/packcache.edit.py"
+    },
+    "causalcache_vdm": {
+      "edit_ops": "edits/causalcache_vdm.edit.py"
+    },
+    "flowcache": {
+      "edit_ops": "edits/flowcache.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "FAR/custom_video_eval.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 685,
+          "end": 716
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

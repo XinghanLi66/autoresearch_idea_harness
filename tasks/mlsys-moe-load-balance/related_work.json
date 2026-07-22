@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "task_name": "mlsys-moe-load-balance",
+  "task_folder": "tasks/mlsys-moe-load-balance",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/mlsys-moe-load-balance/config.json",
+      "task_description_path": "tasks/mlsys-moe-load-balance/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 4,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "deepseek-v3",
+      "cmd": "scripts/moe_small.sh",
+      "package": "eplb",
+      "group": 1,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "qwen3-moe",
+      "cmd": "scripts/moe_medium.sh",
+      "package": "eplb",
+      "group": 2,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "deepseek-v2",
+      "cmd": "scripts/moe_large.sh",
+      "package": "eplb",
+      "group": 3,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "gpt-oss",
+      "cmd": "scripts/moe_gptoss.sh",
+      "package": "eplb",
+      "group": 4,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "greedy",
+      "implementation": "edits/greedy.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "zigzag",
+      "implementation": "edits/zigzag.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "flat_zigzag",
+      "implementation": "edits/full_tensor.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

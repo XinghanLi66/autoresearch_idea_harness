@@ -1,0 +1,27 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "data_deps": [
+    {
+      "name": "vicon_data",
+      "host_path": "{data_root}/vicon_data",
+      "container_path": "/data/icon-data",
+      "prepare": "vendor/data_scripts/VICON/prepare_data.py",
+      "description": "Prepared PDEBench + PDEArena data for the pde-foundation-icl task."
+    }
+  ],
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y git wget unzip git-lfs && rm -rf /var/lib/apt/lists/*",
+    "cd /workspace/VICON && pip install h5py numpy matplotlib omegaconf hydra-core tabulate torchinfo torchvision einops scipy absl-py pytz wandb"
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/VICON/src:${PYTHONPATH}",
+    "HOME": "/root",
+    "WANDB_DISABLED": "true",
+    "WANDB_MODE": "disabled",
+    "WANDB_SILENT": "true"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

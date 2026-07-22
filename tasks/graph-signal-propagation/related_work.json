@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "task_name": "graph-signal-propagation",
+  "task_folder": "tasks/graph-signal-propagation",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/graph-signal-propagation/config.json",
+      "task_description_path": "tasks/graph-signal-propagation/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 7,
+    "baseline_links_found": 0,
+    "test_entries": 4,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "cora",
+      "cmd": "scripts/cora.sh",
+      "package": "ChebNetII",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "citeseer",
+      "cmd": "scripts/citeseer.sh",
+      "package": "ChebNetII",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "texas",
+      "cmd": "scripts/texas.sh",
+      "package": "ChebNetII",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "cornell",
+      "cmd": "scripts/cornell.sh",
+      "package": "ChebNetII",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "gcn",
+      "implementation": "edits/gcn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "appnp",
+      "implementation": "edits/appnp.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "sgc",
+      "implementation": "edits/sgc.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gprgnn",
+      "implementation": "edits/gprgnn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "bernnet",
+      "implementation": "edits/bernnet.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "chebnetii",
+      "implementation": "edits/chebnetii.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "jacobiconv",
+      "implementation": "edits/jacobiconv.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

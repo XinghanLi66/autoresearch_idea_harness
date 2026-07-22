@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "quant-order-execution",
+  "task_folder": "tasks/quant-order-execution",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/quant-order-execution/config.json",
+      "task_description_path": "tasks/quant-order-execution/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "exec_8step",
+      "cmd": "scripts/execute.sh",
+      "package": "qlib",
+      "group": 1,
+      "compute": 1.0,
+      "time": "15:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "exec_4step",
+      "cmd": "scripts/exec_4step.sh",
+      "package": "qlib",
+      "group": 1,
+      "compute": 1.0,
+      "time": "15:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "exec_fine",
+      "cmd": "scripts/exec_fine.sh",
+      "package": "qlib",
+      "group": 1,
+      "compute": 1.0,
+      "time": "15:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "twap",
+      "implementation": "edits/twap.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "ppo",
+      "implementation": "edits/ppo.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "opds",
+      "implementation": "edits/opds.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

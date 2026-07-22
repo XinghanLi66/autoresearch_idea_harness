@@ -1,0 +1,23 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "apt-get update && apt-get install -y git build-essential || true",
+    "pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.5.0+cu121.html",
+    "pip install pytorch-lightning==1.9.0 omegaconf transformers torcheval biopython tqdm joblib scikit-learn pandas matplotlib biotite==0.37.0 fair-esm torch_geometric",
+    "pip install -e /workspace/ProteinInvBench",
+    "python -c \"from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('facebook/esm2_t33_650M_UR50D', cache_dir='/workspace/.cache/transformers')\"",
+    "mkdir -p /workspace/data/cath4.2 /workspace/data/cath4.3 /workspace/data/ts",
+    "python -c \"\nimport urllib.request, zipfile, os, shutil\n# Download data.tar.gz which contains separate cath4.2 and cath4.3 datasets\nurl = 'https://github.com/A4Bio/ProteinInvBench/releases/download/dataset_release/data.tar.gz'\ntpath = '/tmp/_data.tar.gz'\nprint('Downloading data.tar.gz...')\nurllib.request.urlretrieve(url, tpath)\nimport tarfile\nwith tarfile.open(tpath, 'r:gz') as tar:\n    tar.extractall('/tmp/_data_tmp')\nos.remove(tpath)\n# Copy cath4.2 and cath4.3 data separately\nfor d in ['cath4.2', 'cath4.3']:\n    src = f'/tmp/_data_tmp/data/{d}'\n    dst = f'/workspace/data/{d}'\n    if os.path.isdir(src):\n        for f in os.listdir(src):\n            shutil.copy2(os.path.join(src, f), os.path.join(dst, f))\n        print(f'{d}: {os.listdir(dst)}')\nshutil.rmtree('/tmp/_data_tmp')\nprint('CATH data downloaded (separate 4.2 and 4.3)')\n\"",
+    "python -c \"\nimport urllib.request, zipfile, os, shutil\nurl = 'https://github.com/A4Bio/ProteinInvBench/releases/download/dataset_release/TSDataset.zip'\nzpath = '/tmp/_ts.zip'\nprint('Downloading TSDataset.zip...')\nurllib.request.urlretrieve(url, zpath)\nwith zipfile.ZipFile(zpath) as zf:\n    names = zf.namelist()\n    print(f'  Archive contains {len(names)} files')\n    for n in names:\n        print(f'    {n}')\n    zf.extractall('/tmp/_ts_tmp')\nos.remove(zpath)\n# Find and copy json files to /workspace/data/ts/\nimport glob\nfor f in glob.glob('/tmp/_ts_tmp/**/*.json', recursive=True):\n    dst = os.path.join('/workspace/data/ts', os.path.basename(f))\n    shutil.copy2(f, dst)\n    print(f'Copied {f} -> {dst}')\nshutil.rmtree('/tmp/_ts_tmp')\nprint('TS data ready:', os.listdir('/workspace/data/ts'))\n\""
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/ProteinInvBench:/workspace:${PYTHONPATH}",
+    "TRANSFORMERS_CACHE": "/data/transformers_cache",
+    "HF_HOME": "/data/transformers_cache",
+    "HF_HUB_OFFLINE": "1",
+    "MPLBACKEND": "Agg"
+  },
+  "data_bind": "{data_root}/transformers_cache:/data/transformers_cache",
+  "use_cuda": true,
+  "workdir": "/workspace"
+}

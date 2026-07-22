@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "jepa-regularizer",
+  "task_folder": "tasks/jepa-regularizer",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/jepa-regularizer/config.json",
+      "task_description_path": "tasks/jepa-regularizer/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "resnet18",
+      "cmd": "scripts/resnet18.sh",
+      "package": "eb_jepa",
+      "group": 1,
+      "compute": 1.0,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "resnet34",
+      "cmd": "scripts/resnet34.sh",
+      "package": "eb_jepa",
+      "group": 1,
+      "compute": 1.0,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "resnet50",
+      "cmd": "scripts/resnet50.sh",
+      "package": "eb_jepa",
+      "group": 1,
+      "compute": 1.0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "naive",
+      "implementation": "edits/naive.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "vicreg",
+      "implementation": "edits/vicreg.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "sigreg",
+      "implementation": "edits/sigreg.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

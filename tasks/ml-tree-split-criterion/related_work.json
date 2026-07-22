@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-tree-split-criterion",
+  "task_folder": "tasks/ml-tree-split-criterion",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-tree-split-criterion/config.json",
+      "task_description_path": "tasks/ml-tree-split-criterion/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 4,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "iris",
+      "cmd": "scripts/iris.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "wine",
+      "cmd": "scripts/wine.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "breast_cancer",
+      "cmd": "scripts/breast_cancer.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "digits",
+      "cmd": "scripts/digits.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "gini",
+      "implementation": "edits/gini.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "entropy",
+      "implementation": "edits/entropy.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "log_loss",
+      "implementation": "edits/log_loss.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "quant-graph-stock",
+  "task_folder": "tasks/quant-graph-stock",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/quant-graph-stock/config.json",
+      "task_description_path": "tasks/quant-graph-stock/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "csi300",
+      "cmd": "scripts/csi300.sh",
+      "package": "qlib",
+      "group": 1,
+      "compute": 1.0,
+      "time": "3:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "csi100",
+      "cmd": "scripts/csi100.sh",
+      "package": "qlib",
+      "group": 1,
+      "compute": 1.0,
+      "time": "3:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "csi300_recent",
+      "cmd": "scripts/csi300_recent.sh",
+      "package": "qlib",
+      "group": 1,
+      "compute": 1.0,
+      "time": "3:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "hist",
+      "implementation": "edits/hist.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gats",
+      "implementation": "edits/gats.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "lgbm",
+      "implementation": "edits/lgbm.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

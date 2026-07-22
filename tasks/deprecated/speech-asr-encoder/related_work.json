@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "speech-asr-encoder",
+  "task_folder": "tasks/speech-asr-encoder",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/speech-asr-encoder/config.json",
+      "task_description_path": "tasks/speech-asr-encoder/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "librispeech-100h",
+      "cmd": "scripts/librispeech_100h.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "aishell-1",
+      "cmd": "scripts/aishell_1.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mls-spanish",
+      "cmd": "scripts/mls_spanish.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "conformer",
+      "implementation": "edits/conformer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "transformer",
+      "implementation": "edits/transformer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "branchformer",
+      "implementation": "edits/branchformer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

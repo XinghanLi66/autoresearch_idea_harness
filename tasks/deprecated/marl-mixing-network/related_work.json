@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "marl-mixing-network",
+  "task_folder": "tasks/marl-mixing-network",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/marl-mixing-network/config.json",
+      "task_description_path": "tasks/marl-mixing-network/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "simple-spread",
+      "cmd": "scripts/train.sh",
+      "package": "epymarl",
+      "group": 1,
+      "compute": 1,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "simple-reference",
+      "cmd": "scripts/train.sh",
+      "package": "epymarl",
+      "group": 1,
+      "compute": 1,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "simple-speaker-listener",
+      "cmd": "scripts/train.sh",
+      "package": "epymarl",
+      "group": 1,
+      "compute": 1,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "vdn",
+      "implementation": "edits/vdn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "linear_mixer",
+      "implementation": "edits/linear_mixer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "qmix",
+      "implementation": "edits/qmix.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

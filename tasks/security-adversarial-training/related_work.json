@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "security-adversarial-training",
+  "task_folder": "tasks/security-adversarial-training",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/security-adversarial-training/config.json",
+      "task_description_path": "tasks/security-adversarial-training/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "SmallCNN-MNIST",
+      "cmd": "scripts/SmallCNN_MNIST.sh",
+      "package": "torchattacks",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "PreActResNet18-C10",
+      "cmd": "scripts/PreActResNet18_C10.sh",
+      "package": "torchattacks",
+      "group": 1,
+      "compute": 1.0,
+      "time": "3:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "PreActResNet18-C100",
+      "cmd": "scripts/PreActResNet18_C100.sh",
+      "package": "torchattacks",
+      "group": 2,
+      "compute": 1.0,
+      "time": "3:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "standard",
+      "implementation": "edits/standard.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "trades",
+      "implementation": "edits/trades.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "awp",
+      "implementation": "edits/awp.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

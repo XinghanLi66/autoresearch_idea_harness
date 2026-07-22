@@ -1,0 +1,1 @@
+timestamp,model,is_final,seed,hellaswag_acc,hellaswag_acc_norm,arc_challenge_acc,arc_challenge_acc_norm,piqa_acc,piqa_acc_norm,elapsed_metamathqa-sft,elapsed_lm-eval

@@ -1,0 +1,66 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/beta.sh",
+      "label": "Beta",
+      "group": 1,
+      "compute": 0.33,
+      "time": "06:00:00",
+      "package": "DeepProtein"
+    },
+    {
+      "cmd": "scripts/fluorescence.sh",
+      "label": "Fluorescence",
+      "group": 1,
+      "compute": 0.33,
+      "time": "06:00:00",
+      "package": "DeepProtein"
+    },
+    {
+      "cmd": "scripts/solubility.sh",
+      "label": "Solubility",
+      "group": 1,
+      "compute": 0.33,
+      "time": "06:00:00",
+      "package": "DeepProtein",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "cnn": {
+      "edit_ops": "edits/cnn.edit.py"
+    },
+    "transformer": {
+      "edit_ops": "edits/transformer.edit.py"
+    },
+    "dgl_gcn": {
+      "edit_ops": "edits/dgl_gcn.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "DeepProtein/custom_protein.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 109,
+          "end": 179
+        },
+        {
+          "start": 472,
+          "end": 474
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

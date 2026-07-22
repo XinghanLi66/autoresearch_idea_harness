@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-feature-selection",
+  "task_folder": "tasks/ml-feature-selection",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-feature-selection/config.json",
+      "task_description_path": "tasks/ml-feature-selection/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "20newsgroups",
+      "cmd": "scripts/20newsgroups.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mnist",
+      "cmd": "scripts/mnist.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "madelon",
+      "cmd": "scripts/madelon.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "mutual_info",
+      "implementation": "edits/mutual_info.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "chi2",
+      "implementation": "edits/chi2.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "f_classif",
+      "implementation": "edits/f_classif.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "mrmr",
+      "implementation": "edits/mrmr.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

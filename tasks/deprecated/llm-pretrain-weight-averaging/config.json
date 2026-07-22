@@ -1,0 +1,63 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/gpt_345m.sh",
+      "label": "gpt-345m",
+      "group": 1,
+      "compute": 1.0,
+      "time": "6:00:00",
+      "package": "nanoGPT"
+    }
+  ],
+  "baselines": {
+    "no_averaging": {
+      "edit_ops": "edits/no_averaging.edit.py"
+    },
+    "swa": {
+      "edit_ops": "edits/swa.edit.py"
+    },
+    "ema_fixed": {
+      "edit_ops": "edits/ema_fixed.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "nanoGPT/custom_pretrain.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 205,
+          "end": 252
+        }
+      ]
+    },
+    {
+      "filename": "nanoGPT/model.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "nanoGPT/train.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

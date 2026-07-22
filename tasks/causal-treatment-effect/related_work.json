@@ -1,0 +1,539 @@
+{
+  "schema_version": "1.0",
+  "task_name": "causal-treatment-effect",
+  "task_folder": "tasks/causal-treatment-effect",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "conditional average treatment effect estimation from observational data",
+    "research_question": "Design a novel estimator for conditional average treatment effects from observational data that is accurate, robust to confounding, and generalizes across explicitly synthetic benchmark families with different data-generating processes.",
+    "local_sources": {
+      "config_path": "tasks/causal-treatment-effect/config.json",
+      "task_description_path": "tasks/causal-treatment-effect/task_description.md"
+    },
+    "notes": [
+      "Baseline and benchmark mappings were grounded in the task description plus comments/docstrings in edits/custom_template.py.",
+      "The test settings are task-local synthetic DGPs inspired by IHDP, Jobs/LaLonde, and ACIC rather than official benchmark datasets or released benchmark configurations."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 6,
+    "baseline_links_found": 6,
+    "test_entries": 3,
+    "test_links_found": 5
+  },
+  "tests": [
+    {
+      "label": "ihdp_synth",
+      "cmd": "scripts/ihdp_synth.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1198/jcgs.2010.08162",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Synthetic observational DGP inspired by IHDP-style CATE benchmarks; not the official IHDP benchmark setting."
+    },
+    {
+      "label": "jobs_synth",
+      "cmd": "scripts/jobs_synth.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.2307/2669919",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "openalex:W1979740378",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Synthetic job-training-style DGP inspired by Jobs/LaLonde program-evaluation benchmarks; not the official LaLonde/NSW dataset setting."
+    },
+    {
+      "label": "acic_synth",
+      "cmd": "scripts/acic_synth.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1214/18-STS667",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1073/pnas.1510489113",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "Synthetic high-dimensional CATE DGP inspired by ACIC simulation studies; not an official ACIC competition scenario."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "s_learner",
+      "implementation": "edits/s_learner.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1073/pnas.1804597116",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Kunżel et al. formalize S-learner and T-learner meta-learners for CATE estimation."
+    },
+    {
+      "name": "t_learner",
+      "implementation": "edits/t_learner.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1073/pnas.1804597116",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Kunżel et al. formalize S-learner and T-learner meta-learners for CATE estimation."
+    },
+    {
+      "name": "ipw",
+      "implementation": "edits/ipw.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1093/biomet/70.1.41",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "The implementation is an IPW-style learner built around propensity weighting; Rosenbaum and Rubin (1983) is the canonical observational-causal reference for propensity score weighting rather than an exact one-to-one match to this specific code path."
+    },
+    {
+      "name": "causal_forest",
+      "implementation": "edits/causal_forest.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1080/01621459.2017.1319839",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Direct match to the causal forest baseline."
+    },
+    {
+      "name": "dr_learner",
+      "implementation": "edits/dr_learner.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1214/23-EJS2157",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Direct match to Kennedy's modern doubly robust learner analysis referenced in the task description."
+    },
+    {
+      "name": "r_learner",
+      "implementation": "edits/r_learner.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1093/biomet/asaa076",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Direct match to the R-learner / residualization-based objective."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1073/pnas.1804597116",
+      "title": "Metalearners for estimating heterogeneous treatment effects using machine learning",
+      "authors": [
+        "Soren R. Kunzel",
+        "Jasjeet S. Sekhon",
+        "Peter J. Bickel",
+        "Bin Yu"
+      ],
+      "year": 2019,
+      "venue": "Proceedings of the National Academy of Sciences",
+      "doi": "10.1073/pnas.1804597116",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2981731882",
+      "landing_page": "https://doi.org/10.1073/pnas.1804597116",
+      "source_urls": [
+        "https://colab.ws/articles/10.1073%2Fpnas.1804597116",
+        "https://doi.org/10.1073/pnas.1804597116"
+      ],
+      "bibtex": "@article{2019_Kunzel,\nauthor = {Soren R. Kunzel and Jasjeet S. Sekhon and Peter J. Bickel and Bin Yu},\ntitle = {Metalearners for estimating heterogeneous treatment effects using machine learning},\njournal = {Proceedings of the National Academy of Sciences of the United States of America},\nyear = {2019},\nvolume = {116},\npublisher = {Proceedings of the National Academy of Sciences (PNAS)},\nmonth = {feb},\nurl = {https://doi.org/10.1073/pnas.1804597116},\nnumber = {10},\npages = {4156--4165},\ndoi = {10.1073/pnas.1804597116}\n}",
+      "relevance_tags": [
+        "baseline",
+        "meta_learner",
+        "s_learner",
+        "t_learner",
+        "cate"
+      ],
+      "baseline_links": [
+        "s_learner",
+        "t_learner"
+      ],
+      "test_links": [],
+      "relevance": "Primary meta-learner reference covering the S-learner and T-learner baselines used in this task.",
+      "verified_by": "web_search_colab"
+    },
+    {
+      "paper_id": "doi:10.1080/01621459.2017.1319839",
+      "title": "Estimation and Inference of Heterogeneous Treatment Effects using Random Forests",
+      "authors": [
+        "Stefan Wager",
+        "Susan Athey"
+      ],
+      "year": 2018,
+      "venue": "Journal of the American Statistical Association",
+      "doi": "10.1080/01621459.2017.1319839",
+      "arxiv_id": "1510.04342",
+      "openalex_id": "https://openalex.org/W2208550830",
+      "landing_page": "https://doi.org/10.1080/01621459.2017.1319839",
+      "source_urls": [
+        "https://api.openalex.org/works/W2208550830",
+        "https://doi.org/10.1080/01621459.2017.1319839"
+      ],
+      "bibtex": "@article{Wager2018Estimation,\nauthor = {Stefan Wager and Susan Athey},\ntitle = {Estimation and Inference of Heterogeneous Treatment Effects using Random Forests},\njournal = {Journal of the American Statistical Association},\nyear = {2018},\nvolume = {113},\nnumber = {523},\npages = {1228--1242},\ndoi = {10.1080/01621459.2017.1319839},\nurl = {https://doi.org/10.1080/01621459.2017.1319839}\n}",
+      "relevance_tags": [
+        "baseline",
+        "causal_forest",
+        "tree_based",
+        "cate"
+      ],
+      "baseline_links": [
+        "causal_forest"
+      ],
+      "test_links": [],
+      "relevance": "Canonical causal forest paper for the causal_forest baseline.",
+      "verified_by": "paper_cite_mcp_search_plus_doi_metadata"
+    },
+    {
+      "paper_id": "doi:10.1093/biomet/asaa076",
+      "title": "Quasi-oracle estimation of heterogeneous treatment effects",
+      "authors": [
+        "Xinkun Nie",
+        "Stefan Wager"
+      ],
+      "year": 2021,
+      "venue": "Biometrika",
+      "doi": "10.1093/biomet/asaa076",
+      "arxiv_id": "1712.04912",
+      "openalex_id": "https://openalex.org/W3089065092",
+      "landing_page": "https://doi.org/10.1093/biomet/asaa076",
+      "source_urls": [
+        "https://api.openalex.org/works/W3089065092",
+        "https://doi.org/10.1093/biomet/asaa076"
+      ],
+      "bibtex": "@article{Nie2021QuasiOracle,\nauthor = {Xinkun Nie and Stefan Wager},\ntitle = {Quasi-oracle estimation of heterogeneous treatment effects},\njournal = {Biometrika},\nyear = {2021},\nvolume = {108},\nnumber = {2},\npages = {299--319},\ndoi = {10.1093/biomet/asaa076},\nurl = {https://doi.org/10.1093/biomet/asaa076}\n}",
+      "relevance_tags": [
+        "baseline",
+        "r_learner",
+        "orthogonalization",
+        "cate"
+      ],
+      "baseline_links": [
+        "r_learner"
+      ],
+      "test_links": [],
+      "relevance": "Defines the R-learner objective used by the r_learner baseline.",
+      "verified_by": "paper_cite_mcp_search_plus_doi_metadata"
+    },
+    {
+      "paper_id": "doi:10.1214/23-EJS2157",
+      "title": "Towards optimal doubly robust estimation of heterogeneous causal effects",
+      "authors": [
+        "Edward H. Kennedy"
+      ],
+      "year": 2023,
+      "venue": "Electronic Journal of Statistics",
+      "doi": "10.1214/23-EJS2157",
+      "arxiv_id": "2004.14497",
+      "openalex_id": "https://openalex.org/W4388656403",
+      "landing_page": "https://doi.org/10.1214/23-EJS2157",
+      "source_urls": [
+        "https://api.openalex.org/works/W4388656403",
+        "https://doi.org/10.1214/23-EJS2157"
+      ],
+      "bibtex": "@article{Kennedy2023DoublyRobust,\nauthor = {Edward H. Kennedy},\ntitle = {Towards optimal doubly robust estimation of heterogeneous causal effects},\njournal = {Electronic Journal of Statistics},\nyear = {2023},\nvolume = {17},\nnumber = {2},\npages = {3008--3049},\ndoi = {10.1214/23-EJS2157},\nurl = {https://doi.org/10.1214/23-EJS2157}\n}",
+      "relevance_tags": [
+        "baseline",
+        "dr_learner",
+        "double_robustness",
+        "cate"
+      ],
+      "baseline_links": [
+        "dr_learner"
+      ],
+      "test_links": [],
+      "relevance": "Modern DR-learner theory and method reference named in the task description.",
+      "verified_by": "paper_cite_mcp_search_plus_doi_metadata"
+    },
+    {
+      "paper_id": "doi:10.1093/biomet/70.1.41",
+      "title": "The central role of the propensity score in observational studies for causal effects",
+      "authors": [
+        "Paul R. Rosenbaum",
+        "Donald B. Rubin"
+      ],
+      "year": 1983,
+      "venue": "Biometrika",
+      "doi": "10.1093/biomet/70.1.41",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2032212124",
+      "landing_page": "https://doi.org/10.1093/biomet/70.1.41",
+      "source_urls": [
+        "https://colab.ws/articles/10.1093%2Fbiomet%2F70.1.41",
+        "https://doi.org/10.1093/biomet/70.1.41"
+      ],
+      "bibtex": "@article{1983_Rosenbaum,\nauthor = {Paul R. Rosenbaum and Donald B. Rubin},\ntitle = {The central role of the propensity score in observational studies for causal effects},\njournal = {Biometrika},\nyear = {1983},\nvolume = {70},\npublisher = {Oxford University Press (OUP)},\nmonth = {apr},\nurl = {https://doi.org/10.1093/biomet/70.1.41},\nnumber = {1},\npages = {41--55},\ndoi = {10.1093/biomet/70.1.41}\n}",
+      "relevance_tags": [
+        "baseline",
+        "ipw",
+        "propensity_score",
+        "observational_causal_inference"
+      ],
+      "baseline_links": [
+        "ipw"
+      ],
+      "test_links": [],
+      "relevance": "Canonical propensity-score reference underlying IPW-style observational-effect estimators.",
+      "verified_by": "web_search_colab"
+    },
+    {
+      "paper_id": "doi:10.1198/jcgs.2010.08162",
+      "title": "Bayesian Nonparametric Modeling for Causal Inference",
+      "authors": [
+        "Jennifer Hill"
+      ],
+      "year": 2011,
+      "venue": "Journal of Computational and Graphical Statistics",
+      "doi": "10.1198/jcgs.2010.08162",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2064903582",
+      "landing_page": "https://doi.org/10.1198/jcgs.2010.08162",
+      "source_urls": [
+        "https://www.periodicos.capes.gov.br/index.php/acervo/buscador.html?id=W2064903582&task=detalhes",
+        "https://doi.org/10.1198/jcgs.2010.08162"
+      ],
+      "bibtex": "@article{Hill2011Bayesian,\nauthor = {Jennifer Hill},\ntitle = {Bayesian Nonparametric Modeling for Causal Inference},\njournal = {Journal of Computational and Graphical Statistics},\nyear = {2011},\nvolume = {20},\nnumber = {1},\npages = {217--240},\ndoi = {10.1198/jcgs.2010.08162},\nurl = {https://doi.org/10.1198/jcgs.2010.08162}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "ihdp",
+        "bart",
+        "cate"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "ihdp_synth"
+      ],
+      "relevance": "Background reference for IHDP-style semi-synthetic CATE evaluations; this task uses a task-local synthetic IHDP-inspired DGP rather than the official IHDP benchmark.",
+      "verified_by": "web_search_doi_metadata"
+    },
+    {
+      "paper_id": "doi:10.2307/2669919",
+      "title": "Causal Effects in Nonexperimental Studies: Reevaluating the Evaluation of Training Programs",
+      "authors": [
+        "Rajeev H. Dehejia",
+        "Sadek Wahba"
+      ],
+      "year": 1999,
+      "venue": "Journal of the American Statistical Association",
+      "doi": "10.2307/2669919",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W1988055018",
+      "landing_page": "https://www.jstor.org/stable/2669919",
+      "source_urls": [
+        "https://wagner.nyu.edu/impact/research/publications/causal-effects-non-experimental-studies-re-evaluation-training",
+        "https://www.jstor.org/stable/2669919"
+      ],
+      "bibtex": "@article{Dehejia1999Causal,\nauthor = {Rajeev H. Dehejia and Sadek Wahba},\ntitle = {Causal Effects in Nonexperimental Studies: Reevaluating the Evaluation of Training Programs},\njournal = {Journal of the American Statistical Association},\nyear = {1999},\nvolume = {94},\nnumber = {448},\npages = {1053--1062},\ndoi = {10.2307/2669919},\nurl = {https://www.jstor.org/stable/2669919}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "jobs",
+        "propensity_score",
+        "observational_evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "jobs_synth"
+      ],
+      "relevance": "Background reference for Jobs/LaLonde-style observational program-evaluation benchmarks; this task uses a task-local synthetic job-training DGP.",
+      "verified_by": "web_search_jstor_metadata"
+    },
+    {
+      "paper_id": "openalex:W1979740378",
+      "title": "Evaluating the Econometric Evaluations of Training Programs with Experimental Data",
+      "authors": [
+        "Robert J. LaLonde"
+      ],
+      "year": 1986,
+      "venue": "American Economic Review",
+      "doi": null,
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W1979740378",
+      "landing_page": "https://ideas.repec.org/a/aea/aecrev/v76y1986i4p604-20.html",
+      "source_urls": [
+        "https://ideas.repec.org/p/nbr/nberwo/6586.html",
+        "https://openalex.org/W1979740378"
+      ],
+      "bibtex": "@article{LaLonde1986Evaluating,\nauthor = {Robert J. LaLonde},\ntitle = {Evaluating the Econometric Evaluations of Training Programs with Experimental Data},\njournal = {American Economic Review},\nyear = {1986},\nvolume = {76},\nnumber = {4},\npages = {604--620},\nurl = {https://ideas.repec.org/a/aea/aecrev/v76y1986i4p604-20.html}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "jobs",
+        "dataset",
+        "program_evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "jobs_synth"
+      ],
+      "relevance": "Foundational NSW/LaLonde benchmark paper used as background for the task-local synthetic job-training DGP.",
+      "verified_by": "web_search_repec_metadata"
+    },
+    {
+      "paper_id": "doi:10.1214/18-STS667",
+      "title": "Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition",
+      "authors": [
+        "Vincent Dorie",
+        "Jennifer Hill",
+        "Uri Shalit",
+        "Marc Scott",
+        "Dan Cervone"
+      ],
+      "year": 2019,
+      "venue": "Statistical Science",
+      "doi": "10.1214/18-STS667",
+      "arxiv_id": "1707.02641",
+      "openalex_id": "https://openalex.org/W2894951478",
+      "landing_page": "https://doi.org/10.1214/18-STS667",
+      "source_urls": [
+        "https://search.technion.ac.il/en/publications/automated-versus-do-it-yourself-methods-for-causal-inference-less-2",
+        "https://doi.org/10.1214/18-STS667"
+      ],
+      "bibtex": "@article{Dorie2019Automated,\nauthor = {Vincent Dorie and Jennifer Hill and Uri Shalit and Marc Scott and Dan Cervone},\ntitle = {Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition},\njournal = {Statistical Science},\nyear = {2019},\nvolume = {34},\nnumber = {1},\npages = {43--68},\ndoi = {10.1214/18-STS667},\nurl = {https://doi.org/10.1214/18-STS667}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "acic",
+        "competition",
+        "semi_synthetic"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "acic_synth"
+      ],
+      "relevance": "Background reference for ACIC-style causal simulation studies; this task uses a task-local synthetic ACIC-inspired DGP.",
+      "verified_by": "web_search_doi_metadata"
+    },
+    {
+      "paper_id": "doi:10.1073/pnas.1510489113",
+      "title": "Recursive partitioning for heterogeneous causal effects",
+      "authors": [
+        "Susan Athey",
+        "Guido W. Imbens"
+      ],
+      "year": 2016,
+      "venue": "Proceedings of the National Academy of Sciences",
+      "doi": "10.1073/pnas.1510489113",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2094510538",
+      "landing_page": "https://doi.org/10.1073/pnas.1510489113",
+      "source_urls": [
+        "https://www.gsb.stanford.edu/faculty-research/publications/recursive-partitioning-heterogeneous-causal-effects",
+        "https://doi.org/10.1073/pnas.1510489113"
+      ],
+      "bibtex": "@article{Athey2016Recursive,\nauthor = {Susan Athey and Guido W. Imbens},\ntitle = {Recursive partitioning for heterogeneous causal effects},\njournal = {Proceedings of the National Academy of Sciences of the United States of America},\nyear = {2016},\nvolume = {113},\nnumber = {27},\npages = {7353--7360},\ndoi = {10.1073/pnas.1510489113},\nurl = {https://doi.org/10.1073/pnas.1510489113}\n}",
+      "relevance_tags": [
+        "heterogeneous_treatment_effects",
+        "tree_based",
+        "honest_estimation",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "acic_synth"
+      ],
+      "relevance": "Important tree-based heterogeneous-effect reference closely related to the causal-forest family and honest estimation ideas exercised by this task.",
+      "verified_by": "web_search_doi_metadata"
+    },
+    {
+      "paper_id": "doi:10.1080/01621459.2016.1260466",
+      "title": "Propensity Score Weighting for Causal Inference with Multiple Treatments",
+      "authors": [
+        "Fan Li",
+        "Kari Lock Morgan",
+        "Alan M. Zaslavsky"
+      ],
+      "year": 2018,
+      "venue": "Journal of the American Statistical Association",
+      "doi": "10.1080/01621459.2016.1260466",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2618727998",
+      "landing_page": "https://doi.org/10.1080/01621459.2016.1260466",
+      "source_urls": [
+        "https://doi.org/10.1080/01621459.2016.1260466"
+      ],
+      "bibtex": "@article{Li2018Propensity,\nauthor = {Fan Li and Kari Lock Morgan and Alan M. Zaslavsky},\ntitle = {Propensity Score Weighting for Causal Inference with Multiple Treatments},\njournal = {Journal of the American Statistical Association},\nyear = {2018},\nvolume = {113},\nnumber = {521},\npages = {390--400},\ndoi = {10.1080/01621459.2016.1260466},\nurl = {https://doi.org/10.1080/01621459.2016.1260466}\n}",
+      "relevance_tags": [
+        "propensity_weighting",
+        "ipw",
+        "observational_causal_inference"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Additional weighting reference relevant to the IPW-style baseline and overlap/weighting design choices.",
+      "verified_by": "web_search_doi_metadata"
+    },
+    {
+      "paper_id": "doi:10.1214/19-BA1195",
+      "title": "Bayesian Regression Tree Models for Causal Inference: Regularization, Confounding, and Heterogeneous Effects (with Discussion)",
+      "authors": [
+        "P. Richard Hahn",
+        "Jared S. Murray",
+        "Carlos M. Carvalho"
+      ],
+      "year": 2020,
+      "venue": "Bayesian Analysis",
+      "doi": "10.1214/19-BA1195",
+      "arxiv_id": "1706.09523",
+      "openalex_id": "https://openalex.org/W2996943377",
+      "landing_page": "https://doi.org/10.1214/19-BA1195",
+      "source_urls": [
+        "https://colab.ws/articles/10.1214%2F19-BA1195",
+        "https://doi.org/10.1214/19-BA1195"
+      ],
+      "bibtex": "@article{2020_Hahn,\nauthor = {P. Richard Hahn and Jared S. Murray and Carlos M. Carvalho},\ntitle = {Bayesian Regression Tree Models for Causal Inference: Regularization, Confounding, and Heterogeneous Effects (with Discussion)},\njournal = {Bayesian Analysis},\nyear = {2020},\nvolume = {15},\npublisher = {Institute of Mathematical Statistics},\nmonth = {sep},\nurl = {https://doi.org/10.1214/19-ba1195},\nnumber = {3},\npages = {965--1056},\ndoi = {10.1214/19-BA1195}\n}",
+      "relevance_tags": [
+        "cate",
+        "benchmark",
+        "bayesian_trees",
+        "heterogeneous_effects"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Strong nonparametric heterogeneous-effect reference relevant to semi-synthetic CATE benchmarks like IHDP and ACIC.",
+      "verified_by": "web_search_colab"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-selective-deferral",
+  "task_folder": "tasks/ml-selective-deferral",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-selective-deferral/config.json",
+      "task_description_path": "tasks/ml-selective-deferral/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "adult",
+      "cmd": "scripts/adult.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": "AIF360 Adult Census Income dataset."
+    },
+    {
+      "label": "compas",
+      "cmd": "scripts/compas.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": "AIF360 / ProPublica COMPAS recidivism dataset."
+    },
+    {
+      "label": "law_school",
+      "cmd": "scripts/law_school.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:45:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": "AIF360 Law School GPA dataset, binarized for classification."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "confidence_thresholding",
+      "implementation": "edits/confidence_thresholding.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "conformal_abstention",
+      "implementation": "edits/conformal_abstention.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "learned_deferral",
+      "implementation": "edits/learned_deferral.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "groupwise_thresholding",
+      "implementation": "edits/groupwise_thresholding.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "rl-reward-learning",
+  "task_folder": "tasks/rl-reward-learning",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/rl-reward-learning/config.json",
+      "task_description_path": "tasks/rl-reward-learning/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "halfcheetah-v4",
+      "cmd": "scripts/halfcheetah.sh",
+      "package": "imitation",
+      "group": 1,
+      "compute": 0.33,
+      "time": "06:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "hopper-v4",
+      "cmd": "scripts/hopper.sh",
+      "package": "imitation",
+      "group": 1,
+      "compute": 0.33,
+      "time": "06:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "walker2d-v4",
+      "cmd": "scripts/walker2d.sh",
+      "package": "imitation",
+      "group": 1,
+      "compute": 0.33,
+      "time": "06:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "gail",
+      "implementation": "edits/gail.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "airl",
+      "implementation": "edits/airl.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "bc",
+      "implementation": "edits/bc.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

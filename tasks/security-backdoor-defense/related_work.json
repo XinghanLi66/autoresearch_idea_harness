@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "security-backdoor-defense",
+  "task_folder": "tasks/security-backdoor-defense",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/security-backdoor-defense/config.json",
+      "task_description_path": "tasks/security-backdoor-defense/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "resnet20-cifar10-badnets",
+      "cmd": "scripts/resnet20_cifar10_badnets.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "vgg16bn-cifar100-blend",
+      "cmd": "scripts/vgg16bn_cifar100_blend.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mobilenetv2-fmnist-badnets",
+      "cmd": "scripts/mobilenetv2_fmnist_badnets.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "confidence_filter",
+      "implementation": "edits/confidence_filter.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "spectral_signature",
+      "implementation": "edits/spectral_signature.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "activation_clustering",
+      "implementation": "edits/activation_clustering.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "fine_pruning",
+      "implementation": "edits/fine_pruning.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

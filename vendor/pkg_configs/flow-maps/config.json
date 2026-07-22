@@ -1,0 +1,28 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "export PIP_NO_CACHE_DIR=1",
+    "apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*",
+    "mkdir -p /opt/mlsbench && curl -fsSL -o /opt/mlsbench/inception_v3_weights_fid.pickle 'https://www.dropbox.com/s/xt6zvlvt22dcwck/inception_v3_weights_fid.pickle?dl=1'",
+    "pip install --no-cache-dir --upgrade pip setuptools wheel",
+    "pip install --no-cache-dir --prefer-binary tensorflow==2.15.0 tensorflow-datasets==4.9.4",
+    "python -c \"import tensorflow_datasets as tfds; tfds.builder('cifar10', data_dir='/data/tfds').download_and_prepare()\"",
+    "pip install --no-cache-dir \"jax[cuda12_pip]==0.4.26\" \"jaxlib==0.4.26\" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html",
+    "pip install --no-cache-dir flax==0.8.2 optax==0.2.2 ml_collections==0.1.1",
+    "pip install --no-cache-dir \"jax[cuda12_pip]==0.4.26\" \"jaxlib==0.4.26\" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html",
+    "pip install --no-cache-dir wandb==0.16.5 matplotlib==3.7.0 seaborn==0.12.2 scipy==1.10.1",
+    "pip install --no-cache-dir click==8.1.7 requests==2.31.0 tqdm==4.65.0"
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/flow-maps/py:${PYTHONPATH}",
+    "TF_CPP_MIN_LOG_LEVEL": "3",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "false",
+    "FID_INCEPTION_WEIGHTS": "/opt/mlsbench/inception_v3_weights_fid.pickle",
+    "FID_STATS_BATCH": "256",
+    "XLA_FLAGS": "--xla_gpu_strict_conv_algorithm_picker=false"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

@@ -1,0 +1,615 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4bio-mutation-effect-prediction",
+  "task_folder": "tasks/ai4bio-mutation-effect-prediction",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "protein mutation effect prediction from frozen ESM-2 embeddings",
+    "research_question": "Design a supervised prediction head over frozen ESM-2 embeddings and delta embeddings that improves mutation effect prediction on ProteinGym DMS assays.",
+    "local_sources": {
+      "config_path": "tasks/ai4bio-mutation-effect-prediction/config.json",
+      "task_description_path": "tasks/ai4bio-mutation-effect-prediction/task_description.md"
+    },
+    "notes": [
+      "The task is a supervised protein fitness prediction problem over precomputed embeddings, not end-to-end sequence modeling.",
+      "The three evaluated assays are ProteinGym splits tied to Firnberg 2014, Nutschel 2020, and Bandaru 2017."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 15,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 6
+  },
+  "tests": [
+    {
+      "label": "BLAT_ECOLX",
+      "cmd": "scripts/blat_ecolx.sh",
+      "package": "ProteinGym",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1101/2023.12.07.570727",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1093/molbev/msu081",
+          "role": "dataset"
+        }
+      ],
+      "notes": "ProteinGym benchmark split for the beta-lactamase fitness landscape from Firnberg et al."
+    },
+    {
+      "label": "ESTA_BACSU",
+      "cmd": "scripts/esta_bacsu.sh",
+      "package": "ProteinGym",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1101/2023.12.07.570727",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1021/acs.jcim.9b00954",
+          "role": "dataset"
+        }
+      ],
+      "notes": "ProteinGym benchmark split for Bacillus subtilis lipase/esterase thermostability from Nutschel et al."
+    },
+    {
+      "label": "RASH_HUMAN",
+      "cmd": "scripts/rash_human.sh",
+      "package": "ProteinGym",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:30:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1101/2023.12.07.570727",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.7554/eLife.27810",
+          "role": "dataset"
+        }
+      ],
+      "notes": "ProteinGym benchmark split for Ras mutational effects from Bandaru et al."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ridge",
+      "implementation": "edits/ridge.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1080/00401706.1970.10488634",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "L2-regularized linear regression head (single nn.Linear trained with AdamW, weight_decay=5e-2). Matches the supervised 'Embeddings' linear baseline used in ProteinGym/ProteinNPT, which trains a linear head on mean-pooled PLM features with weight decay rather than the closed-form sklearn estimator."
+    },
+    {
+      "name": "mlp",
+      "implementation": "edits/mlp.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1038/323533a0",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Single-hidden-layer MLP head (Linear -> Dropout -> ReLU -> Linear) over mean-pooled ESM-2 features. Matches the canonical nonlinear probe used in TAPE / ProteinGym / ProteinNPT supervised baselines; intentionally not a deep residual MLP."
+    },
+    {
+      "name": "reshape_cnn",
+      "implementation": "edits/reshape_cnn.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/5.726791",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Reshape-CNN: concatenates [mutant_emb, delta_emb] (2*1280=2560 dims), reshapes to (channels=64, length=40), and applies Conv1D blocks over the embedding-channel axis. NOT a paper-faithful per-residue CNN: the precomputed embedding files only store mean-pooled features, so there is no real residue/sequence axis. Renamed from 'cnn' to make this clear; the reference is LeCun 1998 only as a generic CNN family pointer, not as a faithful re-implementation."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1101/2023.12.07.570727",
+      "title": "ProteinGym: Large-Scale Benchmarks for Protein Fitness Prediction and Design",
+      "authors": [
+        "Pascal Notin",
+        "Aaron W. Kollasch",
+        "Daniel Ritter",
+        "Lood van Niekerk",
+        "Steffanie Paul",
+        "Han Spinner",
+        "Nathan Rollins",
+        "Ada Shaw",
+        "Ruben Weitzman",
+        "Jonathan Frazer",
+        "Mafalda Dias",
+        "Dinko Franceschi",
+        "Rose Orenbuch",
+        "Yarin Gal",
+        "Debora S. Marks"
+      ],
+      "year": 2023,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2023.12.07.570727",
+      "landing_page": "https://doi.org/10.1101/2023.12.07.570727",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/38106144/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10723403/"
+      ],
+      "bibtex": "@article{notin2023proteingym,\n  title={ProteinGym: Large-Scale Benchmarks for Protein Fitness Prediction and Design},\n  author={Notin, Pascal and Kollasch, Aaron W. and Ritter, Daniel and van Niekerk, Lood and Paul, Steffanie and Spinner, Han and Rollins, Nathan and Shaw, Ada and Weitzman, Ruben and Frazer, Jonathan and Dias, Mafalda and Franceschi, Dinko and Orenbuch, Rose and Gal, Yarin and Marks, Debora S.},\n  journal={bioRxiv},\n  year={2023},\n  doi={10.1101/2023.12.07.570727}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "protein_fitness_prediction",
+        "supervised_learning"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "BLAT_ECOLX",
+        "ESTA_BACSU",
+        "RASH_HUMAN"
+      ],
+      "relevance": "Defines the benchmark protocol and the supervised mutation-effect evaluation used by this task.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.1101/2023.12.06.570473",
+      "title": "ProteinNPT: Improving Protein Property Prediction and Design with Non-Parametric Transformers",
+      "authors": [
+        "Pascal Notin",
+        "Debora S. Marks",
+        "Ruben Weitzman",
+        "Yarin Gal"
+      ],
+      "year": 2023,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2023.12.06.570473",
+      "landing_page": "https://doi.org/10.1101/2023.12.06.570473",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/38106034/",
+        "https://neurips.cc/virtual/2023/poster/72519"
+      ],
+      "bibtex": "@article{notin2023proteinnpt,\n  title={ProteinNPT: Improving Protein Property Prediction and Design with Non-Parametric Transformers},\n  author={Notin, Pascal and Marks, Debora S. and Weitzman, Ruben and Gal, Yarin},\n  journal={bioRxiv},\n  year={2023},\n  doi={10.1101/2023.12.06.570473}\n}",
+      "relevance_tags": [
+        "protein_fitness_prediction",
+        "baseline_context",
+        "few_shot_learning"
+      ],
+      "baseline_links": [
+        "ridge"
+      ],
+      "test_links": [],
+      "relevance": "Provides a modern protein property prediction baseline suite that explicitly reuses ridge-style supervised heads.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.1073/pnas.2016239118",
+      "title": "Biological structure and function emerge from scaling unsupervised learning to 250 million protein sequences",
+      "authors": [
+        "Alexander Rives",
+        "Joshua Meier",
+        "Tom Sercu",
+        "Siddharth Goyal",
+        "Zeming Lin",
+        "Jason Liu",
+        "Demi Guo",
+        "Myle Ott",
+        "C. Lawrence Zitnick",
+        "Jerry Ma",
+        "Rob Fergus"
+      ],
+      "year": 2021,
+      "venue": "PNAS",
+      "doi": "10.1073/pnas.2016239118",
+      "landing_page": "https://doi.org/10.1073/pnas.2016239118",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/33876751/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC8053943/"
+      ],
+      "bibtex": "@article{rives2021biological,\n  title={Biological structure and function emerge from scaling unsupervised learning to 250 million protein sequences},\n  author={Rives, Alexander and Meier, Joshua and Sercu, Tom and Goyal, Siddharth and Lin, Zeming and Liu, Jason and Guo, Demi and Ott, Myle and Zitnick, C. Lawrence and Ma, Jerry and Fergus, Rob},\n  journal={Proceedings of the National Academy of Sciences},\n  year={2021},\n  doi={10.1073/pnas.2016239118}\n}",
+      "relevance_tags": [
+        "protein_language_model",
+        "esm",
+        "representation_learning"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundation paper for ESM protein language model embeddings used as frozen features in this task.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.1101/2022.07.20.500902",
+      "title": "Language models of protein sequences at the scale of evolution enable accurate structure prediction",
+      "authors": [
+        "Zeming Lin",
+        "Halil Akin",
+        "Roshan Rao",
+        "Brian Hie",
+        "Zhongkai Zhu",
+        "Wenting Lu",
+        "Allan dos Santos Costa",
+        "Maryam Fazel-Zarandi",
+        "Tom Sercu",
+        "Sal Candido",
+        "Alexander Rives"
+      ],
+      "year": 2022,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2022.07.20.500902",
+      "landing_page": "https://doi.org/10.1101/2022.07.20.500902",
+      "source_urls": [
+        "https://huggingface.co/docs/transformers/en/model_doc/esm",
+        "https://paperswithcode.com/paper/language-models-of-protein-sequences-at-the"
+      ],
+      "bibtex": "@article{lin2022language,\n  title={Language models of protein sequences at the scale of evolution enable accurate structure prediction},\n  author={Lin, Zeming and Akin, Halil and Rao, Roshan and Hie, Brian and Zhu, Zhongkai and Lu, Wenting and dos Santos Costa, Allan and Fazel-Zarandi, Maryam and Sercu, Tom and Candido, Sal and Rives, Alexander},\n  journal={bioRxiv},\n  year={2022},\n  doi={10.1101/2022.07.20.500902}\n}",
+      "relevance_tags": [
+        "protein_language_model",
+        "esm2",
+        "embeddings"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Direct source for the ESM-2 650M embeddings used by the task.",
+      "verified_by": "web_search_snippet"
+    },
+    {
+      "paper_id": "doi:10.1101/676825",
+      "title": "Evaluating Protein Transfer Learning with TAPE",
+      "authors": [
+        "Roshan Rao",
+        "Nicholas Bhattacharya",
+        "Neil Thomas",
+        "Yan Duan",
+        "Xi Chen",
+        "John Canny",
+        "Pieter Abbeel",
+        "Yun S. Song"
+      ],
+      "year": 2019,
+      "venue": "bioRxiv",
+      "doi": "10.1101/676825",
+      "landing_page": "https://doi.org/10.1101/676825",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/33390682/",
+        "https://papers.nips.cc/paper/9163-evaluating-protein-transfer-learning-with-tape"
+      ],
+      "bibtex": "@article{rao2019evaluating,\n  title={Evaluating Protein Transfer Learning with TAPE},\n  author={Rao, Roshan and Bhattacharya, Nicholas and Thomas, Neil and Duan, Yan and Chen, Xi and Canny, John and Abbeel, Pieter and Song, Yun S.},\n  journal={bioRxiv},\n  year={2019},\n  doi={10.1101/676825}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "protein_representation_learning",
+        "generalization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Canonical benchmark paper for supervised and transfer learning with protein representations.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.1038/s41592-018-0138-4",
+      "title": "Deep generative models of genetic variation capture the effects of mutations",
+      "authors": [
+        "Adam J. Riesselman",
+        "John B. Ingraham",
+        "Debora S. Marks"
+      ],
+      "year": 2018,
+      "venue": "Nature Methods",
+      "doi": "10.1038/s41592-018-0138-4",
+      "landing_page": "https://doi.org/10.1038/s41592-018-0138-4",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/30250057/",
+        "https://www.nature.com/articles/s41592-018-0138-4"
+      ],
+      "bibtex": "@article{riesselman2018deepsequence,\n  title={Deep generative models of genetic variation capture the effects of mutations},\n  author={Riesselman, Adam J. and Ingraham, John B. and Marks, Debora S.},\n  journal={Nature Methods},\n  year={2018},\n  doi={10.1038/s41592-018-0138-4}\n}",
+      "relevance_tags": [
+        "mutation_effect_prediction",
+        "unsupervised_model",
+        "msa_model"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational unsupervised mutation-effect predictor that established a strong protein-fitness baseline.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.1038/s41586-021-04043-8",
+      "title": "Disease variant prediction with deep generative models of evolutionary data",
+      "authors": [
+        "Jonathan Frazer",
+        "Pascal Notin",
+        "Mafalda Dias",
+        "Aidan Gomez",
+        "Joseph K. Min",
+        "Kelly Brock",
+        "Yarin Gal",
+        "Debora S. Marks"
+      ],
+      "year": 2021,
+      "venue": "Nature",
+      "doi": "10.1038/s41586-021-04043-8",
+      "landing_page": "https://doi.org/10.1038/s41586-021-04043-8",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/34707284/",
+        "https://www.nature.com/articles/s41586-021-04043-8"
+      ],
+      "bibtex": "@article{frazer2021eve,\n  title={Disease variant prediction with deep generative models of evolutionary data},\n  author={Frazer, Jonathan and Notin, Pascal and Dias, Mafalda and Gomez, Aidan and Min, Joseph K. and Brock, Kelly and Gal, Yarin and Marks, Debora S.},\n  journal={Nature},\n  year={2021},\n  doi={10.1038/s41586-021-04043-8}\n}",
+      "relevance_tags": [
+        "mutation_effect_prediction",
+        "unsupervised_model",
+        "variant_effect_prediction"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "EVE is a major unsupervised variant-effect baseline for protein mutation scoring.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.1101/2021.02.12.430858",
+      "title": "MSA Transformer",
+      "authors": [
+        "Roshan M. Rao",
+        "Jason Liu",
+        "Robert Verkuil",
+        "Joshua Meier",
+        "John Canny",
+        "Pieter Abbeel",
+        "Tom Sercu",
+        "Alexander Rives"
+      ],
+      "year": 2021,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2021.02.12.430858",
+      "landing_page": "https://doi.org/10.1101/2021.02.12.430858",
+      "source_urls": [
+        "https://proceedings.mlr.press/v139/rao21a.html",
+        "https://www.researchgate.net/publication/349300852_MSA_transformer"
+      ],
+      "bibtex": "@article{rao2021msatransformer,\n  title={MSA Transformer},\n  author={Rao, Roshan M. and Liu, Jason and Verkuil, Robert and Meier, Joshua and Canny, John and Abbeel, Pieter and Sercu, Tom and Rives, Alexander},\n  journal={bioRxiv},\n  year={2021},\n  doi={10.1101/2021.02.12.430858}\n}",
+      "relevance_tags": [
+        "msa_model",
+        "protein_language_model",
+        "attention"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Important protein language model baseline and a representative alternative embedding family.",
+      "verified_by": "web_search_pmlr"
+    },
+    {
+      "paper_id": "doi:10.1101/2021.11.09.467890",
+      "title": "FLIP: Benchmark tasks in fitness landscape inference for proteins",
+      "authors": [
+        "Christian Dallago",
+        "Jody Mou",
+        "Kadina E. Johnston",
+        "Bruce J. Wittmann",
+        "Nicholas Bhattacharya",
+        "Samuel Goldman",
+        "Ali Madani",
+        "Kevin K. Yang"
+      ],
+      "year": 2021,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2021.11.09.467890",
+      "landing_page": "https://doi.org/10.1101/2021.11.09.467890",
+      "source_urls": [
+        "https://openreview.net/forum?id=p2dMLEwL8tF",
+        "https://authors.library.caltech.edu/records/rdyyf-j4j94"
+      ],
+      "bibtex": "@article{dallago2021flip,\n  title={FLIP: Benchmark tasks in fitness landscape inference for proteins},\n  author={Dallago, Christian and Mou, Jody and Johnston, Kadina E. and Wittmann, Bruce J. and Bhattacharya, Nicholas and Goldman, Samuel and Madani, Ali and Yang, Kevin K.},\n  journal={bioRxiv},\n  year={2021},\n  doi={10.1101/2021.11.09.467890}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "fitness_landscape",
+        "generalization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Close benchmark analogue for protein fitness prediction under distribution shift.",
+      "verified_by": "web_search_openreview"
+    },
+    {
+      "paper_id": "doi:10.1093/molbev/msu081",
+      "title": "A comprehensive, high-resolution map of a gene's fitness landscape",
+      "authors": [
+        "Elad Firnberg",
+        "Jason W. Labonte",
+        "Jeffrey J. Gray",
+        "Marc Ostermeier"
+      ],
+      "year": 2014,
+      "venue": "Molecular Biology and Evolution",
+      "doi": "10.1093/molbev/msu081",
+      "landing_page": "https://doi.org/10.1093/molbev/msu081",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/24567513/",
+        "https://academic.oup.com/mbe/article/31/6/1581/2925654"
+      ],
+      "bibtex": "@article{firnberg2014fitnesslandscape,\n  title={A comprehensive, high-resolution map of a gene's fitness landscape},\n  author={Firnberg, Elad and Labonte, Jason W. and Gray, Jeffrey J. and Ostermeier, Marc},\n  journal={Molecular Biology and Evolution},\n  year={2014},\n  doi={10.1093/molbev/msu081}\n}",
+      "relevance_tags": [
+        "dataset",
+        "deep_mutational_scanning",
+        "beta_lactamase"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "BLAT_ECOLX"
+      ],
+      "relevance": "Original deep mutational scanning source for the BLAT_ECOLX assay.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.1021/acs.jcim.9b00954",
+      "title": "Systematically Scrutinizing the Impact of Substitution Sites on Thermostability and Detergent Tolerance for Bacillus subtilis Lipase A",
+      "authors": [
+        "Christina Nutschel",
+        "Alexander Fulton",
+        "Olav Zimmermann",
+        "Ulrich Schwaneberg",
+        "Karl-Erich Jaeger",
+        "Holger Gohlke"
+      ],
+      "year": 2020,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/acs.jcim.9b00954",
+      "landing_page": "https://doi.org/10.1021/acs.jcim.9b00954",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/31905288/",
+        "https://pubs.acs.org/doi/10.1021/acs.jcim.9b00954"
+      ],
+      "bibtex": "@article{nutschel2020lipaseA,\n  title={Systematically Scrutinizing the Impact of Substitution Sites on Thermostability and Detergent Tolerance for Bacillus subtilis Lipase A},\n  author={Nutschel, Christina and Fulton, Alexander and Zimmermann, Olav and Schwaneberg, Ulrich and Jaeger, Karl-Erich and Gohlke, Holger},\n  journal={Journal of Chemical Information and Modeling},\n  year={2020},\n  doi={10.1021/acs.jcim.9b00954}\n}",
+      "relevance_tags": [
+        "dataset",
+        "deep_mutational_scanning",
+        "thermostability"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "ESTA_BACSU"
+      ],
+      "relevance": "Original stability/thermostability source for the ESTA_BACSU assay.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.7554/eLife.27810",
+      "title": "Deconstruction of the Ras switching cycle through saturation mutagenesis",
+      "authors": [
+        "Pradeep Bandaru",
+        "Neel H. Shah",
+        "Moitrayee Bhattacharyya",
+        "John P. Barton",
+        "Yasushi Kondo",
+        "Joshua C. Cofsky",
+        "Christine L. Gee",
+        "Arup K. Chakraborty",
+        "Tanja Kortemme",
+        "Rama Ranganathan",
+        "John Kuriyan"
+      ],
+      "year": 2017,
+      "venue": "eLife",
+      "doi": "10.7554/eLife.27810",
+      "landing_page": "https://doi.org/10.7554/eLife.27810",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/28686159/",
+        "https://elifesciences.org/articles/27810"
+      ],
+      "bibtex": "@article{bandaru2017ras,\n  title={Deconstruction of the Ras switching cycle through saturation mutagenesis},\n  author={Bandaru, Pradeep and Shah, Neel H. and Bhattacharyya, Moitrayee and Barton, John P. and Kondo, Yasushi and Cofsky, Joshua C. and Gee, Christine L. and Chakraborty, Arup K. and Kortemme, Tanja and Ranganathan, Rama and Kuriyan, John},\n  journal={eLife},\n  year={2017},\n  doi={10.7554/eLife.27810}\n}",
+      "relevance_tags": [
+        "dataset",
+        "deep_mutational_scanning",
+        "ras"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "RASH_HUMAN"
+      ],
+      "relevance": "Original deep mutational scanning source for the RASH_HUMAN assay.",
+      "verified_by": "web_search_pubmed"
+    },
+    {
+      "paper_id": "doi:10.1080/00401706.1970.10488634",
+      "title": "Ridge Regression: Biased Estimation for Nonorthogonal Problems",
+      "authors": [
+        "Arthur E. Hoerl",
+        "Robert W. Kennard"
+      ],
+      "year": 1970,
+      "venue": "Technometrics",
+      "doi": "10.1080/00401706.1970.10488634",
+      "landing_page": "https://doi.org/10.1080/00401706.1970.10488634",
+      "source_urls": [
+        "https://www.tandfonline.com/doi/abs/10.1080/00401706.1970.10488634",
+        "https://www.researchgate.net/publication/221996166_Ridge_Regression_Biased_Estimation_for_Nonorthogonal_Problems"
+      ],
+      "bibtex": "@article{hoerl1970ridge,\n  title={Ridge Regression: Biased Estimation for Nonorthogonal Problems},\n  author={Hoerl, Arthur E. and Kennard, Robert W.},\n  journal={Technometrics},\n  volume={12},\n  number={1},\n  pages={55--67},\n  year={1970},\n  doi={10.1080/00401706.1970.10488634}\n}",
+      "relevance_tags": [
+        "baseline_method",
+        "linear_model",
+        "regularization"
+      ],
+      "baseline_links": [
+        "ridge"
+      ],
+      "test_links": [],
+      "relevance": "Canonical ridge regression reference for the linear baseline.",
+      "verified_by": "web_search_tandf"
+    },
+    {
+      "paper_id": "doi:10.1038/323533a0",
+      "title": "Learning representations by back-propagating errors",
+      "authors": [
+        "David E. Rumelhart",
+        "Geoffrey E. Hinton",
+        "Ronald J. Williams"
+      ],
+      "year": 1986,
+      "venue": "Nature",
+      "doi": "10.1038/323533a0",
+      "landing_page": "https://doi.org/10.1038/323533a0",
+      "source_urls": [
+        "https://www.nature.com/articles/323533a0"
+      ],
+      "bibtex": "@article{rumelhart1986backprop,\n  title={Learning representations by back-propagating errors},\n  author={Rumelhart, David E. and Hinton, Geoffrey E. and Williams, Ronald J.},\n  journal={Nature},\n  year={1986},\n  doi={10.1038/323533a0}\n}",
+      "relevance_tags": [
+        "baseline_method",
+        "multilayer_perceptron",
+        "backpropagation"
+      ],
+      "baseline_links": [
+        "mlp"
+      ],
+      "test_links": [],
+      "relevance": "Classic backprop-trained multilayer perceptron reference for the nonlinear baseline.",
+      "verified_by": "web_search_nature"
+    },
+    {
+      "paper_id": "doi:10.1109/5.726791",
+      "title": "Gradient-based learning applied to document recognition",
+      "authors": [
+        "Yann LeCun",
+        "Leon Bottou",
+        "Yoshua Bengio",
+        "Patrick Haffner"
+      ],
+      "year": 1998,
+      "venue": "Proceedings of the IEEE",
+      "doi": "10.1109/5.726791",
+      "landing_page": "https://doi.org/10.1109/5.726791",
+      "source_urls": [
+        "https://www.nyu.edu/projects/bowman/publications/lecun-bottou-bengio-haffner-1998.pdf",
+        "https://nyuscholars.nyu.edu/en/publications/gradient-based-learning-applied-to-document-recognition"
+      ],
+      "bibtex": "@article{lecun1998gradient,\n  title={Gradient-based learning applied to document recognition},\n  author={LeCun, Yann and Bottou, Leon and Bengio, Yoshua and Haffner, Patrick},\n  journal={Proceedings of the IEEE},\n  volume={86},\n  number={11},\n  pages={2278--2324},\n  year={1998},\n  doi={10.1109/5.726791}\n}",
+      "relevance_tags": [
+        "baseline_method",
+        "cnn",
+        "representation_learning"
+      ],
+      "baseline_links": [
+        "reshape_cnn"
+      ],
+      "test_links": [],
+      "relevance": "Classic CNN reference. Used here only as a generic citation for the convolutional family; the 'reshape_cnn' baseline is NOT a paper-faithful re-implementation (it convolves over the embedding-channel axis, not a residue sequence).",
+      "verified_by": "web_search_ieee"
+    }
+  ]
+}

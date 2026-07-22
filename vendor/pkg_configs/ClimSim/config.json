@@ -1,0 +1,13 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "pip install tqdm"
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/ClimSim:${PYTHONPATH}",
+    "DATA_DIR": "/data/climsim"
+  },
+  "use_cuda": true,
+  "workdir": "/workspace",
+  "data_bind": "{data_root}/ClimSim/processed:/data/climsim"
+}

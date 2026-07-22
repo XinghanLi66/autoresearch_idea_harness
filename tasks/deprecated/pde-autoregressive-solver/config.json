@@ -1,0 +1,152 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/ns.sh",
+      "label": "NS",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "Neural-Solver-Library"
+    },
+    {
+      "cmd": "scripts/diff_sorp.sh",
+      "label": "DiffSorp",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "Neural-Solver-Library"
+    },
+    {
+      "cmd": "scripts/burgers.sh",
+      "label": "Burgers",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "Neural-Solver-Library",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "fno": {
+      "edit_ops": "edits/fno.edit.py"
+    },
+    "transformer": {
+      "edit_ops": "edits/transformer.edit.py"
+    },
+    "transolver": {
+      "edit_ops": "edits/transolver.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "Neural-Solver-Library/models/Custom.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 1,
+          "end": 65
+        }
+      ]
+    },
+    {
+      "filename": "Neural-Solver-Library/models/Transolver.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "Neural-Solver-Library/models/FNO.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "Neural-Solver-Library/models/Transformer.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "Neural-Solver-Library/layers/Basic.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Neural-Solver-Library/layers/Embedding.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Neural-Solver-Library/layers/Physics_Attention.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Neural-Solver-Library/layers/FNO_Layers.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "task_name": "graph-link-prediction",
+  "task_folder": "tasks/graph-link-prediction",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/graph-link-prediction/config.json",
+      "task_description_path": "tasks/graph-link-prediction/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "Cora",
+      "cmd": "scripts/cora.sh",
+      "package": "pytorch-geometric-lp",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "CiteSeer",
+      "cmd": "scripts/citeseer.sh",
+      "package": "pytorch-geometric-lp",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "ogbl-collab",
+      "cmd": "scripts/ogbl_collab.sh",
+      "package": "pytorch-geometric-lp",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "gcn_dot",
+      "implementation": "edits/gcn_dot.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "vgae",
+      "implementation": "edits/vgae.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "node2vec",
+      "implementation": "edits/node2vec.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "seal",
+      "implementation": "edits/seal.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "neo_gnn",
+      "implementation": "edits/neo_gnn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "buddy",
+      "implementation": "edits/buddy.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

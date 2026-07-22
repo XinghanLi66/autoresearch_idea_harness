@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "task_name": "inverse-diffusion-algo",
+  "task_folder": "tasks/inverse-diffusion-algo",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/inverse-diffusion-algo/config.json",
+      "task_description_path": "tasks/inverse-diffusion-algo/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 2,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "inv-scatter",
+      "cmd": "scripts/inv_scatter.sh",
+      "package": "InverseBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "navier-stokes",
+      "cmd": "scripts/navier_stokes.sh",
+      "package": "InverseBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "dps",
+      "implementation": "edits/dps.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "reddiff",
+      "implementation": "edits/reddiff.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "lgd",
+      "implementation": "edits/lgd.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

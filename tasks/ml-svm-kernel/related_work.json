@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-svm-kernel",
+  "task_folder": "tasks/ml-svm-kernel",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-svm-kernel/config.json",
+      "task_description_path": "tasks/ml-svm-kernel/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "breast_cancer",
+      "cmd": "scripts/breast_cancer.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "digits",
+      "cmd": "scripts/digits.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "wine",
+      "cmd": "scripts/wine.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "rbf",
+      "implementation": "edits/rbf.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "polynomial",
+      "implementation": "edits/polynomial.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "linear",
+      "implementation": "edits/linear.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

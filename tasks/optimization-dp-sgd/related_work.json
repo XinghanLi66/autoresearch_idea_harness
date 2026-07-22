@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-dp-sgd",
+  "task_folder": "tasks/optimization-dp-sgd",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-dp-sgd/config.json",
+      "task_description_path": "tasks/optimization-dp-sgd/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "mnist",
+      "cmd": "scripts/mnist.sh",
+      "package": "opacus",
+      "group": 1,
+      "compute": 0.5,
+      "time": "0:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "fmnist",
+      "cmd": "scripts/fmnist.sh",
+      "package": "opacus",
+      "group": 1,
+      "compute": 0.5,
+      "time": "0:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "cifar10",
+      "cmd": "scripts/cifar10.sh",
+      "package": "opacus",
+      "group": 2,
+      "compute": 1.0,
+      "time": "0:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "standard_dpsgd",
+      "implementation": "edits/standard_dpsgd.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "automatic_clipping",
+      "implementation": "edits/automatic_clipping.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "adaptive_clipping",
+      "implementation": "edits/adaptive_clipping.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "noise_decay",
+      "implementation": "edits/noise_decay.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

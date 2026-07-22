@@ -1,0 +1,46 @@
+{
+  "allow_create": false,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train.sh",
+      "label": "train",
+      "group": 1,
+      "compute": 1,
+      "time": "12:00:00",
+      "package": "LIBERO"
+    }
+  ],
+  "rigorous_codebase": true,
+  "baselines": {
+    "ewc": {"edit_ops": "edits/ewc.edit.py"},
+    "er": {"edit_ops": "edits/er.edit.py"},
+    "agem": {"edit_ops": "edits/agem.edit.py"}
+  },
+  "files": [
+    {
+      "filename": "LIBERO/libero/lifelong/algos/custom.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": [{"start": 37, "end": 65}]
+    },
+    {
+      "filename": "LIBERO/libero/lifelong/algos/base.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": []
+    },
+    {
+      "filename": "LIBERO/libero/lifelong/algos/er.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": []
+    },
+    {
+      "filename": "LIBERO/libero/lifelong/algos/ewc.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": []
+    },
+    {
+      "filename": "LIBERO/libero/lifelong/algos/agem.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": []
+    }
+  ]
+}

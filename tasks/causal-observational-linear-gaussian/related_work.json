@@ -1,0 +1,521 @@
+{
+  "schema_version": "1.0",
+  "task_name": "causal-observational-linear-gaussian",
+  "task_folder": "tasks/causal-observational-linear-gaussian",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "observational causal discovery for linear Gaussian SEMs with CPDAG recovery",
+    "research_question": "Design a causal discovery algorithm that recovers the Markov equivalence class, represented as a CPDAG, from purely observational linear Gaussian data.",
+    "local_sources": {
+      "config_path": "tasks/causal-observational-linear-gaussian/config.json",
+      "task_description_path": "tasks/causal-observational-linear-gaussian/task_description.md"
+    },
+    "notes": [
+      "The task evaluates CPDAG recovery on synthetic Erdos-Renyi and scale-free graphs under linear Gaussian SEM assumptions.",
+      "The repo baseline stub names Chickering 2002 for GES, but exact BibTeX retrieval for that paper failed in MCP during this run; the GES baseline is therefore linked to concrete GES-focused follow-on papers with status paper_linked_approx."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 4,
+    "baseline_links_found": 5,
+    "test_entries": 5,
+    "test_links_found": 10
+  },
+  "tests": [
+    {
+      "label": "ER10",
+      "cmd": "scripts/eval_er10.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1103/physreve.64.026118",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1214/aos/1031833662",
+          "role": "other"
+        }
+      ],
+      "notes": "ER synthetic graph family plus CPDAG/Markov equivalence target."
+    },
+    {
+      "label": "ER20",
+      "cmd": "scripts/eval_er20.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1103/physreve.64.026118",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1214/aos/1031833662",
+          "role": "other"
+        }
+      ],
+      "notes": "Larger Erdos-Renyi synthetic graph with CPDAG recovery target."
+    },
+    {
+      "label": "SF50",
+      "cmd": "scripts/eval_sf50.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1126/science.286.5439.509",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1214/aos/1031833662",
+          "role": "other"
+        }
+      ],
+      "notes": "Scale-free synthetic graph family plus CPDAG/Markov equivalence target."
+    },
+    {
+      "label": "SF50-Hard",
+      "cmd": "scripts/eval_sf50_hard.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1126/science.286.5439.509",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1214/aos/1031833662",
+          "role": "other"
+        }
+      ],
+      "notes": "Denser scale-free synthetic graph with the same CPDAG target."
+    },
+    {
+      "label": "ER20-Noisy",
+      "cmd": "scripts/eval_er20_noisy.sh",
+      "package": "causal-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "1:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1103/physreve.64.026118",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1214/aos/1031833662",
+          "role": "other"
+        }
+      ],
+      "notes": "Noisier Erdos-Renyi evaluation scenario with the same CPDAG recovery objective."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "pc",
+      "implementation": "edits/pc.edit.py",
+      "labels": [
+        "constraint_based",
+        "linear_gaussian"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.5555/1314498.1314520",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the PC algorithm family used in the baseline edit."
+    },
+    {
+      "name": "ges",
+      "implementation": "edits/ges.edit.py",
+      "labels": [
+        "score_based",
+        "equivalence_search"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1214/17-aos1654",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1007/s41060-016-0032-z",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "The stub cites Chickering 2002; this entry is linked to concrete GES-focused follow-on papers because exact BibTeX retrieval for the original paper failed during citation lookup."
+    },
+    {
+      "name": "grasp",
+      "implementation": "edits/grasp.edit.py",
+      "labels": [
+        "permutation_based",
+        "score_based"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2206.05421",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the exact GRaSP paper named in the baseline stub."
+    },
+    {
+      "name": "boss",
+      "implementation": "edits/boss.edit.py",
+      "labels": [
+        "permutation_based",
+        "score_based"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2310.17679",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Linked to the BOSS paper introducing Best Order Score Search."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.5555/1314498.1314520",
+      "title": "Estimating High-Dimensional Directed Acyclic Graphs with the PC-Algorithm",
+      "authors": [
+        "Markus Kalisch",
+        "Peter Buehlmann"
+      ],
+      "year": 2007,
+      "venue": "Journal of Machine Learning Research",
+      "doi": "10.5555/1314498.1314520",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://dblp.org/rec/journals/jmlr/KalischB07",
+      "source_urls": [
+        "https://academictorrents.com/details/9938d5a4bcf4e7986b1059cdb293a5beb65d6233",
+        "https://dblp.org/rec/journals/jmlr/KalischB07"
+      ],
+      "bibtex": "@article{8:22,author={Markus Kalisch and Peter Bhlmann}, Title={Estimating High-Dimensional Directed Acyclic Graphs with the PC-Algorithm},journal={Journal of Machine Learning Research},volume={8}, url={http://www.jmlr.org/papers/volume8/kalisch07a/kalisch07a.pdf}}",
+      "relevance_tags": [
+        "baseline",
+        "pc",
+        "constraint_based",
+        "linear_gaussian"
+      ],
+      "baseline_links": [
+        "pc"
+      ],
+      "test_links": [],
+      "relevance": "Concrete PC-algorithm paper for the constraint-based baseline under high-dimensional observational settings.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1214/17-aos1654",
+      "title": "High-dimensional consistency in score-based and hybrid structure learning",
+      "authors": [
+        "Preetam Nandy",
+        "Alain Hauser",
+        "Marloes H. Maathuis"
+      ],
+      "year": 2018,
+      "venue": "The Annals of Statistics",
+      "doi": "10.1214/17-AOS1654",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2337761434",
+      "landing_page": "https://doi.org/10.1214/17-AOS1654",
+      "source_urls": [
+        "https://doi.org/10.1214/17-AOS1654"
+      ],
+      "bibtex": "@article{Nandy_2018, title={High-dimensional consistency in score-based and hybrid structure learning}, volume={46}, ISSN={0090-5364}, url={http://dx.doi.org/10.1214/17-aos1654}, DOI={10.1214/17-aos1654}, number={6A}, journal={The Annals of Statistics}, publisher={Institute of Mathematical Statistics}, author={Nandy, Preetam and Hauser, Alain and Maathuis, Marloes H.}, year={2018}, month=dec }",
+      "relevance_tags": [
+        "baseline",
+        "ges",
+        "score_based",
+        "consistency"
+      ],
+      "baseline_links": [
+        "ges"
+      ],
+      "test_links": [],
+      "relevance": "Provides direct modern analysis of GES and related score-based search in sparse high-dimensional observational settings.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2206.05421",
+      "title": "Greedy Relaxations of the Sparsest Permutation Algorithm",
+      "authors": [
+        "Wai-Yin Lam",
+        "Bryan Andrews",
+        "Joseph Ramsey"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.05421",
+      "arxiv_id": "2206.05421",
+      "openalex_id": "https://openalex.org/W4282915913",
+      "landing_page": "https://arxiv.org/abs/2206.05421",
+      "source_urls": [
+        "https://arxiv.org/abs/2206.05421",
+        "https://openalex.org/W4282915913"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.05421,\n  doi = {10.48550/ARXIV.2206.05421},\n  url = {https://arxiv.org/abs/2206.05421},\n  author = {Lam, Wai-Yin and Andrews, Bryan and Ramsey, Joseph},\n  keywords = {Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Greedy Relaxations of the Sparsest Permutation Algorithm},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "grasp",
+        "permutation_search",
+        "observational_causal_discovery"
+      ],
+      "baseline_links": [
+        "grasp"
+      ],
+      "test_links": [],
+      "relevance": "Introduces GRaSP, one of the exact baselines in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2310.17679",
+      "title": "Fast Scalable and Accurate Discovery of DAGs Using the Best Order Score Search and Grow-Shrink Trees",
+      "authors": [
+        "Bryan Andrews",
+        "Joseph Ramsey",
+        "Ruben Sanchez-Romero",
+        "Jazmin Camchong",
+        "Erich Kummerfeld"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2310.17679",
+      "arxiv_id": "2310.17679",
+      "openalex_id": "https://openalex.org/W4388067792",
+      "landing_page": "https://arxiv.org/abs/2310.17679",
+      "source_urls": [
+        "https://arxiv.org/abs/2310.17679",
+        "https://openalex.org/W4388067792"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2310.17679,\n  doi = {10.48550/ARXIV.2310.17679},\n  url = {https://arxiv.org/abs/2310.17679},\n  author = {Andrews, Bryan and Ramsey, Joseph and Sanchez-Romero, Ruben and Camchong, Jazmin and Kummerfeld, Erich},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Methodology (stat.ME), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Fast Scalable and Accurate Discovery of DAGs Using the Best Order Score Search and Grow-Shrink Trees},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "boss",
+        "permutation_search",
+        "observational_causal_discovery"
+      ],
+      "baseline_links": [
+        "boss"
+      ],
+      "test_links": [],
+      "relevance": "Introduces BOSS, the exact best-order search baseline used by this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1007/s41060-016-0032-z",
+      "title": "A million variables and more: the Fast Greedy Equivalence Search algorithm for learning high-dimensional graphical causal models, with an application to functional magnetic resonance images",
+      "authors": [
+        "Joseph Ramsey",
+        "Madelyn Glymour",
+        "Ruben Sanchez-Romero",
+        "Clark Glymour"
+      ],
+      "year": 2016,
+      "venue": "International Journal of Data Science and Analytics",
+      "doi": "10.1007/s41060-016-0032-z",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2557632452",
+      "landing_page": "https://doi.org/10.1007/s41060-016-0032-z",
+      "source_urls": [
+        "https://doi.org/10.1007/s41060-016-0032-z"
+      ],
+      "bibtex": "@article{Ramsey_2016, title={A million variables and more: the Fast Greedy Equivalence Search algorithm for learning high-dimensional graphical causal models, with an application to functional magnetic resonance images}, volume={3}, ISSN={2364-4168}, url={http://dx.doi.org/10.1007/s41060-016-0032-z}, DOI={10.1007/s41060-016-0032-z}, number={2}, journal={International Journal of Data Science and Analytics}, publisher={Springer Science and Business Media LLC}, author={Ramsey, Joseph and Glymour, Madelyn and Sanchez-Romero, Ruben and Glymour, Clark}, year={2016}, month=dec, pages={121–129} }",
+      "relevance_tags": [
+        "baseline",
+        "ges",
+        "score_based",
+        "scalability"
+      ],
+      "baseline_links": [
+        "ges"
+      ],
+      "test_links": [],
+      "relevance": "Fast GES variant directly relevant to score-based equivalence-class search on large linear Gaussian problems.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1214/aos/1031833662",
+      "title": "A characterization of Markov equivalence classes for acyclic digraphs",
+      "authors": [
+        "Steen A. Andersson",
+        "David Madigan",
+        "Michael D. Perlman"
+      ],
+      "year": 1997,
+      "venue": "The Annals of Statistics",
+      "doi": "10.1214/AOS/1031833662",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2111061246",
+      "landing_page": "https://doi.org/10.1214/AOS/1031833662",
+      "source_urls": [
+        "https://ftp.math.utah.edu/pub/tex/bib/idx/annstat1990/25/2/505_541.html",
+        "https://openalex.org/W2111061246"
+      ],
+      "bibtex": "@Article{Andersson:1997:CME,\n  author =       \"Steen A. Andersson and David Madigan and Michael D. Perlman\",\n  title =        \"A characterization of {Markov} equivalence classes for acyclic digraphs\",\n  journal =      j-ANN-STAT,\n  volume =       \"25\",\n  number =       \"2\",\n  pages =        \"505--541\",\n  month =        apr,\n  year =         \"1997\",\n  CODEN =        \"ASTSC7\",\n  DOI =          \"https://doi.org/10.1214/aos/1031833662\",\n  ISSN =         \"0090-5364 (print), 2168-8966 (electronic)\",\n  ISSN-L =       \"0090-5364\",\n  bibdate =      \"Wed Jun 4 06:40:34 MDT 2014\",\n  bibsource =    \"http://www.math.utah.edu/pub/tex/bib/annstat1990.bib\",\n  URL =          \"http://projecteuclid.org/euclid.aos/1031833662\",\n  acknowledgement = ack-nhfb,\n  fjournal =     \"Annals of Statistics\",\n  journal-URL =  \"http://projecteuclid.org/all/euclid.aos/\"\n}",
+      "relevance_tags": [
+        "cpdag",
+        "markov_equivalence",
+        "observational_identifiability"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "ER10",
+        "ER20",
+        "SF50",
+        "SF50-Hard",
+        "ER20-Noisy"
+      ],
+      "relevance": "Foundational paper for representing the observationally identifiable target as a Markov equivalence class / essential graph / CPDAG.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1145/3501714.3501732",
+      "title": "Equivalence and Synthesis of Causal Models",
+      "authors": [
+        "Thomas Verma",
+        "Judea Pearl"
+      ],
+      "year": 2022,
+      "venue": "Probabilistic and Causal Inference: The Works of Judea Pearl",
+      "doi": "10.1145/3501714.3501732",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1145/3501714.3501732",
+      "source_urls": [
+        "https://researchr.org/publication/VermaP22-5/bibtex",
+        "https://dblp.org/rec/conf/uai/VermaP90"
+      ],
+      "bibtex": "@incollection{VermaP22-5,\n  title = {Equivalence and Synthesis of Causal Models},\n  author = {Thomas Verma and Judea Pearl},\n  year = {2022},\n  doi = {10.1145/3501714.3501732},\n  url = {https://doi.org/10.1145/3501714.3501732},\n  researchr = {https://researchr.org/publication/VermaP22-5},\n  cites = {0},\n  citedby = {0},\n  pages = {221-236},\n  booktitle = {Probabilistic and Causal Inference: The Works of Judea Pearl},\n  editor = {Hector Geffner and Rina Dechter and Joseph Y. Halpern},\n  volume = {36},\n  series = {ACM Books},\n  publisher = {ACM},\n  isbn = {978-1-4503-9586-1},\n}",
+      "relevance_tags": [
+        "cpdag",
+        "markov_equivalence",
+        "causal_discovery_foundations"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Reprint of the classic Verma-Pearl equivalence result that underpins MEC-based causal discovery from observational data.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1126/science.286.5439.509",
+      "title": "Emergence of Scaling in Random Networks",
+      "authors": [
+        "Albert-Laszlo Barabasi",
+        "Reka Albert"
+      ],
+      "year": 1999,
+      "venue": "Science",
+      "doi": "10.1126/science.286.5439.509",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2008620264",
+      "landing_page": "https://doi.org/10.1126/science.286.5439.509",
+      "source_urls": [
+        "https://doi.org/10.1126/science.286.5439.509"
+      ],
+      "bibtex": "@article{Baraba_si_1999, title={Emergence of Scaling in Random Networks}, volume={286}, ISSN={1095-9203}, url={http://dx.doi.org/10.1126/science.286.5439.509}, DOI={10.1126/science.286.5439.509}, number={5439}, journal={Science}, publisher={American Association for the Advancement of Science (AAAS)}, author={Barabási, Albert-László and Albert, Réka}, year={1999}, month=oct, pages={509–512} }",
+      "relevance_tags": [
+        "graph_family",
+        "scale_free",
+        "benchmark_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "SF50",
+        "SF50-Hard"
+      ],
+      "relevance": "Matches the scale-free graph family used by the SF50 evaluation settings.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1103/physreve.64.026118",
+      "title": "Random graphs with arbitrary degree distributions and their applications",
+      "authors": [
+        "M. E. J. Newman",
+        "Steven H. Strogatz",
+        "Duncan J. Watts"
+      ],
+      "year": 2001,
+      "venue": "Physical Review E",
+      "doi": "10.1103/PhysRevE.64.026118",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2169015768",
+      "landing_page": "https://doi.org/10.1103/PhysRevE.64.026118",
+      "source_urls": [
+        "https://doi.org/10.1103/PhysRevE.64.026118"
+      ],
+      "bibtex": "@article{Newman_2001, title={Random graphs with arbitrary degree distributions and their applications}, volume={64}, ISSN={1095-3787}, url={http://dx.doi.org/10.1103/physreve.64.026118}, DOI={10.1103/physreve.64.026118}, number={2}, journal={Physical Review E}, publisher={American Physical Society (APS)}, author={Newman, M. E. J. and Strogatz, S. H. and Watts, D. J.}, year={2001}, month=jul }",
+      "relevance_tags": [
+        "graph_family",
+        "erdos_renyi_related",
+        "benchmark_generation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "ER10",
+        "ER20",
+        "ER20-Noisy"
+      ],
+      "relevance": "Relevant random-graph reference for the Erdos-Renyi-style synthetic benchmark family used by the ER evaluation settings.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2307.16405",
+      "title": "Causal-learn: Causal Discovery in Python",
+      "authors": [
+        "Yujia Zheng",
+        "Biwei Huang",
+        "Wei Chen",
+        "Joseph Ramsey",
+        "Mingming Gong",
+        "Ruichu Cai",
+        "Shohei Shimizu",
+        "Peter Spirtes",
+        "Kun Zhang"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2307.16405",
+      "arxiv_id": "2307.16405",
+      "openalex_id": "https://openalex.org/W4385474105",
+      "landing_page": "https://arxiv.org/abs/2307.16405",
+      "source_urls": [
+        "https://arxiv.org/abs/2307.16405",
+        "https://openalex.org/W4385474105"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.2307.16405,\n  doi = {10.48550/ARXIV.2307.16405},\n  url = {https://arxiv.org/abs/2307.16405},\n  author = {Zheng, Yujia and Huang, Biwei and Chen, Wei and Ramsey, Joseph and Gong, Mingming and Cai, Ruichu and Shimizu, Shohei and Spirtes, Peter and Zhang, Kun},\n  keywords = {Machine Learning (cs.LG), Methodology (stat.ME), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Causal-learn: Causal Discovery in Python},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "software",
+        "causal_discovery_library",
+        "task_package"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Describes the causal-learn package that provides the scaffolding and baseline algorithms used by this task.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

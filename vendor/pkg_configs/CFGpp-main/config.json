@@ -1,0 +1,77 @@
+{
+  "base_image": "continuumio/miniconda3:latest",
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y git wget && rm -rf /var/lib/apt/lists/*",
+    "conda env create -f environment.yaml -n cfgpp",
+    "echo 'source activate cfgpp' >> ~/.bashrc",
+    "conda run -n cfgpp pip install ftfy regex tqdm",
+    "conda run -n cfgpp pip install git+https://github.com/openai/CLIP.git",
+    "conda run -n cfgpp python -c \"import torch; print('PyTorch version:', torch.__version__)\"",
+    "conda run -n cfgpp python -c \"import diffusers; print('Diffusers version:', diffusers.__version__)\"",
+    "conda run -n cfgpp python -c \"import clip; print('CLIP installed successfully')\"",
+    "mkdir -p /opt/model_weights && wget -q -O /opt/model_weights/ViT-B-32.pt https://openaipublic.azureedge.net/clip/models/40d365715913c9da98579312b702a82c18be219cc2a73407c4526f58eba950af/ViT-B-32.pt",
+    "wget -q -O /opt/model_weights/inception_v3_google.pth https://download.pytorch.org/models/inception_v3_google-0cc3c7bd.pth",
+    "mkdir -p /data/huggingface/hub"
+  ],
+  "env": {
+    "HF_HOME": "/data/huggingface",
+    "TRANSFORMERS_CACHE": "/data/huggingface/transformers",
+    "HF_DATASETS_CACHE": "/data/huggingface/datasets",
+    "TORCH_HOME": "/data/huggingface/torch",
+    "XDG_CACHE_HOME": "/data/huggingface",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "CONDA_DEFAULT_ENV": "cfgpp",
+    "PATH": "/opt/conda/envs/cfgpp/bin:${PATH}",
+    "TMPDIR": "/data/huggingface/pip_tmp",
+    "PIP_CACHE_DIR": "/data/huggingface/pip_cache"
+  },
+
+  "data_bind": [
+    "{data_root}/huggingface_cache:/data/huggingface",
+    "{data_root}/coco_val2014:/data/coco_val2014"
+  ],
+
+  "data_deps": [
+    {
+      "name": "stable-diffusion-v1-5",
+      "description": "Stable Diffusion v1.5 model weights",
+      "host_path": "{data_root}/huggingface_cache/hub/models--runwayml--stable-diffusion-v1-5",
+      "container_path": "/data/huggingface/hub/models--runwayml--stable-diffusion-v1-5",
+      "prepare": "vendor/data_scripts/CFGpp-main/prepare_models.py"
+    },
+    {
+      "name": "stable-diffusion-2-base",
+      "description": "Stable Diffusion v2.0 base model weights",
+      "host_path": "{data_root}/huggingface_cache/hub/models--Manojb--stable-diffusion-2-base",
+      "container_path": "/data/huggingface/hub/models--Manojb--stable-diffusion-2-base",
+      "prepare": "vendor/data_scripts/CFGpp-main/prepare_models.py"
+    },
+    {
+      "name": "sdxl-vae-fp16-fix",
+      "description": "SDXL VAE fp16-fix weights",
+      "host_path": "{data_root}/huggingface_cache/hub/models--madebyollin--sdxl-vae-fp16-fix",
+      "container_path": "/data/huggingface/hub/models--madebyollin--sdxl-vae-fp16-fix",
+      "prepare": "vendor/data_scripts/CFGpp-main/prepare_models.py"
+    },
+    {
+      "name": "sdxl-base-1.0",
+      "description": "Stable Diffusion XL base model + VAE fix weights",
+      "host_path": "{data_root}/huggingface_cache/hub/models--stabilityai--stable-diffusion-xl-base-1.0",
+      "container_path": "/data/huggingface/hub/models--stabilityai--stable-diffusion-xl-base-1.0",
+      "prepare": "vendor/data_scripts/CFGpp-main/prepare_models.py"
+    },
+    {
+      "name": "coco-val2014",
+      "description": "COCO val2014 images and pre-computed inception stats for FID",
+      "host_path": "{data_root}/coco_val2014",
+      "container_path": "/data/coco_val2014",
+      "prepare": "vendor/data_scripts/CFGpp-main/prepare_coco.py"
+    }
+  ],
+
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

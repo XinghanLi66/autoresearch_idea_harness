@@ -1,0 +1,529 @@
+# Custom offline RL algorithm for MLS-Bench — NetHack POMDP (LSTM backbone)
+#
+# FIXED: ModelBackbone (encoders + LSTM), config, utilities, data, eval, training loop.
+# EDITABLE: Model (output heads on top of backbone) + OfflineAlgorithm class.
+import os
+import sys
+import random
+import uuid
+import wandb
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+
+import pyrallis
+from copy import deepcopy
+from dataclasses import dataclass, asdict
+from typing import Optional, Dict, Tuple, Any, List
+from multiprocessing import set_start_method
+from gym.vector import AsyncVectorEnv
+from concurrent.futures import ThreadPoolExecutor
+from tqdm.auto import tqdm, trange
+from torch.distributions import Categorical
+
+from katakomba.env import NetHackChallenge, OfflineNetHackChallengeWrapper
+from katakomba.nn.chaotic_dwarf import TopLineEncoder, BottomLinesEncoder, ScreenEncoder
+from katakomba.utils.render import SCREEN_SHAPE, render_screen_image
+from katakomba.utils.datasets import SequentialBuffer
+from katakomba.utils.misc import Timeit, StatMean
+
+LSTM_HIDDEN = Tuple[torch.Tensor, torch.Tensor]
+UPDATE_INFO = Dict[str, Any]
+
+torch.backends.cudnn.benchmark = True
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+
+# =====================================================================
+# FIXED: Configuration
+# =====================================================================
+@dataclass
+class TrainConfig:
+    character: str = "mon-hum-neu"
+    data_mode: str = "in_memory"
+    # Wandb logging
+    project: str = "NetHack"
+    group: str = "custom-nethack-pomdp"
+    name: str = "custom"
+    version: int = 0
+    # Model
+    rnn_hidden_dim: int = 2048
+    rnn_layers: int = 2
+    use_prev_action: bool = True
+    rnn_dropout: float = 0.0
+    clip_range: float = 10.0
+    tau: float = 0.005
+    gamma: float = 0.999
+    # Training
+    update_steps: int = 100_000
+    batch_size: int = 128
+    seq_len: int = 16
+    learning_rate: float = 3e-4
+    weight_decay: float = 0.0
+    clip_grad_norm: Optional[float] = None
+    checkpoints_path: Optional[str] = None
+    eval_every: int = 10_000
+    eval_episodes: int = 50
+    eval_processes: int = 14
+    render_processes: int = 14
+    eval_seed: int = 50
+    train_seed: int = 42
+
+    def __post_init__(self):
+        self.group = f"{self.group}-v{str(self.version)}"
+        self.name = f"{self.name}-{self.character}-{str(uuid.uuid4())[:8]}"
+        if self.checkpoints_path is not None:
+            self.checkpoints_path = os.path.join(self.checkpoints_path, self.group, self.name)
+
+
+# =====================================================================
+# FIXED: Utilities
+# =====================================================================
+def set_seed(seed: int):
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+
+
+@torch.no_grad()
+def filter_wd_params(model: nn.Module) -> Tuple[List[nn.parameter.Parameter], List[nn.parameter.Parameter]]:
+    no_decay, decay = [], []
+    for name, param in model.named_parameters():
+        if hasattr(param, 'requires_grad') and not param.requires_grad:
+            continue
+        if 'weight' in name and 'norm' not in name and 'bn' not in name:
+            decay.append(param)
+        else:
+            no_decay.append(param)
+    assert len(no_decay) + len(decay) == len(list(model.parameters()))
+    return no_decay, decay
+
+
+def dict_to_tensor(data: Dict[str, np.ndarray], device: str) -> Dict[str, torch.Tensor]:
+    return {k: torch.as_tensor(v, dtype=torch.float, device=device) for k, v in data.items()}
+
+
+def soft_update(target: nn.Module, source: nn.Module, tau: float):
+    for tp, sp in zip(target.parameters(), source.parameters()):
+        tp.data.copy_((1 - tau) * tp.data + tau * sp.data)
+
+
+def asymmetric_l2_loss(u: torch.Tensor, tau: float) -> torch.Tensor:
+    return torch.mean(torch.abs(tau - (u < 0).float()) * u ** 2)
+
+
+# =====================================================================
+# FIXED: Vectorized evaluation
+# =====================================================================
+@torch.no_grad()
+def vec_evaluate(
+        vec_env: AsyncVectorEnv,
+        actor,
+        num_episodes: int,
+        seed: int = 0,
+        device: str = "cpu"
+) -> Dict[str, np.ndarray]:
+    actor.eval()
+    vec_env.seed(seed)
+    n_envs = vec_env.num_envs
+    episode_rewards = []
+    episode_lengths = []
+    episode_depths = []
+
+    episode_counts = np.zeros(n_envs, dtype="int")
+    episode_count_targets = np.array([(num_episodes + i) // n_envs for i in range(n_envs)], dtype="int")
+
+    current_rewards = np.zeros(n_envs)
+    current_lengths = np.zeros(n_envs, dtype="int")
+    observations = vec_env.reset()
+    observations["prev_actions"] = np.zeros(n_envs, dtype=float)
+
+    rnn_states = None
+    pbar = tqdm(total=num_episodes)
+    while (episode_counts < episode_count_targets).any():
+        observations["screen_image"] = render_screen_image(
+            tty_chars=observations["tty_chars"][:, np.newaxis, ...],
+            tty_colors=observations["tty_colors"][:, np.newaxis, ...],
+            tty_cursor=observations["tty_cursor"][:, np.newaxis, ...],
+        )
+        observations["screen_image"] = np.squeeze(observations["screen_image"], 1)
+
+        actions, rnn_states = actor.vec_act(observations, rnn_states, device=device)
+
+        observations, rewards, dones, infos = vec_env.step(actions)
+        observations["prev_actions"] = actions
+
+        current_rewards += rewards
+        current_lengths += 1
+
+        for i in range(n_envs):
+            if episode_counts[i] < episode_count_targets[i]:
+                if dones[i]:
+                    episode_rewards.append(current_rewards[i])
+                    episode_lengths.append(current_lengths[i])
+                    episode_depths.append(infos[i]["current_depth"])
+                    episode_counts[i] += 1
+                    pbar.update(1)
+
+                    current_rewards[i] = 0
+                    current_lengths[i] = 0
+
+    pbar.close()
+    result = {
+        "reward_median": np.median(episode_rewards),
+        "reward_mean": np.mean(episode_rewards),
+        "reward_std": np.std(episode_rewards),
+        "reward_min": np.min(episode_rewards),
+        "reward_max": np.max(episode_rewards),
+        "reward_raw": np.array(episode_rewards),
+        "depth_median": np.median(episode_depths),
+        "depth_mean": np.mean(episode_depths),
+        "depth_std": np.std(episode_depths),
+        "depth_min": np.min(episode_depths),
+        "depth_max": np.max(episode_depths),
+        "depth_raw": np.array(episode_depths),
+    }
+    actor.train()
+    return result
+
+
+# =====================================================================
+# FIXED: Model backbone (encoders + LSTM)
+# =====================================================================
+class ModelBackbone(nn.Module):
+    """FIXED backbone: CDGPT5 encoders + LSTM. Cannot be modified.
+
+    Architecture:
+    - TopLineEncoder (row 0, messages): 80 ASCII chars -> 128 dim
+    - BottomLinesEncoder (rows 22-23, stats): 160 chars -> 128 dim
+    - ScreenEncoder (rendered pixel image): CNN -> 512 dim
+    - Previous action one-hot: num_actions dim
+    - LSTM: h_dim -> rnn_hidden_dim (2048), 2 layers
+
+    Output: (core_output [B, T, rnn_hidden_dim], new_rnn_state)
+    """
+    def __init__(
+            self,
+            action_dim: int,
+            rnn_hidden_dim: int = 2048,
+            rnn_layers: int = 2,
+            rnn_dropout: float = 0.0,
+            use_prev_action: bool = True
+    ):
+        super().__init__()
+        self.num_actions = action_dim
+        self.use_prev_action = use_prev_action
+        self.prev_actions_dim = self.num_actions if self.use_prev_action else 0
+        self.rnn_hidden_dim = rnn_hidden_dim
+
+        # CDGPT5 Encoders
+        self.topline_encoder = TopLineEncoder()
+        self.bottomline_encoder = torch.jit.script(BottomLinesEncoder())
+        screen_shape = (SCREEN_SHAPE[1], SCREEN_SHAPE[2])
+        self.screen_encoder = torch.jit.script(ScreenEncoder(screen_shape))
+
+        self.h_dim = sum([
+            self.topline_encoder.hidden_dim,    # 128
+            self.bottomline_encoder.hidden_dim,  # 128
+            self.screen_encoder.hidden_dim,      # 512
+            self.prev_actions_dim,               # num_actions
+        ])
+
+        # LSTM backbone
+        self.rnn = nn.LSTM(
+            self.h_dim,
+            rnn_hidden_dim,
+            num_layers=rnn_layers,
+            dropout=rnn_dropout,
+            batch_first=True
+        )
+
+    def forward(self, inputs, state=None):
+        """Encode observations and run through LSTM.
+
+        Returns: (core_output [B, T, rnn_hidden_dim], new_rnn_state)
+        """
+        B, T, C, H, W = inputs["screen_image"].shape
+        topline = inputs["tty_chars"][..., 0, :]
+        bottom_line = inputs["tty_chars"][..., -2:, :]
+
+        encoded_state = [
+            self.topline_encoder(
+                topline.float(memory_format=torch.contiguous_format).view(T * B, -1)
+            ),
+            self.bottomline_encoder(
+                bottom_line.float(memory_format=torch.contiguous_format).view(T * B, -1)
+            ),
+            self.screen_encoder(
+                inputs["screen_image"]
+                .float(memory_format=torch.contiguous_format)
+                .view(T * B, C, H, W)
+            ),
+        ]
+        if self.use_prev_action:
+            encoded_state.append(
+                F.one_hot(inputs["prev_actions"], self.num_actions).view(T * B, -1)
+            )
+
+        encoded_state = torch.cat(encoded_state, dim=1)
+        core_output, new_state = self.rnn(encoded_state.view(B, T, -1), state)
+        return core_output, new_state
+
+
+# =====================================================================
+# EDITABLE: Model (output heads) and OfflineAlgorithm
+# =====================================================================
+class Model(nn.Module):
+    """Model with FIXED backbone + EDITABLE output heads.
+
+    The backbone (encoders + LSTM) is instantiated by the FIXED training loop
+    and passed to __init__. You MUST store it as self.backbone.
+
+    The backbone provides:
+    - self.backbone.num_actions: number of discrete actions
+    - self.backbone.rnn_hidden_dim: LSTM output dimension (2048)
+    - self.backbone(inputs, state) -> (core_output [B,T,2048], new_rnn_state)
+
+    EDITABLE: Add output heads (policy, Q-heads, value heads, etc.)
+    """
+    def __init__(self, backbone: ModelBackbone):
+        super().__init__()
+        self.backbone = backbone
+        self.num_actions = backbone.num_actions
+        # Output head -- single logits head (BC default)
+        self.head = nn.Linear(backbone.rnn_hidden_dim, self.num_actions)
+
+    def forward(self, inputs, state=None):
+        core_output, new_state = self.backbone(inputs, state)
+        logits = self.head(core_output)
+        return logits, new_state
+
+    @torch.no_grad()
+    def vec_act(self, obs, state=None, device="cpu"):
+        inputs = {
+            "tty_chars": torch.tensor(obs["tty_chars"][:, None], device=device),
+            "screen_image": torch.tensor(obs["screen_image"][:, None], device=device),
+            "prev_actions": torch.tensor(obs["prev_actions"][:, None], dtype=torch.long, device=device)
+        }
+        logits, new_state = self(inputs, state)
+        actions = torch.argmax(logits.squeeze(1), dim=-1)
+        return actions.cpu().numpy(), new_state
+
+
+class OfflineAlgorithm:
+    """Your offline RL algorithm for NetHack (POMDP with LSTM backbone).
+
+    The FIXED training loop calls:
+    - loss, rnn_states, info = algorithm.train_step(batch, prev_actions, rnn_states)
+    - algorithm.after_gradient_step()       # after optimizer.step()
+    - vec_evaluate(eval_env, algorithm.model, ...)  # evaluation
+
+    Batch dict has keys: screen_image [B,T+1,C,H,W], tty_chars [B,T+1,24,80],
+    actions [B,T+1], rewards [B,T+1], dones [B,T+1] (T+1 from add_next_step=True).
+    Rewards are already normalized using running std.
+
+    The FIXED training loop creates the ModelBackbone and passes it to you.
+    You MUST use Model(backbone) and store self.model.
+
+    Requirements:
+    - self.model: nn.Module with vec_act method (used for evaluation)
+    - parameters(): returns all learnable params for the optimizer
+    - train_step(): returns (loss, new_rnn_states_dict, info_dict)
+    """
+    def __init__(self, backbone: ModelBackbone, config: TrainConfig, device: str):
+        self.device = device
+        self.config = config
+        self.model = Model(backbone).to(device)
+
+    def parameters(self):
+        return self.model.parameters()
+
+    def train_step(self, batch, prev_actions, rnn_states):
+        """Compute loss for one step. Called inside torch.cuda.amp.autocast().
+
+        Default: BC (behavioral cloning) -- maximize log-prob of dataset actions.
+        """
+        rnn_state = rnn_states.get("rnn_state", None)
+
+        obs = {
+            "screen_image": batch["screen_image"][:, :-1].contiguous(),
+            "tty_chars": batch["tty_chars"][:, :-1].contiguous(),
+            "prev_actions": torch.cat([prev_actions, batch["actions"][:, :-2].long()], dim=1)
+        }
+        logits, new_rnn_state = self.model(obs, state=rnn_state)
+        new_rnn_state = [a.detach() for a in new_rnn_state]
+
+        dist = Categorical(logits=logits)
+        loss = -dist.log_prob(batch["actions"][:, :-1]).mean()
+
+        return loss, {"rnn_state": new_rnn_state}, {"loss": loss.item()}
+
+    def after_gradient_step(self):
+        pass
+
+
+# =====================================================================
+# FIXED: Training loop
+# =====================================================================
+@pyrallis.wrap()
+def train(config: TrainConfig):
+    print(f"Device: {DEVICE}")
+    wandb.init(
+        config=asdict(config),
+        project=config.project,
+        group=config.group,
+        name=config.name,
+        id=str(uuid.uuid4()),
+        save_code=True,
+    )
+    if config.checkpoints_path is not None:
+        print(f"Checkpoints path: {config.checkpoints_path}")
+        os.makedirs(config.checkpoints_path, exist_ok=True)
+        with open(os.path.join(config.checkpoints_path, "config.yaml"), "w") as f:
+            pyrallis.dump(config, f)
+
+    set_seed(config.train_seed)
+
+    def env_fn():
+        env = NetHackChallenge(
+            character=config.character,
+            observation_keys=["tty_chars", "tty_colors", "tty_cursor"]
+        )
+        env = OfflineNetHackChallengeWrapper(env)
+        return env
+
+    tmp_env = env_fn()
+    eval_env = AsyncVectorEnv(
+        env_fns=[env_fn for _ in range(config.eval_processes)],
+        copy=False
+    )
+    buffer = SequentialBuffer(
+        dataset=tmp_env.get_dataset(mode=config.data_mode, scale="small"),
+        seq_len=config.seq_len,
+        batch_size=config.batch_size,
+        seed=config.train_seed,
+        add_next_step=True
+    )
+    tp = ThreadPoolExecutor(max_workers=config.render_processes)
+
+    # ── FIXED: Create backbone (encoders + LSTM) ──
+    backbone = ModelBackbone(
+        action_dim=eval_env.single_action_space.n,
+        rnn_hidden_dim=config.rnn_hidden_dim,
+        rnn_layers=config.rnn_layers,
+        rnn_dropout=config.rnn_dropout,
+        use_prev_action=config.use_prev_action,
+    )
+    backbone_params = sum(p.numel() for p in backbone.parameters())
+
+    algorithm = OfflineAlgorithm(
+        backbone=backbone,
+        config=config,
+        device=DEVICE,
+    )
+
+    # ── FIXED: Verify backbone integrity ──
+    assert hasattr(algorithm.model, "backbone"), (
+        "Model must have a 'backbone' attribute (the FIXED ModelBackbone)."
+    )
+    assert algorithm.model.backbone is backbone, (
+        "Model.backbone must be the FIXED ModelBackbone instance passed to OfflineAlgorithm. "
+        "Do not replace the backbone."
+    )
+
+    # ── FIXED: Parameter count guard ──
+    total_params = sum(p.numel() for p in algorithm.model.parameters())
+    head_params = total_params - backbone_params
+    MAX_HEAD_PARAMS = 2_000_000
+    assert head_params <= MAX_HEAD_PARAMS, (
+        f"Output heads have {head_params:,} parameters (backbone: {backbone_params:,}), "
+        f"exceeding the limit of {MAX_HEAD_PARAMS:,}. "
+        f"Do not inflate head capacity to gain unfair advantage."
+    )
+    print(f"Number of parameters: {total_params:,} (backbone: {backbone_params:,}, heads: {head_params:,})")
+
+    no_decay_params, decay_params = filter_wd_params(algorithm.model)
+    optim = torch.optim.AdamW([
+        {"params": no_decay_params, "weight_decay": 0.0},
+        {"params": decay_params, "weight_decay": config.weight_decay}
+    ], lr=config.learning_rate)
+
+    scaler = torch.cuda.amp.GradScaler()
+
+    rnn_states = {}
+    prev_actions = torch.zeros((config.batch_size, 1), dtype=torch.long, device=DEVICE)
+
+    # For reward normalization
+    reward_stats = StatMean(cumulative=True)
+    running_rewards = 0.0
+
+    for step in trange(1, config.update_steps + 1, desc="Training"):
+        with Timeit() as timer:
+            batch = buffer.sample()
+            screen_image = render_screen_image(
+                tty_chars=batch["tty_chars"],
+                tty_colors=batch["tty_colors"],
+                tty_cursor=batch["tty_cursor"],
+                threadpool=tp,
+            )
+            batch["screen_image"] = screen_image
+
+            # Reward normalization
+            running_rewards *= config.gamma
+            running_rewards += batch["rewards"]
+            reward_stats += running_rewards ** 2
+            running_rewards *= (~batch["dones"]).astype(float)
+            reward_std = reward_stats.mean() ** 0.5
+            batch["rewards"] = batch["rewards"] / max(0.01, reward_std)
+            batch["rewards"] = np.clip(batch["rewards"], -config.clip_range, config.clip_range)
+
+            batch = dict_to_tensor(batch, device=DEVICE)
+
+        with Timeit() as timer_fwd:
+            with torch.cuda.amp.autocast():
+                loss, rnn_states, loss_info = algorithm.train_step(batch, prev_actions, rnn_states)
+
+            # update prev_actions for next iteration (-1 is seq_len + 1, so -2)
+            prev_actions = batch["actions"][:, -2].unsqueeze(-1).long()
+
+        scaler.scale(loss).backward()
+        if config.clip_grad_norm is not None:
+            scaler.unscale_(optim)
+            torch.nn.utils.clip_grad_norm_(algorithm.model.parameters(), config.clip_grad_norm)
+        scaler.step(optim)
+        scaler.update()
+        optim.zero_grad(set_to_none=True)
+        algorithm.after_gradient_step()
+
+        if step % 1000 == 0:
+            _items = {k: v.item() if hasattr(v, "item") else v for k, v in loss_info.items()}
+            metrics_str = " ".join(f"{k}={v:.4f}" if isinstance(v, float) else f"{k}={v}" for k, v in _items.items())
+            print(f"TRAIN_METRICS step={step} {metrics_str}", flush=True)
+
+        wandb.log({"transitions": config.batch_size * config.seq_len * step, **loss_info}, step=step)
+
+        if step % config.eval_every == 0:
+            with Timeit() as timer_eval:
+                eval_stats = vec_evaluate(
+                    eval_env, algorithm.model, config.eval_episodes, config.eval_seed, device=DEVICE
+                )
+            raw_returns = eval_stats.pop("reward_raw")
+            raw_depths = eval_stats.pop("depth_raw")
+            normalized_scores = tmp_env.get_normalized_score(raw_returns)
+
+            print(f"Normalized score: {np.mean(normalized_scores):.4f}", flush=True)
+            print(f"D4RL score: {np.mean(normalized_scores):.6f}", flush=True)
+
+            wandb.log({"transitions": config.batch_size * config.seq_len * step, **eval_stats}, step=step)
+
+            if config.checkpoints_path is not None:
+                pass  # checkpoint saving disabled (crashes on tmpfs)
+
+    buffer.close(clear_cache=False)
+
+
+if __name__ == "__main__":
+    set_start_method("spawn")
+    train()

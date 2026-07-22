@@ -1,0 +1,32 @@
+{
+  "base_image": "pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel",
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y --no-install-recommends wget && rm -rf /var/lib/apt/lists/*",
+    "pip install scipy clean-fid huggingface-hub safetensors requests filelock lpips",
+    "mkdir -p /data/cifar10 && wget --retry-connrefused --waitretry=5 --tries=5 -O /data/cifar10/cifar-10-python.tar.gz https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz && cd /data/cifar10 && tar xzf cifar-10-python.tar.gz && rm cifar-10-python.tar.gz",
+    "python -c \"import torchvision.datasets as d; d.CIFAR10('/data/cifar10', train=True, download=False); print('CIFAR-10 OK')\"",
+    "mkdir -p /data/cleanfid && python -c \"from cleanfid.downloads_helper import check_download_inception, check_download_url; check_download_inception('/data/cleanfid'); check_download_url('/data/cleanfid', 'https://www.cs.cmu.edu/~clean-fid/stats/cifar10_clean_train_32.npz')\""
+  ],
+  "data_bind": [
+    "{data_root}/volc_data/diffusers-main/cifar10:/data/cifar10",
+    "{data_root}/cleanfid:/data/cleanfid"
+  ],
+  "data_deps": [
+    {
+      "name": "vgg16_lpips_weights",
+      "host_path": "{data_root}/diffusers_data",
+      "container_path": "/data/pretrained",
+      "prepare": "vendor/data_scripts/diffusers-main/prepare_data.py",
+      "description": "VGG16 and LPIPS pretrained weights for perceptual loss in VAE training."
+    }
+  ],
+  "env": {
+    "DATA_DIR": "/data/cifar10",
+    "OUTPUT_DIR": "/tmp/output",
+    "TORCH_HOME": "/data/pretrained"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

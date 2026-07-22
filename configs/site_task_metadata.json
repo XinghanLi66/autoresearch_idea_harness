@@ -1,0 +1,618 @@
+{
+  "agent-tool-reasoning": {
+    "name": "Tool-Use Search Strategy",
+    "summary": "Studies how tool-use search, backtracking, and stopping policies affect answer validity and query efficiency."
+  },
+  "ai4bio-antibody-binding-scoring": {
+    "name": "Antibody Affinity Scoring",
+    "summary": "Studies how antibody and antigen representations can be scored to predict experimental binding affinity under generalization splits."
+  },
+  "ai4bio-antibody-cdr-design": {
+    "name": "Antibody CDR Co-Design Model",
+    "summary": "Studies how antigen-conditioned sequence and structure generation improves antibody complementarity and binding quality."
+  },
+  "ai4bio-mutation-effect-prediction": {
+    "name": "Mutation Fitness Predictor",
+    "summary": "Studies how mutant and wild-type protein representations can predict functional effects of sequence mutations."
+  },
+  "ai4bio-protein-function-prediction": {
+    "name": "Sequence Encoder for Protein Function",
+    "summary": "Studies how sequence encoders turn amino-acid information into transferable representations for protein property prediction."
+  },
+  "ai4bio-protein-inverse-folding": {
+    "name": "Backbone-to-Sequence Inverse Folding",
+    "summary": "Studies how geometric structure encoding and sequence decoding recover amino-acid sequences from protein backbones."
+  },
+  "ai4bio-protein-structure-repr": {
+    "name": "Geometric Protein Structure Encoder",
+    "summary": "Studies how local and global geometric protein representations transfer to structure-aware function prediction."
+  },
+  "ai4sci-climate-emulation": {
+    "name": "Atmospheric Column Emulator Architecture",
+    "summary": "Studies how neural emulator architecture maps vertical atmospheric states to sub-grid physics tendencies across training budgets."
+  },
+  "ai4sci-inverse-diffusion-algo": {
+    "name": "Diffusion-Prior Inverse Solver",
+    "summary": "Studies how diffusion priors and measurement guidance can be combined for inverse-problem reconstruction."
+  },
+  "ai4sci-mol-property-prediction": {
+    "name": "Molecular Representation Predictor",
+    "summary": "Studies how molecular graph and geometric representations improve property prediction under scaffold-based generalization."
+  },
+  "ai4sci-pla-binding-affinity": {
+    "name": "Protein-Ligand Interaction Model",
+    "summary": "Studies how intra- and inter-molecular geometric interactions should be represented to predict binding affinity."
+  },
+  "ai4sci-vs-contrastive-scoring": {
+    "name": "Contrastive Virtual-Screening Objective",
+    "summary": "Studies how projection geometry and contrastive losses affect zero-shot protein-ligand screening quality."
+  },
+  "ai4sci-weather-forecast-aggregation": {
+    "name": "Meteorological Variable Aggregation",
+    "summary": "Studies how per-variable atmospheric embeddings should be aggregated for medium-range weather forecasting."
+  },
+  "causal-discovery-discrete": {
+    "name": "Discrete Causal Graph Discovery",
+    "summary": "Studies how causal discovery algorithms recover equivalence-class graph structure from discrete observational data."
+  },
+  "causal-observational-linear-gaussian": {
+    "name": "Linear Gaussian Causal Discovery",
+    "summary": "Studies how observational algorithms recover causal graph structure under linear Gaussian assumptions."
+  },
+  "causal-observational-linear-non-gaussian": {
+    "name": "Non-Gaussian Causal Discovery",
+    "summary": "Studies how non-Gaussian structure can identify directed causal relationships from observational data."
+  },
+  "causal-observational-nonlinear": {
+    "name": "Nonlinear Causal Discovery",
+    "summary": "Studies how nonlinear additive-noise assumptions support directed causal graph recovery from observations."
+  },
+  "causal-treatment-effect": {
+    "name": "Heterogeneous Treatment Effect Estimation",
+    "summary": "Studies how observational estimators recover individual and average treatment effects on synthetic CATE benchmark families."
+  },
+  "cv-3dgs-densification": {
+    "name": "3D Scene Densification Strategy",
+    "summary": "Studies how clone, split, prune, reset, relocation, and sampling policies affect novel-view scene reconstruction."
+  },
+  "cv-classification-loss": {
+    "name": "Adaptive Classification Loss",
+    "summary": "Modify the training loss over logits and labels to improve classification accuracy across image-model families."
+  },
+  "cv-data-augmentation": {
+    "name": "Image Augmentation Policy",
+    "summary": "Design the training transform pipeline combining geometric, photometric, and erasing operations to improve image-classification generalization."
+  },
+  "cv-dbm-sampler": {
+    "name": "Low-Step Diffusion Bridge Sampling",
+    "summary": "Studies how bridge sampling transitions affect image-to-image generation quality under a strict denoising-call budget."
+  },
+  "cv-dbm-scheduler": {
+    "name": "Low-Step Bridge Time Scheduling",
+    "summary": "Studies how bridge timestep schedules affect image quality under very small denoising budgets."
+  },
+  "cv-diffusion-architecture": {
+    "name": "Unconditional Diffusion Architecture",
+    "summary": "Studies how denoising backbone structure, attention placement, and scale choices affect unconditional image-generation quality."
+  },
+  "cv-diffusion-cfg": {
+    "name": "Classifier-Free Guidance Trajectories",
+    "summary": "Studies how guidance trajectories trade off text-image alignment and sample quality in conditional image generation."
+  },
+  "cv-diffusion-conditioning": {
+    "name": "Class Conditioning Injection",
+    "summary": "Studies how class information should be injected into a diffusion model to improve conditional image-generation quality."
+  },
+  "cv-diffusion-efficiency": {
+    "name": "Fixed-Budget Diffusion Sampler Updates",
+    "summary": "Studies how latent diffusion sampling updates improve text-image alignment under a fixed inference-step budget."
+  },
+  "cv-diffusion-prediction": {
+    "name": "Diffusion Prediction Parameterization",
+    "summary": "Studies how prediction targets and sampling-time inversion affect diffusion-model image quality."
+  },
+  "cv-meanflow-perceptual-loss": {
+    "name": "Perceptual Flow-Matching Losses",
+    "summary": "Studies how timestep-gated perceptual, gradient, or multiscale auxiliary losses affect flow-matching image quality."
+  },
+  "cv-multitask-loss": {
+    "name": "Hierarchical Classification Loss Weighting",
+    "summary": "Studies how fine-label and coarse-label objectives should be combined to improve hierarchical image classification."
+  },
+  "cv-pooling-aggregation": {
+    "name": "Spatial Feature Aggregation",
+    "summary": "Studies how global spatial features should be aggregated to improve image-classification accuracy across convolutional architectures."
+  },
+  "cv-sample-weighting": {
+    "name": "Long-Tail Class Reweighting",
+    "summary": "Studies how class-count statistics should be mapped to loss weights to improve balanced accuracy under long-tailed label distributions."
+  },
+  "cv-vae-loss": {
+    "name": "Frequency-Aware Autoencoding Loss",
+    "summary": "Studies how reconstruction, KL, perceptual, adversarial, and frequency-domain terms affect autoencoding image quality."
+  },
+  "demo-task-1": {
+    "name": "Digit Classifier Architecture",
+    "summary": "Studies how classifier architecture affects digit recognition accuracy under a fixed training recipe."
+  },
+  "demo-task-2": {
+    "name": "Digit Classifier Learning-Rate Schedule",
+    "summary": "Studies how epoch-level learning-rate scheduling affects digit recognition accuracy with the optimizer held fixed."
+  },
+  "dl-activation-function": {
+    "name": "Convolutional Activation Nonlinearity",
+    "summary": "Studies how drop-in activation functions affect accuracy across convolutional image classifiers."
+  },
+  "dl-lr-schedule": {
+    "name": "Architecture-Aware Learning-Rate Scheduling",
+    "summary": "Designs an epoch-level learning-rate curve conditioned on architecture and dataset to improve convergence and final classification accuracy."
+  },
+  "dl-normalization": {
+    "name": "Normalization Statistics and Affine Design",
+    "summary": "Studies how normalization statistics and affine behavior affect convolutional training stability and test accuracy."
+  },
+  "dl-regularization": {
+    "name": "Adaptive Regularization Loss",
+    "summary": "Adds a model-, output-, input-, or epoch-dependent regularization term to improve classification generalization beyond standard weight decay."
+  },
+  "dl-residual-connection": {
+    "name": "Residual Block Skip Design",
+    "summary": "Studies how shortcut transformations and residual branch computation affect optimization and generalization across network depths."
+  },
+  "dl-weight-initialization": {
+    "name": "Depth-Aware Network Initialization",
+    "summary": "Designs data-independent initialization for convolutional, normalization, and classifier layers to improve convergence and final accuracy."
+  },
+  "dlm-dkv-policy": {
+    "name": "Diffusion Language-Model Cache Refresh Policy",
+    "summary": "Studies how token-state refresh intervals, masks, transfer ratios, and fallbacks affect denoising quality and cache reuse."
+  },
+  "graph-generation": {
+    "name": "Unconditional Graph Generator Architecture",
+    "summary": "Studies how graph generator architecture affects distributional match to target graph statistics."
+  },
+  "graph-graph-classification": {
+    "name": "Structure-Aware Graph Readout Pooling",
+    "summary": "Studies how graph-level readout mechanisms affect graph classification accuracy and macro F1 under a fixed message-passing backbone."
+  },
+  "graph-link-prediction": {
+    "name": "Graph Link Encoder-Decoder",
+    "summary": "Studies how node encoders and edge decoders affect missing-link prediction quality."
+  },
+  "graph-node-classification": {
+    "name": "Graph Node Message Passing",
+    "summary": "Studies how message-passing layers affect node classification across relational graph datasets."
+  },
+  "graph-signal-propagation": {
+    "name": "Homophily-Heterophily Graph Filter",
+    "summary": "The graph signal propagation filter is changed to improve node classification accuracy across homophilic and heterophilic graphs."
+  },
+  "jepa-planning": {
+    "name": "Latent World-Model Planner",
+    "summary": "Studies how goal-conditioned planning should exploit a fixed latent world model to improve navigation success."
+  },
+  "jepa-prediction-loss": {
+    "name": "Temporal Latent Prediction Loss",
+    "summary": "Studies how latent prediction objectives affect multi-step video representation quality."
+  },
+  "jepa-regularizer": {
+    "name": "Anti-Collapse Representation Regularizer",
+    "summary": "Studies how self-supervised regularization prevents representation collapse and improves linear-probe accuracy."
+  },
+  "llm-algorithm-16Mqat": {
+    "name": "Compact Language-Model Quantization-Aware Training",
+    "summary": "Studies how quantization-aware training affects compact autoregressive language-model compression and validation loss."
+  },
+  "llm-dllm-demask-strategy": {
+    "name": "Masked Diffusion Demasking Policy",
+    "summary": "Studies how demasking schedules, position selection, and token assignment affect diffusion language-model quality and decoding efficiency."
+  },
+  "llm-kv-adaptive-quantization": {
+    "name": "Adaptive Attention Cache Quantization",
+    "summary": "Studies how bit allocation, quantization axis, residual windows, and calibration affect attention-cache memory and replay quality."
+  },
+  "llm-kv-selection-budgeting": {
+    "name": "Attention Cache Selection Budgeting",
+    "summary": "Studies how selection and eviction controllers allocate layer budgets and recent windows for quality, latency, and memory tradeoffs."
+  },
+  "llm-kv-structural-reduction": {
+    "name": "Attention Cache Structural Reduction",
+    "summary": "Studies how head sharing and latent compression reduce attention-cache memory while preserving pretraining quality."
+  },
+  "llm-pretrain-attention": {
+    "name": "Autoregressive Attention Mechanism",
+    "summary": "Studies how self-attention computation and positional handling affect autoregressive pretraining loss and downstream accuracy."
+  },
+  "llm-pretrain-bitlinear": {
+    "name": "Low-Bit Linear Pretraining Layer",
+    "summary": "Studies how low-bit linear layers and quantization functions affect pretraining loss under discrete weight constraints."
+  },
+  "llm-pretrain-embedding": {
+    "name": "Autoregressive Embedding Strategy",
+    "summary": "Studies how token embeddings, position embeddings, and weight tying affect autoregressive language-model pretraining loss."
+  },
+  "llm-pretrain-kernel": {
+    "name": "Fused Feed-Forward Kernel",
+    "summary": "Studies how fused feed-forward kernels affect training throughput while preserving validation quality."
+  },
+  "llm-pretrain-linear-attention": {
+    "name": "Subquadratic Attention Mechanism",
+    "summary": "Studies whether linear or subquadratic attention can reduce autoregressive validation loss while preserving downstream performance."
+  },
+  "llm-pretrain-loss": {
+    "name": "Autoregressive Pretraining Loss",
+    "summary": "Studies how alternative next-token training losses affect autoregressive validation cross-entropy."
+  },
+  "llm-pretrain-lr-schedule": {
+    "name": "Pretraining Learning-Rate Schedule",
+    "summary": "Studies how warmup, decay shape, and schedule horizon affect autoregressive pretraining validation loss."
+  },
+  "llm-pretrain-mlp": {
+    "name": "Transformer Feed-Forward Block",
+    "summary": "Studies how activation, gating, and expansion choices in the feed-forward sublayer affect language-model validation loss."
+  },
+  "llm-pretrain-normalization": {
+    "name": "Normalization and Block Layout",
+    "summary": "Studies how normalization placement, affine behavior, and transformer block layout affect pretraining stability and validation loss."
+  },
+  "llm-pretrain-optimizer": {
+    "name": "Pretraining Optimizer Design",
+    "summary": "Studies how optimizer choice, parameter grouping, and schedule coupling affect autoregressive pretraining validation loss."
+  },
+  "llm-pretrain-residual": {
+    "name": "Transformer Residual Stream Strategy",
+    "summary": "Studies how residual connections and information flow across transformer layers affect validation loss, perplexity, and accuracy metrics."
+  },
+  "llm-ptq-algorithm": {
+    "name": "Post-Training Weight Quantization",
+    "summary": "Studies how calibration-based post-training quantization can reduce low-bit language-model weight precision while limiting perplexity degradation."
+  },
+  "llm-qat-algorithm": {
+    "name": "Quantization-Aware Language-Model Training",
+    "summary": "Studies how fake-quantization and quantize-dequantize behavior during finetuning affect low-bit language-model perplexity."
+  },
+  "llm-rl-advantage": {
+    "name": "Reasoning RL Advantage Estimation",
+    "summary": "Studies how advantage estimates for online language-model reinforcement learning affect mathematical reasoning accuracy."
+  },
+  "llm-rl-importance-sampling": {
+    "name": "Reasoning RL Importance-Sampling Granularity",
+    "summary": "Studies how importance-sampling ratio granularity and clipping affect online language-model reinforcement learning for reasoning."
+  },
+  "llm-rl-kl-estimator": {
+    "name": "Actor Divergence Estimator for Reasoning RL",
+    "summary": "Studies how per-token actor KL estimation controls reference-policy drift while preserving reasoning accuracy during online RL."
+  },
+  "llm-rl-reward-normalization": {
+    "name": "Pre-Advantage Reward Normalization",
+    "summary": "Studies how reward normalization before advantage estimation affects reasoning accuracy in online language-model RL."
+  },
+  "llm-scaling-law-discovery": {
+    "name": "Symbolic Scaling-Law Discovery",
+    "summary": "Studies how symbolic functional forms and group-specific coefficients capture held-out scaling behavior."
+  },
+  "marl-centralized-critic": {
+    "name": "Multi-Agent Centralized Critic",
+    "summary": "Studies how centralized critic architecture affects cooperative multi-agent policy learning and test win rate."
+  },
+  "marl-mixing-network": {
+    "name": "Value-Decomposition Mixing Network",
+    "summary": "Studies how state-conditioned joint value mixers affect cooperative multi-agent coordination and test win rate."
+  },
+  "mas-topology": {
+    "name": "Language-Agent Collaboration Topology",
+    "summary": "Studies how deterministic collaboration topology affects multi-agent code-generation quality and execution success."
+  },
+  "meta-fewshot-classification": {
+    "name": "Few-Shot Image Classification Method",
+    "summary": "Studies how support encoding, query comparison, and loss design affect episodic few-shot image-classification accuracy."
+  },
+  "meta-inner-loop-optimizer": {
+    "name": "Meta-Learning Inner-Loop Optimizer",
+    "summary": "Studies how differentiable inner-loop adaptation rules affect few-shot classification accuracy in gradient-based meta-learning."
+  },
+  "meta-rl": {
+    "name": "Context Encoder for Meta-RL Task Inference",
+    "summary": "Studies how transition-context encoders infer latent task representations for adaptation to unseen reinforcement-learning tasks."
+  },
+  "meta-rl-algorithm": {
+    "name": "Complete Meta-RL Adaptation Algorithm",
+    "summary": "Implements task inference, policy conditioning, and meta-training logic to improve meta-test return on unseen reinforcement learning tasks."
+  },
+  "ml-active-learning": {
+    "name": "Pool-Based Active Learning Query Strategy",
+    "summary": "Studies how unlabeled-sample query rules affect accuracy under a fixed labeling budget."
+  },
+  "ml-anomaly-detection": {
+    "name": "Unsupervised Tabular Anomaly Detector",
+    "summary": "Studies how unlabeled anomaly scoring algorithms identify outliers across tabular data distributions."
+  },
+  "ml-calibration": {
+    "name": "Post-Hoc Probability Calibration Mapping",
+    "summary": "Studies how post-hoc probability transforms improve classifier confidence calibration."
+  },
+  "ml-clustering-algorithm": {
+    "name": "Geometry-Robust Clustering Algorithm",
+    "summary": "Studies how clustering objectives and distance metrics handle non-convex, varied-density, and high-dimensional data."
+  },
+  "ml-continual-regularization": {
+    "name": "Continual Learning Importance Regularizer",
+    "summary": "Changes parameter-importance estimation and regularization loss to reduce catastrophic forgetting and improve final average accuracy across contexts."
+  },
+  "ml-dimensionality-reduction": {
+    "name": "Nonlinear 2D Structure-Preserving Embedding",
+    "summary": "Studies how nonlinear dimensionality reduction preserves neighborhood structure in low-dimensional embeddings."
+  },
+  "ml-ensemble-boosting": {
+    "name": "Adaptive Boosting Weight and Target Strategy",
+    "summary": "Studies how pseudo-targets, learner weights, and sample reweighting affect boosted ensemble performance."
+  },
+  "ml-feature-selection": {
+    "name": "Univariate Multimodal Feature Scoring",
+    "summary": "Studies how univariate feature scores select informative variables across heterogeneous classification modalities."
+  },
+  "ml-federated-aggregation": {
+    "name": "Heterogeneous Federated Server Aggregation",
+    "summary": "Changes server-side client selection and model aggregation to improve federated test accuracy under heterogeneous client data."
+  },
+  "ml-missing-data-imputation": {
+    "name": "Correlation-Aware Tabular Imputation",
+    "summary": "Studies how feature correlations and predictive structure guide missing-value imputation in tabular data."
+  },
+  "ml-selective-deferral": {
+    "name": "Subgroup-Aware Selective Deferral Policy",
+    "summary": "Studies how acceptance and deferral rules trade off selective risk, subgroup robustness, and coverage on AIF360 tabular datasets."
+  },
+  "ml-subgroup-calibration-shift": {
+    "name": "Shift-Robust Subgroup Calibration",
+    "summary": "Studies how post-hoc calibration behaves under subgroup distribution shift and worst-group reliability constraints on AIF360 tabular datasets."
+  },
+  "ml-symbolic-regression": {
+    "name": "Genetic Programming Search for Symbolic Regression",
+    "summary": "Studies how symbolic-regression search strategies recover generalizable analytical expressions."
+  },
+  "mlsys-fused-attention": {
+    "name": "Fused Causal Attention Kernel",
+    "summary": "Studies how fused self-attention kernels improve throughput and latency while preserving numerical agreement."
+  },
+  "mlsys-moe-load-balance": {
+    "name": "Expert Replica Load Balancing",
+    "summary": "Studies how expert replica placement balances token load while minimizing placement and routing overhead."
+  },
+  "mlsys-sparse-attention": {
+    "name": "Quality-Constrained Sparse Diffusion Attention",
+    "summary": "Studies how sparse attention block selection improves diffusion inference throughput and memory use under quality constraints."
+  },
+  "optimization-bilevel": {
+    "name": "Penalty-Based Bilevel Strategy Tuning",
+    "summary": "Studies how bilevel optimization strategies and penalty schedules improve nested objective convergence and validation performance."
+  },
+  "optimization-convex-concave": {
+    "name": "Convex-Concave Gradient-Norm Optimization",
+    "summary": "Studies how stochastic optimizer updates and hyperparameters reduce gradient norm in convex-concave optimization."
+  },
+  "optimization-diagonal-net": {
+    "name": "Diagonal Parameterization Sparse Recovery",
+    "summary": "Designs optimizer dynamics for the squared diagonal-net parameterization to recover sparse predictors with fewer training samples."
+  },
+  "optimization-dp-sgd": {
+    "name": "Private Gradient Clipping and Noise Mechanism",
+    "summary": "Changes private gradient clipping and noise calibration to improve test accuracy under the fixed epsilon-delta privacy budget."
+  },
+  "optimization-evolution-strategy": {
+    "name": "Evolutionary Operators for Continuous Black-Box Optimization",
+    "summary": "Selection, crossover, mutation, or the evolutionary loop are redesigned to lower final best fitness and improve convergence on continuous benchmark functions."
+  },
+  "optimization-gradient-compression": {
+    "name": "Gradient Compression for Distributed Training",
+    "summary": "Studies how gradient compressors reduce distributed-training communication while preserving model accuracy."
+  },
+  "optimization-hyperparameter-search": {
+    "name": "Sample-Efficient Hyperparameter Search",
+    "summary": "Studies how sequential search strategies allocate limited multi-fidelity evaluations to improve validation performance."
+  },
+  "optimization-multi-objective": {
+    "name": "Multi-Objective Evolutionary Survival and Variation",
+    "summary": "Studies how selection, variation, and survival strategies affect Pareto-front quality in multi-objective optimization."
+  },
+  "optimization-nas": {
+    "name": "Sample-Efficient Architecture Search",
+    "summary": "Studies how neural architecture search strategies identify high-performing architectures under a small query budget."
+  },
+  "optimization-online-bandit": {
+    "name": "Adaptive Bandit Exploration Policy",
+    "summary": "The bandit policy is redesigned to reduce normalized cumulative regret across stochastic, contextual, and non-stationary bandit settings."
+  },
+  "optimization-pac-bayes-bound": {
+    "name": "Generalization-Bound Optimization",
+    "summary": "Studies how bound formulas, training objectives, and risk certificates produce tighter generalization guarantees."
+  },
+  "optimization-parity": {
+    "name": "Sparse Parity Training Strategy",
+    "summary": "Studies how initialization, data construction, and optimizer hyperparameters affect sparse parity generalization."
+  },
+  "optimization-variance-reduction": {
+    "name": "Variance-Reduced Stochastic Optimization",
+    "summary": "Studies how variance-reduction state and correction terms affect stochastic optimization on finite-sum objectives."
+  },
+  "pde-autoregressive-solver": {
+    "name": "Autoregressive Neural Operator",
+    "summary": "Studies how neural operator architecture affects rollout error for time-dependent physical systems."
+  },
+  "pde-design-solver": {
+    "name": "Unstructured Design Neural Operator",
+    "summary": "Studies how neural operators on unstructured meshes support design evaluation and field prediction."
+  },
+  "pde-steady-solver": {
+    "name": "Steady-State Neural Operator",
+    "summary": "Studies how neural operator architecture affects solution accuracy for steady-state physical systems."
+  },
+  "quant-concept-drift": {
+    "name": "Concept-Drift-Aware Quantitative Forecasting",
+    "summary": "The stock prediction model and data pipeline are redesigned to handle temporal distribution shift and improve signal quality and portfolio metrics."
+  },
+  "quant-graph-stock": {
+    "name": "Graph-Based Quantitative Forecasting",
+    "summary": "Studies how inter-asset graph relationships affect return signal quality and portfolio performance."
+  },
+  "quant-stock-prediction": {
+    "name": "Quantitative Return Forecasting",
+    "summary": "Studies how predictive models and input processing affect next-period return signals and portfolio performance."
+  },
+  "rl-intrinsic-exploration": {
+    "name": "Intrinsic Exploration for Sparse Rewards",
+    "summary": "Studies how intrinsic rewards and advantage mixing affect exploration and return in sparse-reward environments."
+  },
+  "rl-offline-adroit": {
+    "name": "Offline Dexterous Manipulation from Narrow Demonstrations",
+    "summary": "Studies how offline RL algorithms learn dexterous manipulation from narrow human demonstration datasets."
+  },
+  "rl-offline-continuous": {
+    "name": "Q-Overestimation Suppression for Offline Continuous Control",
+    "summary": "Studies how offline continuous-control algorithms suppress out-of-distribution Q-value overestimation."
+  },
+  "rl-offline-off2on": {
+    "name": "Offline-to-Online Fine-Tuning Without Forgetting",
+    "summary": "Studies how offline-to-online reinforcement learning prevents forgetting and value collapse during continued interaction."
+  },
+  "rl-offpolicy-continuous": {
+    "name": "Off-Policy Actor-Critic for Continuous Control",
+    "summary": "Changes off-policy actor-critic update rules, losses, or exploration strategies to improve mean episodic return on continuous-control tasks."
+  },
+  "rl-onpolicy-continuous": {
+    "name": "On-Policy Actor-Critic for Continuous Control",
+    "summary": "Changes on-policy actor-critic objectives, update rules, or exploration mechanisms to improve mean episodic return on continuous-control tasks."
+  },
+  "rl-reward-learning": {
+    "name": "Inverse RL Reward Learning from Demonstrations",
+    "summary": "Studies how reward models learned from expert demonstrations affect downstream policy return in continuous-control locomotion."
+  },
+  "rl-value-atari": {
+    "name": "Value-Based Visual Control",
+    "summary": "Studies how value-based RL losses, update rules, and exploration strategies affect visual-control episodic return."
+  },
+  "rl-value-discrete": {
+    "name": "Value-Based Discrete Control",
+    "summary": "Changes value estimation, uncertainty handling, or replay-based update rules to improve episodic return on discrete-action control tasks."
+  },
+  "robo-diffusion-guidance": {
+    "name": "Guided Diffusion Sampling for Robot Actions",
+    "summary": "Studies how guidance during diffusion denoising affects robot action quality, diversity, and inference time."
+  },
+  "robo-diffusion-planner": {
+    "name": "Diffusion Trajectory Planning for Robot Control",
+    "summary": "Changes long-horizon diffusion planning, return conditioning, trajectory selection, or replanning logic to improve normalized score and episode reward."
+  },
+  "robo-diffusion-policy": {
+    "name": "Diffusion Policy Learning for Robot Control",
+    "summary": "Studies how diffusion policy training, value guidance, and action generation affect robot-control episode reward."
+  },
+  "robo-diffusion-sampling-method": {
+    "name": "Efficient Diffusion Sampling for Robot Actions",
+    "summary": "Studies how sampling schedules and solver choices affect diffusion-generated robot action quality and inference time."
+  },
+  "robo-humanoid-sim2real-algo": {
+    "name": "Humanoid Transfer Policy Learning",
+    "summary": "Studies how actor-critic architecture, policy optimization, and rollout processing affect humanoid command-following transfer."
+  },
+  "robomimic-bc-loss": {
+    "name": "Behavioral Cloning Loss for Manipulation",
+    "summary": "Studies how imitation-learning loss design affects rollout success for low-dimensional robot manipulation tasks."
+  },
+  "robomimic-iql-vf": {
+    "name": "Offline Value Loss for Manipulation",
+    "summary": "Studies how asymmetric value regression loss design affects offline robot manipulation policy success."
+  },
+  "robomimic-obs-encoder": {
+    "name": "Observation Fusion Encoder for Imitation Learning",
+    "summary": "Designs a multimodal robot state encoder for behavioral cloning to improve rollout success rate on manipulation tasks."
+  },
+  "safe-rl": {
+    "name": "Constraint Handling for Safe RL",
+    "summary": "Changes Lagrangian or controller-style multiplier updates and cost-reward advantage mixing to improve reward while keeping episode cost below target."
+  },
+  "security-adversarial-attack-black-box-score": {
+    "name": "Score-Based Black-Box Linf Attack",
+    "summary": "Designs a query-efficient black-box Linf evasion attack to improve attack success rate under a fixed per-sample query budget."
+  },
+  "security-adversarial-attack-sparse-l0": {
+    "name": "Sparse L0 Adversarial Attack",
+    "summary": "Studies how sparse perturbation strategies improve attack success while respecting a strict pixel budget."
+  },
+  "security-adversarial-attack-white-box-linf": {
+    "name": "White-Box Linf Evasion Attack",
+    "summary": "Designs a gradient-based white-box Linf attack to improve attack success rate while respecting the perturbation budget."
+  },
+  "security-adversarial-training": {
+    "name": "Linf Adversarial Training for Robust Accuracy",
+    "summary": "Studies how adversarial training procedures improve robust accuracy while maintaining clean accuracy."
+  },
+  "security-backdoor-defense": {
+    "name": "Poisoned-Sample Scoring for Backdoor Filtering",
+    "summary": "A suspicion scoring rule identifies and filters backdoored training examples to reduce attack success rate while preserving clean accuracy."
+  },
+  "security-machine-unlearning": {
+    "name": "Targeted Update Rules for Class Unlearning",
+    "summary": "An unlearning update rule removes forget-class information while improving retained accuracy and reducing forget-set membership leakage."
+  },
+  "security-membership-inference-defense": {
+    "name": "Training Regularization for Membership Privacy",
+    "summary": "Studies how privacy-preserving training losses reduce membership leakage while maintaining accuracy."
+  },
+  "security-poison-robust-learning": {
+    "name": "Robust Losses for Label-Flip Poisoning",
+    "summary": "A robust loss or sample-weighting rule improves clean accuracy under label-flip poisoning and reduces poisoned-label memorization."
+  },
+  "speech-asr-encoder": {
+    "name": "End-to-End Speech Recognition Encoder",
+    "summary": "Studies how speech encoder architecture maps raw waveforms to frame representations for multilingual recognition."
+  },
+  "speech-enhancement": {
+    "name": "Speech Enhancement Denoising Architecture",
+    "summary": "Studies how waveform enhancement architectures convert noisy speech into cleaner audio."
+  },
+  "speech-vocoder": {
+    "name": "Mel-to-Waveform Vocoder Generator",
+    "summary": "Studies how neural vocoder generators synthesize waveform audio from acoustic features."
+  },
+  "stf-traffic-forecast": {
+    "name": "Spatial-Temporal Traffic Forecasting Model",
+    "summary": "Studies how spatial-temporal models capture sensor-network dependencies for traffic forecasting."
+  },
+  "tdmpc2-planning": {
+    "name": "Trajectory Optimization for Model-Based Planning",
+    "summary": "An online planning algorithm selects actions through learned-world-model trajectory optimization to improve episode reward."
+  },
+  "tdmpc2-simnorm": {
+    "name": "Latent Normalization for World Models",
+    "summary": "Studies how latent-state normalization in encoders and dynamics models affects model-based RL episode reward."
+  },
+  "ts-anomaly-detection": {
+    "name": "Reconstruction Model for Time-Series Anomaly Detection",
+    "summary": "An unsupervised reconstruction model detects anomalous multivariate time-series segments to improve F-score."
+  },
+  "ts-classification": {
+    "name": "Multivariate Time-Series Classification Model",
+    "summary": "Studies how representation learning improves classification of multivariate time-series signals."
+  },
+  "ts-exogenous-forecast": {
+    "name": "Exogenous-Variable Target Forecasting Model",
+    "summary": "Studies how exogenous variables improve target-channel forecasting."
+  },
+  "ts-imputation": {
+    "name": "Masked Multivariate Time-Series Imputation",
+    "summary": "Studies how imputation models reconstruct missing regions in multivariate time series."
+  },
+  "ts-long-term-forecast": {
+    "name": "Multivariate Long-Horizon Forecasting Model",
+    "summary": "Studies how long-horizon forecasting models predict future multivariate sequences."
+  },
+  "ts-short-term-forecast": {
+    "name": "Univariate Short-Horizon Forecasting Model",
+    "summary": "Studies how short-horizon forecasting models predict seasonal univariate series."
+  },
+  "ttt-memory": {
+    "name": "Test-Time Memory Module Design",
+    "summary": "Studies the inner learning dynamics of a chunk-wise test-time memory module — surprise signal, online update rule, forget gate, storage structure (Titans / Nested Learning). Evaluated by co-training the module with a 345M GPT substrate and measuring length-generalization NIAH retrieval, downstream 0-shot accuracy, and substrate validation loss."
+  }
+}

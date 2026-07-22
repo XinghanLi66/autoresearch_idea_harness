@@ -1,0 +1,25 @@
+{
+  "allow_create": false,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train.sh",
+      "label": "train",
+      "group": 1,
+      "compute": 1,
+      "time": "1:00:00",
+      "package": "pytorch-examples"
+    }
+  ],
+  "rigorous_codebase": true,
+  "baselines": {
+    "cosine_annealing": {"edit_ops": "edits/cosine_annealing.edit.py"},
+    "warmup_cosine": {"edit_ops": "edits/warmup_cosine.edit.py"}
+  },
+  "files": [
+    {
+      "filename": "pytorch-examples/mnist/main_custom.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": [{"start": 7, "end": 7}, {"start": 9, "end": 11}, {"start": 131, "end": 131}]
+    }
+  ]
+}

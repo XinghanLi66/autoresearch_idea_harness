@@ -1,0 +1,157 @@
+"""CIFAR-10 config with a short training budget for MLS-Bench.
+
+Same experiment grid as configs.cifar10 without ESD (LSD / PSD-uniform / PSD-midpoint),
+but total_steps and logging are tuned for benchmark runs.
+"""
+
+import os
+
+import ml_collections
+
+experiments = [
+    ("lsd", None, "convex"),
+    ("psd", "uniform", "convex"),
+    ("psd", "midpoint", "convex"),
+]
+
+
+def get_config(
+    slurm_id: int, dataset_location: str, output_folder: str
+) -> ml_collections.ConfigDict:
+    import jax
+
+    loss_type, psd_type, stopgrad_type = experiments[slurm_id % len(experiments)]
+
+    config = ml_collections.ConfigDict()
+
+    config.training = ml_collections.ConfigDict()
+    config.training.shuffle = True
+    config.training.conditional = False
+    config.training.class_dropout = 0.0
+    config.training.stopgrad_type = stopgrad_type
+    config.training.psd_type = psd_type
+    config.training.loss_type = loss_type
+    config.training.tmin = 0.0
+    config.training.tmax = 1.0
+    config.training.seed = int(os.environ.get("SEED", "42"))
+    config.training.ema_facs = [0.999, 0.9999]
+    config.training.ndevices = jax.device_count()
+
+    config.problem = ml_collections.ConfigDict()
+    config.problem.n = 60000
+    config.problem.image_dims = (3, 32, 32)
+    config.problem.d = 3072
+    config.problem.num_classes = 10
+    config.problem.target = "cifar10"
+    config.problem.dataset_location = dataset_location
+    config.problem.interp_type = "linear"
+    config.problem.base = "gaussian"
+    config.problem.gaussian_scale = "adaptive"
+
+    # Align with cv-meanflow-training env names where useful (BATCH_SIZE, NUM_FID_SAMPLES, …).
+    _bs = int(os.environ.get("BENCH_BATCH_SIZE", os.environ.get("BATCH_SIZE", "128")))
+    _steps = int(os.environ.get("BENCH_TOTAL_STEPS", os.environ.get("MAX_STEPS", "500")))
+
+    config.optimization = ml_collections.ConfigDict()
+    config.optimization.bs = _bs
+    config.optimization.diag_fraction = 0.75
+    config.optimization.learning_rate = 1e-2
+    config.optimization.clip = 1.0
+    config.optimization.total_samples = _bs * _steps
+    config.optimization.total_steps = int(
+        config.optimization.total_samples // config.optimization.bs
+    )
+    config.optimization.decay_steps = max(100, _steps // 2)
+    config.optimization.schedule_type = "sqrt"
+
+    config.logging = ml_collections.ConfigDict()
+    config.logging.plot_bs = 25
+    config.logging.visual_freq = 999_999_999
+    config.logging.save_freq = 999_999_999
+    config.logging.wandb_project = "self-distill-flow-maps"
+    method_str = f"{loss_type}_{psd_type}" if psd_type else loss_type
+    config.logging.wandb_name = f"cifar10_bench_{method_str}"
+    config.logging.wandb_entity = os.getenv("WANDB_ENTITY", "bench")
+    config.logging.output_folder = output_folder
+    config.logging.output_name = config.logging.wandb_name
+
+    # One FID eval at the final step (step == total_steps): see logging.log_metrics
+    config.logging.fid_freq = config.optimization.total_steps
+    config.logging.fid_stats_path = f"{dataset_location}/cifar10/cifar_stats.npz"
+    config.logging.fid_n_samples = int(
+        os.environ.get(
+            "BENCH_FID_N_SAMPLES",
+            os.environ.get("NUM_FID_SAMPLES", "2048"),
+        )
+    )
+    config.logging.fid_batch_size = int(
+        os.environ.get("BENCH_FID_BATCH_SIZE", os.environ.get("FID_BATCH_SIZE", "128"))
+    )
+    _nf = int(
+        os.environ.get(
+            "BENCH_FID_N_STEPS",
+            os.environ.get("NUM_EVAL_STEPS", "1"),
+        )
+    )
+    config.logging.fid_n_steps_flow = [_nf]
+    config.logging.fid_ema_factor = 0.9999
+    config.logging.visual_ema_factor = 0.9999
+
+    # MLS-Bench: three UNet scales (tasks set FLOWMAPS_UNET_SIZE in scripts/common.sh).
+    _size = os.environ.get("FLOWMAPS_UNET_SIZE", "medium").strip().lower()
+    _unet_presets = {
+        "small": {
+            "logvar_channels": 96,
+            "model_channels": 96,
+            "channel_mult": [1, 2, 2],
+            "num_blocks": 3,
+            "attn_resolutions": [16],
+            "dropout": 0.10,
+        },
+        "medium": {
+            "logvar_channels": 128,
+            "model_channels": 128,
+            "channel_mult": [2, 2, 2],
+            "num_blocks": 4,
+            "attn_resolutions": [16],
+            "dropout": 0.13,
+        },
+        "large": {
+            "logvar_channels": 192,
+            "model_channels": 192,
+            "channel_mult": [2, 2, 2],
+            "num_blocks": 5,
+            "attn_resolutions": [16],
+            "dropout": 0.15,
+        },
+    }
+    if _size not in _unet_presets:
+        _size = "medium"
+    _up = _unet_presets[_size]
+
+    config.network = ml_collections.ConfigDict()
+    config.network.network_type = "edm2"
+    config.network.load_path = ""
+    config.network.img_resolution = config.problem.image_dims[1]
+    config.network.img_channels = config.problem.image_dims[0]
+    config.network.input_dims = config.problem.image_dims
+    config.network.label_dim = (
+        config.problem.num_classes if config.training.conditional else 0
+    )
+    config.network.use_cfg = False
+    config.network.reset_optimizer = True
+    config.network.logvar_channels = int(_up["logvar_channels"])
+    config.network.use_bfloat16 = False
+    config.network.use_weight = True
+    config.network.rescale = 0.5
+    config.network.unet_kwargs = {
+        "model_channels": int(_up["model_channels"]),
+        "channel_mult": list(_up["channel_mult"]),
+        "num_blocks": int(_up["num_blocks"]),
+        "attn_resolutions": list(_up["attn_resolutions"]),
+        "block_kwargs": {
+            "dropout": float(_up["dropout"]),
+        },
+    }
+
+    return config

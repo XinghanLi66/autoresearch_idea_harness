@@ -1,0 +1,513 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-dbm-sampler",
+  "task_folder": "tasks/cv-dbm-sampler",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "sampling algorithms for diffusion bridge models in image-to-image translation",
+    "research_question": "Design a better inference-time sampler for diffusion bridge models that improves FID at very low NFE on paired image-to-image translation tasks.",
+    "local_sources": {
+      "config_path": "tasks/cv-dbm-sampler/config.json",
+      "task_description_path": "tasks/cv-dbm-sampler/task_description.md"
+    },
+    "notes": [
+      "The task description frames the problem as a custom sampler for diffusion bridge models evaluated on Edges2Handbags and DIODE with FID and low NFE constraints.",
+      "The dbim_high_order baseline is a repo-level high-order bridge sampler adaptation; it is linked approximately to DBIM and DPM-Solver rather than claimed as an exact named paper baseline."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 3,
+    "baseline_links_found": 4,
+    "test_entries": 2,
+    "test_links_found": 4
+  },
+  "tests": [
+    {
+      "label": "edges2handbags",
+      "cmd": "scripts/run_e2h.sh",
+      "package": "dbim-codebase",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2017.632",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Edges2Handbags is the canonical paired image-translation benchmark popularized by pix2pix; FID is the reported evaluation metric in the task description and run script."
+    },
+    {
+      "label": "DIODE",
+      "cmd": "scripts/run_DIODE.sh",
+      "package": "dbim-codebase",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1908.00463",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "This test runs the bridge sampler on the DIODE paired depth/image benchmark and evaluates outputs with FID."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "dbim",
+      "implementation": "edits/dbim_edit.py",
+      "labels": [
+        "bridge_sampler",
+        "implicit_sampler"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2405.15885",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Exact mapping to the Diffusion Bridge Implicit Models sampler family."
+    },
+    {
+      "name": "ddbm",
+      "implementation": "edits/ddbm_edit.py",
+      "labels": [
+        "bridge_sampler",
+        "sde_solver"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2309.16948",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps to the original Denoising Diffusion Bridge Models sampler."
+    },
+    {
+      "name": "dbim_high_order",
+      "implementation": "edits/dbim_high_order_edit.py",
+      "labels": [
+        "bridge_sampler",
+        "high_order_solver"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2405.15885",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2206.00927",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "The repo baseline is a high-order DBIM-style bridge solver; the nearest concrete paper grounding is the DBIM paper plus DPM-Solver-style high-order diffusion ODE updates."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.2309.16948",
+      "title": "Denoising Diffusion Bridge Models",
+      "authors": [
+        "Linqi Zhou",
+        "Aaron Lou",
+        "Samar Khanna",
+        "Stefano Ermon"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2309.16948",
+      "arxiv_id": "2309.16948",
+      "openalex_id": "https://openalex.org/W4387293761",
+      "landing_page": "https://doi.org/10.48550/arxiv.2309.16948",
+      "source_urls": [
+        "https://openalex.org/W4387293761",
+        "https://doi.org/10.48550/arxiv.2309.16948"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2309.16948,\n  doi = {10.48550/ARXIV.2309.16948},\n  url = {https://arxiv.org/abs/2309.16948},\n  author = {Zhou, Linqi and Lou, Aaron and Khanna, Samar and Ermon, Stefano},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Bridge Models},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "baseline",
+        "diffusion_bridge",
+        "image_to_image_translation"
+      ],
+      "baseline_links": [
+        "ddbm"
+      ],
+      "test_links": [],
+      "relevance": "Introduces DDBM, the exact bridge-model baseline represented by the task's ddbm edit.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2405.15885",
+      "title": "Diffusion Bridge Implicit Models",
+      "authors": [
+        "Kaiwen Zheng",
+        "Guande He",
+        "Jianfei Chen",
+        "Fan Bao",
+        "Jun Zhu"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2405.15885",
+      "arxiv_id": "2405.15885",
+      "openalex_id": "https://openalex.org/W4399114664",
+      "landing_page": "https://doi.org/10.48550/arxiv.2405.15885",
+      "source_urls": [
+        "https://openalex.org/W4399114664",
+        "https://doi.org/10.48550/arxiv.2405.15885"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2405.15885,\n  doi = {10.48550/ARXIV.2405.15885},\n  url = {https://arxiv.org/abs/2405.15885},\n  author = {Zheng, Kaiwen and He, Guande and Chen, Jianfei and Bao, Fan and Zhu, Jun},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Diffusion Bridge Implicit Models},\n  publisher = {arXiv},\n  year = {2024},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "diffusion_bridge",
+        "fast_sampling"
+      ],
+      "baseline_links": [
+        "dbim",
+        "dbim_high_order"
+      ],
+      "test_links": [],
+      "relevance": "Introduces DBIM, the exact implicit bridge sampling baseline and the paper most directly motivating low-NFE bridge samplers in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2206.00927",
+      "title": "DPM-Solver: A Fast ODE Solver for Diffusion Probabilistic Model Sampling in Around 10 Steps",
+      "authors": [
+        "Cheng Lu",
+        "Yuhao Zhou",
+        "Fan Bao",
+        "Jianfei Chen",
+        "Chongxuan Li",
+        "Jun Zhu"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.00927",
+      "arxiv_id": "2206.00927",
+      "openalex_id": "https://openalex.org/W4281661987",
+      "landing_page": "https://doi.org/10.48550/arxiv.2206.00927",
+      "source_urls": [
+        "https://openalex.org/W4281661987",
+        "https://doi.org/10.48550/arxiv.2206.00927"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00927,\n  doi = {10.48550/ARXIV.2206.00927},\n  url = {https://arxiv.org/abs/2206.00927},\n  author = {Lu, Cheng and Zhou, Yuhao and Bao, Fan and Chen, Jianfei and Li, Chongxuan and Zhu, Jun},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {DPM-Solver: A Fast ODE Solver for Diffusion Probabilistic Model Sampling in Around 10 Steps},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "sampling",
+        "high_order_solver",
+        "ode"
+      ],
+      "baseline_links": [
+        "dbim_high_order"
+      ],
+      "test_links": [],
+      "relevance": "Provides the clearest concrete reference for the high-order diffusion ODE solver ideas adapted by the dbim_high_order baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2011.13456",
+      "title": "Score-Based Generative Modeling through Stochastic Differential Equations",
+      "authors": [
+        "Yang Song",
+        "Jascha Sohl-Dickstein",
+        "Diederik P. Kingma",
+        "Abhishek Kumar",
+        "Stefano Ermon",
+        "Ben Poole"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2011.13456",
+      "arxiv_id": "2011.13456",
+      "openalex_id": "https://openalex.org/W3110257065",
+      "landing_page": "https://doi.org/10.48550/arxiv.2011.13456",
+      "source_urls": [
+        "https://openalex.org/W3110257065",
+        "https://doi.org/10.48550/arxiv.2011.13456"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2011.13456,\n  doi = {10.48550/ARXIV.2011.13456},\n  url = {https://arxiv.org/abs/2011.13456},\n  author = {Song, Yang and Sohl-Dickstein, Jascha and Kingma, Diederik P. and Kumar, Abhishek and Ermon, Stefano and Poole, Ben},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Score-Based Generative Modeling through Stochastic Differential Equations},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "sampling",
+        "predictor_corrector",
+        "sde"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational reference for predictor-corrector and SDE/ODE viewpoints that are directly suggested in the task description as sampler-design directions.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2010.02502",
+      "title": "Denoising Diffusion Implicit Models",
+      "authors": [
+        "Jiaming Song",
+        "Chenlin Meng",
+        "Stefano Ermon"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2010.02502",
+      "arxiv_id": "2010.02502",
+      "openalex_id": "https://openalex.org/W3092442149",
+      "landing_page": "https://doi.org/10.48550/arxiv.2010.02502",
+      "source_urls": [
+        "https://openalex.org/W3092442149",
+        "https://doi.org/10.48550/arxiv.2010.02502"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2010.02502,\n  doi = {10.48550/ARXIV.2010.02502},\n  url = {https://arxiv.org/abs/2010.02502},\n  author = {Song, Jiaming and Meng, Chenlin and Ermon, Stefano},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Implicit Models},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "sampling",
+        "implicit_model",
+        "fast_sampling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "DDIM is a core precursor for deterministic and low-step diffusion sampling, making it relevant background for DBIM-style bridge samplers.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2206.00364",
+      "title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+      "authors": [
+        "Tero Karras",
+        "Miika Aittala",
+        "Timo Aila",
+        "Samuli Laine"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.00364",
+      "arxiv_id": "2206.00364",
+      "openalex_id": "https://openalex.org/W4281969232",
+      "landing_page": "https://doi.org/10.48550/arxiv.2206.00364",
+      "source_urls": [
+        "https://openalex.org/W4281969232",
+        "https://doi.org/10.48550/arxiv.2206.00364"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00364,\n  doi = {10.48550/ARXIV.2206.00364},\n  url = {https://arxiv.org/abs/2206.00364},\n  author = {Karras, Tero and Aittala, Miika and Aila, Timo and Laine, Samuli},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Elucidating the Design Space of Diffusion-Based Generative Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "sampling",
+        "design_space",
+        "diffusion"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant for low-NFE diffusion sampler design, especially noise schedule and solver-design choices similar to those exposed in this task's sampler function.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr52729.2023.00194",
+      "title": "BBDM: Image-to-Image Translation with Brownian Bridge Diffusion Models",
+      "authors": [
+        "Bo Li",
+        "Kaitao Xue",
+        "Bin Liu",
+        "Yu-Kun Lai"
+      ],
+      "year": 2023,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr52729.2023.00194",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4386076617",
+      "landing_page": "https://doi.org/10.1109/cvpr52729.2023.00194",
+      "source_urls": [
+        "https://openalex.org/W4386076617",
+        "https://doi.org/10.1109/cvpr52729.2023.00194"
+      ],
+      "bibtex": "@inproceedings{Li_2023, title={BBDM: Image-to-Image Translation with Brownian Bridge Diffusion Models}, url={http://dx.doi.org/10.1109/cvpr52729.2023.00194}, DOI={10.1109/cvpr52729.2023.00194}, booktitle={2023 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Li, Bo and Xue, Kaitao and Liu, Bin and Lai, Yu-Kun}, year={2023}, month=jun, pages={1952–1961} }",
+      "relevance_tags": [
+        "image_to_image_translation",
+        "brownian_bridge",
+        "diffusion_bridge"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "A closely related bridge-based image-to-image translation paper that provides adjacent prior art for benchmarking bridge formulations against paired translation tasks.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1908.00463",
+      "title": "DIODE: A Dense Indoor and Outdoor DEpth Dataset",
+      "authors": [
+        "Igor Vasiljevic",
+        "Nick Kolkin",
+        "Shanyi Zhang",
+        "Ruotian Luo",
+        "Haochen Wang",
+        "Falcon Z. Dai",
+        "Andrea F. Daniele",
+        "Mohammadreza Mostajabi",
+        "Steven Basart",
+        "Matthew R. Walter",
+        "Gregory Shakhnarovich"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1908.00463",
+      "arxiv_id": "1908.00463",
+      "openalex_id": "https://openalex.org/W2965851327",
+      "landing_page": "https://doi.org/10.48550/arxiv.1908.00463",
+      "source_urls": [
+        "https://openalex.org/W2965851327",
+        "https://doi.org/10.48550/arxiv.1908.00463"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1908.00463,\n  doi = {10.48550/ARXIV.1908.00463},\n  url = {https://arxiv.org/abs/1908.00463},\n  author = {Vasiljevic, Igor and Kolkin, Nick and Zhang, Shanyi and Luo, Ruotian and Wang, Haochen and Dai, Falcon Z. and Daniele, Andrea F. and Mostajabi, Mohammadreza and Basart, Steven and Walter, Matthew R. and Shakhnarovich, Gregory},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {DIODE: A Dense Indoor and Outdoor DEpth Dataset},\n  publisher = {arXiv},\n  year = {2019},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "dataset",
+        "depth",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "DIODE"
+      ],
+      "relevance": "This is the concrete dataset paper for the DIODE test command in config.json.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2017.632",
+      "title": "Image-to-Image Translation with Conditional Adversarial Networks",
+      "authors": [
+        "Phillip Isola",
+        "Jun-Yan Zhu",
+        "Tinghui Zhou",
+        "Alexei A. Efros"
+      ],
+      "year": 2017,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2017.632",
+      "arxiv_id": "1611.07004",
+      "openalex_id": "https://openalex.org/W2552465644",
+      "landing_page": "https://doi.org/10.1109/cvpr.2017.632",
+      "source_urls": [
+        "https://openalex.org/W2552465644",
+        "https://doi.org/10.1109/cvpr.2017.632"
+      ],
+      "bibtex": "@inproceedings{Isola_2017, title={Image-to-Image Translation with Conditional Adversarial Networks}, url={http://dx.doi.org/10.1109/cvpr.2017.632}, DOI={10.1109/cvpr.2017.632}, booktitle={2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Isola, Phillip and Zhu, Jun-Yan and Zhou, Tinghui and Efros, Alexei A.}, year={2017}, month=jul, pages={5967–5976} }",
+      "relevance_tags": [
+        "dataset",
+        "benchmark",
+        "image_to_image_translation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "edges2handbags"
+      ],
+      "relevance": "The Edges2Handbags benchmark used by the task became standard through pix2pix and is the most concrete paper link for the e2h test command.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1706.08500",
+      "title": "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium",
+      "authors": [
+        "Martin Heusel",
+        "Hubert Ramsauer",
+        "Thomas Unterthiner",
+        "Bernhard Nessler",
+        "Sepp Hochreiter"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.08500",
+      "arxiv_id": "1706.08500",
+      "openalex_id": "https://openalex.org/W2963981733",
+      "landing_page": "https://doi.org/10.48550/arxiv.1706.08500",
+      "source_urls": [
+        "https://openalex.org/W2963981733",
+        "https://doi.org/10.48550/arxiv.1706.08500"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1706.08500,\n  doi = {10.48550/ARXIV.1706.08500},\n  url = {https://arxiv.org/abs/1706.08500},\n  author = {Heusel, Martin and Ramsauer, Hubert and Unterthiner, Thomas and Nessler, Bernhard and Hochreiter, Sepp},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "metric",
+        "fid",
+        "evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "edges2handbags",
+        "DIODE"
+      ],
+      "relevance": "Introduces FID, the explicit task metric used by both evaluation scripts.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2006.11239",
+      "title": "Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Jonathan Ho",
+        "Ajay Jain",
+        "Pieter Abbeel"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2006.11239",
+      "arxiv_id": "2006.11239",
+      "openalex_id": "https://openalex.org/W3036167779",
+      "landing_page": "https://doi.org/10.48550/arxiv.2006.11239",
+      "source_urls": [
+        "https://openalex.org/W3036167779",
+        "https://doi.org/10.48550/arxiv.2006.11239"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2006.11239,\n  doi = {10.48550/ARXIV.2006.11239},\n  url = {https://arxiv.org/abs/2006.11239},\n  author = {Ho, Jonathan and Jain, Ajay and Abbeel, Pieter},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Probabilistic Models},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "foundation",
+        "diffusion",
+        "sampling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational DDPM reference for the reverse-process formulation that DBIM, DDBM, and related fast samplers build on.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2108.01073",
+      "title": "SDEdit: Guided Image Synthesis and Editing with Stochastic Differential Equations",
+      "authors": [
+        "Chenlin Meng",
+        "Yutong He",
+        "Yang Song",
+        "Jiaming Song",
+        "Jiajun Wu",
+        "Jun-Yan Zhu",
+        "Stefano Ermon"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2108.01073",
+      "arxiv_id": "2108.01073",
+      "openalex_id": "https://openalex.org/W4287029626",
+      "landing_page": "https://doi.org/10.48550/arxiv.2108.01073",
+      "source_urls": [
+        "https://openalex.org/W4287029626",
+        "https://doi.org/10.48550/arxiv.2108.01073"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2108.01073,\n  doi = {10.48550/ARXIV.2108.01073},\n  url = {https://arxiv.org/abs/2108.01073},\n  author = {Meng, Chenlin and He, Yutong and Song, Yang and Song, Jiaming and Wu, Jiajun and Zhu, Jun-Yan and Ermon, Stefano},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {SDEdit: Guided Image Synthesis and Editing with Stochastic Differential Equations},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "image_editing",
+        "sde",
+        "image_to_image_translation"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant image-to-image diffusion prior art for guided editing from structured inputs, adjacent to the conditional bridge-sampling setting of this task.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "trace_version": "video-chunk-trace-v1",
+  "workload": "minecraft_scene_cut",
+  "source_dataset": "Minecraft (OpenAI VPT / IGLU)",
+  "source_family": "minecraft",
+  "description": "Scene-cut sequence \u2014 abrupt boundary ~40% through",
+  "frame_count": 56,
+  "chunk_frames": 4,
+  "n_chunks": 14,
+  "chunks": [
+    {
+      "chunk_id": 0,
+      "temporal_similarity": 1.0,
+      "feature_drift": 0.0,
+      "keyframe_score": 0.022,
+      "boundary_score": 0.0,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 1,
+      "temporal_similarity": 1.0,
+      "feature_drift": 0.019,
+      "keyframe_score": 0.0197,
+      "boundary_score": 0.1529,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 2,
+      "temporal_similarity": 1.0,
+      "feature_drift": 0.0382,
+      "keyframe_score": 0.0225,
+      "boundary_score": 0.2045,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 3,
+      "temporal_similarity": 1.0,
+      "feature_drift": 0.056,
+      "keyframe_score": 0.0218,
+      "boundary_score": 0.1853,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 4,
+      "temporal_similarity": 1.0,
+      "feature_drift": 0.0715,
+      "keyframe_score": 0.0249,
+      "boundary_score": 0.1978,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 5,
+      "temporal_similarity": 0.9799,
+      "feature_drift": 0.5274,
+      "keyframe_score": 1.0,
+      "boundary_score": 1.0,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 6,
+      "temporal_similarity": 0.9816,
+      "feature_drift": 0.9722,
+      "keyframe_score": 0.3394,
+      "boundary_score": 1.0,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 7,
+      "temporal_similarity": 0.9988,
+      "feature_drift": 1.0,
+      "keyframe_score": 0.3618,
+      "boundary_score": 0.0189,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 8,
+      "temporal_similarity": 0.9981,
+      "feature_drift": 0.9941,
+      "keyframe_score": 0.3497,
+      "boundary_score": 0.0094,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 9,
+      "temporal_similarity": 0.9986,
+      "feature_drift": 0.9715,
+      "keyframe_score": 0.3871,
+      "boundary_score": 0.0057,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 10,
+      "temporal_similarity": 0.9985,
+      "feature_drift": 0.9444,
+      "keyframe_score": 0.3701,
+      "boundary_score": 0.003,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 11,
+      "temporal_similarity": 0.9961,
+      "feature_drift": 0.9902,
+      "keyframe_score": 0.3853,
+      "boundary_score": 0.0823,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 12,
+      "temporal_similarity": 0.9988,
+      "feature_drift": 0.9577,
+      "keyframe_score": 0.401,
+      "boundary_score": 0.0079,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    },
+    {
+      "chunk_id": 13,
+      "temporal_similarity": 0.9985,
+      "feature_drift": 0.9606,
+      "keyframe_score": 0.4009,
+      "boundary_score": 0.0197,
+      "access_count": 1,
+      "chunk_size_tokens": 2560
+    }
+  ]
+}

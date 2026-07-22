@@ -1,0 +1,534 @@
+{
+  "schema_version": "1.0",
+  "task_name": "causal-discovery-discrete",
+  "task_folder": "tasks/causal-discovery-discrete",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "Discrete causal discovery and Bayesian network structure learning on bnlearn benchmarks",
+    "research_question": "Design a causal discovery algorithm that recovers the CPDAG from purely observational discrete data sampled from real-world Bayesian networks in the bnlearn repository.",
+    "local_sources": {
+      "config_path": "tasks/causal-discovery-discrete/config.json",
+      "task_description_path": "tasks/causal-discovery-discrete/task_description.md"
+    },
+    "notes": [
+      "Baselines were mapped to canonical structure-learning papers plus the BDeu scoring paper used by the bnlearn-style score-and-search implementations.",
+      "The linked test papers cover the benchmark networks with explicit references; tests without a clear single publication in the bnlearn notes are left unlinked rather than guessed."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 5,
+    "baseline_links_found": 9,
+    "test_entries": 5,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "Cancer",
+      "cmd": "scripts/eval_cancer.sh",
+      "package": "causal-bnlearn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": "bnlearn lists this benchmark with a textbook reference rather than a single canonical paper; left unlinked."
+    },
+    {
+      "label": "Child",
+      "cmd": "scripts/eval_child.sh",
+      "package": "causal-bnlearn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1093/oso/9780198522669.003.0025",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Linked to the probabilistic expert-systems chapter that bnlearn cites for Child."
+    },
+    {
+      "label": "Alarm",
+      "cmd": "scripts/eval_alarm.sh",
+      "package": "causal-bnlearn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1007/3-540-60454-1_14",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "The ALARM benchmark has a canonical conference paper in the bnlearn repository notes."
+    },
+    {
+      "label": "Hailfinder",
+      "cmd": "scripts/eval_hailfinder.sh",
+      "package": "causal-bnlearn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1016/0169-2070(95)00664-8",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Linked to the original Hailfinder forecasting paper."
+    },
+    {
+      "label": "Win95pts",
+      "cmd": "scripts/eval_win95pts.sh",
+      "package": "causal-bnlearn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "4:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": "bnlearn does not list a clear single source paper for this benchmark; left unlinked."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "pc",
+      "implementation": "edits/pc.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1177/089443939100900106",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Mapped to the original PC algorithm paper."
+    },
+    {
+      "name": "ges",
+      "implementation": "edits/ges.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1162/153244303321897717",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1007/BF00994016",
+          "role": "training_recipe"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "GES is linked to Chickering's GES paper and the BDeu score paper used by the bnlearn-style scorer."
+    },
+    {
+      "name": "grasp",
+      "implementation": "edits/grasp.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+      "paper_id": "doi:10.48550/arXiv.2206.05421",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1007/BF00994016",
+          "role": "training_recipe"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Linked to the GRaSP paper plus the BDeu score paper."
+    },
+    {
+      "name": "boss",
+      "implementation": "edits/boss.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "pmid:39280091",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.1302.4938",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "BOSS is linked to its NeurIPS paper; the Chickering equivalence-class paper is attached as methodological background."
+    },
+    {
+      "name": "hc",
+      "implementation": "edits/hc.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1007/978-3-540-75256-1_52",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1007/BF00994016",
+          "role": "training_recipe"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Linked to a dedicated hill-climbing structure-learning paper plus the BDeu score paper."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1177/089443939100900106",
+      "title": "An Algorithm for Fast Recovery of Sparse Causal Graphs",
+      "authors": [
+        "Peter Spirtes",
+        "Clark Glymour"
+      ],
+      "year": 1991,
+      "venue": "Social Science Computer Review",
+      "doi": "10.1177/089443939100900106",
+      "landing_page": "https://doi.org/10.1177/089443939100900106",
+      "source_urls": [
+        "https://journals.sagepub.com/doi/10.1177/089443939100900106",
+        "https://doi.org/10.1177/089443939100900106"
+      ],
+      "bibtex": "@article{spirtes1991algorithm, title={An Algorithm for Fast Recovery of Sparse Causal Graphs}, author={Spirtes, Peter and Glymour, Clark}, journal={Social Science Computer Review}, volume={9}, number={1}, pages={62--72}, year={1991}, doi={10.1177/089443939100900106}}",
+      "relevance_tags": [
+        "causal_discovery",
+        "constraint_based",
+        "discrete_data"
+      ],
+      "baseline_links": [
+        "pc"
+      ],
+      "test_links": [],
+      "relevance": "Canonical PC algorithm paper for constraint-based causal discovery.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.1007/BF00994016",
+      "title": "Learning Bayesian Networks: The Combination of Knowledge and Statistical Data",
+      "authors": [
+        "David Heckerman",
+        "Dan Geiger",
+        "David Maxwell Chickering"
+      ],
+      "year": 1995,
+      "venue": "Machine Learning",
+      "doi": "10.1007/BF00994016",
+      "landing_page": "https://doi.org/10.1007/BF00994016",
+      "source_urls": [
+        "https://link.springer.com/article/10.1007/BF00994016",
+        "https://doi.org/10.1007/BF00994016"
+      ],
+      "bibtex": "@article{heckerman1995learning, title={Learning Bayesian Networks: The Combination of Knowledge and Statistical Data}, author={Heckerman, David and Geiger, Dan and Chickering, David M.}, journal={Machine Learning}, volume={20}, number={3}, pages={197--243}, year={1995}, doi={10.1007/BF00994016}}",
+      "relevance_tags": [
+        "score_based",
+        "bayesian_network_learning",
+        "discrete_data"
+      ],
+      "baseline_links": [
+        "ges",
+        "grasp",
+        "boss",
+        "hc"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the Bayesian-network scoring framework used by the score-and-search baselines.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.1162/153244303321897717",
+      "title": "Optimal Structure Identification With Greedy Search",
+      "authors": [
+        "David Maxwell Chickering"
+      ],
+      "year": 2002,
+      "venue": "Journal of Machine Learning Research",
+      "doi": "10.1162/153244303321897717",
+      "landing_page": "https://doi.org/10.1162/153244303321897717",
+      "source_urls": [
+        "https://www.jmlr.org/papers/v3/chickering02a.html",
+        "https://doi.org/10.1162/153244303321897717"
+      ],
+      "bibtex": "@article{chickering2002optimal, title={Optimal Structure Identification With Greedy Search}, author={Chickering, David Maxwell}, journal={Journal of Machine Learning Research}, volume={3}, pages={507--554}, year={2002}, doi={10.1162/153244303321897717}}",
+      "relevance_tags": [
+        "score_based",
+        "greedy_search",
+        "causal_discovery"
+      ],
+      "baseline_links": [
+        "ges"
+      ],
+      "test_links": [],
+      "relevance": "Canonical GES reference for score-based equivalence-class search.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.1302.4938",
+      "title": "A Transformational Characterization of Equivalent Bayesian Network Structures",
+      "authors": [
+        "David Maxwell Chickering"
+      ],
+      "year": 1995,
+      "venue": "UAI",
+      "arxiv_id": "1302.4938",
+      "doi": "10.48550/arXiv.1302.4938",
+      "landing_page": "https://dblp.org/rec/conf/uai/Chickering95.html",
+      "source_urls": [
+        "https://dblp.org/rec/conf/uai/Chickering95.html",
+        "https://arxiv.org/abs/1302.4938"
+      ],
+      "bibtex": "@inproceedings{chickering1995transformational, title={A Transformational Characterization of Equivalent Bayesian Network Structures}, author={Chickering, David Maxwell}, booktitle={Proceedings of the Eleventh Conference on Uncertainty in Artificial Intelligence}, pages={87--98}, year={1995}, doi={10.48550/arXiv.1302.4938}}",
+      "relevance_tags": [
+        "equivalence_class",
+        "cpdag",
+        "causal_discovery"
+      ],
+      "baseline_links": [
+        "boss"
+      ],
+      "test_links": [],
+      "relevance": "Relevant background for equivalence classes and edge-orientation reasoning in CPDAG recovery.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2206.05421",
+      "title": "Greedy Relaxations of the Sparsest Permutation",
+      "authors": [
+        "Wai-Yin Lam",
+        "Bryan Andrews",
+        "Joseph Ramsey"
+      ],
+      "year": 2022,
+      "venue": "UAI",
+      "arxiv_id": "2206.05421",
+      "doi": "10.48550/arXiv.2206.05421",
+      "landing_page": "https://proceedings.mlr.press/v180/lam22a.html",
+      "source_urls": [
+        "https://proceedings.mlr.press/v180/lam22a.html",
+        "https://arxiv.org/abs/2206.05421"
+      ],
+      "bibtex": "@inproceedings{lam2022greedy, title={Greedy Relaxations of the Sparsest Permutation}, author={Lam, Wai-Yin and Andrews, Bryan and Ramsey, Joseph}, booktitle={Proceedings of The 38th Conference on Uncertainty in Artificial Intelligence}, pages={1052--1062}, year={2022}, doi={10.48550/arXiv.2206.05421}}",
+      "relevance_tags": [
+        "permutation_search",
+        "score_based",
+        "causal_discovery"
+      ],
+      "baseline_links": [
+        "grasp"
+      ],
+      "test_links": [],
+      "relevance": "Canonical GRaSP reference for greedy permutation-based causal discovery.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "pmid:39280091",
+      "title": "Fast Scalable and Accurate Discovery of DAGs Using the Best Order Score Search and Grow-Shrink Trees",
+      "authors": [
+        "Bryan Andrews",
+        "Joseph Ramsey",
+        "Rub\u00e9n S\u00e1nchez-Romero",
+        "Jazmin Camchong",
+        "Erich Kummerfeld"
+      ],
+      "year": 2023,
+      "venue": "Advances in Neural Information Processing Systems 36",
+      "landing_page": "https://pubmed.ncbi.nlm.nih.gov/39280091/",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/39280091/",
+        "https://proceedings.neurips.cc/paper_files/paper/2023/hash/c9cde817d04811ba28e44071bd9f76a5-Abstract-Conference.html"
+      ],
+      "bibtex": "@inproceedings{andrews2023boss, title={Fast Scalable and Accurate Discovery of DAGs Using the Best Order Score Search and Grow-Shrink Trees}, author={Andrews, Bryan and Ramsey, Joseph and Sanchez-Romero, Ruben and Camchong, Jazmin and Kummerfeld, Erich}, booktitle={Advances in Neural Information Processing Systems 36}, year={2023}, pages={63945--63956}}",
+      "relevance_tags": [
+        "permutation_search",
+        "score_based",
+        "causal_discovery"
+      ],
+      "baseline_links": [
+        "boss"
+      ],
+      "test_links": [],
+      "relevance": "Canonical BOSS reference for scalable order search with grow-shrink trees.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.1007/978-3-540-75256-1_52",
+      "title": "A Fast Hill-Climbing Algorithm for Bayesian Networks Structure Learning",
+      "authors": [
+        "Jos\u00e9 A. G\u00e1mez",
+        "Juan L. Mateo",
+        "Jos\u00e9 M. Puerta"
+      ],
+      "year": 2007,
+      "venue": "ECSQARU",
+      "doi": "10.1007/978-3-540-75256-1_52",
+      "landing_page": "https://doi.org/10.1007/978-3-540-75256-1_52",
+      "source_urls": [
+        "https://link.springer.com/chapter/10.1007/978-3-540-75256-1_52",
+        "https://doi.org/10.1007/978-3-540-75256-1_52"
+      ],
+      "bibtex": "@inproceedings{gamez2007fast, title={A Fast Hill-Climbing Algorithm for Bayesian Networks Structure Learning}, author={G\u00e1mez, Jos\u00e9 A. and Mateo, Juan L. and Puerta, Jos\u00e9 M.}, booktitle={Symbolic and Quantitative Approaches to Reasoning with Uncertainty}, pages={689--700}, year={2007}, doi={10.1007/978-3-540-75256-1_52}}",
+      "relevance_tags": [
+        "hill_climbing",
+        "score_based",
+        "causal_discovery"
+      ],
+      "baseline_links": [
+        "hc"
+      ],
+      "test_links": [],
+      "relevance": "Dedicated hill-climbing structure-learning paper for the HC baseline.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.1007/3-540-60454-1_14",
+      "title": "The ALARM Monitoring System: A Case Study with Two Probabilistic Inference Techniques for Belief Networks",
+      "authors": [
+        "Henning Beinlich",
+        "Harald Suermondt",
+        "R. M. Chavez",
+        "George C. Cooper"
+      ],
+      "year": 1989,
+      "venue": "European Conference on Artificial Intelligence in Medicine",
+      "doi": "10.1007/3-540-60454-1_14",
+      "landing_page": "https://doi.org/10.1007/3-540-60454-1_14",
+      "source_urls": [
+        "https://link.springer.com/chapter/10.1007/3-540-60454-1_14",
+        "https://doi.org/10.1007/3-540-60454-1_14"
+      ],
+      "bibtex": "@inproceedings{beinlich1989alarm, title={The ALARM Monitoring System: A Case Study with Two Probabilistic Inference Techniques for Belief Networks}, author={Beinlich, Henning and Suermondt, Harald and Chavez, R. M. and Cooper, George C.}, booktitle={Proceedings of the Second European Conference on Artificial Intelligence in Medicine}, pages={247--256}, year={1989}, doi={10.1007/3-540-60454-1_14}}",
+      "relevance_tags": [
+        "benchmark_dataset",
+        "bayesian_network",
+        "discrete_data"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "Alarm"
+      ],
+      "relevance": "Original ALARM network paper, matching the Alarm benchmark used in the task.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.1093/oso/9780198522669.003.0025",
+      "title": "Learning in Probabilistic Expert Systems",
+      "authors": [
+        "David J. Spiegelhalter",
+        "Robert G. Cowell"
+      ],
+      "year": 1992,
+      "venue": "Bayesian Statistics 4",
+      "doi": "10.1093/oso/9780198522669.003.0025",
+      "landing_page": "https://doi.org/10.1093/oso/9780198522669.003.0025",
+      "source_urls": [
+        "https://academic.oup.com/book/9780198522669/chapter/25",
+        "https://doi.org/10.1093/oso/9780198522669.003.0025"
+      ],
+      "bibtex": "@incollection{spiegelhalter1992learning, title={Learning in Probabilistic Expert Systems}, author={Spiegelhalter, David J. and Cowell, Robert G.}, booktitle={Bayesian Statistics 4}, pages={447--466}, year={1992}, publisher={Oxford University Press}, doi={10.1093/oso/9780198522669.003.0025}}",
+      "relevance_tags": [
+        "benchmark_dataset",
+        "bayesian_network",
+        "discrete_data"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "Child"
+      ],
+      "relevance": "Core probabilistic-expert-systems reference for the Child benchmark.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.1016/0169-2070(95)00664-8",
+      "title": "Hailfinder: A Bayesian System for Forecasting Severe Weather",
+      "authors": [
+        "Bruce Abramson",
+        "John Brown",
+        "Ward Edwards",
+        "Allan Murphy",
+        "Robert L. Winkler"
+      ],
+      "year": 1996,
+      "venue": "International Journal of Forecasting",
+      "doi": "10.1016/0169-2070(95)00664-8",
+      "landing_page": "https://doi.org/10.1016/0169-2070(95)00664-8",
+      "source_urls": [
+        "https://www.sciencedirect.com/science/article/pii/0169207095006648",
+        "https://doi.org/10.1016/0169-2070(95)00664-8"
+      ],
+      "bibtex": "@article{abramson1996hailfinder, title={Hailfinder: A Bayesian System for Forecasting Severe Weather}, author={Abramson, Bruce and Brown, John and Edwards, Ward and Murphy, Allan and Winkler, Robert L.}, journal={International Journal of Forecasting}, volume={12}, number={1}, pages={57--71}, year={1996}, doi={10.1016/0169-2070(95)00664-8}}",
+      "relevance_tags": [
+        "benchmark_dataset",
+        "bayesian_network",
+        "discrete_data"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "Hailfinder"
+      ],
+      "relevance": "Canonical Hailfinder benchmark paper used by the Hailfinder test.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.1023/A:1007421730016",
+      "title": "Adaptive Probabilistic Networks with Hidden Variables",
+      "authors": [
+        "John Binder",
+        "Daphne Koller",
+        "Stuart Russell",
+        "Keiji Kanazawa"
+      ],
+      "year": 1997,
+      "venue": "Machine Learning",
+      "doi": "10.1023/A:1007421730016",
+      "landing_page": "https://doi.org/10.1023/A:1007421730016",
+      "source_urls": [
+        "https://link.springer.com/article/10.1023/A:1007421730016",
+        "https://doi.org/10.1023/A:1007421730016"
+      ],
+      "bibtex": "@article{binder1997adaptive, title={Adaptive Probabilistic Networks with Hidden Variables}, author={Binder, John and Koller, Daphne and Russell, Stuart and Kanazawa, Keiji}, journal={Machine Learning}, volume={29}, number={2-3}, pages={213--244}, year={1997}, doi={10.1023/A:1007421730016}}",
+      "relevance_tags": [
+        "benchmark_dataset",
+        "bayesian_network",
+        "discrete_data"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Frequently cited benchmark-network paper for the Insurance network.",
+      "verified_by": "search_and_doi_lookup"
+    },
+    {
+      "paper_id": "doi:10.1126/science.1105809",
+      "title": "Causal Protein-Signaling Networks Derived from Multiparameter Single-Cell Data",
+      "authors": [
+        "Karen Sachs",
+        "Omar Perez",
+        "Dana Pe'er",
+        "Douglas A. Lauffenburger",
+        "Garry P. Nolan"
+      ],
+      "year": 2005,
+      "venue": "Science",
+      "doi": "10.1126/science.1105809",
+      "landing_page": "https://doi.org/10.1126/science.1105809",
+      "source_urls": [
+        "https://www.science.org/doi/10.1126/science.1105809",
+        "https://doi.org/10.1126/science.1105809"
+      ],
+      "bibtex": "@article{sachs2005causal, title={Causal Protein-Signaling Networks Derived from Multiparameter Single-Cell Data}, author={Sachs, Karen and Perez, Omar and Pe'er, Dana and Lauffenburger, Douglas A. and Nolan, Garry P.}, journal={Science}, volume={308}, number={5721}, pages={523--529}, year={2005}, doi={10.1126/science.1105809}}",
+      "relevance_tags": [
+        "benchmark_dataset",
+        "biological_network",
+        "causal_discovery"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "A major causal-discovery benchmark for biological signaling networks.",
+      "verified_by": "search_and_doi_lookup"
+    }
+  ]
+}

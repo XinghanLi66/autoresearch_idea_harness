@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-pac-bayes-bound",
+  "task_folder": "tasks/optimization-pac-bayes-bound",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-pac-bayes-bound/config.json",
+      "task_description_path": "tasks/optimization-pac-bayes-bound/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "mnist-fcn",
+      "cmd": "scripts/mnist_fcn.sh",
+      "package": "PBB",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mnist-cnn",
+      "cmd": "scripts/mnist_cnn.sh",
+      "package": "PBB",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "fmnist-cnn",
+      "cmd": "scripts/fmnist_cnn.sh",
+      "package": "PBB",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "mcallester",
+      "implementation": "edits/mcallester.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "catoni",
+      "implementation": "edits/catoni.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "quadratic",
+      "implementation": "edits/quadratic.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

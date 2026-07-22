@@ -1,0 +1,650 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-diffusion-conditioning",
+  "task_folder": "tasks/cv-diffusion-conditioning",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "conditioning injection mechanisms for class-conditional diffusion models on CIFAR-10",
+    "research_question": "Which conditioning injection method achieves the best class-conditional FID on CIFAR-10 for a UNet-based DDPM trained and sampled with the provided scaffold?",
+    "local_sources": {
+      "config_path": "tasks/cv-diffusion-conditioning/config.json",
+      "task_description_path": "tasks/cv-diffusion-conditioning/task_description.md"
+    },
+    "notes": [
+      "Baseline-to-paper mappings are approximate when the repository adapts a paper's conditioning mechanism to a UNet ResBlock scaffold rather than reproducing the original architecture verbatim.",
+      "All three test commands share the same dataset, training objective, sampling procedure, and evaluation metric; they differ only in model scale and runtime budget."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 15,
+    "baseline_entries": 3,
+    "baseline_links_found": 5,
+    "test_entries": 3,
+    "test_links_found": 15
+  },
+  "tests": [
+    {
+      "label": "train_small",
+      "cmd": "scripts/train_small.sh",
+      "package": "diffusers-main",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2006.11239",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2010.02502",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2104.11222",
+          "role": "metric"
+        }
+      ],
+      "notes": "Small-scale CIFAR-10 class-conditional DDPM training with DDIM sampling and FID computed via clean-fid."
+    },
+    {
+      "label": "train_medium",
+      "cmd": "scripts/train_medium.sh",
+      "package": "diffusers-main",
+      "group": 2,
+      "compute": 1.0,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2006.11239",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2010.02502",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2104.11222",
+          "role": "metric"
+        }
+      ],
+      "notes": "Medium-scale variant of the same CIFAR-10 DDPM/DDIM/FID evaluation protocol."
+    },
+    {
+      "label": "train_large",
+      "cmd": "scripts/train_large.sh",
+      "package": "diffusers-main",
+      "group": 3,
+      "compute": 1.0,
+      "time": "10:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2006.11239",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2010.02502",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.57702/ZP44CU3G",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2104.11222",
+          "role": "metric"
+        }
+      ],
+      "notes": "Large-scale variant of the same CIFAR-10 DDPM/DDIM/FID evaluation protocol."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "concat-film",
+      "implementation": "edits/concat_film.edit.py",
+      "labels": [
+        "FiLM",
+        "adaptive GroupNorm",
+        "class-plus-time embedding"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1609/aaai.v32i1.11671",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1007/978-3-030-01261-8_1",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "The repo baseline uses FiLM-style feature-wise modulation inside a UNet with adaptive GroupNorm; this is closest to FiLM plus GroupNorm rather than a single canonical diffusion paper."
+    },
+    {
+      "name": "cross-attn",
+      "implementation": "edits/cross_attn.edit.py",
+      "labels": [
+        "cross-attention",
+        "class embedding as key/value"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2112.10752",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.03762",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "The baseline adapts Stable-Diffusion-style cross-attention to class embeddings in a UNet ResBlock scaffold."
+    },
+    {
+      "name": "adanorm",
+      "implementation": "edits/adanorm.edit.py",
+      "labels": [
+        "AdaLN-Zero",
+        "adaptive LayerNorm",
+        "DiT-style conditioning"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2212.09748",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "The implementation ports DiT's adaLN-style conditioning idea into a UNet post-ResBlock conditioner."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/ARXIV.2006.11239",
+      "title": "Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Jonathan Ho",
+        "Ajay Jain",
+        "Pieter Abbeel"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2006.11239",
+      "arxiv_id": "2006.11239",
+      "landing_page": "https://arxiv.org/abs/2006.11239",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2006.11239",
+        "https://arxiv.org/abs/2006.11239"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2006.11239,\n  doi = {10.48550/ARXIV.2006.11239},\n  url = {https://arxiv.org/abs/2006.11239},\n  author = {Ho, Jonathan and Jain, Ajay and Abbeel, Pieter},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Probabilistic Models},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion",
+        "ddpm",
+        "unet",
+        "cifar10",
+        "test_protocol"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Foundational DDPM paper for the noise-prediction training objective and UNet-based diffusion setup used throughout the task scaffold.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2010.02502",
+      "title": "Denoising Diffusion Implicit Models",
+      "authors": [
+        "Jiaming Song",
+        "Chenlin Meng",
+        "Stefano Ermon"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2010.02502",
+      "arxiv_id": "2010.02502",
+      "landing_page": "https://arxiv.org/abs/2010.02502",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2010.02502",
+        "https://arxiv.org/abs/2010.02502"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2010.02502,\n  doi = {10.48550/ARXIV.2010.02502},\n  url = {https://arxiv.org/abs/2010.02502},\n  author = {Song, Jiaming and Meng, Chenlin and Ermon, Stefano},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Implicit Models},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion",
+        "ddim",
+        "sampling",
+        "test_protocol"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Matches the task's 50-step DDIM sampling procedure used during class-conditional inference.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2102.09672",
+      "title": "Improved Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Alex Nichol",
+        "Prafulla Dhariwal"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2102.09672",
+      "arxiv_id": "2102.09672",
+      "landing_page": "https://arxiv.org/abs/2102.09672",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2102.09672",
+        "https://arxiv.org/abs/2102.09672"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2102.09672,\n  doi = {10.48550/ARXIV.2102.09672},\n  url = {https://arxiv.org/abs/2102.09672},\n  author = {Nichol, Alex and Dhariwal, Prafulla},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Improved Denoising Diffusion Probabilistic Models},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion",
+        "improved_ddpm",
+        "sampling",
+        "training_recipe"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant adjacent work on DDPM training and faster sampling that informs diffusion baselines on small image benchmarks.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2105.05233",
+      "title": "Diffusion Models Beat GANs on Image Synthesis",
+      "authors": [
+        "Prafulla Dhariwal",
+        "Alex Nichol"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2105.05233",
+      "arxiv_id": "2105.05233",
+      "landing_page": "https://arxiv.org/abs/2105.05233",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2105.05233",
+        "https://arxiv.org/abs/2105.05233"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2105.05233,\n  doi = {10.48550/ARXIV.2105.05233},\n  url = {https://arxiv.org/abs/2105.05233},\n  author = {Dhariwal, Prafulla and Nichol, Alex},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Diffusion Models Beat GANs on Image Synthesis},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "class_conditional_diffusion",
+        "guided_diffusion",
+        "fid"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "A central class-conditional diffusion reference showing strong FID performance and architecture ablations for conditional image synthesis.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2112.10752",
+      "title": "High-Resolution Image Synthesis with Latent Diffusion Models",
+      "authors": [
+        "Robin Rombach",
+        "Andreas Blattmann",
+        "Dominik Lorenz",
+        "Patrick Esser",
+        "Bjorn Ommer"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2112.10752",
+      "arxiv_id": "2112.10752",
+      "landing_page": "https://arxiv.org/abs/2112.10752",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2112.10752",
+        "https://arxiv.org/abs/2112.10752"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2112.10752,\n  doi = {10.48550/ARXIV.2112.10752},\n  url = {https://arxiv.org/abs/2112.10752},\n  author = {Rombach, Robin and Blattmann, Andreas and Lorenz, Dominik and Esser, Patrick and Ommer, Bj\u00f6rn},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {High-Resolution Image Synthesis with Latent Diffusion Models},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "cross_attention",
+        "conditioning",
+        "stable_diffusion",
+        "baseline"
+      ],
+      "baseline_links": [
+        "cross-attn"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the cross-attention conditioning pattern that the `cross-attn` baseline adapts from Stable Diffusion-style text conditioning to class embeddings.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2212.09748",
+      "title": "Scalable Diffusion Models with Transformers",
+      "authors": [
+        "William Peebles",
+        "Saining Xie"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2212.09748",
+      "arxiv_id": "2212.09748",
+      "landing_page": "https://arxiv.org/abs/2212.09748",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2212.09748",
+        "https://arxiv.org/abs/2212.09748"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2212.09748,\n  doi = {10.48550/ARXIV.2212.09748},\n  url = {https://arxiv.org/abs/2212.09748},\n  author = {Peebles, William and Xie, Saining},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Scalable Diffusion Models with Transformers},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "adaln_zero",
+        "conditioning",
+        "dit",
+        "baseline"
+      ],
+      "baseline_links": [
+        "adanorm"
+      ],
+      "test_links": [],
+      "relevance": "Primary reference for AdaLN-Zero conditioning, which the `adanorm` baseline ports into the task's UNet conditioner.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1609/aaai.v32i1.11671",
+      "title": "FiLM: Visual Reasoning with a General Conditioning Layer",
+      "authors": [
+        "Ethan Perez",
+        "Florian Strub",
+        "Harm De Vries",
+        "Vincent Dumoulin",
+        "Aaron Courville"
+      ],
+      "year": 2018,
+      "venue": "Proceedings of the AAAI Conference on Artificial Intelligence",
+      "doi": "10.1609/aaai.v32i1.11671",
+      "landing_page": "https://ojs.aaai.org/index.php/AAAI/article/view/11671",
+      "source_urls": [
+        "https://doi.org/10.1609/aaai.v32i1.11671",
+        "https://ojs.aaai.org/index.php/AAAI/article/view/11671"
+      ],
+      "bibtex": "@article{Perez_2018, title={FiLM: Visual Reasoning with a General Conditioning Layer}, volume={32}, ISSN={2159-5399}, url={http://dx.doi.org/10.1609/AAAI.V32I1.11671}, DOI={10.1609/aaai.v32i1.11671}, number={1}, journal={Proceedings of the AAAI Conference on Artificial Intelligence}, publisher={Association for the Advancement of Artificial Intelligence (AAAI)}, author={Perez, Ethan and Strub, Florian and De Vries, Harm and Dumoulin, Vincent and Courville, Aaron}, year={2018}, month=apr }",
+      "relevance_tags": [
+        "film",
+        "conditioning",
+        "feature_modulation",
+        "baseline"
+      ],
+      "baseline_links": [
+        "concat-film"
+      ],
+      "test_links": [],
+      "relevance": "Canonical FiLM reference for feature-wise affine conditioning, matching the conceptual core of the `concat-film` baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1007/978-3-030-01261-8_1",
+      "title": "Group Normalization",
+      "authors": [
+        "Yuxin Wu",
+        "Kaiming He"
+      ],
+      "year": 2018,
+      "venue": "ECCV",
+      "doi": "10.1007/978-3-030-01261-8_1",
+      "landing_page": "https://link.springer.com/10.1007/978-3-030-01261-8_1",
+      "source_urls": [
+        "https://doi.org/10.1007/978-3-030-01261-8_1",
+        "https://link.springer.com/10.1007/978-3-030-01261-8_1"
+      ],
+      "bibtex": "@inbook{Wu_2018, title={Group Normalization}, ISBN={9783030012618}, ISSN={1611-3349}, url={http://dx.doi.org/10.1007/978-3-030-01261-8_1}, DOI={10.1007/978-3-030-01261-8_1}, booktitle={Computer Vision \u2013 ECCV 2018}, publisher={Springer International Publishing}, author={Wu, Yuxin and He, Kaiming}, year={2018}, pages={3\u201319} }",
+      "relevance_tags": [
+        "group_norm",
+        "film",
+        "conditioning",
+        "baseline"
+      ],
+      "baseline_links": [
+        "concat-film"
+      ],
+      "test_links": [],
+      "relevance": "Supports the adaptive GroupNorm-style modulation used by the `concat-film` baseline inside the UNet ResBlocks.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2207.12598",
+      "title": "Classifier-Free Diffusion Guidance",
+      "authors": [
+        "Jonathan Ho",
+        "Tim Salimans"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2207.12598",
+      "arxiv_id": "2207.12598",
+      "landing_page": "https://arxiv.org/abs/2207.12598",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2207.12598",
+        "https://arxiv.org/abs/2207.12598"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2207.12598,\n  doi = {10.48550/ARXIV.2207.12598},\n  url = {https://arxiv.org/abs/2207.12598},\n  author = {Ho, Jonathan and Salimans, Tim},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Classifier-Free Diffusion Guidance},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "class_conditional_diffusion",
+        "guidance",
+        "conditioning"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant class-conditional diffusion reference on how conditioning information can be combined with the generative model without a separate classifier.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1706.08500",
+      "title": "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium",
+      "authors": [
+        "Martin Heusel",
+        "Hubert Ramsauer",
+        "Thomas Unterthiner",
+        "Bernhard Nessler",
+        "Sepp Hochreiter"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.08500",
+      "arxiv_id": "1706.08500",
+      "landing_page": "https://arxiv.org/abs/1706.08500",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1706.08500",
+        "https://arxiv.org/abs/1706.08500"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1706.08500,\n  doi = {10.48550/ARXIV.1706.08500},\n  url = {https://arxiv.org/abs/1706.08500},\n  author = {Heusel, Martin and Ramsauer, Hubert and Unterthiner, Thomas and Nessler, Bernhard and Hochreiter, Sepp},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "fid",
+        "evaluation",
+        "metric",
+        "test_protocol"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Introduces the Fr\u00e9chet Inception Distance used as the task's primary evaluation metric.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2104.11222",
+      "title": "On Aliased Resizing and Surprising Subtleties in GAN Evaluation",
+      "authors": [
+        "Gaurav Parmar",
+        "Richard Zhang",
+        "Jun-Yan Zhu"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2104.11222",
+      "arxiv_id": "2104.11222",
+      "landing_page": "https://arxiv.org/abs/2104.11222",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2104.11222",
+        "https://arxiv.org/abs/2104.11222"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2104.11222,\n  doi = {10.48550/ARXIV.2104.11222},\n  url = {https://arxiv.org/abs/2104.11222},\n  author = {Parmar, Gaurav and Zhang, Richard and Zhu, Jun-Yan},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Graphics (cs.GR), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {On Aliased Resizing and Surprising Subtleties in GAN Evaluation},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "clean_fid",
+        "fid",
+        "evaluation",
+        "test_protocol"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Directly underlies the clean-fid evaluation package referenced in the task description.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/ZP44CU3G",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB",
+      "doi": "10.57702/ZP44CU3G",
+      "landing_page": "https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a",
+      "source_urls": [
+        "https://doi.org/10.57702/ZP44CU3G",
+        "https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g,\n  doi = {10.57702/ZP44CU3G},\n  url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a},\n  author = {Krizhevsky, Alex},\n  keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images},\n  language = {en},\n  title = {Learning Multiple Layers of Features from Tiny Images},\n  publisher = {TIB},\n  year = {2024}\n}",
+      "relevance_tags": [
+        "cifar10",
+        "dataset",
+        "test_protocol"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Repository-resolved citation for the CIFAR-10 dataset used by every evaluation script in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1505.04597",
+      "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+      "authors": [
+        "Olaf Ronneberger",
+        "Philipp Fischer",
+        "Thomas Brox"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1505.04597",
+      "arxiv_id": "1505.04597",
+      "landing_page": "https://arxiv.org/abs/1505.04597",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1505.04597",
+        "https://arxiv.org/abs/1505.04597"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1505.04597,\n  doi = {10.48550/ARXIV.1505.04597},\n  url = {https://arxiv.org/abs/1505.04597},\n  author = {Ronneberger, Olaf and Fischer, Philipp and Brox, Thomas},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {U-Net: Convolutional Networks for Biomedical Image Segmentation},\n  publisher = {arXiv},\n  year = {2015},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "unet",
+        "architecture",
+        "conditioning_scaffold"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Background architecture reference for the UNet family underlying the task's `UNet2DModel` scaffold.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1706.03762",
+      "title": "Attention Is All You Need",
+      "authors": [
+        "Ashish Vaswani",
+        "Noam Shazeer",
+        "Niki Parmar",
+        "Jakob Uszkoreit",
+        "Llion Jones",
+        "Aidan N. Gomez",
+        "Lukasz Kaiser",
+        "Illia Polosukhin"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.03762",
+      "arxiv_id": "1706.03762",
+      "landing_page": "https://arxiv.org/abs/1706.03762",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1706.03762",
+        "https://arxiv.org/abs/1706.03762"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1706.03762,\n  doi = {10.48550/ARXIV.1706.03762},\n  url = {https://arxiv.org/abs/1706.03762},\n  author = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia},\n  keywords = {Computation and Language (cs.CL), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Attention Is All You Need},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "attention",
+        "cross_attention",
+        "baseline"
+      ],
+      "baseline_links": [
+        "cross-attn"
+      ],
+      "test_links": [],
+      "relevance": "Background reference for the attention mechanism that underlies the `cross-attn` baseline's key/value conditioning module.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2206.00364",
+      "title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+      "authors": [
+        "Tero Karras",
+        "Miika Aittala",
+        "Timo Aila",
+        "Samuli Laine"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.00364",
+      "arxiv_id": "2206.00364",
+      "landing_page": "https://arxiv.org/abs/2206.00364",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2206.00364",
+        "https://arxiv.org/abs/2206.00364"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00364,\n  doi = {10.48550/ARXIV.2206.00364},\n  url = {https://arxiv.org/abs/2206.00364},\n  author = {Karras, Tero and Aittala, Miika and Aila, Timo and Laine, Samuli},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Elucidating the Design Space of Diffusion-Based Generative Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "class_conditional_diffusion",
+        "cifar10",
+        "fid",
+        "design_space"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant recent diffusion-design paper with strong CIFAR-10 class-conditional FID results, useful context for the task's research question.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

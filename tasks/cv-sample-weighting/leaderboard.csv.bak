@@ -1,0 +1,2 @@
+timestamp,model,is_final,seed,elapsed_resnet32-cifar10lt,elapsed_resnet32-cifar100lt,elapsed_vgg16bn-cifar100lt
+2026-03-27T00:16:24.552124+00:00,baseline:balanced_softmax,true,42,1,1,0

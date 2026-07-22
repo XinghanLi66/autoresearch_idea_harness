@@ -1,0 +1,35 @@
+# MLS-Bench global config for D0 (lxh_dl_0) — V3 closed-loop eval on MLS-Bench-Lite.
+# Written by cc002 (coder agent), 2026-07-17. See
+# agentic-training/agent-memory/coder/mls_lite_eval_env_request.md for context.
+#
+# Runtime: NO docker daemon / apptainer on this DSW pod -> container_runtime: local
+# (per-package conda envs `mlsbench-<pkg>`, created automatically by `mlsbench build`).
+#
+# Claude routing: providers.anthropic points at the local Anthropic->MaaS shim
+# (autoresearch_idea_harness/scripts/anthropic_maas_shim.py, tmux session
+# `maas-shim`, port 18791). Valid --model strings:
+#   claude-fable-5   (MaaS)
+#   claude-opus-4-8  (MaaS)
+#   claude-opus-4-6  (legacy Runway rawPredict)
+# sonnet-4.6 / gpt-5.5 keys were dead on 2026-07-17 — do not use until refreshed.
+
+max_steps: 20
+max_tests: 3
+save_path: /newcpfs/lxh/MLS-Bench/.local-saves
+seeds: [1, 2, 3]
+container_runtime: local
+local_thread_limit: 16
+cpu_only_concurrency: 8
+gpu_devices: "0"          # single NVIDIA L20Z on this pod
+compute_scale: 0.5        # same convention as config.local.yaml (L20-class GPU)
+
+thinking:
+  enabled: false
+  # NOTE (2026-07-17): the MaaS Claude-5 deployments (fable-5 / opus-4-8) reject
+  # thinking.type "enabled" ("use adaptive"); with no thinking param they think
+  # adaptively by default, so keep this disabled — do NOT flip to true.
+
+providers:
+  anthropic:
+    api_key: "local-shim"                  # shim ignores the key
+    base_url: "http://127.0.0.1:18791"     # anthropic_maas_shim.py

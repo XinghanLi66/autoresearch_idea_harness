@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-sft-loss",
+  "task_folder": "tasks/llm-sft-loss",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/llm-sft-loss/config.json",
+      "task_description_path": "tasks/llm-sft-loss/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 2,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "metamathqa-sft",
+      "cmd": "scripts/train.sh",
+      "package": "LLaMA-Factory",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "lm-eval",
+      "cmd": "scripts/eval.sh",
+      "package": "lm-evaluation-harness",
+      "group": 2,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ce",
+      "implementation": "baselines/ce.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "label_smoothing",
+      "implementation": "baselines/label_smoothing.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "focal",
+      "implementation": "baselines/focal.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gem",
+      "implementation": "baselines/gem.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

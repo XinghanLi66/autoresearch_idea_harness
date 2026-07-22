@@ -1,0 +1,8 @@
+timestamp,model,is_final,seed,wer_librispeech-100h,cer_librispeech-100h,elapsed_librispeech-100h,wer_aishell-1,cer_aishell-1,elapsed_aishell-1,wer_mls-spanish,cer_mls-spanish,elapsed_mls-spanish
+2026-04-04T09:27:43.368660+00:00,baseline:conformer,true,42,0.2307,0.0793,3472,0.663,0.1134,9237,0.24,0.0645,
+2026-04-13T12:20:21.758331+00:00,baseline:branchformer,true,42,0.3055,0.103,3462,0.6643,0.1156,8705,0.3052,0.0786,10448
+2026-04-13T01:46:19.127690+00:00,baseline:transformer,true,42,0.4785,0.1633,2299,0.7032,0.1279,8821,0.5879,0.1345,10414
+2026-04-19T12:58:34.847623+00:00,baseline:transformer,false,42,0.4797,0.1627,2294,0.7089,0.1293,8020,0.5863,0.1333,10529
+2026-04-19T14:03:52.821177+00:00,baseline:branchformer,false,42,0.2173,0.0757,9024,,,,,,
+2026-04-19T16:57:50.030678+00:00,baseline:conformer,false,42,0.2309,0.0793,3463,0.663,0.1134,8271,0.238,0.0641,10412
+2026-04-21T06:05:30.391376+00:00,baseline:branchformer,false,42,0.2181,0.0763,9036,,,19541,,,

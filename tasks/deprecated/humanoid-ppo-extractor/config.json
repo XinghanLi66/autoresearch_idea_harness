@@ -1,0 +1,72 @@
+{
+  "allow_create": false,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train_stand.sh",
+      "label": "h1-stand",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "package": "humanoid-bench"
+    },
+    {
+      "cmd": "scripts/train_walk.sh",
+      "label": "h1-walk",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "package": "humanoid-bench"
+    },
+    {
+      "cmd": "scripts/train_run.sh",
+      "label": "h1-run",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "package": "humanoid-bench",
+      "hidden": true
+    }
+  ],
+  "rigorous_codebase": true,
+  "baselines": {
+    "wide_mlp": {
+      "edit_ops": "edits/wide_mlp.edit.py"
+    },
+    "layernorm_mlp": {
+      "edit_ops": "edits/layernorm_mlp.edit.py"
+    },
+    "residual_mlp": {
+      "edit_ops": "edits/residual_mlp.edit.py"
+    },
+    "spectral_norm_mlp": {
+      "edit_ops": "edits/spectral_norm_mlp.edit.py"
+    },
+    "gated_residual_mlp": {
+      "edit_ops": "edits/gated_residual_mlp.edit.py"
+    },
+    "obs_group_attention": {
+      "edit_ops": "edits/obs_group_attention.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "humanoid-bench/ppo/train_custom.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 14,
+          "end": 16
+        },
+        {
+          "start": 20,
+          "end": 38
+        }
+      ]
+    }
+  ]
+}

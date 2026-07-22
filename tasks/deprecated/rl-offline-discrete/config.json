@@ -1,0 +1,44 @@
+{
+  "allow_create": false,
+  "test_cmds": [
+    {
+      "cmd": "scripts/breakout.sh",
+      "label": "breakout",
+      "group": 1,
+      "compute": 0.4,
+      "time": "23:59:59",
+      "package": "d3rlpy"
+    },
+    {
+      "cmd": "scripts/qbert.sh",
+      "label": "qbert",
+      "group": 1,
+      "compute": 0.4,
+      "time": "23:59:59",
+      "package": "d3rlpy"
+    },
+    {
+      "cmd": "scripts/pong.sh",
+      "label": "pong",
+      "group": 1,
+      "compute": 0.4,
+      "time": "23:59:59",
+      "package": "d3rlpy",
+      "hidden": true
+    }
+  ],
+  "rigorous_codebase": true,
+  "baselines": {
+    "bc": {"edit_ops": "edits/bc.edit.py"},
+    "cql": {"edit_ops": "edits/cql.edit.py"},
+    "bcq": {"edit_ops": "edits/bcq.edit.py"},
+    "dt": {"edit_ops": "edits/dt.edit.py"}
+  },
+  "files": [
+    {
+      "filename": "d3rlpy/atari_offline/custom_atari.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": [{"start": 220, "end": 258}]
+    }
+  ]
+}

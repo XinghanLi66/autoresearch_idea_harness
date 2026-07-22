@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "task_name": "graph-node-classification",
+  "task_folder": "tasks/graph-node-classification",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/graph-node-classification/config.json",
+      "task_description_path": "tasks/graph-node-classification/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "Cora",
+      "cmd": "scripts/cora.sh",
+      "package": "pytorch-geometric",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "CiteSeer",
+      "cmd": "scripts/citeseer.sh",
+      "package": "pytorch-geometric",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "PubMed",
+      "cmd": "scripts/pubmed.sh",
+      "package": "pytorch-geometric",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "gcn",
+      "implementation": "edits/gcn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gat",
+      "implementation": "edits/gat.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "graphsage",
+      "implementation": "edits/graphsage.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gps",
+      "implementation": "edits/gps.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "nagphormer",
+      "implementation": "edits/nagphormer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "revgat",
+      "implementation": "edits/revgat.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

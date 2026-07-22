@@ -1,0 +1,93 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train.sh",
+      "label": "3s5z_vs_3s6z",
+      "group": 1,
+      "compute": 0.4,
+      "time": "24:00:00",
+      "package": "epymarl"
+    },
+    {
+      "cmd": "scripts/train.sh",
+      "label": "corridor",
+      "group": 1,
+      "compute": 0.4,
+      "time": "24:00:00",
+      "package": "epymarl"
+    },
+    {
+      "cmd": "scripts/train.sh",
+      "label": "MMM2",
+      "group": 1,
+      "compute": 0.4,
+      "time": "24:00:00",
+      "package": "epymarl",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "vdn": {
+      "edit_ops": "edits/vdn.edit.py"
+    },
+    "linear_mixer": {
+      "edit_ops": "edits/linear_mixer.edit.py"
+    },
+    "qmix": {
+      "edit_ops": "edits/qmix.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "epymarl/src/modules/mixers/custom.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 7,
+          "end": 8
+        },
+        {
+          "start": 13,
+          "end": 49
+        }
+      ]
+    },
+    {
+      "filename": "epymarl/src/modules/mixers/vdn.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "epymarl/src/modules/mixers/qmix.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "epymarl/src/learners/q_learner.py",
+      "read": [
+        {
+          "start": 51,
+          "end": 145
+        }
+      ],
+      "edit": []
+    }
+  ]
+}

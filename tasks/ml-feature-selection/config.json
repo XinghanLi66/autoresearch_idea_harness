@@ -1,0 +1,44 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "seeds": [42],
+  "test_cmds": [
+    {
+      "cmd": "scripts/20newsgroups.sh",
+      "label": "20newsgroups",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "package": "scikit-learn"
+    },
+    {
+      "cmd": "scripts/mnist.sh",
+      "label": "mnist",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "package": "scikit-learn"
+    },
+    {
+      "cmd": "scripts/madelon.sh",
+      "label": "madelon",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "package": "scikit-learn",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "mutual_info": {"edit_ops": "edits/mutual_info.edit.py"},
+    "chi2":        {"edit_ops": "edits/chi2.edit.py"},
+    "f_classif":   {"edit_ops": "edits/f_classif.edit.py"}
+  },
+  "files": [
+    {
+      "filename": "scikit-learn/custom_featsel.py",
+      "read": [{"start": -1, "end": -1}],
+      "edit": [{"start": 86, "end": 112}]
+    }
+  ]
+}

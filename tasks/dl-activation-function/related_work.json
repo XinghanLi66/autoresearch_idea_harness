@@ -1,0 +1,496 @@
+{
+  "schema_version": "1.0",
+  "task_name": "dl-activation-function",
+  "task_folder": "tasks/dl-activation-function",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "activation function design for deep convolutional neural networks",
+    "research_question": "Design a novel activation function for deep convolutional neural networks that improves test accuracy across different architectures (ResNet, VGG) and datasets (CIFAR-10, CIFAR-100).",
+    "local_sources": {
+      "config_path": "tasks/dl-activation-function/config.json",
+      "task_description_path": "tasks/dl-activation-function/task_description.md"
+    },
+    "notes": [
+      "Required baselines from config.json are GELU, SiLU, and Mish.",
+      "Required tests from config.json are ResNet-20/CIFAR-10, VGG-16-BN/CIFAR-100, and hidden MobileNetV2/Fashion-MNIST."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 4
+  },
+  "tests": [
+    {
+      "label": "resnet20-cifar10",
+      "cmd": "scripts/resnet20_cifar10.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        }
+      ],
+      "notes": "Links the ResNet architecture paper used for this benchmark family."
+    },
+    {
+      "label": "vgg16bn-cifar100",
+      "cmd": "scripts/vgg16bn_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1409.1556",
+          "role": "architecture"
+        }
+      ],
+      "notes": "Links the VGG architecture paper used by the benchmarked model variant."
+    },
+    {
+      "label": "mobilenetv2-fmnist",
+      "cmd": "scripts/mobilenetv2_fmnist.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2018.00474",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1708.07747",
+          "role": "dataset"
+        }
+      ],
+      "notes": "Links the MobileNetV2 architecture and Fashion-MNIST dataset papers for the hidden evaluation setting."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "gelu",
+      "implementation": "edits/gelu.edit.py",
+      "labels": [
+        "activation_function"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1606.08415",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Baseline maps directly to the GELU activation."
+    },
+    {
+      "name": "silu",
+      "implementation": "edits/silu.edit.py",
+      "labels": [
+        "activation_function"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1016/j.neunet.2017.12.012",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Baseline maps directly to the SiLU activation introduced in the cited paper."
+    },
+    {
+      "name": "mish",
+      "implementation": "edits/mish.edit.py",
+      "labels": [
+        "activation_function"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1908.08681",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Baseline maps directly to the Mish activation."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.1606.08415",
+      "title": "Gaussian Error Linear Units (GELUs)",
+      "authors": [
+        "Dan Hendrycks",
+        "Kevin Gimpel"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1606.08415",
+      "arxiv_id": "1606.08415",
+      "openalex_id": "https://openalex.org/W2899663614",
+      "landing_page": "https://arxiv.org/abs/1606.08415",
+      "source_urls": [
+        "https://openalex.org/W2899663614",
+        "https://doi.org/10.48550/arXiv.1606.08415"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1606.08415,\n  doi = {10.48550/ARXIV.1606.08415},\n  url = {https://arxiv.org/abs/1606.08415},\n  author = {Hendrycks, Dan and Gimpel, Kevin},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Gaussian Error Linear Units (GELUs)},\n  publisher = {arXiv},\n  year = {2016},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "activation_function",
+        "cnn"
+      ],
+      "baseline_links": [
+        "gelu"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the GELU baseline included in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1016/j.neunet.2017.12.012",
+      "title": "Sigmoid-weighted linear units for neural network function approximation in reinforcement learning",
+      "authors": [
+        "Stefan Elfwing",
+        "Eiji Uchibe",
+        "Kenji Doya"
+      ],
+      "year": 2018,
+      "venue": "Neural Networks",
+      "doi": "10.1016/j.neunet.2017.12.012",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2962834855",
+      "landing_page": "https://doi.org/10.1016/j.neunet.2017.12.012",
+      "source_urls": [
+        "https://openalex.org/W2962834855",
+        "https://doi.org/10.1016/j.neunet.2017.12.012"
+      ],
+      "bibtex": "@article{Elfwing_2018, title={Sigmoid-weighted linear units for neural network function approximation in reinforcement learning}, volume={107}, ISSN={0893-6080}, url={http://dx.doi.org/10.1016/j.neunet.2017.12.012}, DOI={10.1016/j.neunet.2017.12.012}, journal={Neural Networks}, publisher={Elsevier BV}, author={Elfwing, Stefan and Uchibe, Eiji and Doya, Kenji}, year={2018}, month=nov, pages={3–11} }",
+      "relevance_tags": [
+        "baseline",
+        "activation_function",
+        "silu"
+      ],
+      "baseline_links": [
+        "silu"
+      ],
+      "test_links": [],
+      "relevance": "Canonical SiLU paper for the exact baseline used by this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1908.08681",
+      "title": "Mish: A Self Regularized Non-Monotonic Activation Function",
+      "authors": [
+        "Diganta Misra"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1908.08681",
+      "arxiv_id": "1908.08681",
+      "openalex_id": "https://openalex.org/W3127062143",
+      "landing_page": "https://arxiv.org/abs/1908.08681",
+      "source_urls": [
+        "https://openalex.org/W3127062143",
+        "https://doi.org/10.48550/arXiv.1908.08681"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1908.08681,\n  doi = {10.48550/ARXIV.1908.08681},\n  url = {https://arxiv.org/abs/1908.08681},\n  author = {Misra, Diganta},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Mish: A Self Regularized Non-Monotonic Activation Function},\n  publisher = {arXiv},\n  year = {2019},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "activation_function",
+        "mish"
+      ],
+      "baseline_links": [
+        "mish"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the Mish baseline included in the task scaffold.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2016.90",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2194775991",
+      "landing_page": "https://doi.org/10.1109/cvpr.2016.90",
+      "source_urls": [
+        "https://openalex.org/W2194775991",
+        "https://doi.org/10.1109/cvpr.2016.90"
+      ],
+      "bibtex": "@inproceedings{He_2016, title={Deep Residual Learning for Image Recognition}, url={http://dx.doi.org/10.1109/cvpr.2016.90}, DOI={10.1109/cvpr.2016.90}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian}, year={2016}, month=jun, pages={770–778} }",
+      "relevance_tags": [
+        "test_architecture",
+        "resnet",
+        "cnn"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet20-cifar10"
+      ],
+      "relevance": "Provides the residual architecture family used by the ResNet-20 evaluation test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1409.1556",
+      "title": "Very Deep Convolutional Networks for Large-Scale Image Recognition",
+      "authors": [
+        "Karen Simonyan",
+        "Andrew Zisserman"
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1409.1556",
+      "arxiv_id": "1409.1556",
+      "openalex_id": "https://openalex.org/W1686810756",
+      "landing_page": "https://arxiv.org/abs/1409.1556",
+      "source_urls": [
+        "https://openalex.org/W1686810756",
+        "https://doi.org/10.48550/arXiv.1409.1556"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1409.1556,\n  doi = {10.48550/ARXIV.1409.1556},\n  url = {https://arxiv.org/abs/1409.1556},\n  author = {Simonyan, Karen and Zisserman, Andrew},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Very Deep Convolutional Networks for Large-Scale Image Recognition},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "test_architecture",
+        "vgg",
+        "cnn"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "vgg16bn-cifar100"
+      ],
+      "relevance": "Provides the VGG architecture family used by the VGG-16-BN evaluation test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2018.00474",
+      "title": "MobileNetV2: Inverted Residuals and Linear Bottlenecks",
+      "authors": [
+        "Mark Sandler",
+        "Andrew Howard",
+        "Menglong Zhu",
+        "Andrey Zhmoginov",
+        "Liang-Chieh Chen"
+      ],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2018.00474",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2963163009",
+      "landing_page": "https://doi.org/10.1109/cvpr.2018.00474",
+      "source_urls": [
+        "https://openalex.org/W2963163009",
+        "https://doi.org/10.1109/cvpr.2018.00474"
+      ],
+      "bibtex": "@inproceedings{Sandler_2018, title={MobileNetV2: Inverted Residuals and Linear Bottlenecks}, url={http://dx.doi.org/10.1109/cvpr.2018.00474}, DOI={10.1109/cvpr.2018.00474}, booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Sandler, Mark and Howard, Andrew and Zhu, Menglong and Zhmoginov, Andrey and Chen, Liang-Chieh}, year={2018}, month=jun, pages={4510–4520} }",
+      "relevance_tags": [
+        "test_architecture",
+        "mobilenetv2",
+        "cnn"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Provides the hidden MobileNetV2 architecture used in final evaluation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1708.07747",
+      "title": "Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms",
+      "authors": [
+        "Han Xiao",
+        "Kashif Rasul",
+        "Roland Vollgraf"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1708.07747",
+      "arxiv_id": "1708.07747",
+      "openalex_id": "https://openalex.org/W2750384547",
+      "landing_page": "https://arxiv.org/abs/1708.07747",
+      "source_urls": [
+        "https://openalex.org/W2750384547",
+        "https://doi.org/10.48550/arXiv.1708.07747"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1708.07747,\n  doi = {10.48550/ARXIV.1708.07747},\n  url = {https://arxiv.org/abs/1708.07747},\n  author = {Xiao, Han and Rasul, Kashif and Vollgraf, Roland},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "test_dataset",
+        "fashion-mnist",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Documents the Fashion-MNIST dataset used in the hidden evaluation test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/iccv.2015.123",
+      "title": "Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2015,
+      "venue": "ICCV",
+      "doi": "10.1109/iccv.2015.123",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W1677182931",
+      "landing_page": "https://doi.org/10.1109/iccv.2015.123",
+      "source_urls": [
+        "https://openalex.org/W1677182931",
+        "https://doi.org/10.1109/iccv.2015.123"
+      ],
+      "bibtex": "@inproceedings{He_2015, title={Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification}, url={http://dx.doi.org/10.1109/iccv.2015.123}, DOI={10.1109/iccv.2015.123}, booktitle={2015 IEEE International Conference on Computer Vision (ICCV)}, publisher={IEEE}, author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian}, year={2015}, month=dec, pages={1026–1034} }",
+      "relevance_tags": [
+        "activation_function",
+        "prelu",
+        "cnn"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Introduces PReLU, a major learnable activation baseline in deep vision models and a core reference point for this task's design space.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1511.07289",
+      "title": "Fast and Accurate Deep Network Learning by Exponential Linear Units (ELUs)",
+      "authors": [
+        "Djork-Arne Clevert",
+        "Thomas Unterthiner",
+        "Sepp Hochreiter"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1511.07289",
+      "arxiv_id": "1511.07289",
+      "openalex_id": "https://openalex.org/W2176412452",
+      "landing_page": "https://arxiv.org/abs/1511.07289",
+      "source_urls": [
+        "https://openalex.org/W2176412452",
+        "https://doi.org/10.48550/arXiv.1511.07289"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1511.07289,\n  doi = {10.48550/ARXIV.1511.07289},\n  url = {https://arxiv.org/abs/1511.07289},\n  author = {Clevert, Djork-Arné and Unterthiner, Thomas and Hochreiter, Sepp},\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Fast and Accurate Deep Network Learning by Exponential Linear Units (ELUs)},\n  publisher = {arXiv},\n  year = {2015},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "activation_function",
+        "elu",
+        "cnn"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "ELU is a strong historical activation-function baseline directly relevant to designing better CNN nonlinearities.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1710.05941",
+      "title": "Searching for Activation Functions",
+      "authors": [
+        "Prajit Ramachandran",
+        "Barret Zoph",
+        "Quoc V. Le"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1710.05941",
+      "arxiv_id": "1710.05941",
+      "openalex_id": "https://openalex.org/W2767286248",
+      "landing_page": "https://arxiv.org/abs/1710.05941",
+      "source_urls": [
+        "https://openalex.org/W2767286248",
+        "https://doi.org/10.48550/arXiv.1710.05941"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1710.05941,\n  doi = {10.48550/ARXIV.1710.05941},\n  url = {https://arxiv.org/abs/1710.05941},\n  author = {Ramachandran, Prajit and Zoph, Barret and Le, Quoc V.},\n  keywords = {Neural and Evolutionary Computing (cs.NE), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Searching for Activation Functions},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "activation_function",
+        "swish",
+        "search"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Introduces Swish and establishes automated activation search as a relevant research direction for this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr46437.2021.00794",
+      "title": "Activate or Not: Learning Customized Activation",
+      "authors": [
+        "Ningning Ma",
+        "Xiangyu Zhang",
+        "Ming Liu",
+        "Jian Sun"
+      ],
+      "year": 2021,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr46437.2021.00794",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3167706095",
+      "landing_page": "https://doi.org/10.1109/cvpr46437.2021.00794",
+      "source_urls": [
+        "https://openalex.org/W3167706095",
+        "https://doi.org/10.1109/cvpr46437.2021.00794"
+      ],
+      "bibtex": "@inproceedings{Ma_2021, title={Activate or Not: Learning Customized Activation}, url={http://dx.doi.org/10.1109/cvpr46437.2021.00794}, DOI={10.1109/cvpr46437.2021.00794}, booktitle={2021 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Ma, Ningning and Zhang, Xiangyu and Liu, Ming and Sun, Jian}, year={2021}, month=jun, pages={8028–8038} }",
+      "relevance_tags": [
+        "activation_function",
+        "customized_activation",
+        "cnn"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Represents more recent activation-function design work targeted at image models, directly aligned with the task objective.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2109.08668",
+      "title": "Primer: Searching for Efficient Transformers for Language Modeling",
+      "authors": [
+        "David R. So",
+        "Wojciech Manke",
+        "Hanxiao Liu",
+        "Zihang Dai",
+        "Noam Shazeer",
+        "Quoc V. Le"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2109.08668",
+      "arxiv_id": "2109.08668",
+      "openalex_id": "https://openalex.org/W3200543719",
+      "landing_page": "https://arxiv.org/abs/2109.08668",
+      "source_urls": [
+        "https://openalex.org/W3200543719",
+        "https://doi.org/10.48550/arXiv.2109.08668"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2109.08668,\n  doi = {10.48550/ARXIV.2109.08668},\n  url = {https://arxiv.org/abs/2109.08668},\n  author = {So, David R. and Mańke, Wojciech and Liu, Hanxiao and Dai, Zihang and Shazeer, Noam and Le, Quoc V.},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Computation and Language (cs.CL), Neural and Evolutionary Computing (cs.NE), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Primer: Searching for Efficient Transformers for Language Modeling},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "activation_function",
+        "squared_relu",
+        "design_space"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Introduces Squared ReLU, a notable modern activation variant that is relevant to the task's editable search space.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

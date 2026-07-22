@@ -1,0 +1,35 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "apt-get update && apt-get install -y git wget",
+    "pip install 'transformers<4.49' datasets huggingface_hub pandas numpy scipy scikit-learn tqdm biopython safetensors",
+    "mkdir -p /data/binding_affinity /data/complex_structure",
+    "python -c \"\nfrom huggingface_hub import hf_hub_download\nimport os\nREPO = 'AbBibench/Antibody_Binding_Benchmark_Dataset'\n\n# Download ALL binding affinity CSVs\ncsv_files = [\n    'binding_affinity/1mhp_LC_benchmarking_data.csv',\n    'binding_affinity/1mlc_benchmarking_data.csv',\n    'binding_affinity/1n8z_benchmarking_data.csv',\n    'binding_affinity/2fjg_benchmarking_data.csv',\n    'binding_affinity/3gbn_h1_benchmarking_data.csv',\n    'binding_affinity/3gbn_h9_benchmarking_data.csv',\n    'binding_affinity/4d5_her2_benchmarking_data.csv',\n    'binding_affinity/4fqi_h1_benchmarking_data.csv',\n    'binding_affinity/4fqi_h3_benchmarking_data.csv',\n    'binding_affinity/5a12_ang2_benchmarking_data.csv',\n    'binding_affinity/aayl49_ML_benchmarking_data.csv',\n    'binding_affinity/aayl49_benchmarking_data.csv',\n    'binding_affinity/aayl50_LC_benchmarking_data.csv',\n    'binding_affinity/aayl51_benchmarking_data.csv',\n    'binding_affinity/aayl52_LC_benchmarking_data.csv',\n    'binding_affinity/g6_LC_benchmarking_data.csv',\n]\nfor f in csv_files:\n    local = hf_hub_download(repo_id=REPO, filename=f, repo_type='dataset', local_dir='/data')\n    print(f'Downloaded {f} -> {local}')\n\n# Download ALL PDB structures\npdb_files = [\n    'complex_structure/1mhp.pdb',\n    'complex_structure/1mhp_hla.pdb',\n    'complex_structure/1mlc_bae.pdb',\n    'complex_structure/1n8z_bac.pdb',\n    'complex_structure/2fjg_hlv.pdb',\n    'complex_structure/3gbn_hlab.pdb',\n    'complex_structure/4fqi_hlab.pdb',\n    'complex_structure/4zff_hld.pdb',\n    'complex_structure/4zfg_hla.pdb',\n    'complex_structure/AAYL49_bca.pdb',\n    'complex_structure/AAYL50_bca.pdb',\n    'complex_structure/AAYL51_bca.pdb',\n    'complex_structure/AAYL52_bca.pdb',\n]\nfor f in pdb_files:\n    local = hf_hub_download(repo_id=REPO, filename=f, repo_type='dataset', local_dir='/data')\n    print(f'Downloaded {f} -> {local}')\n\n# Download metadata\nlocal = hf_hub_download(repo_id=REPO, filename='metadata.json', repo_type='dataset', local_dir='/data')\nprint(f'Downloaded metadata.json -> {local}')\nprint('All AbBiBench data downloaded.')\n\"",
+    "python -c \"\nfrom transformers import AutoModelForMaskedLM, AutoTokenizer\nprint('Downloading ESM-2 3B (matches AbBiBench paper / upstream get_model_log_likelihood.py)...')\ntokenizer = AutoTokenizer.from_pretrained('facebook/esm2_t36_3B_UR50D')\nmodel = AutoModelForMaskedLM.from_pretrained('facebook/esm2_t36_3B_UR50D')\nprint('ESM-2 3B cached.')\n\"",
+    "python -c \"\nimport os\nchecks = [\n    '/data/binding_affinity/1mhp_LC_benchmarking_data.csv',\n    '/data/binding_affinity/1mlc_benchmarking_data.csv',\n    '/data/binding_affinity/1n8z_benchmarking_data.csv',\n    '/data/binding_affinity/2fjg_benchmarking_data.csv',\n    '/data/binding_affinity/3gbn_h1_benchmarking_data.csv',\n    '/data/binding_affinity/3gbn_h9_benchmarking_data.csv',\n    '/data/binding_affinity/4d5_her2_benchmarking_data.csv',\n    '/data/binding_affinity/4fqi_h1_benchmarking_data.csv',\n    '/data/binding_affinity/4fqi_h3_benchmarking_data.csv',\n    '/data/binding_affinity/5a12_ang2_benchmarking_data.csv',\n    '/data/binding_affinity/aayl49_ML_benchmarking_data.csv',\n    '/data/binding_affinity/aayl49_benchmarking_data.csv',\n    '/data/binding_affinity/aayl50_LC_benchmarking_data.csv',\n    '/data/binding_affinity/aayl51_benchmarking_data.csv',\n    '/data/binding_affinity/aayl52_LC_benchmarking_data.csv',\n    '/data/binding_affinity/g6_LC_benchmarking_data.csv',\n    '/data/complex_structure/1mhp.pdb',\n    '/data/complex_structure/1mhp_hla.pdb',\n    '/data/complex_structure/1mlc_bae.pdb',\n    '/data/complex_structure/1n8z_bac.pdb',\n    '/data/complex_structure/2fjg_hlv.pdb',\n    '/data/complex_structure/3gbn_hlab.pdb',\n    '/data/complex_structure/4fqi_hlab.pdb',\n    '/data/complex_structure/4zff_hld.pdb',\n    '/data/complex_structure/4zfg_hla.pdb',\n    '/data/complex_structure/AAYL49_bca.pdb',\n    '/data/complex_structure/AAYL50_bca.pdb',\n    '/data/complex_structure/AAYL51_bca.pdb',\n    '/data/complex_structure/AAYL52_bca.pdb',\n    '/data/metadata.json',\n]\nmissing = [f for f in checks if not os.path.exists(f)]\nassert not missing, f'Missing files: {missing}'\nprint('All data verified.')\n\""
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/AbBiBench:${PYTHONPATH}",
+    "DATA_DIR": "/data",
+    "HF_HOME": "/data/transformers_cache",
+    "HF_HUB_CACHE": "/data/transformers_cache/hub",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1"
+  },
+  "data_bind": "{data_root}/transformers_cache:/data/transformers_cache",
+  "data_deps": [
+    {
+      "name": "AbBiBench",
+      "description": "ESM-2 3B (and 650M) model weights cached on host transformers_cache. Mirrors the in-container build cache so the runtime data_bind exposes the model.",
+      "host_path": "{data_root}/transformers_cache",
+      "container_path": "/data/transformers_cache",
+      "prepare_script": "vendor/data_scripts/AbBiBench/prepare_data.py",
+      "verify_files": [
+        "{data_root}/transformers_cache/hub/models--facebook--esm2_t36_3B_UR50D"
+      ]
+    }
+  ],
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "workdir": "/workspace"
+}

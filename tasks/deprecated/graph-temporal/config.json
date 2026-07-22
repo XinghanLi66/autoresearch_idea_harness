@@ -1,0 +1,64 @@
+{
+  "deprecated": true,
+  "deprecated_reason": "BasicTS models + METR-LA/PEMS datasets require >15GB free GPU memory; cannot run on shared gpublaze GPUs (2026-04-22).",
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/metr_la.sh",
+      "label": "METR-LA",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "package": "BasicTS"
+    },
+    {
+      "cmd": "scripts/pems_bay.sh",
+      "label": "PEMS-BAY",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "package": "BasicTS"
+    },
+    {
+      "cmd": "scripts/pems04.sh",
+      "label": "PEMS04",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "package": "BasicTS",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "gwnet": {
+      "edit_ops": "edits/gwnet.edit.py"
+    },
+    "mtgnn": {
+      "edit_ops": "edits/mtgnn.edit.py"
+    },
+    "staeformer": {
+      "edit_ops": "edits/staeformer.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "BasicTS/custom_graph_model.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 94,
+          "end": 127
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

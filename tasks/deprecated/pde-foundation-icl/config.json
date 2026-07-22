@@ -1,0 +1,102 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/ns2d.sh",
+      "label": "NS2D",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "VICON"
+    },
+    {
+      "cmd": "scripts/comp2d.sh",
+      "label": "COMPRESSIBLE2D",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "VICON"
+    },
+    {
+      "cmd": "scripts/euler2d.sh",
+      "label": "EULER2D",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "VICON",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "icon": {
+      "edit_ops": "edits/icon.edit.py"
+    },
+    "mpp": {
+      "edit_ops": "edits/mpp.edit.py"
+    },
+    "dpot": {
+      "edit_ops": "edits/dpot.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "VICON/src/custom_model.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 89,
+          "end": 205
+        }
+      ]
+    },
+    {
+      "filename": "VICON/src/models.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "VICON/src/model_utils.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "VICON/src/trainer.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "VICON/src/custom_train_eval.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

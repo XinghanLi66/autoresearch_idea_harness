@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "task_name": "graph-temporal",
+  "task_folder": "tasks/graph-temporal",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/graph-temporal/config.json",
+      "task_description_path": "tasks/graph-temporal/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "METR-LA",
+      "cmd": "scripts/metr_la.sh",
+      "package": "BasicTS",
+      "group": 1,
+      "compute": 0.33,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "PEMS-BAY",
+      "cmd": "scripts/pems_bay.sh",
+      "package": "BasicTS",
+      "group": 1,
+      "compute": 0.33,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "PEMS04",
+      "cmd": "scripts/pems04.sh",
+      "package": "BasicTS",
+      "group": 1,
+      "compute": 0.33,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "stgcn",
+      "implementation": "edits/stgcn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dcrnn",
+      "implementation": "edits/dcrnn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gwnet",
+      "implementation": "edits/gwnet.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "astgcn",
+      "implementation": "edits/astgcn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "mtgnn",
+      "implementation": "edits/mtgnn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "staeformer",
+      "implementation": "edits/staeformer.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

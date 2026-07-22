@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-hyperparameter-search",
+  "task_folder": "tasks/optimization-hyperparameter-search",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-hyperparameter-search/config.json",
+      "task_description_path": "tasks/optimization-hyperparameter-search/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "xgboost",
+      "cmd": "scripts/xgboost.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "svm",
+      "cmd": "scripts/svm.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "nn",
+      "cmd": "scripts/nn.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.33,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "random_search",
+      "implementation": "edits/random_search.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "tpe",
+      "implementation": "edits/tpe.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "hyperband",
+      "implementation": "edits/hyperband.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dehb",
+      "implementation": "edits/dehb.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "bohb",
+      "implementation": "edits/bohb.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "optuna_cma",
+      "implementation": "edits/optuna_cma.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

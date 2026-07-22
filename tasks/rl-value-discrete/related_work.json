@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "rl-value-discrete",
+  "task_folder": "tasks/rl-value-discrete",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/rl-value-discrete/config.json",
+      "task_description_path": "tasks/rl-value-discrete/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "cartpole-v1",
+      "cmd": "scripts/cartpole.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "lunarlander-v2",
+      "cmd": "scripts/lunarlander.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "acrobot-v1",
+      "cmd": "scripts/acrobot.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "qr_dqn",
+      "implementation": "edits/qr_dqn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dueling_dqn",
+      "implementation": "edits/dueling_dqn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "c51",
+      "implementation": "edits/c51.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

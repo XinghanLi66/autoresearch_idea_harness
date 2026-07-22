@@ -1,0 +1,80 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/gpt_345m.sh",
+      "label": "gpt-345m",
+      "group": 1,
+      "compute": 2.0,
+      "time": "20:00:00",
+      "package": "nanoGPT"
+    },
+    {
+      "cmd": "scripts/lm_eval_345m.sh",
+      "label": "lm-eval-345m",
+      "group": 2,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "package": "lm-evaluation-harness"
+    },
+    {
+      "cmd": "scripts/niah_eval.sh",
+      "label": "niah-eval-345m",
+      "group": 3,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "package": "nanoGPT",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "titans_default": {
+      "edit_ops": "edits/titans_default.edit.py"
+    },
+    "linear_memory": {
+      "edit_ops": "edits/linear_memory.edit.py"
+    },
+    "deep_momentum": {
+      "edit_ops": "edits/deep_momentum.edit.py"
+    },
+    "fast_weights_hebbian": {
+      "edit_ops": "edits/fast_weights_hebbian.edit.py"
+    },
+    "vanilla": {
+      "edit_ops": "edits/vanilla.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "nanoGPT/custom_pretrain.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 35,
+          "end": 274
+        },
+        {
+          "start": 335,
+          "end": 346
+        },
+        {
+          "start": 531,
+          "end": 533
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ],
+  "hidden_metrics": [
+    "piqa_*",
+    "winogrande_*"
+  ]
+}

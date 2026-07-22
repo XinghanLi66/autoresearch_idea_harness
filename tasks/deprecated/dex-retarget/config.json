@@ -1,0 +1,91 @@
+{
+  "deprecated": true,
+  "deprecated_reason": "Evaluation uses a task-local synthetic smooth hand trajectory rather than a real retargeting benchmark or captured human-hand motion dataset; deprecated on 2026-04-29 pending replacement with standard retargeting data.",
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/allegro.sh",
+      "label": "allegro",
+      "group": 1,
+      "compute": 1,
+      "time": "0:30:00",
+      "package": "dex-retargeting"
+    },
+    {
+      "cmd": "scripts/svh.sh",
+      "label": "svh",
+      "group": 2,
+      "compute": 1,
+      "time": "0:30:00",
+      "package": "dex-retargeting"
+    },
+    {
+      "cmd": "scripts/leap.sh",
+      "label": "leap",
+      "group": 3,
+      "compute": 1,
+      "time": "0:30:00",
+      "package": "dex-retargeting",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "position": {
+      "edit_ops": "edits/position.edit.py"
+    },
+    "vector": {
+      "edit_ops": "edits/vector.edit.py"
+    },
+    "dexpilot": {
+      "edit_ops": "edits/dexpilot.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "dex-retargeting/src/dex_retargeting/custom_optimizer.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "dex-retargeting/src/dex_retargeting/optimizer.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "dex-retargeting/src/dex_retargeting/robot_wrapper.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    },
+    {
+      "filename": "dex-retargeting/src/dex_retargeting/seq_retarget.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": []
+    }
+  ]
+}

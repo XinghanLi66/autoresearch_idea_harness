@@ -1,0 +1,596 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-sample-weighting",
+  "task_folder": "tasks/cv-sample-weighting",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "sample reweighting for long-tailed image classification",
+    "research_question": "Design a novel sample reweighting strategy for class-imbalanced image classification that improves test accuracy on long-tail distributed datasets across different architectures and imbalance ratios.",
+    "local_sources": {
+      "config_path": "tasks/cv-sample-weighting/config.json",
+      "task_description_path": "tasks/cv-sample-weighting/task_description.md"
+    },
+    "notes": [
+      "Task edits are restricted to pure class-count-to-weight logic in pytorch-vision/custom_weighting.py.",
+      "Benchmarks are CIFAR-10-LT and CIFAR-100-LT with ResNet-32 and hidden VGG-16-BN evaluation."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 14,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 9
+  },
+  "tests": [
+    {
+      "label": "resnet32-cifar10lt",
+      "cmd": "scripts/resnet32_cifar10lt.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1906.07413",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "ResNet architecture on CIFAR-10-LT; CIFAR-LT benchmark convention is widely standardized in the LDAM paper."
+    },
+    {
+      "label": "resnet32-cifar100lt",
+      "cmd": "scripts/resnet32_cifar100lt.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1906.07413",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "ResNet architecture on CIFAR-100-LT; benchmark linkage follows the LDAM long-tail evaluation setup."
+    },
+    {
+      "label": "vgg16bn-cifar100lt",
+      "cmd": "scripts/vgg16bn_cifar100lt.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:59:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1409.1556",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1906.07413",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Hidden evaluation swaps in VGG-16-BN while keeping the same CIFAR-100-LT benchmark family."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "inverse_freq",
+      "implementation": "edits/inverse_freq.edit.py",
+      "labels": [
+        "cost_sensitive_learning",
+        "class_frequency_weighting"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/tkde.2008.239",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Inverse-frequency weighting is a standard heuristic rather than a single canonical method paper; linked approximately to the imbalanced-learning survey that covers class-frequency reweighting."
+    },
+    {
+      "name": "effective_number",
+      "implementation": "edits/effective_number.edit.py",
+      "labels": [
+        "class_balanced_loss",
+        "effective_number"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2019.00949",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Exact match to the class-balanced weighting formula based on effective number of samples."
+    },
+    {
+      "name": "balanced_softmax",
+      "implementation": "edits/balanced_softmax.edit.py",
+      "labels": [
+        "balanced_softmax",
+        "long_tail_loss"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2007.10740",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Task baseline matches the Balanced Softmax loss introduced in the Balanced Meta-Softmax paper."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1109/tkde.2008.239",
+      "title": "Learning from Imbalanced Data",
+      "authors": [
+        "Haibo He",
+        "Edwardo A. Garcia"
+      ],
+      "year": 2009,
+      "venue": "IEEE Transactions on Knowledge and Data Engineering",
+      "doi": "10.1109/TKDE.2008.239",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2118978333",
+      "landing_page": "https://doi.org/10.1109/TKDE.2008.239",
+      "source_urls": [
+        "https://openalex.org/W2118978333",
+        "https://doi.org/10.1109/TKDE.2008.239"
+      ],
+      "bibtex": "@article{Haibo_He_2009, title={Learning from Imbalanced Data}, volume={21}, ISSN={1041-4347}, url={http://dx.doi.org/10.1109/tkde.2008.239}, DOI={10.1109/tkde.2008.239}, number={9}, journal={IEEE Transactions on Knowledge and Data Engineering}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Haibo He and Garcia, E.A.}, year={2009}, month=sep, pages={1263-1284} }",
+      "relevance_tags": [
+        "baseline",
+        "survey",
+        "sample_weighting",
+        "class_imbalance"
+      ],
+      "baseline_links": [
+        "inverse_freq"
+      ],
+      "test_links": [],
+      "relevance": "Broad survey grounding classical class-frequency and cost-sensitive weighting approaches; used as the approximate citation for the inverse-frequency baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1803.09050",
+      "title": "Learning to Reweight Examples for Robust Deep Learning",
+      "authors": [
+        "Mengye Ren",
+        "Wenyuan Zeng",
+        "Bin Yang",
+        "Raquel Urtasun"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1803.09050",
+      "arxiv_id": "1803.09050",
+      "openalex_id": "https://openalex.org/W2795282075",
+      "landing_page": "https://doi.org/10.48550/arxiv.1803.09050",
+      "source_urls": [
+        "https://openalex.org/W2795282075",
+        "https://doi.org/10.48550/arxiv.1803.09050"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1803.09050, doi = {10.48550/ARXIV.1803.09050}, url = {https://arxiv.org/abs/1803.09050}, author = {Ren, Mengye and Zeng, Wenyuan and Yang, Bin and Urtasun, Raquel}, keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Learning to Reweight Examples for Robust Deep Learning}, publisher = {arXiv}, year = {2018}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "meta_reweighting",
+        "sample_weighting",
+        "class_imbalance"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Representative learned sample-reweighting paper showing that example weighting itself is a strong design axis beyond fixed class-count heuristics.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1812.03372",
+      "title": "What is the Effect of Importance Weighting in Deep Learning?",
+      "authors": [
+        "Jonathon Byrd",
+        "Zachary C. Lipton"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1812.03372",
+      "arxiv_id": "1812.03372",
+      "openalex_id": "https://openalex.org/W2921393178",
+      "landing_page": "https://doi.org/10.48550/arxiv.1812.03372",
+      "source_urls": [
+        "https://openalex.org/W2921393178",
+        "https://doi.org/10.48550/arxiv.1812.03372"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1812.03372, doi = {10.48550/ARXIV.1812.03372}, url = {https://arxiv.org/abs/1812.03372}, author = {Byrd, Jonathon and Lipton, Zachary C.}, keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {What is the Effect of Importance Weighting in Deep Learning?}, publisher = {arXiv}, year = {2018}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "importance_weighting",
+        "sample_weighting",
+        "theory"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Analyzes when importance weighting matters in deep nets, which is directly relevant to designing class-count-based loss weights for this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2019.00949",
+      "title": "Class-Balanced Loss Based on Effective Number of Samples",
+      "authors": [
+        "Yin Cui",
+        "Menglin Jia",
+        "Tsung-Yi Lin",
+        "Yang Song",
+        "Serge Belongie"
+      ],
+      "year": 2019,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2019.00949",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2963691377",
+      "landing_page": "https://doi.org/10.1109/CVPR.2019.00949",
+      "source_urls": [
+        "https://openalex.org/W2963691377",
+        "https://doi.org/10.1109/CVPR.2019.00949"
+      ],
+      "bibtex": "@inproceedings{Cui_2019, title={Class-Balanced Loss Based on Effective Number of Samples}, url={http://dx.doi.org/10.1109/cvpr.2019.00949}, DOI={10.1109/cvpr.2019.00949}, booktitle={2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Cui, Yin and Jia, Menglin and Lin, Tsung-Yi and Song, Yang and Belongie, Serge}, year={2019}, month=jun, pages={9260-9269} }",
+      "relevance_tags": [
+        "baseline",
+        "effective_number",
+        "sample_weighting",
+        "long_tail"
+      ],
+      "baseline_links": [
+        "effective_number"
+      ],
+      "test_links": [],
+      "relevance": "Direct source for the effective-number baseline already present in the task config.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1906.07413",
+      "title": "Learning Imbalanced Datasets with Label-Distribution-Aware Margin Loss",
+      "authors": [
+        "Kaidi Cao",
+        "Colin Wei",
+        "Adrien Gaidon",
+        "Nikos Aréchiga",
+        "Tengyu Ma"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1906.07413",
+      "arxiv_id": "1906.07413",
+      "openalex_id": "https://openalex.org/W2952120674",
+      "landing_page": "https://doi.org/10.48550/arxiv.1906.07413",
+      "source_urls": [
+        "https://openalex.org/W2952120674",
+        "https://doi.org/10.48550/arxiv.1906.07413"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1906.07413, doi = {10.48550/ARXIV.1906.07413}, url = {https://arxiv.org/abs/1906.07413}, author = {Cao, Kaidi and Wei, Colin and Gaidon, Adrien and Arechiga, Nikos and Ma, Tengyu}, keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Learning Imbalanced Datasets with Label-Distribution-Aware Margin Loss}, publisher = {arXiv}, year = {2019}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "benchmark",
+        "long_tail",
+        "cifar_lt",
+        "loss_design"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet32-cifar10lt",
+        "resnet32-cifar100lt",
+        "vgg16bn-cifar100lt"
+      ],
+      "relevance": "Widely cited source for CIFAR-LT benchmark construction and a central long-tail classification comparison point used to contextualize the task's evaluation setup.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1910.09217",
+      "title": "Decoupling Representation and Classifier for Long-Tailed Recognition",
+      "authors": [
+        "Bingyi Kang",
+        "Saining Xie",
+        "Marcus Rohrbach",
+        "Zhicheng Yan",
+        "Albert Gordo",
+        "Jiashi Feng",
+        "Yannis Kalantidis"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1910.09217",
+      "arxiv_id": "1910.09217",
+      "openalex_id": "https://openalex.org/W2981188200",
+      "landing_page": "https://doi.org/10.48550/arxiv.1910.09217",
+      "source_urls": [
+        "https://openalex.org/W2981188200",
+        "https://doi.org/10.48550/arxiv.1910.09217"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1910.09217, doi = {10.48550/ARXIV.1910.09217}, url = {https://arxiv.org/abs/1910.09217}, author = {Kang, Bingyi and Xie, Saining and Rohrbach, Marcus and Yan, Zhicheng and Gordo, Albert and Feng, Jiashi and Kalantidis, Yannis}, keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Decoupling Representation and Classifier for Long-Tailed Recognition}, publisher = {arXiv}, year = {2019}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "long_tail",
+        "classifier_bias",
+        "rebalancing"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Important long-tail reference showing that rebalancing often affects the classifier more than the representation, which is relevant for interpreting class-weighting behavior in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2007.10740",
+      "title": "Balanced Meta-Softmax for Long-Tailed Visual Recognition",
+      "authors": [
+        "Jiawei Ren",
+        "Cunjun Yu",
+        "Shunan Sheng",
+        "Xiao Ma",
+        "Haiyu Zhao",
+        "Shuai Yi",
+        "Hongsheng Li"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2007.10740",
+      "arxiv_id": "2007.10740",
+      "openalex_id": "https://openalex.org/W3044057088",
+      "landing_page": "https://doi.org/10.48550/arxiv.2007.10740",
+      "source_urls": [
+        "https://openalex.org/W3044057088",
+        "https://doi.org/10.48550/arxiv.2007.10740"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2007.10740, doi = {10.48550/ARXIV.2007.10740}, url = {https://arxiv.org/abs/2007.10740}, author = {Ren, Jiawei and Yu, Cunjun and Sheng, Shunan and Ma, Xiao and Zhao, Haiyu and Yi, Shuai and Li, Hongsheng}, keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Balanced Meta-Softmax for Long-Tailed Visual Recognition}, publisher = {arXiv}, year = {2020}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "baseline",
+        "balanced_softmax",
+        "long_tail_loss"
+      ],
+      "baseline_links": [
+        "balanced_softmax"
+      ],
+      "test_links": [],
+      "relevance": "Direct source for the Balanced Softmax baseline present in the task config.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2007.07314",
+      "title": "Long-tail learning via logit adjustment",
+      "authors": [
+        "Aditya Krishna Menon",
+        "Sadeep Jayasumana",
+        "Ankit Singh Rawat",
+        "Himanshu Jain",
+        "Andreas Veit",
+        "Sanjiv Kumar"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2007.07314",
+      "arxiv_id": "2007.07314",
+      "openalex_id": "https://openalex.org/W3042496707",
+      "landing_page": "https://doi.org/10.48550/arxiv.2007.07314",
+      "source_urls": [
+        "https://openalex.org/W3042496707",
+        "https://doi.org/10.48550/arxiv.2007.07314"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2007.07314, doi = {10.48550/ARXIV.2007.07314}, url = {https://arxiv.org/abs/2007.07314}, author = {Menon, Aditya Krishna and Jayasumana, Sadeep and Rawat, Ankit Singh and Jain, Himanshu and Veit, Andreas and Kumar, Sanjiv}, keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Long-tail learning via logit adjustment}, publisher = {arXiv}, year = {2020}, copyright = {Creative Commons Attribution Non Commercial Share Alike 4.0 International} }",
+      "relevance_tags": [
+        "long_tail",
+        "logit_adjustment",
+        "reweighting_equivalence"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant comparator paper because logit adjustment is closely related to class-prior correction and often compared against weighting-based long-tail methods.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr42600.2020.00974",
+      "title": "BBN: Bilateral-Branch Network With Cumulative Learning for Long-Tailed Visual Recognition",
+      "authors": [
+        "Boyan Zhou",
+        "Quan Cui",
+        "Xiu-Shen Wei",
+        "Zhao-Min Chen"
+      ],
+      "year": 2020,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR42600.2020.00974",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3034601242",
+      "landing_page": "https://doi.org/10.1109/cvpr42600.2020.00974",
+      "source_urls": [
+        "https://openalex.org/W3034601242",
+        "https://doi.org/10.1109/cvpr42600.2020.00974"
+      ],
+      "bibtex": "@inproceedings{Zhou_2020, title={BBN: Bilateral-Branch Network With Cumulative Learning for Long-Tailed Visual Recognition}, url={http://dx.doi.org/10.1109/cvpr42600.2020.00974}, DOI={10.1109/cvpr42600.2020.00974}, booktitle={2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Zhou, Boyan and Cui, Quan and Wei, Xiu-Shen and Chen, Zhao-Min}, year={2020}, month=jun, pages={9716-9725} }",
+      "relevance_tags": [
+        "long_tail",
+        "rebalancing",
+        "classifier_learning"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Strong long-tail baseline emphasizing the tradeoff between representation learning and classifier rebalancing, relevant to interpreting class-weight strategies.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr42600.2020.00763",
+      "title": "Rethinking Class-Balanced Methods for Long-Tailed Visual Recognition From a Domain Adaptation Perspective",
+      "authors": [
+        "Muhammad Abdullah Jamal",
+        "Matthew A. Brown",
+        "Ming-Hsuan Yang",
+        "Liqiang Wang",
+        "Boqing Gong"
+      ],
+      "year": 2020,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR42600.2020.00763",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3035054804",
+      "landing_page": "https://doi.org/10.1109/cvpr42600.2020.00763",
+      "source_urls": [
+        "https://openalex.org/W3035054804",
+        "https://doi.org/10.1109/cvpr42600.2020.00763"
+      ],
+      "bibtex": "@inproceedings{Jamal_2020, title={Rethinking Class-Balanced Methods for Long-Tailed Visual Recognition From a Domain Adaptation Perspective}, url={http://dx.doi.org/10.1109/cvpr42600.2020.00763}, DOI={10.1109/cvpr42600.2020.00763}, booktitle={2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Jamal, Muhammad Abdullah and Brown, Matthew and Yang, Ming-Hsuan and Wang, Liqiang and Gong, Boqing}, year={2020}, month=jun, pages={7607-7616} }",
+      "relevance_tags": [
+        "long_tail",
+        "class_balanced_methods",
+        "sample_weighting"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Critiques and extends class-balanced methods specifically, making it directly relevant to the task's search space over count-to-weight mappings.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR.2016.90",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2194775991",
+      "landing_page": "https://doi.org/10.1109/cvpr.2016.90",
+      "source_urls": [
+        "https://openalex.org/W2194775991",
+        "https://doi.org/10.1109/cvpr.2016.90"
+      ],
+      "bibtex": "@inproceedings{He_2016, title={Deep Residual Learning for Image Recognition}, url={http://dx.doi.org/10.1109/cvpr.2016.90}, DOI={10.1109/cvpr.2016.90}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian}, year={2016}, month=jun, pages={770-778} }",
+      "relevance_tags": [
+        "architecture",
+        "resnet",
+        "benchmark_backbone"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet32-cifar10lt",
+        "resnet32-cifar100lt"
+      ],
+      "relevance": "Architecture citation for the two ResNet-32 evaluation commands in the task config.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1409.1556",
+      "title": "Very Deep Convolutional Networks for Large-Scale Image Recognition",
+      "authors": [
+        "Karen Simonyan",
+        "Andrew Zisserman"
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1409.1556",
+      "arxiv_id": "1409.1556",
+      "openalex_id": "https://openalex.org/W1686810756",
+      "landing_page": "https://doi.org/10.48550/arxiv.1409.1556",
+      "source_urls": [
+        "https://openalex.org/W1686810756",
+        "https://doi.org/10.48550/arxiv.1409.1556"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1409.1556, doi = {10.48550/ARXIV.1409.1556}, url = {https://arxiv.org/abs/1409.1556}, author = {Simonyan, Karen and Zisserman, Andrew}, keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Very Deep Convolutional Networks for Large-Scale Image Recognition}, publisher = {arXiv}, year = {2014}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "architecture",
+        "vgg",
+        "benchmark_backbone"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "vgg16bn-cifar100lt"
+      ],
+      "relevance": "Architecture citation for the hidden VGG-16-BN evaluation command.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/zp44cu3g",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB dataset record for the CIFAR technical report",
+      "doi": "10.57702/ZP44CU3G",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3118608800",
+      "landing_page": "https://doi.org/10.57702/zp44cu3g",
+      "source_urls": [
+        "https://openalex.org/W3118608800",
+        "https://doi.org/10.57702/zp44cu3g"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g, doi = {10.57702/ZP44CU3G}, url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a}, author = {Krizhevsky, Alex}, keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images}, language = {en}, title = {Learning Multiple Layers of Features from Tiny Images}, publisher = {TIB}, year = {2024} }",
+      "relevance_tags": [
+        "dataset",
+        "cifar10",
+        "cifar100",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet32-cifar10lt",
+        "resnet32-cifar100lt",
+        "vgg16bn-cifar100lt"
+      ],
+      "relevance": "Used as the retrieved citation record for the CIFAR-10/CIFAR-100 source technical report underlying the task's CIFAR-LT benchmarks.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1709.01450",
+      "title": "The Devil is in the Tails: Fine-grained Classification in the Wild",
+      "authors": [
+        "Grant Van Horn",
+        "Pietro Perona"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1709.01450",
+      "arxiv_id": "1709.01450",
+      "openalex_id": "https://openalex.org/W2753211788",
+      "landing_page": "https://doi.org/10.48550/arxiv.1709.01450",
+      "source_urls": [
+        "https://openalex.org/W2753211788",
+        "https://doi.org/10.48550/arxiv.1709.01450"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1709.01450, doi = {10.48550/ARXIV.1709.01450}, url = {https://arxiv.org/abs/1709.01450}, author = {Van Horn, Grant and Perona, Pietro}, keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {The Devil is in the Tails: Fine-grained Classification in the Wild}, publisher = {arXiv}, year = {2017}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "long_tail",
+        "problem_motivation",
+        "visual_recognition"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Canonical motivation paper for long-tailed visual recognition as a learning problem, providing broader context for why sample weighting matters.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

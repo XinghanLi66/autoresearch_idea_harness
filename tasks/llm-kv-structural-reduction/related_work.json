@@ -1,0 +1,596 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-kv-structural-reduction",
+  "task_folder": "tasks/llm-kv-structural-reduction",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "KV-state structural reduction for GPT-style causal language model pretraining",
+    "research_question": "Design an attention structure that preserves small-scale GPT pretraining quality while reducing realized KV-cache footprint through head sharing or latent KV compression.",
+    "local_sources": {
+      "config_path": "tasks/llm-kv-structural-reduction/config.json",
+      "task_description_path": "tasks/llm-kv-structural-reduction/task_description.md"
+    },
+    "notes": [
+      "Baselines map to the intended MHA -> MQA -> GQA -> MLA structural chain.",
+      "The visible eval-* settings are lightweight replays from the train-ctx1024 final metrics snapshot, matching mature nanoGPT task practice of training once and evaluating held-out corpora from that checkpoint."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 4,
+    "baseline_links_found": 4,
+    "test_entries": 5,
+    "test_links_found": 11
+  },
+  "tests": [
+    {
+      "label": "train-ctx1024",
+      "cmd": "scripts/gpt_124m.sh",
+      "package": "nanoGPT",
+      "group": 1,
+      "compute": 1.0,
+      "time": "16:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2005.14165",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2203.15556",
+          "role": "training_scale"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1609.07843",
+          "role": "heldout_eval"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1606.06031",
+          "role": "heldout_eval"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.03762",
+          "role": "architecture"
+        }
+      ],
+      "notes": "Primary 124M ctx1024 autoregressive pretraining run. The script also emits WikiText-2/103 and LAMBADA aux metrics that the eval-* replay scripts expose as separate leaderboard settings."
+    },
+    {
+      "label": "train-ctx256",
+      "cmd": "scripts/gpt_124m_shortctx.sh",
+      "package": "nanoGPT",
+      "group": 2,
+      "compute": 1.0,
+      "time": "16:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2005.14165",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2203.15556",
+          "role": "training_scale"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.03762",
+          "role": "architecture"
+        }
+      ],
+      "notes": "Hidden short-context robustness run. WikiText/LAMBADA visible eval settings are replayed from train-ctx1024 aux metrics, not separate training commands."
+    },
+    {
+      "label": "eval-wikitext2",
+      "cmd": "scripts/gpt_124m_eval_wikitext2.sh",
+      "package": "nanoGPT",
+      "group": 3,
+      "compute": 0.1,
+      "time": "00:10:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1609.07843",
+          "role": "heldout_eval"
+        }
+      ],
+      "notes": "Lightweight replay of WikiText-2 metrics emitted by the final train-ctx1024 checkpoint."
+    },
+    {
+      "label": "eval-wikitext103",
+      "cmd": "scripts/gpt_124m_eval_wikitext103.sh",
+      "package": "nanoGPT",
+      "group": 3,
+      "compute": 0.1,
+      "time": "00:10:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1609.07843",
+          "role": "heldout_eval"
+        }
+      ],
+      "notes": "Lightweight replay of WikiText-103 metrics emitted by the final train-ctx1024 checkpoint."
+    },
+    {
+      "label": "eval-lambada",
+      "cmd": "scripts/gpt_124m_eval_lambada.sh",
+      "package": "nanoGPT",
+      "group": 3,
+      "compute": 0.1,
+      "time": "00:10:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1606.06031",
+          "role": "heldout_eval"
+        }
+      ],
+      "notes": "Lightweight replay of LAMBADA metrics emitted by the final train-ctx1024 checkpoint."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "mha",
+      "implementation": "edits/mha.edit.py",
+      "labels": [
+        "multi_head_attention",
+        "dense_kv_control"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.03762",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Dense multi-head attention control with one KV head per query head."
+    },
+    {
+      "name": "mqa",
+      "implementation": "edits/mqa.edit.py",
+      "labels": [
+        "multi_query_attention",
+        "shared_kv_head"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1911.02150",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Multi-query attention anchor with one shared KV head reused across query heads."
+    },
+    {
+      "name": "gqa",
+      "implementation": "edits/gqa.edit.py",
+      "labels": [
+        "grouped_query_attention",
+        "shared_kv_groups"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2305.13245",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Grouped-query attention anchor between dense MHA and one-head MQA."
+    },
+    {
+      "name": "mla",
+      "implementation": "edits/mla.edit.py",
+      "labels": [
+        "multi_head_latent_attention",
+        "latent_kv_compression"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2405.04434",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "MLA-style latent KV bottleneck adapted into the fixed nanoGPT attention scaffold."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.1706.03762",
+      "title": "Attention Is All You Need",
+      "authors": [
+        "Ashish Vaswani",
+        "Noam Shazeer",
+        "Niki Parmar",
+        "Jakob Uszkoreit",
+        "Llion Jones",
+        "Aidan N. Gomez",
+        "Lukasz Kaiser",
+        "Illia Polosukhin"
+      ],
+      "year": 2017,
+      "venue": "NeurIPS",
+      "doi": "10.48550/ARXIV.1706.03762",
+      "arxiv_id": "1706.03762",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1706.03762",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1706.03762",
+        "https://arxiv.org/abs/1706.03762"
+      ],
+      "bibtex": "@article{vaswani2017attention, title={Attention Is All You Need}, author={Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia}, journal={Advances in Neural Information Processing Systems}, year={2017}}",
+      "relevance_tags": [
+        "attention",
+        "mha",
+        "transformer"
+      ],
+      "baseline_links": [
+        "mha"
+      ],
+      "test_links": [
+        "train-ctx1024",
+        "train-ctx256"
+      ],
+      "relevance": "Defines the dense multi-head attention control that this task structurally modifies.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1911.02150",
+      "title": "Fast Transformer Decoding: One Write-Head is All You Need",
+      "authors": [
+        "Noam Shazeer"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1911.02150",
+      "arxiv_id": "1911.02150",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1911.02150",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1911.02150",
+        "https://arxiv.org/abs/1911.02150"
+      ],
+      "bibtex": "@article{shazeer2019fast, title={Fast Transformer Decoding: One Write-Head is All You Need}, author={Shazeer, Noam}, journal={arXiv preprint arXiv:1911.02150}, year={2019}}",
+      "relevance_tags": [
+        "mqa",
+        "kv_cache",
+        "decoding"
+      ],
+      "baseline_links": [
+        "mqa"
+      ],
+      "test_links": [],
+      "relevance": "Canonical multi-query attention reference for sharing KV heads to reduce decoder cache bandwidth and memory.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2305.13245",
+      "title": "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints",
+      "authors": [
+        "Joshua Ainslie",
+        "James Lee-Thorp",
+        "Michiel de Jong",
+        "Yury Zemlyanskiy",
+        "Federico Lebron",
+        "Sumit Sanghai"
+      ],
+      "year": 2023,
+      "venue": "EMNLP",
+      "doi": "10.48550/ARXIV.2305.13245",
+      "arxiv_id": "2305.13245",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2305.13245",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2305.13245",
+        "https://arxiv.org/abs/2305.13245"
+      ],
+      "bibtex": "@article{ainslie2023gqa, title={GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints}, author={Ainslie, Joshua and Lee-Thorp, James and de Jong, Michiel and Zemlyanskiy, Yury and Lebron, Federico and Sanghai, Sumit}, journal={arXiv preprint arXiv:2305.13245}, year={2023}}",
+      "relevance_tags": [
+        "gqa",
+        "mqa",
+        "kv_cache"
+      ],
+      "baseline_links": [
+        "gqa"
+      ],
+      "test_links": [],
+      "relevance": "Canonical grouped-query attention reference for intermediate KV sharing between MHA and MQA.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2405.04434",
+      "title": "DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model",
+      "authors": [
+        "DeepSeek-AI"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2405.04434",
+      "arxiv_id": "2405.04434",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2405.04434",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2405.04434",
+        "https://arxiv.org/abs/2405.04434"
+      ],
+      "bibtex": "@article{deepseek2024v2, title={DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model}, author={{DeepSeek-AI}}, journal={arXiv preprint arXiv:2405.04434}, year={2024}}",
+      "relevance_tags": [
+        "mla",
+        "latent_kv",
+        "kv_cache"
+      ],
+      "baseline_links": [
+        "mla"
+      ],
+      "test_links": [],
+      "relevance": "Introduces multi-head latent attention, the approximate latent-KV baseline family adapted into this fixed scaffold.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1609.07843",
+      "title": "Pointer Sentinel Mixture Models",
+      "authors": [
+        "Stephen Merity",
+        "Caiming Xiong",
+        "James Bradbury",
+        "Richard Socher"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1609.07843",
+      "arxiv_id": "1609.07843",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1609.07843",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1609.07843",
+        "https://arxiv.org/abs/1609.07843"
+      ],
+      "bibtex": "@article{merity2016pointer, title={Pointer Sentinel Mixture Models}, author={Merity, Stephen and Xiong, Caiming and Bradbury, James and Socher, Richard}, journal={arXiv preprint arXiv:1609.07843}, year={2016}}",
+      "relevance_tags": [
+        "wikitext",
+        "language_modeling",
+        "heldout_eval"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train-ctx1024"
+      ],
+      "relevance": "Introduces WikiText-2 and WikiText-103, the held-out language-modeling corpora used by the aux eval.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1606.06031",
+      "title": "The LAMBADA dataset: Word prediction requiring a broad discourse context",
+      "authors": [
+        "Denis Paperno",
+        "German Kruszewski",
+        "Angeliki Lazaridou",
+        "Quan Ngoc Pham",
+        "Raffaella Bernardi",
+        "Sandro Pezzelle",
+        "Marco Baroni",
+        "Gemma Boleda",
+        "Raquel Fernandez"
+      ],
+      "year": 2016,
+      "venue": "ACL",
+      "doi": "10.48550/ARXIV.1606.06031",
+      "arxiv_id": "1606.06031",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1606.06031",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1606.06031",
+        "https://arxiv.org/abs/1606.06031"
+      ],
+      "bibtex": "@article{paperno2016lambada, title={The LAMBADA dataset: Word prediction requiring a broad discourse context}, author={Paperno, Denis and Kruszewski, German and Lazaridou, Angeliki and Pham, Quan Ngoc and Bernardi, Raffaella and Pezzelle, Sandro and Baroni, Marco and Boleda, Gemma and Fernandez, Raquel}, journal={arXiv preprint arXiv:1606.06031}, year={2016}}",
+      "relevance_tags": [
+        "lambada",
+        "language_modeling",
+        "heldout_eval"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train-ctx1024"
+      ],
+      "relevance": "Held-out long-discourse word-prediction benchmark used as one of the task's aux eval corpora.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2005.14165",
+      "title": "Language Models are Few-Shot Learners",
+      "authors": [
+        "Tom B. Brown",
+        "Benjamin Mann",
+        "Nick Ryder",
+        "Melanie Subbiah",
+        "Jared Kaplan",
+        "Prafulla Dhariwal",
+        "Arvind Neelakantan",
+        "Pranav Shyam",
+        "Girish Sastry",
+        "Amanda Askell",
+        "Sandhini Agarwal",
+        "Ariel Herbert-Voss",
+        "Gretchen Krueger",
+        "Tom Henighan",
+        "Rewon Child",
+        "Aditya Ramesh",
+        "Daniel M. Ziegler",
+        "Jeffrey Wu",
+        "Clemens Winter",
+        "Christopher Hesse",
+        "Mark Chen",
+        "Eric Sigler",
+        "Mateusz Litwin",
+        "Scott Gray",
+        "Benjamin Chess",
+        "Jack Clark",
+        "Christopher Berner",
+        "Sam McCandlish",
+        "Alec Radford",
+        "Ilya Sutskever",
+        "Dario Amodei"
+      ],
+      "year": 2020,
+      "venue": "NeurIPS",
+      "doi": "10.48550/ARXIV.2005.14165",
+      "arxiv_id": "2005.14165",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2005.14165",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2005.14165",
+        "https://arxiv.org/abs/2005.14165"
+      ],
+      "bibtex": "@article{brown2020language, title={Language Models are Few-Shot Learners}, author={Brown, Tom B. and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda and Agarwal, Sandhini and Herbert-Voss, Ariel and Krueger, Gretchen and Henighan, Tom and Child, Rewon and Ramesh, Aditya and Ziegler, Daniel M. and Wu, Jeffrey and Winter, Clemens and Hesse, Christopher and Chen, Mark and Sigler, Eric and Litwin, Mateusz and Gray, Scott and Chess, Benjamin and Clark, Jack and Berner, Christopher and McCandlish, Sam and Radford, Alec and Sutskever, Ilya and Amodei, Dario}, journal={Advances in Neural Information Processing Systems}, year={2020}}",
+      "relevance_tags": [
+        "gpt",
+        "autoregressive_pretraining",
+        "language_modeling"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train-ctx1024",
+        "train-ctx256"
+      ],
+      "relevance": "Canonical GPT-style autoregressive pretraining reference for the fixed training recipe family.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2203.15556",
+      "title": "Training Compute-Optimal Large Language Models",
+      "authors": [
+        "Jordan Hoffmann",
+        "Sebastian Borgeaud",
+        "Arthur Mensch",
+        "Elena Buchatskaya",
+        "Trevor Cai",
+        "Eliza Rutherford",
+        "Diego de Las Casas",
+        "Lisa Anne Hendricks",
+        "Johannes Welbl",
+        "Aidan Clark",
+        "Tom Hennigan",
+        "Eric Noland",
+        "Katie Millican",
+        "George van den Driessche",
+        "Bogdan Damoc",
+        "Aurelia Guy",
+        "Simon Osindero",
+        "Karen Simonyan",
+        "Erich Elsen",
+        "Jack W. Rae",
+        "Oriol Vinyals",
+        "Laurent Sifre"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2203.15556",
+      "arxiv_id": "2203.15556",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2203.15556",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2203.15556",
+        "https://arxiv.org/abs/2203.15556"
+      ],
+      "bibtex": "@article{hoffmann2022training, title={Training Compute-Optimal Large Language Models}, author={Hoffmann, Jordan and Borgeaud, Sebastian and Mensch, Arthur and Buchatskaya, Elena and Cai, Trevor and Rutherford, Eliza and de Las Casas, Diego and Hendricks, Lisa Anne and Welbl, Johannes and Clark, Aidan and Hennigan, Tom and Noland, Eric and Millican, Katie and van den Driessche, George and Damoc, Bogdan and Guy, Aurelia and Osindero, Simon and Simonyan, Karen and Elsen, Erich and Rae, Jack W. and Vinyals, Oriol and Sifre, Laurent}, journal={arXiv preprint arXiv:2203.15556}, year={2022}}",
+      "relevance_tags": [
+        "pretraining_scale",
+        "compute_budget",
+        "language_modeling"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train-ctx1024",
+        "train-ctx256"
+      ],
+      "relevance": "Motivates using a fixed compute/data budget when comparing pretraining architecture changes.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2302.13971",
+      "title": "LLaMA: Open and Efficient Foundation Language Models",
+      "authors": [
+        "Hugo Touvron",
+        "Thibaut Lavril",
+        "Gautier Izacard",
+        "Xavier Martinet",
+        "Marie-Anne Lachaux",
+        "Timothee Lacroix",
+        "Baptiste Roziere",
+        "Naman Goyal",
+        "Eric Hambro",
+        "Faisal Azhar",
+        "Aurelien Rodriguez",
+        "Armand Joulin",
+        "Edouard Grave",
+        "Guillaume Lample"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2302.13971",
+      "arxiv_id": "2302.13971",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2302.13971",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2302.13971",
+        "https://arxiv.org/abs/2302.13971"
+      ],
+      "bibtex": "@article{touvron2023llama, title={LLaMA: Open and Efficient Foundation Language Models}, author={Touvron, Hugo and Lavril, Thibaut and Izacard, Gautier and Martinet, Xavier and Lachaux, Marie-Anne and Lacroix, Timothee and Roziere, Baptiste and Goyal, Naman and Hambro, Eric and Azhar, Faisal and Rodriguez, Aurelien and Joulin, Armand and Grave, Edouard and Lample, Guillaume}, journal={arXiv preprint arXiv:2302.13971}, year={2023}}",
+      "relevance_tags": [
+        "efficient_llm",
+        "pretraining",
+        "foundation_model"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Modern efficient decoder-only LLM reference for interpreting quality-preserving architectural changes.",
+      "verified_by": "manual_metadata"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2310.06825",
+      "title": "Mistral 7B",
+      "authors": [
+        "Albert Q. Jiang",
+        "Alexandre Sablayrolles",
+        "Arthur Mensch",
+        "Chris Bamford",
+        "Devendra Singh Chaplot",
+        "Diego de Las Casas",
+        "Florian Bressand",
+        "Gianna Lengyel",
+        "Guillaume Lample",
+        "Lucile Saulnier",
+        "Lelio Renard Lavaud",
+        "Marie-Anne Lachaux",
+        "Pierre Stock",
+        "Teven Le Scao",
+        "Thibaut Lavril",
+        "Thomas Wang",
+        "Timothee Lacroix",
+        "William El Sayed"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2310.06825",
+      "arxiv_id": "2310.06825",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2310.06825",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2310.06825",
+        "https://arxiv.org/abs/2310.06825"
+      ],
+      "bibtex": "@article{jiang2023mistral, title={Mistral 7B}, author={Jiang, Albert Q. and Sablayrolles, Alexandre and Mensch, Arthur and Bamford, Chris and Chaplot, Devendra Singh and de Las Casas, Diego and Bressand, Florian and Lengyel, Gianna and Lample, Guillaume and Saulnier, Lucile and Lavaud, Lelio Renard and Lachaux, Marie-Anne and Stock, Pierre and Le Scao, Teven and Lavril, Thibaut and Wang, Thomas and Lacroix, Timothee and El Sayed, William}, journal={arXiv preprint arXiv:2310.06825}, year={2023}}",
+      "relevance_tags": [
+        "gqa",
+        "efficient_llm",
+        "decoder_only"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Representative modern decoder-only LLM using grouped-query attention, useful context for the GQA efficiency-quality tradeoff.",
+      "verified_by": "manual_metadata"
+    }
+  ]
+}

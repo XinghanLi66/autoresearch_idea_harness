@@ -1,0 +1,529 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-diffusion-prediction",
+  "task_folder": "tasks/cv-diffusion-prediction",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "diffusion model prediction parameterization for unconditional image generation",
+    "research_question": "Can we design a prediction parameterization that achieves better FID than standard epsilon-, v-, and x0-prediction for CIFAR-10 diffusion training under a fixed compute budget?",
+    "local_sources": {
+      "config_path": "tasks/cv-diffusion-prediction/config.json",
+      "task_description_path": "tasks/cv-diffusion-prediction/task_description.md"
+    },
+    "notes": [
+      "The task description explicitly frames epsilon prediction as Ho et al. (2020) and v-prediction as Salimans and Ho (2022).",
+      "The x0 baseline is linked approximately to later explicit data-prediction/preconditioning literature because this task uses direct x0 prediction as a parameterization rather than introducing a new named method."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 18
+  },
+  "tests": [
+    {
+      "label": "train_small",
+      "cmd": "scripts/train_small.sh",
+      "package": "diffusers-main",
+      "group": 1,
+      "compute": 1.0,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2006.11239",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2010.02502",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1505.04597",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1711.05101",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2104.11222",
+          "role": "metric"
+        }
+      ],
+      "notes": "Small-scale CIFAR-10 diffusion training with a UNet backbone, DDIM sampling, AdamW optimization, and FID/clean-fid evaluation."
+    },
+    {
+      "label": "train_medium",
+      "cmd": "scripts/train_medium.sh",
+      "package": "diffusers-main",
+      "group": 2,
+      "compute": 1.0,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2006.11239",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2010.02502",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1505.04597",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1711.05101",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2104.11222",
+          "role": "metric"
+        }
+      ],
+      "notes": "Medium-scale version of the same evaluation stack; the model width changes but the literature grounding is unchanged."
+    },
+    {
+      "label": "train_large",
+      "cmd": "scripts/train_large.sh",
+      "package": "diffusers-main",
+      "group": 3,
+      "compute": 1.0,
+      "time": "10:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2006.11239",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2010.02502",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1505.04597",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1711.05101",
+          "role": "training_recipe"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.08500",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.2104.11222",
+          "role": "metric"
+        }
+      ],
+      "notes": "Largest-capacity variant of the same DDPM-style UNet training setup and DDIM/FID evaluation protocol."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "epsilon",
+      "implementation": "edits/epsilon.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2006.11239",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the epsilon/noise-prediction parameterization described in the task and introduced in DDPM."
+    },
+    {
+      "name": "vpred",
+      "implementation": "edits/vpred.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2202.00512",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the velocity parameterization explicitly attributed to Salimans and Ho (2022) in the task description."
+    },
+    {
+      "name": "x0pred",
+      "implementation": "edits/x0pred.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.2206.00364",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Direct x0/data prediction is a standard diffusion parameterization, but this link is approximate because the task baseline is not tied to a single named originating paper."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/ARXIV.1503.03585",
+      "title": "Deep Unsupervised Learning using Nonequilibrium Thermodynamics",
+      "authors": [
+        "Jascha Sohl-Dickstein",
+        "Eric A. Weiss",
+        "Niru Maheswaranathan",
+        "Surya Ganguli"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1503.03585",
+      "arxiv_id": "1503.03585",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1503.03585",
+      "source_urls": [
+        "https://arxiv.org/abs/1503.03585",
+        "https://doi.org/10.48550/ARXIV.1503.03585"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1503.03585,\\n  doi = {10.48550/ARXIV.1503.03585},\\n  url = {https://arxiv.org/abs/1503.03585},\\n  author = {Sohl-Dickstein, Jascha and Weiss, Eric A. and Maheswaranathan, Niru and Ganguli, Surya},\\n  keywords = {Machine Learning (cs.LG), Disordered Systems and Neural Networks (cond-mat.dis-nn), Neurons and Cognition (q-bio.NC), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Physical sciences, FOS: Physical sciences, FOS: Biological sciences, FOS: Biological sciences},\\n  title = {Deep Unsupervised Learning using Nonequilibrium Thermodynamics},\\n  publisher = {arXiv},\\n  year = {2015},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "foundational_diffusion",
+        "generative_modeling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational diffusion-model paper that motivates the forward noising and learned reverse process used by later DDPM-style training.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1505.04597",
+      "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+      "authors": [
+        "Olaf Ronneberger",
+        "Philipp Fischer",
+        "Thomas Brox"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1505.04597",
+      "arxiv_id": "1505.04597",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1505.04597",
+      "source_urls": [
+        "https://arxiv.org/abs/1505.04597",
+        "https://doi.org/10.48550/ARXIV.1505.04597"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1505.04597,\\n  doi = {10.48550/ARXIV.1505.04597},\\n  url = {https://arxiv.org/abs/1505.04597},\\n  author = {Ronneberger, Olaf and Fischer, Philipp and Brox, Thomas},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {U-Net: Convolutional Networks for Biomedical Image Segmentation},\\n  publisher = {arXiv},\\n  year = {2015},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "architecture",
+        "unet"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "The task trains a UNet2DModel backbone, so the original U-Net paper is the canonical architecture reference.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1711.05101",
+      "title": "Decoupled Weight Decay Regularization",
+      "authors": [
+        "Ilya Loshchilov",
+        "Frank Hutter"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1711.05101",
+      "arxiv_id": "1711.05101",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1711.05101",
+      "source_urls": [
+        "https://arxiv.org/abs/1711.05101",
+        "https://doi.org/10.48550/ARXIV.1711.05101"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1711.05101,\\n  doi = {10.48550/ARXIV.1711.05101},\\n  url = {https://arxiv.org/abs/1711.05101},\\n  author = {Loshchilov, Ilya and Hutter, Frank},\\n  keywords = {Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Optimization and Control (math.OC), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Mathematics, FOS: Mathematics},\\n  title = {Decoupled Weight Decay Regularization},\\n  publisher = {arXiv},\\n  year = {2017},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "optimization",
+        "adamw",
+        "training_recipe"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "The evaluation protocol explicitly uses AdamW, so this is the optimizer reference for all three tests.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1706.08500",
+      "title": "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium",
+      "authors": [
+        "Martin Heusel",
+        "Hubert Ramsauer",
+        "Thomas Unterthiner",
+        "Bernhard Nessler",
+        "Sepp Hochreiter"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.08500",
+      "arxiv_id": "1706.08500",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1706.08500",
+      "source_urls": [
+        "https://arxiv.org/abs/1706.08500",
+        "https://doi.org/10.48550/ARXIV.1706.08500"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1706.08500,\\n  doi = {10.48550/ARXIV.1706.08500},\\n  url = {https://arxiv.org/abs/1706.08500},\\n  author = {Heusel, Martin and Ramsauer, Hubert and Unterthiner, Thomas and Nessler, Bernhard and Hochreiter, Sepp},\\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},\\n  publisher = {arXiv},\\n  year = {2017},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "metric",
+        "fid",
+        "evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Introduces Fréchet Inception Distance, the primary metric optimized by this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2006.11239",
+      "title": "Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Jonathan Ho",
+        "Ajay Jain",
+        "Pieter Abbeel"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2006.11239",
+      "arxiv_id": "2006.11239",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2006.11239",
+      "source_urls": [
+        "https://arxiv.org/abs/2006.11239",
+        "https://doi.org/10.48550/ARXIV.2006.11239"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2006.11239,\\n  doi = {10.48550/ARXIV.2006.11239},\\n  url = {https://arxiv.org/abs/2006.11239},\\n  author = {Ho, Jonathan and Jain, Ajay and Abbeel, Pieter},\\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Denoising Diffusion Probabilistic Models},\\n  publisher = {arXiv},\\n  year = {2020},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "baseline",
+        "epsilon_prediction",
+        "diffusion_training"
+      ],
+      "baseline_links": [
+        "epsilon"
+      ],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "Primary paper for epsilon prediction and the DDPM-style CIFAR-10 training setup used by the task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2010.02502",
+      "title": "Denoising Diffusion Implicit Models",
+      "authors": [
+        "Jiaming Song",
+        "Chenlin Meng",
+        "Stefano Ermon"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2010.02502",
+      "arxiv_id": "2010.02502",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2010.02502",
+      "source_urls": [
+        "https://arxiv.org/abs/2010.02502",
+        "https://doi.org/10.48550/ARXIV.2010.02502"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2010.02502,\\n  doi = {10.48550/ARXIV.2010.02502},\\n  url = {https://arxiv.org/abs/2010.02502},\\n  author = {Song, Jiaming and Meng, Chenlin and Ermon, Stefano},\\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Denoising Diffusion Implicit Models},\\n  publisher = {arXiv},\\n  year = {2020},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "sampling",
+        "ddim",
+        "diffusion_inference"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "The task evaluates with a 50-step DDIM sampler, making DDIM the direct inference-time benchmark reference.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2011.13456",
+      "title": "Score-Based Generative Modeling through Stochastic Differential Equations",
+      "authors": [
+        "Yang Song",
+        "Jascha Sohl-Dickstein",
+        "Diederik P. Kingma",
+        "Abhishek Kumar",
+        "Stefano Ermon",
+        "Ben Poole"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2011.13456",
+      "arxiv_id": "2011.13456",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2011.13456",
+      "source_urls": [
+        "https://arxiv.org/abs/2011.13456",
+        "https://doi.org/10.48550/ARXIV.2011.13456"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2011.13456,\\n  doi = {10.48550/ARXIV.2011.13456},\\n  url = {https://arxiv.org/abs/2011.13456},\\n  author = {Song, Yang and Sohl-Dickstein, Jascha and Kingma, Diederik P. and Kumar, Abhishek and Ermon, Stefano and Poole, Ben},\\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Score-Based Generative Modeling through Stochastic Differential Equations},\\n  publisher = {arXiv},\\n  year = {2020},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "score_based_models",
+        "diffusion_theory"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Broadens the score-based interpretation of diffusion training and is relevant background for alternative parameterizations and samplers.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2102.09672",
+      "title": "Improved Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Alex Nichol",
+        "Prafulla Dhariwal"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2102.09672",
+      "arxiv_id": "2102.09672",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2102.09672",
+      "source_urls": [
+        "https://arxiv.org/abs/2102.09672",
+        "https://doi.org/10.48550/ARXIV.2102.09672"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2102.09672,\\n  doi = {10.48550/ARXIV.2102.09672},\\n  url = {https://arxiv.org/abs/2102.09672},\\n  author = {Nichol, Alex and Dhariwal, Prafulla},\\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Improved Denoising Diffusion Probabilistic Models},\\n  publisher = {arXiv},\\n  year = {2021},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "diffusion_training",
+        "improved_ddpm"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Important follow-on DDPM paper covering learned variances and compute-quality tradeoffs relevant to fixed-budget CIFAR-10 diffusion evaluation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2104.11222",
+      "title": "On Aliased Resizing and Surprising Subtleties in GAN Evaluation",
+      "authors": [
+        "Gaurav Parmar",
+        "Richard Zhang",
+        "Jun-Yan Zhu"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2104.11222",
+      "arxiv_id": "2104.11222",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2104.11222",
+      "source_urls": [
+        "https://arxiv.org/abs/2104.11222",
+        "https://doi.org/10.48550/ARXIV.2104.11222"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2104.11222,\\n  doi = {10.48550/ARXIV.2104.11222},\\n  url = {https://arxiv.org/abs/2104.11222},\\n  author = {Parmar, Gaurav and Zhang, Richard and Zhu, Jun-Yan},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Graphics (cs.GR), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {On Aliased Resizing and Surprising Subtleties in GAN Evaluation},\\n  publisher = {arXiv},\\n  year = {2021},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "metric",
+        "clean_fid",
+        "evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train_small",
+        "train_medium",
+        "train_large"
+      ],
+      "relevance": "This is the clean-fid reference, directly matching the task's stated FID evaluation implementation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2202.00512",
+      "title": "Progressive Distillation for Fast Sampling of Diffusion Models",
+      "authors": [
+        "Tim Salimans",
+        "Jonathan Ho"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2202.00512",
+      "arxiv_id": "2202.00512",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2202.00512",
+      "source_urls": [
+        "https://arxiv.org/abs/2202.00512",
+        "https://doi.org/10.48550/ARXIV.2202.00512"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2202.00512,\\n  doi = {10.48550/ARXIV.2202.00512},\\n  url = {https://arxiv.org/abs/2202.00512},\\n  author = {Salimans, Tim and Ho, Jonathan},\\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Progressive Distillation for Fast Sampling of Diffusion Models},\\n  publisher = {arXiv},\\n  year = {2022},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "baseline",
+        "v_prediction",
+        "sampling"
+      ],
+      "baseline_links": [
+        "vpred"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the v-parameterization explicitly referenced by the task description for the vpred baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.2206.00364",
+      "title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+      "authors": [
+        "Tero Karras",
+        "Miika Aittala",
+        "Timo Aila",
+        "Samuli Laine"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.00364",
+      "arxiv_id": "2206.00364",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2206.00364",
+      "source_urls": [
+        "https://arxiv.org/abs/2206.00364",
+        "https://doi.org/10.48550/ARXIV.2206.00364"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00364,\\n  doi = {10.48550/ARXIV.2206.00364},\\n  url = {https://arxiv.org/abs/2206.00364},\\n  author = {Karras, Tero and Aittala, Miika and Aila, Timo and Laine, Samuli},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Elucidating the Design Space of Diffusion-Based Generative Models},\\n  publisher = {arXiv},\\n  year = {2022},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "parameterization",
+        "x0_prediction",
+        "preconditioning"
+      ],
+      "baseline_links": [
+        "x0pred"
+      ],
+      "test_links": [],
+      "relevance": "Relevant explicit discussion of data/x0 prediction and diffusion preconditioning, used here as the closest literature anchor for the x0pred baseline.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

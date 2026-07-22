@@ -1,0 +1,425 @@
+{
+  "schema_version": "1.0",
+  "task_name": "demo-task-2",
+  "task_folder": "tasks/demo-task-2",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "epoch-level learning-rate scheduler design for MNIST classification with a fixed Adadelta optimizer",
+    "research_question": "Can an improved epoch-level learning-rate schedule outperform the default StepLR schedule on the PyTorch MNIST example without changing the model or optimizer?",
+    "local_sources": {
+      "config_path": "tasks/demo-task-2/config.json",
+      "task_description_path": "tasks/demo-task-2/task_description.md"
+    },
+    "notes": [
+      "Task framing comes from task_description.md and the referenced PyTorch MNIST example.",
+      "The warmup_cosine baseline is linked approximately because the repo baseline combines linear warmup and cosine decay without citing a single canonical implementation paper."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 2,
+    "baseline_links_found": 2,
+    "test_entries": 1,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "train",
+      "cmd": "scripts/train.sh",
+      "package": "pytorch-examples",
+      "group": 1,
+      "compute": 1,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/5.726791",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.1109/5.726791",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/ARXIV.1212.5701",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "The training command runs the PyTorch MNIST CNN with Adadelta; the LeCun et al. paper covers the canonical MNIST/CNN benchmark and ADADELTA covers the optimizer family used by the task."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "cosine_annealing",
+      "implementation": "edits/cosine_annealing.edit.py",
+      "labels": [
+        "scheduler",
+        "cosine_decay"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.1608.03983",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Maps to the cosine annealing component popularized by SGDR; the repo baseline omits warm restarts, so the mapping is approximate rather than exact."
+    },
+    {
+      "name": "warmup_cosine",
+      "implementation": "edits/warmup_cosine.edit.py",
+      "labels": [
+        "scheduler",
+        "warmup",
+        "cosine_decay"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/ARXIV.1706.02677",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1109/cvpr.2019.00065",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Matches the common linear-warmup plus cosine-decay recipe described in large-batch and image-classification training papers, but the repo baseline is a custom simplified implementation."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/ARXIV.1608.03983",
+      "title": "SGDR: Stochastic Gradient Descent with Warm Restarts",
+      "authors": [
+        "Ilya Loshchilov",
+        "Frank Hutter"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1608.03983",
+      "arxiv_id": "1608.03983",
+      "openalex_id": "https://openalex.org/W2518108298",
+      "landing_page": "https://doi.org/10.48550/arXiv.1608.03983",
+      "source_urls": [
+        "https://openalex.org/W2518108298",
+        "https://doi.org/10.48550/arXiv.1608.03983"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1608.03983, doi = {10.48550/ARXIV.1608.03983}, url = {https://arxiv.org/abs/1608.03983}, author = {Loshchilov, Ilya and Hutter, Frank}, keywords = {Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Optimization and Control (math.OC), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Mathematics, FOS: Mathematics}, title = {SGDR: Stochastic Gradient Descent with Warm Restarts}, publisher = {arXiv}, year = {2016}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "baseline",
+        "scheduler",
+        "cosine_decay"
+      ],
+      "baseline_links": [
+        "cosine_annealing"
+      ],
+      "test_links": [],
+      "relevance": "Primary citation for cosine annealing schedules and the closest literature match to the cosine_annealing baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1212.5701",
+      "title": "ADADELTA: An Adaptive Learning Rate Method",
+      "authors": [
+        "Matthew D. Zeiler"
+      ],
+      "year": 2012,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1212.5701",
+      "arxiv_id": "1212.5701",
+      "openalex_id": "https://openalex.org/W6908809",
+      "landing_page": "https://doi.org/10.48550/arXiv.1212.5701",
+      "source_urls": [
+        "https://openalex.org/W6908809",
+        "https://doi.org/10.48550/arXiv.1212.5701"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1212.5701, doi = {10.48550/ARXIV.1212.5701}, url = {https://arxiv.org/abs/1212.5701}, author = {Zeiler, Matthew D.}, keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {ADADELTA: An Adaptive Learning Rate Method}, publisher = {arXiv}, year = {2012}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "optimizer",
+        "training_recipe",
+        "mnist"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train"
+      ],
+      "relevance": "The task fixes the optimizer to Adadelta, so this paper anchors an important non-editable part of the training setup.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/5.726791",
+      "title": "Gradient-based learning applied to document recognition",
+      "authors": [
+        "Y. Lecun",
+        "L. Bottou",
+        "Y. Bengio",
+        "P. Haffner"
+      ],
+      "year": 1998,
+      "venue": "Proceedings of the IEEE",
+      "doi": "10.1109/5.726791",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2112796928",
+      "landing_page": "https://doi.org/10.1109/5.726791",
+      "source_urls": [
+        "https://openalex.org/W2112796928",
+        "https://doi.org/10.1109/5.726791"
+      ],
+      "bibtex": "@article{Lecun_1998, title={Gradient-based learning applied to document recognition}, volume={86}, ISSN={0018-9219}, url={http://dx.doi.org/10.1109/5.726791}, DOI={10.1109/5.726791}, number={11}, journal={Proceedings of the IEEE}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Lecun, Y. and Bottou, L. and Bengio, Y. and Haffner, P.}, year={1998}, pages={2278-2324} }",
+      "relevance_tags": [
+        "mnist",
+        "cnn",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "train"
+      ],
+      "relevance": "Canonical paper for the MNIST handwritten-digit benchmark and CNN-based digit recognition, matching the task's dataset and model family.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1706.02677",
+      "title": "Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour",
+      "authors": [
+        "Priya Goyal",
+        "Piotr Dollar",
+        "Ross Girshick",
+        "Pieter Noordhuis",
+        "Lukasz Wesolowski",
+        "Aapo Kyrola",
+        "Andrew Tulloch",
+        "Yangqing Jia",
+        "Kaiming He"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.02677",
+      "arxiv_id": "1706.02677",
+      "openalex_id": "https://openalex.org/W2622263826",
+      "landing_page": "https://doi.org/10.48550/arXiv.1706.02677",
+      "source_urls": [
+        "https://openalex.org/W2622263826",
+        "https://doi.org/10.48550/arXiv.1706.02677"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1706.02677, doi = {10.48550/ARXIV.1706.02677}, url = {https://arxiv.org/abs/1706.02677}, author = {Goyal, Priya and Dollar, Piotr and Girshick, Ross and Noordhuis, Pieter and Wesolowski, Lukasz and Kyrola, Aapo and Tulloch, Andrew and Jia, Yangqing and He, Kaiming}, keywords = {Computer Vision and Pattern Recognition (cs.CV), Distributed, Parallel, and Cluster Computing (cs.DC), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, publisher = {arXiv}, year = {2017}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "scheduler",
+        "warmup",
+        "training_recipe"
+      ],
+      "baseline_links": [
+        "warmup_cosine"
+      ],
+      "test_links": [],
+      "relevance": "Widely cited source for linear warmup, which is one half of the warmup_cosine baseline implemented in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2019.00065",
+      "title": "Bag of Tricks for Image Classification with Convolutional Neural Networks",
+      "authors": [
+        "Tong He",
+        "Zhi Zhang",
+        "Hang Zhang",
+        "Zhongyue Zhang",
+        "Junyuan Xie",
+        "Mu Li"
+      ],
+      "year": 2019,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2019.00065",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2963855133",
+      "landing_page": "https://doi.org/10.1109/cvpr.2019.00065",
+      "source_urls": [
+        "https://openalex.org/W2963855133",
+        "https://doi.org/10.1109/cvpr.2019.00065"
+      ],
+      "bibtex": "@inproceedings{He_2019, title={Bag of Tricks for Image Classification with Convolutional Neural Networks}, url={http://dx.doi.org/10.1109/cvpr.2019.00065}, DOI={10.1109/cvpr.2019.00065}, booktitle={2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={He, Tong and Zhang, Zhi and Zhang, Hang and Zhang, Zhongyue and Xie, Junyuan and Li, Mu}, year={2019}, month=jun, pages={558-567} }",
+      "relevance_tags": [
+        "scheduler",
+        "warmup",
+        "cosine_decay"
+      ],
+      "baseline_links": [
+        "warmup_cosine"
+      ],
+      "test_links": [],
+      "relevance": "Provides a concrete image-classification recipe that combines warmup with cosine-style learning-rate decay, closely matching the intended warmup_cosine baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/wacv.2017.58",
+      "title": "Cyclical Learning Rates for Training Neural Networks",
+      "authors": [
+        "Leslie N. Smith"
+      ],
+      "year": 2017,
+      "venue": "WACV",
+      "doi": "10.1109/wacv.2017.58",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2544860310",
+      "landing_page": "https://doi.org/10.1109/WACV.2017.58",
+      "source_urls": [
+        "https://openalex.org/W2544860310",
+        "https://doi.org/10.1109/WACV.2017.58"
+      ],
+      "bibtex": "@inproceedings{Smith_2017, title={Cyclical Learning Rates for Training Neural Networks}, url={http://dx.doi.org/10.1109/WACV.2017.58}, DOI={10.1109/wacv.2017.58}, booktitle={2017 IEEE Winter Conference on Applications of Computer Vision (WACV)}, publisher={IEEE}, author={Smith, Leslie N.}, year={2017}, month=mar, pages={464-472} }",
+      "relevance_tags": [
+        "scheduler",
+        "cyclical_lr",
+        "optimization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant adjacent scheduler literature for this task because it studies non-monotonic learning-rate schedules as alternatives to fixed step decay.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1117/12.2520589",
+      "title": "Super-convergence: very fast training of neural networks using large learning rates",
+      "authors": [
+        "Leslie N. Smith",
+        "Nicholay Topin"
+      ],
+      "year": 2019,
+      "venue": "Artificial Intelligence and Machine Learning for Multi-Domain Operations Applications",
+      "doi": "10.1117/12.2520589",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2749581528",
+      "landing_page": "https://doi.org/10.1117/12.2520589",
+      "source_urls": [
+        "https://openalex.org/W2749581528",
+        "https://doi.org/10.1117/12.2520589"
+      ],
+      "bibtex": "@inproceedings{Smith_2019, title={Super-convergence: very fast training of neural networks using large learning rates}, url={http://dx.doi.org/10.1117/12.2520589}, DOI={10.1117/12.2520589}, booktitle={Artificial Intelligence and Machine Learning for Multi-Domain Operations Applications}, publisher={SPIE}, author={Smith, Leslie N. and Topin, Nicholay}, editor={Pham, Tien}, year={2019}, month=may, pages={36} }",
+      "relevance_tags": [
+        "scheduler",
+        "one_cycle",
+        "optimization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Another major scheduler paper showing that aggressive learning-rate schedules can materially change convergence speed and accuracy.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1609/aaai.v35i10.17069",
+      "title": "On the Adequacy of Untuned Warmup for Adaptive Optimization",
+      "authors": [
+        "Jerry Ma",
+        "Denis Yarats"
+      ],
+      "year": 2021,
+      "venue": "AAAI",
+      "doi": "10.1609/aaai.v35i10.17069",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3174851698",
+      "landing_page": "https://doi.org/10.1609/AAAI.V35I10.17069",
+      "source_urls": [
+        "https://openalex.org/W3174851698",
+        "https://doi.org/10.1609/AAAI.V35I10.17069"
+      ],
+      "bibtex": "@article{Ma_2021, title={On the Adequacy of Untuned Warmup for Adaptive Optimization}, volume={35}, ISSN={2159-5399}, url={http://dx.doi.org/10.1609/AAAI.V35I10.17069}, DOI={10.1609/aaai.v35i10.17069}, number={10}, journal={Proceedings of the AAAI Conference on Artificial Intelligence}, publisher={Association for the Advancement of Artificial Intelligence (AAAI)}, author={Ma, Jerry and Yarats, Denis}, year={2021}, month=may, pages={8828-8836} }",
+      "relevance_tags": [
+        "warmup",
+        "adaptive_optimization",
+        "scheduler"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Supports the task's focus on warmup schedules, especially because the fixed optimizer is adaptive rather than SGD.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1803.09820",
+      "title": "A disciplined approach to neural network hyper-parameters: Part 1 -- learning rate, batch size, momentum, and weight decay",
+      "authors": [
+        "Leslie N. Smith"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1803.09820",
+      "arxiv_id": "1803.09820",
+      "openalex_id": "https://openalex.org/W2795247881",
+      "landing_page": "https://doi.org/10.48550/arXiv.1803.09820",
+      "source_urls": [
+        "https://openalex.org/W2795247881",
+        "https://doi.org/10.48550/arXiv.1803.09820"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1803.09820, doi = {10.48550/ARXIV.1803.09820}, url = {https://arxiv.org/abs/1803.09820}, author = {Smith, Leslie N.}, keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {A disciplined approach to neural network hyper-parameters: Part 1 -- learning rate, batch size, momentum, and weight decay}, publisher = {arXiv}, year = {2018}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "scheduler",
+        "one_cycle",
+        "tuning"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Useful scheduler-design reference because it systematizes how learning-rate schedules should be chosen and tuned.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/ARXIV.1711.00489",
+      "title": "Don't Decay the Learning Rate, Increase the Batch Size",
+      "authors": [
+        "Samuel L. Smith",
+        "Pieter-Jan Kindermans",
+        "Chris Ying",
+        "Quoc V. Le"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1711.00489",
+      "arxiv_id": "1711.00489",
+      "openalex_id": "https://openalex.org/W2766164908",
+      "landing_page": "https://doi.org/10.48550/arXiv.1711.00489",
+      "source_urls": [
+        "https://openalex.org/W2766164908",
+        "https://doi.org/10.48550/arXiv.1711.00489"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1711.00489, doi = {10.48550/ARXIV.1711.00489}, url = {https://arxiv.org/abs/1711.00489}, author = {Smith, Samuel L. and Kindermans, Pieter-Jan and Ying, Chris and Le, Quoc V.}, keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Distributed, Parallel, and Cluster Computing (cs.DC), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Don't Decay the Learning Rate, Increase the Batch Size}, publisher = {arXiv}, year = {2017}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "scheduler",
+        "step_decay_alternative",
+        "optimization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Directly relevant to the task because it questions standard learning-rate decay heuristics and proposes alternative training-control strategies.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1145/3065386",
+      "title": "ImageNet classification with deep convolutional neural networks",
+      "authors": [
+        "Alex Krizhevsky",
+        "Ilya Sutskever",
+        "Geoffrey E. Hinton"
+      ],
+      "year": 2017,
+      "venue": "Communications of the ACM",
+      "doi": "10.1145/3065386",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2163605009",
+      "landing_page": "https://doi.org/10.1145/3065386",
+      "source_urls": [
+        "https://openalex.org/W2163605009",
+        "https://doi.org/10.1145/3065386"
+      ],
+      "bibtex": "@article{Krizhevsky_2017, title={ImageNet classification with deep convolutional neural networks}, volume={60}, ISSN={1557-7317}, url={http://dx.doi.org/10.1145/3065386}, DOI={10.1145/3065386}, number={6}, journal={Communications of the ACM}, publisher={Association for Computing Machinery (ACM)}, author={Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E.}, year={2017}, month=may, pages={84-90} }",
+      "relevance_tags": [
+        "scheduler",
+        "step_decay",
+        "training_recipe"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Representative citation for classic stepwise learning-rate decay recipes, which provides context for the task's default StepLR baseline.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

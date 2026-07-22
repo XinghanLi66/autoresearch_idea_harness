@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-offline-rl",
+  "task_folder": "tasks/llm-offline-rl",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "Preference optimization loss design for math reasoning LLMs",
+    "research_question": "Can a custom DPO-family preference loss beat DPO/SimPO/IPO/ORPO when fine-tuning Qwen2.5-Math-1.5B-Instruct on Math-Step-DPO-10K and evaluating on GSM8K/MATH-500/AIME-2024?",
+    "local_sources": {
+      "config_path": "tasks/llm-offline-rl/config.json",
+      "task_description_path": "tasks/llm-offline-rl/task_description.md"
+    },
+    "notes": [
+      "Task is aligned with Step-DPO (Lai et al. 2024, arXiv:2406.18629): same preference dataset (xinlai/Math-Step-DPO-10K) and the same math evaluation suite (GSM8K, MATH-500, AIME-2024). Base model scaled down to Qwen2.5-Math-1.5B-Instruct to fit a 4-GPU budget."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 5,
+    "paper_count": 5,
+    "baseline_entries": 4,
+    "baseline_links_found": 4,
+    "test_entries": 2,
+    "test_links_found": 2
+  },
+  "tests": [
+    {
+      "label": "train",
+      "cmd": "scripts/train.sh",
+      "package": "LLaMA-Factory",
+      "group": 1,
+      "compute": 4,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": ["https://arxiv.org/abs/2406.18629"],
+      "notes": "Full-parameter DPO of Qwen2.5-Math-1.5B-Instruct on Math-Step-DPO-10K."
+    },
+    {
+      "label": "math_eval",
+      "cmd": "scripts/math_eval.sh",
+      "package": "MathRuler",
+      "group": 2,
+      "compute": 1,
+      "time": "1:30:00",
+      "hidden": false,
+      "paper_links": ["https://arxiv.org/abs/2406.18629"],
+      "notes": "Single-pass vLLM eval; sympy+mathd grader for GSM8K, MATH-500, AIME-2024."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "dpo",
+      "implementation": "scripts/dpo.sh",
+      "labels": ["train"],
+      "paper_links": ["https://arxiv.org/abs/2305.18290"],
+      "status": "mapped",
+      "notes": "DPO (Rafailov et al. 2023): pref_loss=sigmoid with reference model."
+    },
+    {
+      "name": "simpo",
+      "implementation": "scripts/simpo.sh",
+      "labels": ["train"],
+      "paper_links": ["https://arxiv.org/abs/2405.14734"],
+      "status": "mapped",
+      "notes": "SimPO (Meng et al. 2024): reference-free length-normalized loss with margin gamma=1.0, beta=2.0."
+    },
+    {
+      "name": "ipo",
+      "implementation": "scripts/ipo.sh",
+      "labels": ["train"],
+      "paper_links": ["https://arxiv.org/abs/2310.12036"],
+      "status": "mapped",
+      "notes": "IPO (Azar et al. 2023): squared-loss preference optimization with reference model."
+    },
+    {
+      "name": "orpo",
+      "implementation": "scripts/orpo.sh",
+      "labels": ["train"],
+      "paper_links": ["https://arxiv.org/abs/2403.07691"],
+      "status": "mapped",
+      "notes": "ORPO (Hong et al. 2024): reference-free odds-ratio preference loss + NLL on chosen."
+    }
+  ],
+  "papers": [
+    {"id": "step_dpo_2024", "title": "Step-DPO: Step-wise Preference Optimization for Long-chain Reasoning of LLMs", "authors": "Lai et al.", "url": "https://arxiv.org/abs/2406.18629"},
+    {"id": "dpo_2023", "title": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model", "authors": "Rafailov et al.", "url": "https://arxiv.org/abs/2305.18290"},
+    {"id": "simpo_2024", "title": "SimPO: Simple Preference Optimization with a Reference-Free Reward", "authors": "Meng et al.", "url": "https://arxiv.org/abs/2405.14734"},
+    {"id": "ipo_2023", "title": "A General Theoretical Paradigm to Understand Learning from Human Preferences", "authors": "Azar et al.", "url": "https://arxiv.org/abs/2310.12036"},
+    {"id": "orpo_2024", "title": "ORPO: Monolithic Preference Optimization without Reference Model", "authors": "Hong et al.", "url": "https://arxiv.org/abs/2403.07691"}
+  ]
+}

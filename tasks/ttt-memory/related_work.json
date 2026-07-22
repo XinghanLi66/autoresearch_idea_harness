@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ttt-memory",
+  "task_folder": "tasks/ttt-memory",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "Inner learning dynamics of chunk-wise test-time memory modules (Titans / Nested Learning) — surprise signal, online update rule, data-dependent forget gate, storage structure.",
+    "research_question": "How should a chunk-wise test-time memory module that updates its fast weights online from a surprise signal be designed — what surprise loss, update rule, and forget-gate parameterization give the best length generalization (NIAH passkey at 1.5x / 2x training context) and downstream-accuracy lift when co-trained with a fixed 345M GPT substrate?",
+    "local_sources": {
+      "config_path": "tasks/ttt-memory/config.json",
+      "task_description_path": "tasks/ttt-memory/task_description.md"
+    },
+    "notes": [
+      "The 345M GPT (24L/16H/1024D) trained Chinchilla-optimal ~7.1B tokens on ClimbMix is the *evaluation substrate*, not the research question. The substrate is held fixed; only the memory module varies between baselines.",
+      "Length-generalization is the primary target: training context is 1024, but NIAH passkey retrieval is evaluated at 1280 / 1536 / 2048 with NTK-aware RoPE base scaling — so the only thing that can carry information past the cliff is the memory module's online consolidation.",
+      "Score spec uses niah_pass_1536, niah_pass_2k, and niah_rank_2k (continuous companion); niah_pass_1280 is recorded but excluded from scoring because it saturates near 1.0."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 2,
+    "paper_count": 3,
+    "baseline_entries": 4,
+    "baseline_links_found": 4,
+    "test_entries": 3,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "gpt-345m",
+      "cmd": "scripts/gpt_345m.sh",
+      "package": "nanoGPT",
+      "group": 1,
+      "compute": 2.0,
+      "time": "20:00:00",
+      "hidden": false,
+      "paper_links": ["arXiv:2501.00663"],
+      "notes": "345M pretraining on ClimbMix; reports val_loss + WikiText-2 / LAMBADA PPL."
+    },
+    {
+      "label": "lm-eval-345m",
+      "cmd": "scripts/lm_eval_345m.sh",
+      "package": "lm-evaluation-harness",
+      "group": 2,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": "0-shot downstream evaluation on the 345M checkpoint (ARC-Easy, HellaSwag, PIQA, WinoGrande)."
+    },
+    {
+      "label": "niah-eval-345m",
+      "cmd": "scripts/niah_eval.sh",
+      "package": "nanoGPT",
+      "group": 3,
+      "compute": 1.0,
+      "time": "01:00:00",
+      "hidden": true,
+      "paper_links": ["arXiv:2501.00663#table5"],
+      "notes": "Standalone NIAH passkey retrieval at 1280 / 1536 / 2048 with NTK-aware RoPE base scaling; reports pass@1 and mean rank per length."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "titans_default",
+      "implementation": "edits/titans_default.edit.py",
+      "labels": [],
+      "paper_links": ["arXiv:2501.00663"],
+      "status": "mapped",
+      "notes": "Titans Eq. 13-14 reference: depth=2 MLP memory, MSE surprise, momentum SGD with all three data-dependent gates (alpha_t/eta_t/theta_t = sigmoid(W·x)) per Titans §3.2 chunk-wise simplification."
+    },
+    {
+      "name": "linear_memory",
+      "implementation": "edits/linear_memory.edit.py",
+      "labels": [],
+      "paper_links": ["arXiv:2501.00663"],
+      "status": "mapped",
+      "notes": "Titans §3.1 / Table 5 depth ablation: L_M = 1 (linear regression memory), otherwise identical to titans_default — clean depth ablation."
+    },
+    {
+      "name": "deep_momentum",
+      "implementation": "edits/deep_momentum.edit.py",
+      "labels": [],
+      "paper_links": ["arXiv:2512.24695"],
+      "status": "mapped",
+      "notes": "Nested Learning DMGD (§4 Eq. 51): m_{i+1} = alpha_{i+1} m_i − eta_t · phi(grad), W_{i+1} = W_i + m_{i+1}. NO weight decay on W; learnable feature map phi (small SiLU MLP) on the gradient. Depth=2 MLP memory."
+    },
+    {
+      "name": "fast_weights_hebbian",
+      "implementation": "edits/fast_weights_hebbian.edit.py",
+      "labels": [],
+      "paper_links": ["arXiv:1610.06258"],
+      "status": "mapped",
+      "notes": "Ba et al. 2016 NeurIPS Eq. 1+5: A(t) = lambda·A(t-1) + eta·h h^T autoassociative outer product, lambda=0.95, eta=0.5; inner-loop read with LayerNorm (S=1 step). NO surprise gradient — pure Hebbian storage."
+    }
+  ],
+  "papers": [
+    {
+      "title": "Titans: Learning to Memorize at Test Time",
+      "authors": "Behrouz, Zhong, Mirrokni",
+      "year": 2025,
+      "arxiv_id": "2501.00663",
+      "url": "https://arxiv.org/abs/2501.00663",
+      "relevance": "Defines the Titans NMM (deep MLP memory + momentum + data-dependent forget gate) and the depth=1 vs depth>=2 ablation that motivates linear_memory."
+    },
+    {
+      "title": "Nested Learning: The Illusion of Deep Learning Architecture",
+      "authors": "Behrouz, Razaviyayn, Zhong, Mirrokni",
+      "year": 2025,
+      "arxiv_id": "2512.24695",
+      "url": "https://arxiv.org/abs/2512.24695",
+      "relevance": "Introduces Deep Momentum Gradient Descent (DMGD, §4 Eq. 51) — momentum with learnable feature map on the gradient. Source for deep_momentum baseline."
+    },
+    {
+      "title": "Using Fast Weights to Attend to the Recent Past",
+      "authors": "Ba, Hinton, Mnih, Leibo, Ionescu",
+      "year": 2016,
+      "arxiv_id": "1610.06258",
+      "url": "https://arxiv.org/abs/1610.06258",
+      "relevance": "Hebbian outer-product fast-weight memory with iterative LN-stabilized inner-loop read. Source for fast_weights_hebbian baseline."
+    }
+  ]
+}

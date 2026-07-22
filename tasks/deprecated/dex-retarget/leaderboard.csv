@@ -1,0 +1,4 @@
+timestamp,model,is_final,seed,allegro_mpjpe_mm,allegro_smoothness,allegro_fps,svh_mpjpe_mm,svh_smoothness,svh_fps,leap_mpjpe_mm,leap_smoothness,leap_fps
+2026-03-31T17:49:10.614371+00:00,baseline:position,true,42,21.6242,0.051237,106.7,12.0318,0.042909,131.6,22.4161,0.056102,99.2
+2026-03-31T17:52:36.637706+00:00,baseline:vector,true,42,4970.8095,0.050865,101.8,4061.9097,0.04277,159.9,4967.1985,0.053462,91.7
+2026-03-31T17:53:01.170231+00:00,baseline:dexpilot,true,42,4972.2743,0.08439,77.4,4058.8019,0.056651,111.4,4958.5161,0.165982,65.7

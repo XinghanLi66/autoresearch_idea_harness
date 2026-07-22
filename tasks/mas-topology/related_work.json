@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "task_name": "mas-topology",
+  "task_folder": "tasks/mas-topology",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "Multi-agent LLM topology design for code generation",
+    "research_question": "How does the inter-agent communication topology (chain, star, layered, or a learned alternative) among cooperating LLM agents affect code-generation quality on HumanEval and SRDD?",
+    "local_sources": {
+      "config_path": "tasks/mas-topology/config.json",
+      "task_description_path": "tasks/mas-topology/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 1,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "humaneval-4-deepseek",
+      "cmd": "scripts/run_humaneval_4_deepseek.sh",
+      "package": "chatdev-macnet",
+      "group": 1,
+      "compute": 1,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": ["https://arxiv.org/abs/2406.07155"],
+      "notes": "HumanEval with MacNet 4-agent, deepseek-chat backend"
+    },
+    {
+      "label": "humaneval-4-qwen",
+      "cmd": "scripts/run_humaneval_4_qwen.sh",
+      "package": "chatdev-macnet",
+      "group": 2,
+      "compute": 1,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": ["https://arxiv.org/abs/2406.07155"],
+      "notes": "HumanEval with MacNet 4-agent, qwen2.5-72b-instruct backend"
+    },
+    {
+      "label": "srdd-4-deepseek",
+      "cmd": "scripts/run_srdd_4_deepseek.sh",
+      "package": "chatdev-macnet",
+      "group": 3,
+      "compute": 1,
+      "time": "8:00:00",
+      "hidden": false,
+      "paper_links": ["https://arxiv.org/abs/2406.07155"],
+      "notes": "SRDD with MacNet 4-agent, deepseek-chat backend"
+    }
+  ],
+  "baselines": [
+    {
+      "name": "chain",
+      "implementation": "edits/chain.edit.py",
+      "labels": [],
+      "paper_links": ["https://arxiv.org/abs/2406.07155"],
+      "status": "mapped",
+      "notes": "Chain topology baseline from MacNet (Sec 3.1)"
+    },
+    {
+      "name": "star",
+      "implementation": "edits/star.edit.py",
+      "labels": [],
+      "paper_links": ["https://arxiv.org/abs/2406.07155"],
+      "status": "mapped",
+      "notes": "Star topology baseline from MacNet (Sec 3.1)"
+    },
+    {
+      "name": "layered",
+      "implementation": "edits/layered.edit.py",
+      "labels": [],
+      "paper_links": ["https://arxiv.org/abs/2406.07155"],
+      "status": "mapped",
+      "notes": "Layered topology baseline from MacNet (Sec 3.1)"
+    }
+  ],
+  "papers": [
+    {
+      "title": "Scaling Large Language Model-based Multi-Agent Collaboration",
+      "url": "https://arxiv.org/abs/2406.07155",
+      "role": "primary",
+      "notes": "Introduces MacNet and the chain/star/layered topology baselines used by this task"
+    }
+  ]
+}

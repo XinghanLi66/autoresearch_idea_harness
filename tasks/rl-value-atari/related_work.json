@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "rl-value-atari",
+  "task_folder": "tasks/rl-value-atari",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/rl-value-atari/config.json",
+      "task_description_path": "tasks/rl-value-atari/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "breakout-v4",
+      "cmd": "scripts/breakout.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.4,
+      "time": "12:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "seaquest-v4",
+      "cmd": "scripts/seaquest.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.4,
+      "time": "12:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "pong-v4",
+      "cmd": "scripts/pong.sh",
+      "package": "cleanrl",
+      "group": 1,
+      "compute": 0.4,
+      "time": "12:00:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "qr_dqn",
+      "implementation": "edits/qr_dqn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "c51",
+      "implementation": "edits/c51.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "double_dqn",
+      "implementation": "edits/double_dqn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

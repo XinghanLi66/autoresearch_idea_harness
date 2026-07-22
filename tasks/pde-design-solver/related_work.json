@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "task_name": "pde-design-solver",
+  "task_folder": "tasks/pde-design-solver",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "Neural operators for industrial CFD design on 3D unstructured meshes",
+    "research_question": "Can a custom neural operator outperform standard point cloud / graph / physics-attention baselines on aerodynamic design prediction?",
+    "local_sources": {
+      "config_path": "tasks/pde-design-solver/config.json",
+      "task_description_path": "tasks/pde-design-solver/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 5,
+    "paper_count": 5,
+    "baseline_entries": 5,
+    "baseline_links_found": 5,
+    "test_entries": 3,
+    "test_links_found": 2
+  },
+  "tests": [
+    {
+      "label": "Car",
+      "cmd": "scripts/car.sh",
+      "package": "Neural-Solver-Library",
+      "group": 1,
+      "compute": 0.33,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        "https://arxiv.org/abs/2402.02366"
+      ],
+      "notes": "ShapeNet-Car design benchmark, used in Transolver / Neural-Solver-Library DesignBench."
+    },
+    {
+      "label": "AirfRANS",
+      "cmd": "scripts/airfrans.sh",
+      "package": "Neural-Solver-Library",
+      "group": 1,
+      "compute": 0.33,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        "https://arxiv.org/abs/2212.07564"
+      ],
+      "notes": "AirfRANS 2D airfoil RANS benchmark, used in Transolver / Neural-Solver-Library DesignBench."
+    },
+    {
+      "label": "AirCraft",
+      "cmd": "scripts/aircraft.sh",
+      "package": "Neural-Solver-Library",
+      "group": 1,
+      "compute": 0.33,
+      "time": "23:59:59",
+      "hidden": true,
+      "paper_links": [],
+      "notes": "Custom 3D aircraft design dataset assembled for this task; no published baseline. Included as a held-out generalization probe; numbers are task-internal references, not literature reproductions."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "pointnet",
+      "implementation": "edits/pointnet.edit.py",
+      "labels": [],
+      "paper_links": [
+        "https://arxiv.org/abs/1612.00593"
+      ],
+      "status": "paper-faithful",
+      "notes": "PointNet (Qi et al., 2017). Reference n_hidden=16 per vendor/external_packages/Neural-Solver-Library/scripts/DesignBench/car/PointNet.sh; full max_block (n_hidden*32) preserved."
+    },
+    {
+      "name": "graphsage",
+      "implementation": "edits/graphsage.edit.py",
+      "labels": [],
+      "paper_links": [
+        "https://arxiv.org/abs/1706.02216"
+      ],
+      "status": "paper-faithful",
+      "notes": "GraphSAGE (Hamilton et al., 2017). Reference n_hidden=128 per vendor/external_packages/Neural-Solver-Library/scripts/DesignBench/car/GraphSAGE.sh."
+    },
+    {
+      "name": "graphunet",
+      "implementation": "edits/graphunet.edit.py",
+      "labels": [],
+      "paper_links": [
+        "https://arxiv.org/abs/1905.05178"
+      ],
+      "status": "paper-faithful",
+      "notes": "Graph U-Net (Gao & Ji, 2019). Reference n_hidden=16 per vendor/external_packages/Neural-Solver-Library/scripts/DesignBench/car/GraphUNet.sh."
+    },
+    {
+      "name": "gnot",
+      "implementation": "edits/gnot.edit.py",
+      "labels": [],
+      "paper_links": [
+        "https://arxiv.org/abs/2302.14376"
+      ],
+      "status": "paper-faithful",
+      "notes": "GNOT (Hao et al., 2023, MoE general neural operator transformer). Reference n_hidden=256 per vendor/external_packages/Neural-Solver-Library/scripts/DesignBench/car/GNOT.sh."
+    },
+    {
+      "name": "transolver",
+      "implementation": "edits/transolver.edit.py",
+      "labels": [],
+      "paper_links": [
+        "https://arxiv.org/abs/2402.02366"
+      ],
+      "status": "paper-faithful",
+      "notes": "Transolver (Wu et al., 2024). Reference n_hidden=256, slice_num=32 per vendor/external_packages/Neural-Solver-Library/scripts/DesignBench/car/Transolver.sh."
+    }
+  ],
+  "papers": [
+    {
+      "title": "PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation",
+      "url": "https://arxiv.org/abs/1612.00593"
+    },
+    {
+      "title": "Inductive Representation Learning on Large Graphs (GraphSAGE)",
+      "url": "https://arxiv.org/abs/1706.02216"
+    },
+    {
+      "title": "Graph U-Nets",
+      "url": "https://arxiv.org/abs/1905.05178"
+    },
+    {
+      "title": "GNOT: A General Neural Operator Transformer for Operator Learning",
+      "url": "https://arxiv.org/abs/2302.14376"
+    },
+    {
+      "title": "Transolver: A Fast Transformer Solver for PDEs on General Geometries",
+      "url": "https://arxiv.org/abs/2402.02366"
+    }
+  ]
+}

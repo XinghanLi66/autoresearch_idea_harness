@@ -1,0 +1,33 @@
+{
+  "base_image": "nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04",
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y --no-install-recommends python3-pip python3-dev build-essential cmake autoconf libtool libbz2-dev flex bison curl patchelf wget git libxcb1 libglib2.0-0 libsm6 libxrender1 libxext6 libgl1-mesa-glx && apt-get clean && rm -rf /var/lib/apt/lists/*",
+    "ln -sf /usr/bin/python3 /usr/bin/python",
+    "pip install 'typing-extensions<4.13'",
+    "pip install torch==2.0.1 --index-url https://download.pytorch.org/whl/cu118",
+    "pip install -r requirements.txt",
+    "pip uninstall opencv-python -y",
+    "cd katakomba/utils/render_utils && pip install .",
+    "mkdir -p /root/.katakomba/datasets && cd /root/.katakomba/datasets && wget -q https://huggingface.co/datasets/Howuhh/katakomba/resolve/main/data/data-mon-hum-neu-any.hdf5 && wget -q https://huggingface.co/datasets/Howuhh/katakomba/resolve/main/data/data-val-hum-neu-any.hdf5 && wget -q https://huggingface.co/datasets/Howuhh/katakomba/resolve/main/data/data-ran-hum-neu-any.hdf5",
+    "cd /workspace && PYTHONPATH=/workspace/katakomba KATAKOMBA_DATA_DIR=/root/.katakomba/datasets KATAKOMBA_CACHE_DIR=/root/.katakomba/cache python -c \"from katakomba.utils.roles import Role, Race, Alignment; from katakomba.utils.datasets.small_scale import load_nld_aa_small_dataset; [load_nld_aa_small_dataset(Role(r), Race('hum'), Alignment(a), mode='memmap')[0].close(clear_cache=False) for r, a in [('mon','neu'),('val','neu'),('ran','neu')]]; print('Memmap cache ready')\""
+  ],
+  "data_deps": [
+    {
+      "name": "katakomba_cache",
+      "host_path": "{data_root}/data_staging/katakomba_cache",
+      "container_path": "/root/.katakomba/cache",
+      "prepare": "vendor/data_scripts/katakomba/prepare_cache.py",
+      "description": "Katakomba memmap cache (mon/val/ran-hum-neu). Pre-decompressed from HDF5 for fast loading."
+    }
+  ],
+  "env": {
+    "HOME": "/root",
+    "KATAKOMBA_DATA_DIR": "/root/.katakomba/datasets",
+    "KATAKOMBA_CACHE_DIR": "/root/.katakomba/cache",
+    "PYTHONPATH": "/workspace/katakomba"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

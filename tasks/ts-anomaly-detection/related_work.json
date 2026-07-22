@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ts-anomaly-detection",
+  "task_folder": "tasks/ts-anomaly-detection",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ts-anomaly-detection/config.json",
+      "task_description_path": "tasks/ts-anomaly-detection/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "PSM",
+      "cmd": "scripts/psm.sh",
+      "package": "Time-Series-Library",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "MSL",
+      "cmd": "scripts/msl.sh",
+      "package": "Time-Series-Library",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "SMAP",
+      "cmd": "scripts/smap.sh",
+      "package": "Time-Series-Library",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:59:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "dlinear",
+      "implementation": "scripts/dlinear.sh",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "timesnet",
+      "implementation": "scripts/timesnet.sh",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "patchtst",
+      "implementation": "scripts/patchtst.sh",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

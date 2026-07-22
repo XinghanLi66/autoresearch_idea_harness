@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-pretrain-optimizer",
+  "task_folder": "tasks/llm-pretrain-optimizer",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/llm-pretrain-optimizer/config.json",
+      "task_description_path": "tasks/llm-pretrain-optimizer/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 2,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "gpt-762m",
+      "cmd": "scripts/gpt_762m.sh",
+      "package": "nanoGPT",
+      "group": 1,
+      "compute": 2.0,
+      "time": "23:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "lm-eval-762m",
+      "cmd": "scripts/lm_eval_762m.sh",
+      "package": "lm-evaluation-harness",
+      "group": 2,
+      "compute": 1.0,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "adamw_nesterov",
+      "implementation": "edits/adamw_nesterov.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "lion",
+      "implementation": "edits/lion.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "muon",
+      "implementation": "edits/muon.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

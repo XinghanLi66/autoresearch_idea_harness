@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-calibration",
+  "task_folder": "tasks/ml-calibration",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-calibration/config.json",
+      "task_description_path": "tasks/ml-calibration/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 4,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "rf-mnist",
+      "cmd": "scripts/rf_mnist.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "mlp-fashion_mnist",
+      "cmd": "scripts/mlp_fashion_mnist.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "gbm-madelon",
+      "cmd": "scripts/gbm_madelon.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:20:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "svm-breast_cancer",
+      "cmd": "scripts/svm_breast_cancer.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:10:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "platt_scaling",
+      "implementation": "edits/platt_scaling.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "isotonic_regression",
+      "implementation": "edits/isotonic_regression.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "histogram_binning",
+      "implementation": "edits/histogram_binning.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "temperature_scaling",
+      "implementation": "edits/temperature_scaling.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "beta_calibration",
+      "implementation": "edits/beta_calibration.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "spline_calibration",
+      "implementation": "edits/spline_calibration.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

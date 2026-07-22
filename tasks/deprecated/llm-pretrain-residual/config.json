@@ -1,0 +1,80 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train.sh",
+      "label": "depth-4",
+      "group": 1,
+      "compute": 1,
+      "time": "2:00:00",
+      "package": "nanochat"
+    }
+  ],
+  "baselines": {
+    "vanilla": {
+      "edit_ops": "edits/vanilla.edit.py"
+    },
+    "hc": {
+      "edit_ops": "edits/hc.edit.py"
+    },
+    "mhc": {
+      "edit_ops": "edits/mhc.edit.py"
+    },
+    "full_attnres": {
+      "edit_ops": "edits/full_attnres.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "nanochat/nanochat/gpt.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 53,
+          "end": 55
+        },
+        {
+          "start": 79,
+          "end": 80
+        },
+        {
+          "start": 91,
+          "end": 95
+        },
+        {
+          "start": 176,
+          "end": 185
+        },
+        {
+          "start": 227,
+          "end": 238
+        },
+        {
+          "start": 314,
+          "end": 318
+        },
+        {
+          "start": 329,
+          "end": 356
+        },
+        {
+          "start": 358,
+          "end": 382
+        },
+        {
+          "start": 413,
+          "end": 417
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

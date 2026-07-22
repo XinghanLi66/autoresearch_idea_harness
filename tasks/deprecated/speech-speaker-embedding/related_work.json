@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "speech-speaker-embedding",
+  "task_folder": "tasks/speech-speaker-embedding",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/speech-speaker-embedding/config.json",
+      "task_description_path": "tasks/speech-speaker-embedding/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "voxceleb1-test",
+      "cmd": "scripts/voxceleb1_test.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "voxceleb1-hard",
+      "cmd": "scripts/voxceleb1_hard.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "cnceleb-eval",
+      "cmd": "scripts/cnceleb_eval.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ecapa_tdnn",
+      "implementation": "edits/ecapa_tdnn.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "resnet34",
+      "implementation": "edits/resnet34.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "rawnet3",
+      "implementation": "edits/rawnet3.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

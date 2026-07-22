@@ -1,0 +1,53 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y git wget unzip && rm -rf /var/lib/apt/lists/*",
+    "pip install lmdb tqdm wandb requests biopandas loguru scipy scikit-learn pandas rdkit-pypi transformers gdown 'numpy<2'",
+    "pip install unicore@git+https://github.com/dptech-corp/Uni-Core.git",
+    "mkdir -p /data/pretrain /data/vs_data /data/vs_data/cache /data/test_datasets /data/uniport_fasta /data/hf_cache",
+
+    "wget -q https://github.com/deepmodeling/Uni-Mol/releases/download/v0.1/mol_pre_no_h_220816.pt -O /data/pretrain/mol_pre_no_h_220816.pt",
+    "wget -q https://github.com/deepmodeling/Uni-Mol/releases/download/v0.1/pocket_pre_220816.pt -O /data/pretrain/pocket_pre_220816.pt",
+    "ls -lh /data/pretrain/ && echo 'UniMol pretrained weights downloaded'",
+
+    "HF_HOME=/data/hf_cache python -c \"from transformers import AutoTokenizer, AutoModelForMaskedLM; AutoTokenizer.from_pretrained('facebook/esm2_t12_35M_UR50D'); AutoModelForMaskedLM.from_pretrained('facebook/esm2_t12_35M_UR50D'); print('ESM2 cached')\"",
+
+    "wget -q https://ndownloader.figshare.com/files/50992728 -O /data/vs_data/train_lig_all_blend.lmdb",
+    "wget -q https://ndownloader.figshare.com/files/50992194 -O /data/vs_data/train_prot_all_blend.lmdb",
+    "wget -q https://ndownloader.figshare.com/files/50992179 -O /tmp/train_label.zip && unzip -q /tmp/train_label.zip -d /data/vs_data/ && rm /tmp/train_label.zip",
+    "wget -q https://ndownloader.figshare.com/files/50992173 -O /data/vs_data/valid_label_seq.json",
+    "wget -q https://ndownloader.figshare.com/files/50992176 -O /data/vs_data/valid_lig.lmdb",
+    "wget -q https://ndownloader.figshare.com/files/50992182 -O /data/vs_data/valid_prot.lmdb",
+    "wget -q https://ndownloader.figshare.com/files/54239555 -O /data/vs_data/uniport80.clstr",
+    "wget -q https://ndownloader.figshare.com/files/54239558 -O /data/vs_data/uniport40.clstr",
+    "wget -q https://ndownloader.figshare.com/files/50992185 -O /data/vs_data/pocket_name2idx_train_blend.json",
+    "wget -q https://ndownloader.figshare.com/files/50992191 -O /data/vs_data/mol_smi2idx_train_blend.json",
+    "ls -lh /data/vs_data/ && echo 'Training data downloaded'",
+
+    "echo '[]' > /data/vs_data/fep_repeat_ligands_can.json",
+    "echo '[]' > /data/vs_data/fep_assays.json",
+    "echo 'Test datasets + FASTA files copied via extra_files'",
+    "ls /data/test_datasets/ && echo 'Test datasets structure:'",
+
+    "python3 << 'PYEOF'\nimport os\nchecks = ['/data/pretrain/mol_pre_no_h_220816.pt', '/data/pretrain/pocket_pre_220816.pt', '/data/vs_data/train_lig_all_blend.lmdb', '/data/vs_data/train_prot_all_blend.lmdb']\nmissing = [f for f in checks if not os.path.exists(f)]\nassert not missing, 'Missing: ' + str(missing)\nprint('All critical data files verified')\nPYEOF"
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace:/workspace/unimol:${PYTHONPATH}",
+    "HOME": "/root",
+    "HF_HOME": "/data/hf_cache",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_HUB_OFFLINE": "1"
+  },
+  "extra_files": [
+    {"src": "vendor/data_cache/test_datasets", "dst": "/data/test_datasets"},
+    {"src": "vendor/data_cache/uniport_fasta", "dst": "/data/uniport_fasta"}
+  ],
+  "data_bind": [
+    "{project_root}/vendor/data_cache/test_datasets:/data/test_datasets",
+    "{project_root}/vendor/data_cache/uniport_fasta:/data/uniport_fasta"
+  ],
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

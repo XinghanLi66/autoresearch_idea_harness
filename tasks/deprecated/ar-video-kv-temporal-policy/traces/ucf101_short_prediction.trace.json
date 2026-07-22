@@ -1,0 +1,120 @@
+{
+  "trace_version": "video-chunk-trace-v1",
+  "workload": "ucf101_short_prediction",
+  "source_dataset": "UCF101",
+  "source_family": "ucf101",
+  "description": "Short action prediction \u2014 single scene, smooth motion",
+  "frame_count": 48,
+  "chunk_frames": 4,
+  "n_chunks": 12,
+  "chunks": [
+    {
+      "chunk_id": 0,
+      "temporal_similarity": 1.0,
+      "feature_drift": 0.0,
+      "keyframe_score": 0.889,
+      "boundary_score": 0.0,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 1,
+      "temporal_similarity": 0.9976,
+      "feature_drift": 0.4056,
+      "keyframe_score": 0.9104,
+      "boundary_score": 0.0004,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 2,
+      "temporal_similarity": 0.998,
+      "feature_drift": 0.7111,
+      "keyframe_score": 0.9431,
+      "boundary_score": 0.0002,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 3,
+      "temporal_similarity": 0.9978,
+      "feature_drift": 0.8874,
+      "keyframe_score": 0.9457,
+      "boundary_score": 0.0003,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 4,
+      "temporal_similarity": 0.9978,
+      "feature_drift": 0.9813,
+      "keyframe_score": 0.9356,
+      "boundary_score": 0.0002,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 5,
+      "temporal_similarity": 0.998,
+      "feature_drift": 0.9971,
+      "keyframe_score": 0.955,
+      "boundary_score": 0.0002,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 6,
+      "temporal_similarity": 0.9976,
+      "feature_drift": 0.99,
+      "keyframe_score": 0.9501,
+      "boundary_score": 0.0003,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 7,
+      "temporal_similarity": 0.998,
+      "feature_drift": 0.9876,
+      "keyframe_score": 0.9383,
+      "boundary_score": 0.0004,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 8,
+      "temporal_similarity": 0.9978,
+      "feature_drift": 0.9867,
+      "keyframe_score": 0.9428,
+      "boundary_score": 0.0004,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 9,
+      "temporal_similarity": 0.9978,
+      "feature_drift": 1.0,
+      "keyframe_score": 0.9219,
+      "boundary_score": 0.0004,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 10,
+      "temporal_similarity": 0.998,
+      "feature_drift": 0.99,
+      "keyframe_score": 0.8783,
+      "boundary_score": 0.0002,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    },
+    {
+      "chunk_id": 11,
+      "temporal_similarity": 0.9975,
+      "feature_drift": 0.9896,
+      "keyframe_score": 1.0,
+      "boundary_score": 0.0004,
+      "access_count": 1,
+      "chunk_size_tokens": 4800
+    }
+  ]
+}

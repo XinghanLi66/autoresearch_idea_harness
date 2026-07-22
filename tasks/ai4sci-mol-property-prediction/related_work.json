@@ -1,0 +1,559 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4sci-mol-property-prediction",
+  "task_folder": "tasks/ai4sci-mol-property-prediction",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "molecular property prediction",
+    "research_question": "Design a molecular representation model for predicting chemical properties from molecular structure.",
+    "local_sources": {
+      "config_path": "tasks/ai4sci-mol-property-prediction/config.json",
+      "task_description_path": "tasks/ai4sci-mol-property-prediction/task_description.md"
+    },
+    "notes": [
+      "Baselines map to D-MPNN, Uni-Mol, and GIN.",
+      "Tests cover BBBP, BACE, Tox21, ESOL, FreeSolv, and Lipophilicity."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 6,
+    "test_links_found": 11
+  },
+  "tests": [
+    {
+      "label": "BBBP",
+      "cmd": "scripts/bbbp.sh",
+      "package": "Uni-Mol",
+      "group": 1,
+      "compute": 0.5,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1021/ci300124c",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.1039/c7sc02664a",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Blood-brain barrier penetration benchmark from MoleculeNet and the original BBBP modeling paper."
+    },
+    {
+      "label": "BACE",
+      "cmd": "scripts/bace.sh",
+      "package": "Uni-Mol",
+      "group": 1,
+      "compute": 0.5,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1016/j.ab.2005.04.019",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.1039/c7sc02664a",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "BACE benchmark linked to the assay paper used to ground the dataset plus MoleculeNet."
+    },
+    {
+      "label": "Tox21",
+      "cmd": "scripts/tox21.sh",
+      "package": "Uni-Mol",
+      "group": 1,
+      "compute": 0.5,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1016/j.drudis.2013.05.015",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.1039/c7sc02664a",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Tox21 challenge data and the MoleculeNet benchmark."
+    },
+    {
+      "label": "ESOL",
+      "cmd": "scripts/esol.sh",
+      "package": "Uni-Mol",
+      "group": 1,
+      "compute": 0.5,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1021/ci034243x",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.1039/c7sc02664a",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "ESOL regression benchmark with the original aqueous solubility paper."
+    },
+    {
+      "label": "FreeSolv",
+      "cmd": "scripts/freesolv.sh",
+      "package": "Uni-Mol",
+      "group": 1,
+      "compute": 0.5,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1021/acs.jced.7b00104",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.1039/c7sc02664a",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "FreeSolv benchmark linked to the database update paper and MoleculeNet."
+    },
+    {
+      "label": "Lipo",
+      "cmd": "scripts/lipophilicity.sh",
+      "package": "Uni-Mol",
+      "group": 1,
+      "compute": 0.5,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1039/c7sc02664a",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Lipophilicity is represented through the MoleculeNet benchmark paper."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "dmpnn",
+      "implementation": "edits/dmpnn.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1021/acs.jcim.9b00237",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Directed message passing neural network baseline."
+    },
+    {
+      "name": "unimol",
+      "implementation": "edits/unimol.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.26434/chemrxiv-2022-jjm0j-v4",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Uni-Mol baseline with pretrained 3D molecular representation learning."
+    },
+    {
+      "name": "gin",
+      "implementation": "edits/gin.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1810.00826",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Graph Isomorphism Network baseline."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1021/acs.jcim.9b00237",
+      "title": "Analyzing Learned Molecular Representations for Property Prediction",
+      "authors": [
+        "Kevin Yang",
+        "Kyle Swanson",
+        "Wengong Jin",
+        "Connor Coley",
+        "Philipp Eiden",
+        "Hua Gao",
+        "Angel Guzman-Perez",
+        "Timothy Hopper",
+        "Brian Kelley",
+        "Miriam Mathea",
+        "Andrew Palmer",
+        "Volker Settels",
+        "Tommi Jaakkola",
+        "Klavs Jensen",
+        "Regina Barzilay"
+      ],
+      "year": 2019,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/acs.jcim.9b00237",
+      "arxiv_id": "1904.01561",
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1021/acs.jcim.9b00237",
+      "source_urls": [
+        "https://huggingface.co/papers/1904.01561",
+        "https://doi.org/10.1021/acs.jcim.9b00237"
+      ],
+      "bibtex": "@article{yang2019analyzing,\n  title={Analyzing Learned Molecular Representations for Property Prediction},\n  author={Yang, Kevin and Swanson, Kyle and Jin, Wengong and Coley, Connor and Eiden, Philipp and Gao, Hua and Guzman-Perez, Angel and Hopper, Timothy and Kelley, Brian and Mathea, Miriam and Palmer, Andrew and Settels, Volker and Jaakkola, Tommi and Jensen, Klavs and Barzilay, Regina},\n  journal={Journal of Chemical Information and Modeling},\n  year={2019},\n  doi={10.1021/acs.jcim.9b00237}\n}",
+      "relevance_tags": [
+        "baseline",
+        "graph_neural_network",
+        "molecular_property_prediction"
+      ],
+      "baseline_links": [
+        "dmpnn"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the directed message passing neural network used as the D-MPNN baseline.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "doi:10.26434/chemrxiv-2022-jjm0j-v4",
+      "title": "Uni-Mol: A Universal 3D Molecular Representation Learning Framework",
+      "authors": [
+        "Gengmo Zhou",
+        "Zhifeng Gao",
+        "Qiankun Ding",
+        "Hang Zheng",
+        "Hongteng Xu",
+        "Zhewei Wei",
+        "Linfeng Zhang",
+        "Guolin Ke"
+      ],
+      "year": 2023,
+      "venue": "ChemRxiv",
+      "doi": "10.26434/chemrxiv-2022-jjm0j-v4",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.26434/chemrxiv-2022-jjm0j-v4",
+      "source_urls": [
+        "https://chemrxiv.org/engage/chemrxiv/article-details/6402990d37e01856dc1d1581",
+        "https://doi.org/10.26434/chemrxiv-2022-jjm0j-v4"
+      ],
+      "bibtex": "@misc{zhou2023unimol,\n  title={Uni-Mol: A Universal 3D Molecular Representation Learning Framework},\n  author={Zhou, Gengmo and Gao, Zhifeng and Ding, Qiankun and Zheng, Hang and Xu, Hongteng and Wei, Zhewei and Zhang, Linfeng and Ke, Guolin},\n  year={2023},\n  publisher={ChemRxiv},\n  doi={10.26434/chemrxiv-2022-jjm0j-v4}\n}",
+      "relevance_tags": [
+        "baseline",
+        "3d_geometry",
+        "transformer",
+        "molecular_property_prediction"
+      ],
+      "baseline_links": [
+        "unimol"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the 3D molecular Transformer baseline used in the task.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "arxiv:1810.00826",
+      "title": "How Powerful are Graph Neural Networks?",
+      "authors": [
+        "Keyulu Xu",
+        "Weihua Hu",
+        "Jure Leskovec",
+        "Stefanie Jegelka"
+      ],
+      "year": 2019,
+      "venue": "ICLR",
+      "doi": null,
+      "arxiv_id": "1810.00826",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1810.00826",
+      "source_urls": [
+        "https://www.emergentmind.com/papers/1810.00826",
+        "https://arxiv.org/abs/1810.00826"
+      ],
+      "bibtex": "@article{xu2019gin,\n  title={How Powerful are Graph Neural Networks?},\n  author={Xu, Keyulu and Hu, Weihua and Leskovec, Jure and Jegelka, Stefanie},\n  journal={arXiv preprint arXiv:1810.00826},\n  year={2019}\n}",
+      "relevance_tags": [
+        "baseline",
+        "graph_neural_network",
+        "molecular_property_prediction"
+      ],
+      "baseline_links": [
+        "gin"
+      ],
+      "test_links": [],
+      "relevance": "Canonical GIN baseline for graph-level prediction tasks.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "doi:10.1039/c7sc02664a",
+      "title": "MoleculeNet: a benchmark for molecular machine learning",
+      "authors": [
+        "Zhenqin Wu",
+        "Bharath Ramsundar",
+        "Evan N. Feinberg",
+        "Joseph Gomes",
+        "Caleb Geniesse",
+        "Aneesh S. Pappu",
+        "Karl Leswing",
+        "Vijay Pande"
+      ],
+      "year": 2018,
+      "venue": "Chemical Science",
+      "doi": "10.1039/c7sc02664a",
+      "arxiv_id": "1703.00564",
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1039/c7sc02664a",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/29629118/",
+        "https://doi.org/10.1039/c7sc02664a"
+      ],
+      "bibtex": "@article{wu2018moleculenet,\n  title={MoleculeNet: a benchmark for molecular machine learning},\n  author={Wu, Zhenqin and Ramsundar, Bharath and Feinberg, Evan N. and Gomes, Joseph and Geniesse, Caleb and Pappu, Aneesh S. and Leswing, Karl and Pande, Vijay},\n  journal={Chemical Science},\n  volume={9},\n  number={2},\n  pages={513--530},\n  year={2018},\n  doi={10.1039/c7sc02664a}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "dataset",
+        "molecular_property_prediction"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "BBBP",
+        "BACE",
+        "Tox21",
+        "ESOL",
+        "FreeSolv",
+        "Lipo"
+      ],
+      "relevance": "Defines the standard benchmark suite that includes BBBP, BACE, Tox21, ESOL, FreeSolv, and Lipophilicity.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "doi:10.1021/ci300124c",
+      "title": "A Bayesian approach to in silico blood-brain barrier penetration modeling",
+      "authors": [
+        "Ines Filipa Martins",
+        "Ana L. Teixeira",
+        "Luis Pinheiro",
+        "Andre O. Falcao"
+      ],
+      "year": 2012,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/ci300124c",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1021/ci300124c",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/22612593/",
+        "https://doi.org/10.1021/ci300124c"
+      ],
+      "bibtex": "@article{martins2012bbbp,\n  title={A Bayesian approach to in silico blood-brain barrier penetration modeling},\n  author={Martins, Ines Filipa and Teixeira, Ana L. and Pinheiro, Luis and Falcao, Andre O.},\n  journal={Journal of Chemical Information and Modeling},\n  volume={52},\n  number={6},\n  pages={1686--1697},\n  year={2012},\n  doi={10.1021/ci300124c}\n}",
+      "relevance_tags": [
+        "dataset",
+        "binary_classification",
+        "molecular_property_prediction"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "BBBP"
+      ],
+      "relevance": "Original BBBP modeling paper behind the blood-brain barrier penetration benchmark.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "doi:10.1016/j.ab.2005.04.019",
+      "title": "Biochemical and cell-based assays for characterization of BACE-1 inhibitors",
+      "authors": [
+        "Beth L. Pietrak",
+        "Ming-Chih Crouthamel",
+        "Katherine Tugusheva",
+        "Janet E. Lineberger",
+        "Min Xu",
+        "Jillian M. DiMuzio",
+        "Thomas Steele",
+        "Amy S. Espeseth",
+        "Shawn J. Stachel",
+        "Craig A. Coburn",
+        "Samuel L. Graham",
+        "Joseph P. Vacca",
+        "Xiao-Ping Shi",
+        "Adam J. Simon",
+        "Daria J. Hazuda",
+        "Ming-Tain Lai"
+      ],
+      "year": 2005,
+      "venue": "Analytical Biochemistry",
+      "doi": "10.1016/j.ab.2005.04.019",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1016/j.ab.2005.04.019",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/15958191/",
+        "https://doi.org/10.1016/j.ab.2005.04.019"
+      ],
+      "bibtex": "@article{pietrak2005bace,\n  title={Biochemical and cell-based assays for characterization of BACE-1 inhibitors},\n  author={Pietrak, Beth L. and Crouthamel, Ming-Chih and Tugusheva, Katherine and Lineberger, Janet E. and Xu, Min and DiMuzio, Jillian M. and Steele, Thomas and Espeseth, Amy S. and Stachel, Shawn J. and Coburn, Craig A. and Graham, Samuel L. and Vacca, Joseph P. and Shi, Xiao-Ping and Simon, Adam J. and Hazuda, Daria J. and Lai, Ming-Tain},\n  journal={Analytical Biochemistry},\n  volume={342},\n  number={1},\n  pages={144--151},\n  year={2005},\n  doi={10.1016/j.ab.2005.04.019}\n}",
+      "relevance_tags": [
+        "dataset",
+        "assay",
+        "molecular_property_prediction"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "BACE"
+      ],
+      "relevance": "Experimental assay paper that motivates the BACE benchmark.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "doi:10.1016/j.drudis.2013.05.015",
+      "title": "The Tox21 robotic platform for the assessment of environmental chemicals--from vision to reality",
+      "authors": [
+        "Matias S. Attene-Ramos",
+        "Nicole Miller",
+        "Ruili Huang",
+        "Sam Michael",
+        "Misha Itkin",
+        "Robert J. Kavlock",
+        "Christopher P. Austin",
+        "Paul Shinn",
+        "Anton Simeonov",
+        "Raymond R. Tice",
+        "Menghang Xia"
+      ],
+      "year": 2013,
+      "venue": "Drug Discovery Today",
+      "doi": "10.1016/j.drudis.2013.05.015",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1016/j.drudis.2013.05.015",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/23732176/",
+        "https://doi.org/10.1016/j.drudis.2013.05.015"
+      ],
+      "bibtex": "@article{attene2013tox21,\n  title={The Tox21 robotic platform for the assessment of environmental chemicals--from vision to reality},\n  author={Attene-Ramos, Matias S. and Miller, Nicole and Huang, Ruili and Michael, Sam and Itkin, Misha and Kavlock, Robert J. and Austin, Christopher P. and Shinn, Paul and Simeonov, Anton and Tice, Raymond R. and Xia, Menghang},\n  journal={Drug Discovery Today},\n  volume={18},\n  number={15-16},\n  pages={716--723},\n  year={2013},\n  doi={10.1016/j.drudis.2013.05.015}\n}",
+      "relevance_tags": [
+        "dataset",
+        "toxicity",
+        "multi_task_learning"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "Tox21"
+      ],
+      "relevance": "Tox21 challenge paper for the multi-task toxicity benchmark.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "doi:10.1021/ci034243x",
+      "title": "ESOL: estimating aqueous solubility directly from molecular structure",
+      "authors": [
+        "A. J. Delaney"
+      ],
+      "year": 2004,
+      "venue": "Journal of Chemical Information and Computer Sciences",
+      "doi": "10.1021/ci034243x",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1021/ci034243x",
+      "source_urls": [
+        "https://doi.org/10.1021/ci034243x"
+      ],
+      "bibtex": "@article{delaney2004esol,\n  title={ESOL: estimating aqueous solubility directly from molecular structure},\n  author={Delaney, A. J.},\n  journal={Journal of Chemical Information and Computer Sciences},\n  volume={44},\n  number={3},\n  pages={1000--1005},\n  year={2004},\n  doi={10.1021/ci034243x}\n}",
+      "relevance_tags": [
+        "dataset",
+        "regression",
+        "solubility"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "ESOL"
+      ],
+      "relevance": "Original ESOL aqueous solubility benchmark paper.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "doi:10.1021/acs.jced.7b00104",
+      "title": "Approaches for calculating solvation free energies and enthalpies demonstrated with an update of the FreeSolv database",
+      "authors": [
+        "Guilherme Duarte Ramos Matos",
+        "Daisy Y Kyu",
+        "Hannes H Loeffler",
+        "John D Chodera",
+        "Michael R Shirts",
+        "David L Mobley"
+      ],
+      "year": 2017,
+      "venue": "Journal of Chemical and Engineering Data",
+      "doi": "10.1021/acs.jced.7b00104",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1021/acs.jced.7b00104",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/29056756/",
+        "https://doi.org/10.1021/acs.jced.7b00104"
+      ],
+      "bibtex": "@article{matos2017freesolv,\n  title={Approaches for calculating solvation free energies and enthalpies demonstrated with an update of the FreeSolv database},\n  author={Matos, Guilherme Duarte Ramos and Kyu, Daisy Y and Loeffler, Hannes H and Chodera, John D and Shirts, Michael R and Mobley, David L},\n  journal={Journal of Chemical and Engineering Data},\n  year={2017},\n  doi={10.1021/acs.jced.7b00104}\n}",
+      "relevance_tags": [
+        "dataset",
+        "regression",
+        "solvation_free_energy"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "FreeSolv"
+      ],
+      "relevance": "Updated FreeSolv database paper used for the hydration free energy benchmark.",
+      "verified_by": "web_lookup"
+    },
+    {
+      "paper_id": "doi:10.1021/acs.jmedchem.9b00959",
+      "title": "Pushing the Boundaries of Molecular Representation for Drug Discovery with the Graph Attention Mechanism",
+      "authors": [
+        "Zhaoping Xiong",
+        "Dingyan Wang",
+        "Xiaohong Liu",
+        "Feisheng Zhong",
+        "Xiaozhe Wan",
+        "Xutong Li",
+        "Zhaojun Li",
+        "Xiaomin Luo",
+        "Kaixian Chen",
+        "Hualiang Jiang",
+        "Mingyue Zheng"
+      ],
+      "year": 2020,
+      "venue": "Journal of Medicinal Chemistry",
+      "doi": "10.1021/acs.jmedchem.9b00959",
+      "arxiv_id": null,
+      "openalex_id": null,
+      "landing_page": "https://doi.org/10.1021/acs.jmedchem.9b00959",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/31408336/",
+        "https://doi.org/10.1021/acs.jmedchem.9b00959"
+      ],
+      "bibtex": "@article{xiong2020attentivefp,\n  title={Pushing the Boundaries of Molecular Representation for Drug Discovery with the Graph Attention Mechanism},\n  author={Xiong, Zhaoping and Wang, Dingyan and Liu, Xiaohong and Zhong, Feisheng and Wan, Xiaozhe and Li, Xutong and Li, Zhaojun and Luo, Xiaomin and Chen, Kaixian and Jiang, Hualiang and Zheng, Mingyue},\n  journal={Journal of Medicinal Chemistry},\n  volume={63},\n  number={16},\n  pages={8749--8760},\n  year={2020},\n  doi={10.1021/acs.jmedchem.9b00959}\n}",
+      "relevance_tags": [
+        "graph_attention",
+        "baseline_method",
+        "molecular_property_prediction"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "BBBP",
+        "BACE",
+        "Tox21"
+      ],
+      "relevance": "Graph-attention molecular property model that is directly relevant to the classification benchmarks in this task.",
+      "verified_by": "web_lookup"
+    }
+  ]
+}

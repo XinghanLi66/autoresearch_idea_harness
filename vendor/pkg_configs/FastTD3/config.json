@@ -1,0 +1,15 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "apt-get update && apt-get install -y libglfw3 libgl1-mesa-glx libosmesa6 && rm -rf /var/lib/apt/lists/*",
+    "pip install --no-cache-dir gymnasium<1.0.0 jax-jumpy==1.0.0 matplotlib moviepy 'numpy<2.0' pandas protobuf pygame stable-baselines3 tqdm wandb torchrl==0.7.2 tensordict==0.7.2 tyro loguru",
+    "pip install --no-cache-dir --editable 'git+https://github.com/carlosferrazza/humanoid-bench.git#egg=humanoid-bench'"
+  ],
+  "use_cuda": true,
+  "workdir": "/workspace",
+  "env": {
+    "MUJOCO_GL": "egl",
+    "OMP_NUM_THREADS": "1",
+    "TORCHDYNAMO_INLINE_INBUILT_NN_MODULES": "1"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/epitope_group.sh",
+      "label": "epitope_group",
+      "group": 1,
+      "compute": 1.0,
+      "time": "12:00:00",
+      "package": "chimera-bench"
+    },
+    {
+      "cmd": "scripts/antigen_fold.sh",
+      "label": "antigen_fold",
+      "group": 1,
+      "compute": 1.0,
+      "time": "12:00:00",
+      "package": "chimera-bench"
+    },
+    {
+      "cmd": "scripts/temporal.sh",
+      "label": "temporal",
+      "group": 1,
+      "compute": 1.0,
+      "time": "12:00:00",
+      "package": "chimera-bench",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "diffab": {
+      "edit_ops": "edits/diffab.edit.py"
+    },
+    "dymean": {
+      "edit_ops": "edits/dymean.edit.py"
+    },
+    "mean": {
+      "edit_ops": "edits/mean.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "chimera-bench/custom_cdr.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 225,
+          "end": 519
+        },
+        {
+          "start": 613,
+          "end": 699
+        }
+      ]
+    },
+    {
+      "filename": "chimera-bench/evaluation/metrics.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "chimera-bench/baselines/chimera_utils.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "chimera-bench/baselines/shared_config.yaml",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

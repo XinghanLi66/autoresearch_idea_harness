@@ -1,0 +1,63 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "seeds": [42],
+  "test_cmds": [
+    {
+      "cmd": "scripts/vit_tiny.sh",
+      "label": "vit_tiny",
+      "group": 1,
+      "compute": 0.33,
+      "time": "12:00:00",
+      "package": "eb_jepa"
+    },
+    {
+      "cmd": "scripts/vit_small.sh",
+      "label": "vit_small",
+      "group": 1,
+      "compute": 0.33,
+      "time": "12:00:00",
+      "package": "eb_jepa"
+    },
+    {
+      "cmd": "scripts/vit_base.sh",
+      "label": "vit_base",
+      "group": 1,
+      "compute": 0.33,
+      "time": "12:00:00",
+      "package": "eb_jepa",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "random": {
+      "edit_ops": "edits/random.edit.py"
+    },
+    "rasterized": {
+      "edit_ops": "edits/rasterized.edit.py"
+    },
+    "block": {
+      "edit_ops": "edits/block.edit.py"
+    },
+    "multiblock": {
+      "edit_ops": "edits/multiblock.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "eb_jepa/custom_mask.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 59,
+          "end": 91
+        }
+      ]
+    }
+  ]
+}

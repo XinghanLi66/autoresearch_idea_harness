@@ -1,0 +1,581 @@
+{
+  "schema_version": "1.0",
+  "task_name": "dl-normalization",
+  "task_folder": "tasks/dl-normalization",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "normalization layer design for deep convolutional neural networks",
+    "research_question": "Design a novel normalization layer for deep convolutional neural networks that improves training stability and final test accuracy across different architectures and datasets.",
+    "local_sources": {
+      "config_path": "tasks/dl-normalization/config.json",
+      "task_description_path": "tasks/dl-normalization/task_description.md"
+    },
+    "notes": [
+      "Task-scoped baselines in config.json are GroupNorm, Batch-Instance Norm, and Switchable Norm.",
+      "The task evaluates a BatchNorm2d-compatible replacement across ResNet-56/CIFAR-100, ResNet-110/CIFAR-100, and MobileNetV2/Fashion-MNIST.",
+      "Additional normalization papers are included to cover nearby design space exposed by local edit stubs and the broader research context."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 14,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 9
+  },
+  "tests": [
+    {
+      "label": "resnet56-cifar100",
+      "cmd": "scripts/resnet56_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1608.03983",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "CIFAR-style ResNet evaluation on CIFAR-100 with cosine annealing; SGDR is the closest concrete scheduler paper."
+    },
+    {
+      "label": "resnet110-cifar100",
+      "cmd": "scripts/resnet110_cifar100.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2016.90",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.57702/zp44cu3g",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1608.03983",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "Hidden final-evaluation variant of the same CIFAR-style ResNet family and training setup."
+    },
+    {
+      "label": "mobilenetv2-fmnist",
+      "cmd": "scripts/mobilenetv2_fmnist.sh",
+      "package": "pytorch-vision",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2018.00474",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1708.07747",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1608.03983",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "MobileNetV2 architecture evaluated on Fashion-MNIST with the same cosine-annealed SGD scaffold."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "group_norm",
+      "implementation": "edits/group_norm.edit.py",
+      "labels": [
+        "batch-size-independent",
+        "cnn_normalization"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1007/978-3-030-01261-8_1",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the Wu and He GroupNorm method."
+    },
+    {
+      "name": "batch_instance_norm",
+      "implementation": "edits/batch_instance_norm.edit.py",
+      "labels": [
+        "hybrid_normalization",
+        "style_invariance"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1805.07925",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the learnable BatchNorm/InstanceNorm interpolation introduced in Batch-Instance Normalization."
+    },
+    {
+      "name": "switchable_norm",
+      "implementation": "edits/switchable_norm.edit.py",
+      "labels": [
+        "mixture_of_normalizers",
+        "adaptive_statistics"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1806.10779",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches Switchable Normalization with learned mixing weights over BN, IN, and LN statistics."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.1502.03167",
+      "title": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+      "authors": [
+        "Sergey Ioffe",
+        "Christian Szegedy"
+      ],
+      "year": 2015,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1502.03167",
+      "arxiv_id": "1502.03167",
+      "openalex_id": "https://openalex.org/W1836465849",
+      "landing_page": "https://arxiv.org/abs/1502.03167",
+      "source_urls": [
+        "https://openalex.org/W1836465849",
+        "https://arxiv.org/abs/1502.03167"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1502.03167,\\n  doi = {10.48550/ARXIV.1502.03167},\\n  url = {https://arxiv.org/abs/1502.03167},\\n  author = {Ioffe, Sergey and Szegedy, Christian},\\n  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift},\\n  publisher = {arXiv},\\n  year = {2015},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "normalization",
+        "cnn",
+        "foundational"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational baseline that the task asks agents to replace with a better BatchNorm2d-compatible normalization layer.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1007/978-3-030-01261-8_1",
+      "title": "Group Normalization",
+      "authors": [
+        "Yuxin Wu",
+        "Kaiming He"
+      ],
+      "year": 2018,
+      "venue": "ECCV",
+      "doi": "10.1007/978-3-030-01261-8_1",
+      "arxiv_id": "1803.08494",
+      "openalex_id": "https://openalex.org/W2795783309",
+      "landing_page": "https://doi.org/10.1007/978-3-030-01261-8_1",
+      "source_urls": [
+        "https://openalex.org/W2795783309",
+        "https://doi.org/10.1007/978-3-030-01261-8_1"
+      ],
+      "bibtex": "@inbook{Wu_2018, title={Group Normalization}, ISBN={9783030012618}, ISSN={1611-3349}, url={http://dx.doi.org/10.1007/978-3-030-01261-8_1}, DOI={10.1007/978-3-030-01261-8_1}, booktitle={Computer Vision – ECCV 2018}, publisher={Springer International Publishing}, author={Wu, Yuxin and He, Kaiming}, year={2018}, pages={3–19} }",
+      "relevance_tags": [
+        "baseline",
+        "normalization",
+        "cnn"
+      ],
+      "baseline_links": [
+        "group_norm"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the GroupNorm baseline included in config.json.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1607.08022",
+      "title": "Instance Normalization: The Missing Ingredient for Fast Stylization",
+      "authors": [
+        "Dmitry Ulyanov",
+        "Andrea Vedaldi",
+        "Victor Lempitsky"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1607.08022",
+      "arxiv_id": "1607.08022",
+      "openalex_id": "https://openalex.org/W2502312327",
+      "landing_page": "https://arxiv.org/abs/1607.08022",
+      "source_urls": [
+        "https://openalex.org/W2502312327",
+        "https://arxiv.org/abs/1607.08022"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1607.08022,\\n  doi = {10.48550/ARXIV.1607.08022},\\n  url = {https://arxiv.org/abs/1607.08022},\\n  author = {Ulyanov, Dmitry and Vedaldi, Andrea and Lempitsky, Victor},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Instance Normalization: The Missing Ingredient for Fast Stylization},\\n  publisher = {arXiv},\\n  year = {2016},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "normalization",
+        "instance_norm",
+        "cnn"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Task description cites InstanceNorm as a canonical alternative normalization family relevant to the search space.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1607.06450",
+      "title": "Layer Normalization",
+      "authors": [
+        "Jimmy Lei Ba",
+        "Jamie Ryan Kiros",
+        "Geoffrey E. Hinton"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1607.06450",
+      "arxiv_id": "1607.06450",
+      "openalex_id": "https://openalex.org/W3037932933",
+      "landing_page": "https://arxiv.org/abs/1607.06450",
+      "source_urls": [
+        "https://openalex.org/W3037932933",
+        "https://arxiv.org/abs/1607.06450"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1607.06450,\\n  doi = {10.48550/ARXIV.1607.06450},\\n  url = {https://arxiv.org/abs/1607.06450},\\n  author = {Ba, Jimmy Lei and Kiros, Jamie Ryan and Hinton, Geoffrey E.},\\n  keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Layer Normalization},\\n  publisher = {arXiv},\\n  year = {2016},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "normalization",
+        "layer_norm",
+        "cnn"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Task description cites LayerNorm as another standard normalization family whose statistics differ from BatchNorm and GroupNorm.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1805.07925",
+      "title": "Batch-Instance Normalization for Adaptively Style-Invariant Neural Networks",
+      "authors": [
+        "Hyeonseob Nam",
+        "Hyo-Eun Kim"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1805.07925",
+      "arxiv_id": "1805.07925",
+      "openalex_id": "https://openalex.org/W2803808038",
+      "landing_page": "https://arxiv.org/abs/1805.07925",
+      "source_urls": [
+        "https://openalex.org/W2803808038",
+        "https://arxiv.org/abs/1805.07925"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1805.07925,\\n  doi = {10.48550/ARXIV.1805.07925},\\n  url = {https://arxiv.org/abs/1805.07925},\\n  author = {Nam, Hyeonseob and Kim, Hyo-Eun},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Batch-Instance Normalization for Adaptively Style-Invariant Neural Networks},\\n  publisher = {arXiv},\\n  year = {2018},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "baseline",
+        "hybrid_normalization",
+        "cnn"
+      ],
+      "baseline_links": [
+        "batch_instance_norm"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the Batch-Instance Norm baseline included in config.json.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1806.10779",
+      "title": "Differentiable Learning-to-Normalize via Switchable Normalization",
+      "authors": [
+        "Ping Luo",
+        "Jiamin Ren",
+        "Zhanglin Peng",
+        "Ruimao Zhang",
+        "Jingyu Li"
+      ],
+      "year": 2018,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1806.10779",
+      "arxiv_id": "1806.10779",
+      "openalex_id": "https://openalex.org/W2811135961",
+      "landing_page": "https://arxiv.org/abs/1806.10779",
+      "source_urls": [
+        "https://openalex.org/W2811135961",
+        "https://arxiv.org/abs/1806.10779"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1806.10779,\\n  doi = {10.48550/ARXIV.1806.10779},\\n  url = {https://arxiv.org/abs/1806.10779},\\n  author = {Luo, Ping and Ren, Jiamin and Peng, Zhanglin and Zhang, Ruimao and Li, Jingyu},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Differentiable Learning-to-Normalize via Switchable Normalization},\\n  publisher = {arXiv},\\n  year = {2018},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "baseline",
+        "adaptive_normalization",
+        "cnn"
+      ],
+      "baseline_links": [
+        "switchable_norm"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the Switchable Normalization baseline included in config.json.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2004.02967",
+      "title": "Evolving Normalization-Activation Layers",
+      "authors": [
+        "Hanxiao Liu",
+        "Andrew Brock",
+        "Karen Simonyan",
+        "Quoc V. Le"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2004.02967",
+      "arxiv_id": "2004.02967",
+      "openalex_id": "https://openalex.org/W3015661699",
+      "landing_page": "https://arxiv.org/abs/2004.02967",
+      "source_urls": [
+        "https://openalex.org/W3015661699",
+        "https://arxiv.org/abs/2004.02967"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2004.02967,\\n  doi = {10.48550/ARXIV.2004.02967},\\n  url = {https://arxiv.org/abs/2004.02967},\\n  author = {Liu, Hanxiao and Brock, Andrew and Simonyan, Karen and Le, Quoc V.},\\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Evolving Normalization-Activation Layers},\\n  publisher = {arXiv},\\n  year = {2020},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "normalization",
+        "cnn",
+        "search_space"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant neighboring work because the task explicitly asks agents to invent a new normalization layer and local edit stubs include an EvoNorm variant.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr42600.2020.01125",
+      "title": "Filter Response Normalization Layer: Eliminating Batch Dependence in the Training of Deep Neural Networks",
+      "authors": [
+        "Saurabh Singh",
+        "Shankar Krishnan"
+      ],
+      "year": 2020,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr42600.2020.01125",
+      "arxiv_id": "1911.09737",
+      "openalex_id": "https://openalex.org/W2991530176",
+      "landing_page": "https://doi.org/10.1109/cvpr42600.2020.01125",
+      "source_urls": [
+        "https://openalex.org/W2991530176",
+        "https://doi.org/10.1109/cvpr42600.2020.01125"
+      ],
+      "bibtex": "@inproceedings{Singh_2020, title={Filter Response Normalization Layer: Eliminating Batch Dependence in the Training of Deep Neural Networks}, url={http://dx.doi.org/10.1109/cvpr42600.2020.01125}, DOI={10.1109/cvpr42600.2020.01125}, booktitle={2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Singh, Saurabh and Krishnan, Shankar}, year={2020}, month=jun, pages={11234–11243} }",
+      "relevance_tags": [
+        "normalization",
+        "cnn",
+        "batch_independent"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant CNN normalization alternative focused on removing batch dependence, directly aligned with the task's design space.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1903.10520",
+      "title": "Micro-Batch Training with Batch-Channel Normalization and Weight Standardization",
+      "authors": [
+        "Siyuan Qiao",
+        "Huiyu Wang",
+        "Chenxi Liu",
+        "Wei Shen",
+        "Alan Yuille"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1903.10520",
+      "arxiv_id": "1903.10520",
+      "openalex_id": "https://openalex.org/W3048030262",
+      "landing_page": "https://arxiv.org/abs/1903.10520",
+      "source_urls": [
+        "https://openalex.org/W3048030262",
+        "https://arxiv.org/abs/1903.10520"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1903.10520,\\n  doi = {10.48550/ARXIV.1903.10520},\\n  url = {https://arxiv.org/abs/1903.10520},\\n  author = {Qiao, Siyuan and Wang, Huiyu and Liu, Chenxi and Shen, Wei and Yuille, Alan},\\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Micro-Batch Training with Batch-Channel Normalization and Weight Standardization},\\n  publisher = {arXiv},\\n  year = {2019},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "normalization",
+        "cnn",
+        "weight_standardization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant follow-on normalization work for CNNs under small-batch regimes, which is a central failure mode motivating alternatives to BatchNorm.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2016.90",
+      "title": "Deep Residual Learning for Image Recognition",
+      "authors": [
+        "Kaiming He",
+        "Xiangyu Zhang",
+        "Shaoqing Ren",
+        "Jian Sun"
+      ],
+      "year": 2016,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2016.90",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2194775991",
+      "landing_page": "https://doi.org/10.1109/cvpr.2016.90",
+      "source_urls": [
+        "https://openalex.org/W2194775991",
+        "https://doi.org/10.1109/cvpr.2016.90"
+      ],
+      "bibtex": "@inproceedings{He_2016, title={Deep Residual Learning for Image Recognition}, url={http://dx.doi.org/10.1109/cvpr.2016.90}, DOI={10.1109/cvpr.2016.90}, booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian}, year={2016}, month=jun, pages={770–778} }",
+      "relevance_tags": [
+        "architecture",
+        "resnet",
+        "test"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet56-cifar100",
+        "resnet110-cifar100"
+      ],
+      "relevance": "Architecture paper for the ResNet family used in two evaluation commands.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2018.00474",
+      "title": "MobileNetV2: Inverted Residuals and Linear Bottlenecks",
+      "authors": [
+        "Mark Sandler",
+        "Andrew Howard",
+        "Menglong Zhu",
+        "Andrey Zhmoginov",
+        "Liang-Chieh Chen"
+      ],
+      "year": 2018,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2018.00474",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2963163009",
+      "landing_page": "https://doi.org/10.1109/cvpr.2018.00474",
+      "source_urls": [
+        "https://openalex.org/W2963163009",
+        "https://doi.org/10.1109/cvpr.2018.00474"
+      ],
+      "bibtex": "@inproceedings{Sandler_2018, title={MobileNetV2: Inverted Residuals and Linear Bottlenecks}, url={http://dx.doi.org/10.1109/cvpr.2018.00474}, DOI={10.1109/cvpr.2018.00474}, booktitle={2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Sandler, Mark and Howard, Andrew and Zhu, Menglong and Zhmoginov, Andrey and Chen, Liang-Chieh}, year={2018}, month=jun, pages={4510–4520} }",
+      "relevance_tags": [
+        "architecture",
+        "mobilenetv2",
+        "test"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Architecture paper for the MobileNetV2 evaluation command.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.57702/zp44cu3g",
+      "title": "Learning Multiple Layers of Features from Tiny Images",
+      "authors": [
+        "Alex Krizhevsky"
+      ],
+      "year": 2024,
+      "venue": "TIB dataset record for the original CIFAR technical report",
+      "doi": "10.57702/ZP44CU3G",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3118608800",
+      "landing_page": "https://doi.org/10.57702/zp44cu3g",
+      "source_urls": [
+        "https://openalex.org/W3118608800",
+        "https://doi.org/10.57702/zp44cu3g"
+      ],
+      "bibtex": "@misc{https://doi.org/10.57702/zp44cu3g,\\n  doi = {10.57702/ZP44CU3G},\\n  url = {https://service.tib.eu/ldmservice/dataset/7d79e668-9476-4316-bd95-0a25918d547a},\\n  author = {Krizhevsky, Alex},\\n  keywords = {AlexNet, CIFAR, CIFAR-10, CIFAR-100, Computer Vision, Deep Learning, Image Classification, Image Recognition, Tiny Images, color images, convolutional neural networks, image classification, tiny images},\\n  language = {en},\\n  title = {Learning Multiple Layers of Features from Tiny Images},\\n  publisher = {TIB},\\n  year = {2024}\\n}",
+      "relevance_tags": [
+        "dataset",
+        "cifar100",
+        "test"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet56-cifar100",
+        "resnet110-cifar100"
+      ],
+      "relevance": "Concrete indexed record for the CIFAR technical report that introduced CIFAR-10 and CIFAR-100, which underpin the ResNet tests.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1708.07747",
+      "title": "Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms",
+      "authors": [
+        "Han Xiao",
+        "Kashif Rasul",
+        "Roland Vollgraf"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1708.07747",
+      "arxiv_id": "1708.07747",
+      "openalex_id": "https://openalex.org/W2750384547",
+      "landing_page": "https://arxiv.org/abs/1708.07747",
+      "source_urls": [
+        "https://openalex.org/W2750384547",
+        "https://arxiv.org/abs/1708.07747"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1708.07747,\\n  doi = {10.48550/ARXIV.1708.07747},\\n  url = {https://arxiv.org/abs/1708.07747},\\n  author = {Xiao, Han and Rasul, Kashif and Vollgraf, Roland},\\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\\n  title = {Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms},\\n  publisher = {arXiv},\\n  year = {2017},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "dataset",
+        "fashion_mnist",
+        "test"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Dataset paper for the Fashion-MNIST evaluation command.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1608.03983",
+      "title": "SGDR: Stochastic Gradient Descent with Warm Restarts",
+      "authors": [
+        "Ilya Loshchilov",
+        "Frank Hutter"
+      ],
+      "year": 2016,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1608.03983",
+      "arxiv_id": "1608.03983",
+      "openalex_id": "https://openalex.org/W2518108298",
+      "landing_page": "https://arxiv.org/abs/1608.03983",
+      "source_urls": [
+        "https://openalex.org/W2518108298",
+        "https://arxiv.org/abs/1608.03983"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1608.03983,\\n  doi = {10.48550/ARXIV.1608.03983},\\n  url = {https://arxiv.org/abs/1608.03983},\\n  author = {Loshchilov, Ilya and Hutter, Frank},\\n  keywords = {Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Optimization and Control (math.OC), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Mathematics, FOS: Mathematics},\\n  title = {SGDR: Stochastic Gradient Descent with Warm Restarts},\\n  publisher = {arXiv},\\n  year = {2016},\\n  copyright = {arXiv.org perpetual, non-exclusive license}\\n}",
+      "relevance_tags": [
+        "training_recipe",
+        "cosine_annealing",
+        "test"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "resnet56-cifar100",
+        "resnet110-cifar100",
+        "mobilenetv2-fmnist"
+      ],
+      "relevance": "Closest concrete paper for the cosine-annealed SGD schedule used across all task evaluations.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

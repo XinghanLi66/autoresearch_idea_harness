@@ -1,0 +1,531 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4sci-weather-forecast-aggregation",
+  "task_folder": "tasks/ai4sci-weather-forecast-aggregation",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "weather forecast variable aggregation across heterogeneous meteorological variables",
+    "research_question": "How should a weather forecasting model aggregate information across heterogeneous meteorological variables for optimal prediction?",
+    "local_sources": {
+      "config_path": "tasks/ai4sci-weather-forecast-aggregation/config.json",
+      "task_description_path": "tasks/ai4sci-weather-forecast-aggregation/task_description.md"
+    },
+    "notes": [
+      "Baselines map to standard set-aggregation families used in ClimaX-style multivariable weather forecasting.",
+      "Mean pooling is a standard operation and does not have a single canonical paper."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 4,
+    "baseline_links_found": 5,
+    "test_entries": 3,
+    "test_links_found": 9
+  },
+  "tests": [
+    {
+      "label": "z500-3day",
+      "cmd": "scripts/z500_3day.sh",
+      "package": "ClimaX",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2301.10343",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.1029/2020MS002203",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1029/2020MS002405",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "ClimaX fine-tuning target evaluated with WeatherBench-style metrics on ERA5."
+    },
+    {
+      "label": "t850-5day",
+      "cmd": "scripts/t850_5day.sh",
+      "package": "ClimaX",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2301.10343",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.1029/2020MS002203",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1029/2020MS002405",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "Temperature target from the same ClimaX/WeatherBench evaluation family."
+    },
+    {
+      "label": "wind10m-7day",
+      "cmd": "scripts/wind10m_7day.sh",
+      "package": "ClimaX",
+      "group": 1,
+      "compute": 1.0,
+      "time": "08:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2301.10343",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.1029/2020MS002203",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1029/2020MS002405",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "Wind target from the ClimaX-style ERA5 forecasting benchmark."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "cross_attention",
+      "implementation": "edits/cross_attention.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2301.10343",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.2103.03206",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "ClimaX uses a learnable query with cross-attention over variable tokens; Perceiver is a close cross-attention analogue."
+    },
+    {
+      "name": "mean_pooling",
+      "implementation": "edits/mean_pooling.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "no_explicit_paper",
+      "notes": "Standard non-learned pooling baseline."
+    },
+    {
+      "name": "learned_weighted_sum",
+      "implementation": "edits/learned_weighted_sum.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.1709.01507",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Channel/feature reweighting via softmax-weighted sum is closest to squeeze-and-excitation style gating."
+    },
+    {
+      "name": "self_attention",
+      "implementation": "edits/self_attention.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.1706.03762",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.1810.00825",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Variable self-attention is directly grounded in Transformer-style attention and set-attention models."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arXiv.2301.10343",
+      "title": "ClimaX: A foundation model for weather and climate",
+      "authors": [
+        "Tung Nguyen",
+        "Johannes Brandstetter",
+        "Ashish Kapoor",
+        "Jayesh K. Gupta",
+        "Aditya Grover"
+      ],
+      "year": 2023,
+      "venue": "CoRR",
+      "doi": "10.48550/arXiv.2301.10343",
+      "landing_page": "https://doi.org/10.48550/arXiv.2301.10343",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2301-10343",
+        "https://doi.org/10.48550/arXiv.2301.10343"
+      ],
+      "bibtex": "@article{nguyen2023climax, title={ClimaX: A foundation model for weather and climate}, author={Nguyen, Tung and Brandstetter, Johannes and Kapoor, Ashish and Gupta, Jayesh K. and Grover, Aditya}, journal={CoRR}, volume={abs/2301.10343}, year={2023}, doi={10.48550/arXiv.2301.10343}, url={https://arxiv.org/abs/2301.10343}}",
+      "relevance_tags": [
+        "weather_forecasting",
+        "foundation_model",
+        "cross_attention",
+        "multivariable_aggregation"
+      ],
+      "baseline_links": [
+        "cross_attention"
+      ],
+      "test_links": [
+        "z500-3day",
+        "t850-5day",
+        "wind10m-7day"
+      ],
+      "relevance": "Defines the ClimaX architecture whose default variable aggregator uses learnable-query cross-attention.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1029/2020MS002203",
+      "title": "WeatherBench: A Benchmark Data Set for Data-Driven Weather Forecasting",
+      "authors": [
+        "Stephan Rasp",
+        "Peter D. Dueben",
+        "Sebastian Scher",
+        "Jonathan A. Weyn",
+        "Soukayna Mouatadid",
+        "Nils Thuerey"
+      ],
+      "year": 2020,
+      "venue": "Journal of Advances in Modeling Earth Systems",
+      "doi": "10.1029/2020MS002203",
+      "landing_page": "https://doi.org/10.1029/2020MS002203",
+      "source_urls": [
+        "https://portal.fis.tum.de/en/publications/weatherbench-a-benchmark-data-set-for-data-driven-weather-forecas/",
+        "https://doi.org/10.1029/2020MS002203"
+      ],
+      "bibtex": "@article{rasp2020weatherbench, title={WeatherBench: A Benchmark Data Set for Data-Driven Weather Forecasting}, author={Rasp, Stephan and Dueben, Peter D. and Scher, Sebastian and Weyn, Jonathan A. and Mouatadid, Soukayna and Thuerey, Nils}, journal={Journal of Advances in Modeling Earth Systems}, volume={12}, number={11}, year={2020}, doi={10.1029/2020MS002203}, url={https://doi.org/10.1029/2020MS002203}, note={Article e2020MS002203}}",
+      "relevance_tags": [
+        "weather_forecasting",
+        "benchmark",
+        "era5",
+        "evaluation_metric"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "z500-3day",
+        "t850-5day",
+        "wind10m-7day"
+      ],
+      "relevance": "Provides the benchmark/data context for medium-range weather forecasting on ERA5-derived targets.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.1029/2020MS002405",
+      "title": "Data-Driven Medium-Range Weather Prediction With a Resnet Pretrained on Climate Simulations: A New Model for WeatherBench",
+      "authors": [
+        "Stephan Rasp",
+        "Nils Thuerey"
+      ],
+      "year": 2021,
+      "venue": "Journal of Advances in Modeling Earth Systems",
+      "doi": "10.1029/2020MS002405",
+      "landing_page": "https://doi.org/10.1029/2020MS002405",
+      "source_urls": [
+        "https://portal.fis.tum.de/de/publications/data-driven-medium-range-weather-prediction-with-a-resnet-pretrai/",
+        "https://doi.org/10.1029/2020MS002405"
+      ],
+      "bibtex": "@article{rasp2021data, title={Data-Driven Medium-Range Weather Prediction With a Resnet Pretrained on Climate Simulations: A New Model for WeatherBench}, author={Rasp, Stephan and Thuerey, Nils}, journal={Journal of Advances in Modeling Earth Systems}, volume={13}, number={2}, year={2021}, doi={10.1029/2020MS002405}, url={https://doi.org/10.1029/2020MS002405}, note={Article e2020MS002405}}",
+      "relevance_tags": [
+        "weather_forecasting",
+        "benchmark_baseline",
+        "pretraining",
+        "era5"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "z500-3day",
+        "t850-5day",
+        "wind10m-7day"
+      ],
+      "relevance": "WeatherBench baseline showing the benefit of pretraining for medium-range forecasting on ERA5-derived targets.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.1703.06114",
+      "title": "Deep Sets",
+      "authors": [
+        "Manzil Zaheer",
+        "Satwik Kottur",
+        "Siamak Ravanbakhsh",
+        "Barnabas Poczos",
+        "Ruslan Salakhutdinov",
+        "Alexander J. Smola"
+      ],
+      "year": 2017,
+      "venue": "CoRR",
+      "doi": "10.48550/arXiv.1703.06114",
+      "landing_page": "https://doi.org/10.48550/arXiv.1703.06114",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/ZaheerKRPSS17",
+        "https://huggingface.co/papers/1703.06114"
+      ],
+      "bibtex": "@article{zaheer2017deepsets, title={Deep Sets}, author={Zaheer, Manzil and Kottur, Satwik and Ravanbakhsh, Siamak and Poczos, Barnabas and Salakhutdinov, Ruslan and Smola, Alexander J.}, journal={CoRR}, volume={abs/1703.06114}, year={2017}, doi={10.48550/arXiv.1703.06114}, url={https://arxiv.org/abs/1703.06114}}",
+      "relevance_tags": [
+        "set_aggregation",
+        "permutation_invariance",
+        "pooling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational result for permutation-invariant set functions and pooled aggregation over unordered inputs.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.1810.00825",
+      "title": "Set Transformer: A Framework for Attention-based Permutation-Invariant Neural Networks",
+      "authors": [
+        "Juho Lee",
+        "Yoonho Lee",
+        "Jungtaek Kim",
+        "Adam R. Kosiorek",
+        "Seungjin Choi",
+        "Yee Whye Teh"
+      ],
+      "year": 2019,
+      "venue": "ICML",
+      "doi": "10.48550/arXiv.1810.00825",
+      "landing_page": "https://doi.org/10.48550/arXiv.1810.00825",
+      "source_urls": [
+        "https://dblp.org/rec/conf/icml/LeeLKKCT19",
+        "https://proceedings.mlr.press/v97/lee19d"
+      ],
+      "bibtex": "@inproceedings{lee2019settransformer, title={Set Transformer: A Framework for Attention-based Permutation-Invariant Neural Networks}, author={Lee, Juho and Lee, Yoonho and Kim, Jungtaek and Kosiorek, Adam R. and Choi, Seungjin and Teh, Yee Whye}, booktitle={Proceedings of the 36th International Conference on Machine Learning}, pages={3744--3753}, year={2019}, url={https://proceedings.mlr.press/v97/lee19d.html}}",
+      "relevance_tags": [
+        "set_aggregation",
+        "self_attention",
+        "permutation_invariance"
+      ],
+      "baseline_links": [
+        "self_attention"
+      ],
+      "test_links": [],
+      "relevance": "Attention-based permutation-invariant set encoder, closely related to variable self-attention aggregation.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2103.03206",
+      "title": "Perceiver: General Perception with Iterative Attention",
+      "authors": [
+        "Andrew Jaegle",
+        "Felix Gimeno",
+        "Andrew Brock",
+        "Andrew Zisserman",
+        "Oriol Vinyals",
+        "Joao Carreira"
+      ],
+      "year": 2021,
+      "venue": "CoRR",
+      "doi": "10.48550/arXiv.2103.03206",
+      "landing_page": "https://doi.org/10.48550/arXiv.2103.03206",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2103-03206",
+        "https://huggingface.co/papers/2103.03206"
+      ],
+      "bibtex": "@article{jaegle2021perceiver, title={Perceiver: General Perception with Iterative Attention}, author={Jaegle, Andrew and Gimeno, Felix and Brock, Andrew and Zisserman, Andrew and Vinyals, Oriol and Carreira, Joao}, journal={CoRR}, volume={abs/2103.03206}, year={2021}, doi={10.48550/arXiv.2103.03206}, url={https://arxiv.org/abs/2103.03206}}",
+      "relevance_tags": [
+        "cross_attention",
+        "latent_bottleneck",
+        "multimodal_aggregation"
+      ],
+      "baseline_links": [
+        "cross_attention"
+      ],
+      "test_links": [],
+      "relevance": "Asymmetric cross-attention into a latent bottleneck is a close analogue of learnable-query variable aggregation.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.1706.03762",
+      "title": "Attention Is All You Need",
+      "authors": [
+        "Ashish Vaswani",
+        "Noam Shazeer",
+        "Niki Parmar",
+        "Jakob Uszkoreit",
+        "Llion Jones",
+        "Aidan N. Gomez",
+        "Lukasz Kaiser",
+        "Illia Polosukhin"
+      ],
+      "year": 2017,
+      "venue": "NeurIPS",
+      "doi": "10.48550/arXiv.1706.03762",
+      "landing_page": "https://doi.org/10.48550/arXiv.1706.03762",
+      "source_urls": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://dblp.org/rec/conf/nips/VaswaniSPUJGKP17"
+      ],
+      "bibtex": "@inproceedings{vaswani2017attention, title={Attention Is All You Need}, author={Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia}, booktitle={Advances in Neural Information Processing Systems}, year={2017}, url={https://arxiv.org/abs/1706.03762}}",
+      "relevance_tags": [
+        "self_attention",
+        "transformer",
+        "sequence_modeling"
+      ],
+      "baseline_links": [
+        "self_attention"
+      ],
+      "test_links": [],
+      "relevance": "Canonical self-attention formulation underlying the self-attention baseline.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.1709.01507",
+      "title": "Squeeze-and-Excitation Networks",
+      "authors": [
+        "Jie Hu",
+        "Li Shen",
+        "Gang Sun"
+      ],
+      "year": 2017,
+      "venue": "CoRR",
+      "doi": "10.48550/arXiv.1709.01507",
+      "landing_page": "https://doi.org/10.48550/arXiv.1709.01507",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-1709-01507",
+        "https://arxiv.org/abs/1709.01507"
+      ],
+      "bibtex": "@article{hu2017squeeze, title={Squeeze-and-Excitation Networks}, author={Hu, Jie and Shen, Li and Sun, Gang}, journal={CoRR}, volume={abs/1709.01507}, year={2017}, doi={10.48550/arXiv.1709.01507}, url={https://arxiv.org/abs/1709.01507}}",
+      "relevance_tags": [
+        "feature_recalibration",
+        "gating",
+        "weighted_fusion"
+      ],
+      "baseline_links": [
+        "learned_weighted_sum"
+      ],
+      "test_links": [],
+      "relevance": "Feature-wise gating is the closest canonical analogue to a learned weighted-sum aggregation.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2202.11214",
+      "title": "FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators",
+      "authors": [
+        "Jaideep Pathak",
+        "Shashank Subramanian",
+        "Peter Harrington",
+        "Sanjeev Raja",
+        "Ashesh Chattopadhyay",
+        "Morteza Mardani",
+        "Thorsten Kurth",
+        "David Hall",
+        "Zongyi Li",
+        "Kamyar Azizzadenesheli",
+        "Pedram Hassanzadeh",
+        "Karthik Kashinath",
+        "Animashree Anandkumar"
+      ],
+      "year": 2022,
+      "venue": "CoRR",
+      "doi": "10.48550/arXiv.2202.11214",
+      "landing_page": "https://doi.org/10.48550/arXiv.2202.11214",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2202-11214",
+        "https://huggingface.co/papers/2202.11214"
+      ],
+      "bibtex": "@article{pathak2022fourcastnet, title={FourCastNet: A Global Data-driven High-resolution Weather Model using Adaptive Fourier Neural Operators}, author={Pathak, Jaideep and Subramanian, Shashank and Harrington, Peter and Raja, Sanjeev and Chattopadhyay, Ashesh and Mardani, Morteza and Kurth, Thorsten and Hall, David and Li, Zongyi and Azizzadenesheli, Kamyar and Hassanzadeh, Pedram and Kashinath, Karthik and Anandkumar, Animashree}, journal={CoRR}, volume={abs/2202.11214}, year={2022}, doi={10.48550/arXiv.2202.11214}, url={https://arxiv.org/abs/2202.11214}}",
+      "relevance_tags": [
+        "weather_forecasting",
+        "era5",
+        "global_forecasting",
+        "neural_operator"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "A major data-driven global weather forecasting model on ERA5, relevant for the same target family as this task.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2212.12794",
+      "title": "GraphCast: Learning skillful medium-range global weather forecasting",
+      "authors": [
+        "Remi Lam",
+        "Alvaro Sanchez-Gonzalez",
+        "Matthew Willson",
+        "Peter Wirnsberger",
+        "Meire Fortunato",
+        "Ferran Alet",
+        "Suman V. Ravuri",
+        "Timo Ewalds",
+        "Zach Eaton-Rosen",
+        "Weihua Hu",
+        "Alexander Merose",
+        "Stephan Hoyer",
+        "George Holland",
+        "Jacklynn Stott",
+        "Oriol Vinyals",
+        "Alexander Pritzel",
+        "Shakir Mohamed",
+        "Peter Battaglia"
+      ],
+      "year": 2022,
+      "venue": "CoRR",
+      "doi": "10.48550/arXiv.2212.12794",
+      "landing_page": "https://doi.org/10.48550/arXiv.2212.12794",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2212-12794",
+        "https://huggingface.co/papers/2212.12794"
+      ],
+      "bibtex": "@article{lam2022graphcast, title={GraphCast: Learning skillful medium-range global weather forecasting}, author={Lam, Remi and Sanchez-Gonzalez, Alvaro and Willson, Matthew and Wirnsberger, Peter and Fortunato, Meire and Alet, Ferran and Ravuri, Suman V. and Ewalds, Timo and Eaton-Rosen, Zach and Hu, Weihua and Merose, Alexander and Hoyer, Stephan and Holland, George and Stott, Jacklynn and Vinyals, Oriol and Pritzel, Alexander and Mohamed, Shakir and Battaglia, Peter}, journal={CoRR}, volume={abs/2212.12794}, year={2022}, doi={10.48550/arXiv.2212.12794}, url={https://arxiv.org/abs/2212.12794}}",
+      "relevance_tags": [
+        "weather_forecasting",
+        "era5",
+        "global_forecasting",
+        "graph_neural_network"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "State-of-the-art global forecasting model trained on ERA5, directly relevant to the evaluation regime.",
+      "verified_by": "web_search"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2211.02556",
+      "title": "Pangu-Weather: A 3D High-Resolution Model for Fast and Accurate Global Weather Forecast",
+      "authors": [
+        "Kaifeng Bi",
+        "Lingxi Xie",
+        "Hengheng Zhang",
+        "Xin Chen",
+        "Xiaotao Gu",
+        "Qi Tian"
+      ],
+      "year": 2022,
+      "venue": "CoRR",
+      "doi": "10.48550/arXiv.2211.02556",
+      "landing_page": "https://doi.org/10.48550/arXiv.2211.02556",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2211-02556",
+        "https://huggingface.co/papers/2211.02556"
+      ],
+      "bibtex": "@article{bi2022panguweather, title={Pangu-Weather: A 3D High-Resolution Model for Fast and Accurate Global Weather Forecast}, author={Bi, Kaifeng and Xie, Lingxi and Zhang, Hengheng and Chen, Xin and Gu, Xiaotao and Tian, Qi}, journal={CoRR}, volume={abs/2211.02556}, year={2022}, doi={10.48550/arXiv.2211.02556}, url={https://arxiv.org/abs/2211.02556}}",
+      "relevance_tags": [
+        "weather_forecasting",
+        "era5",
+        "transformer",
+        "global_forecasting"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Transformer-based global weather forecasting model trained on ERA5, a key comparison point for this task family.",
+      "verified_by": "web_search"
+    }
+  ]
+}

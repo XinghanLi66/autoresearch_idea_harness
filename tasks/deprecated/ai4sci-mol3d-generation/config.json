@@ -1,0 +1,98 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/qm9.sh",
+      "label": "QM9",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "Uni-3DAR"
+    },
+    {
+      "cmd": "scripts/mp20.sh",
+      "label": "MP-20",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "Uni-3DAR",
+      "hidden": true
+    },
+    {
+      "cmd": "scripts/geom_drug.sh",
+      "label": "GEOM-DRUG",
+      "group": 2,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "Uni-3DAR"
+    }
+  ],
+  "baselines": {
+    "edm": {
+      "edit_ops": "edits/edm.edit.py"
+    },
+    "geobfn": {
+      "edit_ops": "edits/geobfn.edit.py"
+    },
+    "geoldm": {
+      "edit_ops": "edits/geoldm.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "Uni-3DAR/custom_mol3d.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 42,
+          "end": 328
+        }
+      ]
+    },
+    {
+      "filename": "Uni-3DAR/evaluation_scripts/qm9/molecule_metrics.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Uni-3DAR/evaluation_scripts/qm9/bond_analyze.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Uni-3DAR/evaluation_scripts/crystal/crystal_metrics.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Uni-3DAR/evaluation_scripts/crystal/eval_utils.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

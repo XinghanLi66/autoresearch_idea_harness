@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-continual-regularization",
+  "task_folder": "tasks/ml-continual-regularization",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-continual-regularization/config.json",
+      "task_description_path": "tasks/ml-continual-regularization/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "split-mnist",
+      "cmd": "scripts/train.sh",
+      "package": "continual-learning",
+      "group": 1,
+      "compute": 1,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "perm-mnist",
+      "cmd": "scripts/train_perm.sh",
+      "package": "continual-learning",
+      "group": 2,
+      "compute": 1,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "split-cifar100",
+      "cmd": "scripts/train_cifar.sh",
+      "package": "continual-learning",
+      "group": 3,
+      "compute": 1,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ewc",
+      "implementation": "edits/ewc.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "si",
+      "implementation": "edits/si.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "online_ewc",
+      "implementation": "edits/online_ewc.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

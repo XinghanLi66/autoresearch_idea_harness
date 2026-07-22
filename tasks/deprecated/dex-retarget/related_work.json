@@ -1,0 +1,475 @@
+{
+  "schema_version": "1.0",
+  "task_name": "dex-retarget",
+  "task_folder": "tasks/dex-retarget",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "objective design for dexterous hand pose retargeting and inverse-kinematics-based teleoperation",
+    "research_question": "Design a better optimization objective for retargeting human hand keypoint positions to robot hand joint angles across multiple dexterous hand morphologies.",
+    "local_sources": {
+      "config_path": "tasks/dex-retarget/config.json",
+      "task_description_path": "tasks/dex-retarget/task_description.md"
+    },
+    "notes": [
+      "The task focuses on analytical retargeting objectives and gradients for multi-hand inverse kinematics rather than end-to-end policy learning.",
+      "Local repo metadata and MCP paper search support an exact paper link for the DexPilot baseline, but not for the generic upstream position/vector heuristics.",
+      "All three test scripts are linked to concrete papers about the evaluated robot hands or exact hardware platforms when available."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 3,
+    "baseline_links_found": 1,
+    "test_entries": 3,
+    "test_links_found": 4
+  },
+  "tests": [
+    {
+      "label": "allegro",
+      "cmd": "scripts/allegro.sh",
+      "package": "dex-retargeting",
+      "group": 1,
+      "compute": 1,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/ICRA.2014.6907861",
+          "role": "other"
+        },
+        {
+          "paper_id": "doi:10.1109/LRA.2018.2858271",
+          "role": "other"
+        }
+      ],
+      "notes": "No canonical Allegro Hand design paper was located in MCP search, so this test is linked to two Allegro-specific manipulation/control papers that use the exact hand platform."
+    },
+    {
+      "label": "svh",
+      "cmd": "scripts/svh.sh",
+      "package": "dex-retargeting",
+      "group": 2,
+      "compute": 1,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/LRA.2020.3034067",
+          "role": "architecture"
+        }
+      ],
+      "notes": "Linked to a paper that explicitly evaluates grasping on the Schunk SVH five-finger hand."
+    },
+    {
+      "label": "leap",
+      "cmd": "scripts/leap.sh",
+      "package": "dex-retargeting",
+      "group": 3,
+      "compute": 1,
+      "time": "0:30:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.15607/RSS.2023.XIX.089",
+          "role": "architecture"
+        }
+      ],
+      "notes": "Linked to the LEAP Hand hardware paper, which directly matches the robot used by this test."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "position",
+      "implementation": "edits/position.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "no_explicit_paper",
+      "notes": "Implements the upstream PositionOptimizer-style Huber position objective, but the local repo and MCP search did not surface a standalone paper that exactly names this heuristic baseline."
+    },
+    {
+      "name": "vector",
+      "implementation": "edits/vector.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "no_explicit_paper",
+      "notes": "Implements the upstream VectorOptimizer-style vector-matching heuristic. I did not find a concrete paper that exactly defines this baseline in the dex-retargeting package."
+    },
+    {
+      "name": "dexpilot",
+      "implementation": "edits/dexpilot.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/ICRA40945.2020.9197124",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Directly maps to the DexPilot objective with projected close-finger pair constraints for teleoperation."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1109/ICRA40945.2020.9197124",
+      "title": "DexPilot: Vision-Based Teleoperation of Dexterous Robotic Hand-Arm System",
+      "authors": [
+        "Ankur Handa",
+        "Karl Van Wyk",
+        "Wei Yang",
+        "Jacky Liang",
+        "Yu-Wei Chao",
+        "Qian Wan",
+        "Stan Birchfield",
+        "Nathan Ratliff",
+        "Dieter Fox"
+      ],
+      "year": 2020,
+      "venue": "ICRA",
+      "doi": "10.1109/ICRA40945.2020.9197124",
+      "openalex_id": "https://openalex.org/W3091133300",
+      "landing_page": "https://doi.org/10.1109/ICRA40945.2020.9197124",
+      "source_urls": [
+        "https://doi.org/10.1109/ICRA40945.2020.9197124",
+        "https://openalex.org/W3091133300"
+      ],
+      "bibtex": "@inproceedings{Handa_2020, title={DexPilot: Vision-Based Teleoperation of Dexterous Robotic Hand-Arm System}, url={http://dx.doi.org/10.1109/ICRA40945.2020.9197124}, DOI={10.1109/icra40945.2020.9197124}, booktitle={2020 IEEE International Conference on Robotics and Automation (ICRA)}, publisher={IEEE}, author={Handa, Ankur and Van Wyk, Karl and Yang, Wei and Liang, Jacky and Chao, Yu-Wei and Wan, Qian and Birchfield, Stan and Ratliff, Nathan and Fox, Dieter}, year={2020}, month=may, pages={9164–9170} }",
+      "relevance_tags": [
+        "baseline",
+        "teleoperation",
+        "retargeting",
+        "dexterous_hand"
+      ],
+      "baseline_links": [
+        "dexpilot"
+      ],
+      "test_links": [],
+      "relevance": "Primary exact citation for the DexPilot baseline included in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.15607/RSS.2023.XIX.015",
+      "title": "AnyTeleop: A General Vision-Based Dexterous Robot Arm-Hand Teleoperation System",
+      "authors": [
+        "Yuzhe Qin",
+        "Wei Yang",
+        "Binghao Huang",
+        "Karl Wyk",
+        "Hao Su",
+        "Xiaolong Wang",
+        "Yu-Wei Chao",
+        "Dieter Fox"
+      ],
+      "year": 2023,
+      "venue": "RSS",
+      "doi": "10.15607/RSS.2023.XIX.015",
+      "openalex_id": "https://openalex.org/W4385430618",
+      "landing_page": "https://doi.org/10.15607/RSS.2023.XIX.015",
+      "source_urls": [
+        "https://doi.org/10.15607/RSS.2023.XIX.015",
+        "https://openalex.org/W4385430618"
+      ],
+      "bibtex": "@inproceedings{Qin_2023, series={RSS2023}, title={AnyTeleop: A General Vision-Based Dexterous Robot Arm-Hand Teleoperation System}, url={http://dx.doi.org/10.15607/RSS.2023.XIX.015}, DOI={10.15607/rss.2023.xix.015}, booktitle={Robotics: Science and Systems XIX}, publisher={Robotics: Science and Systems Foundation}, author={Qin, Yuzhe and Yang, Wei and Huang, Binghao and Wyk, Karl and Su, Hao and Wang, Xiaolong and Chao, Yu-Wei and Fox, Dieter}, year={2023}, month=jul, collection={RSS2023} }",
+      "relevance_tags": [
+        "teleoperation",
+        "retargeting",
+        "generalization",
+        "dexterous_hand"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Representative recent work on robot-agnostic dexterous hand-arm teleoperation and cross-hardware retargeting.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.15607/RSS.2023.XIX.089",
+      "title": "LEAP Hand: Low-Cost, Efficient, and Anthropomorphic Hand for Robot Learning",
+      "authors": [
+        "Kenneth Shaw",
+        "Ananye Agarwal",
+        "Deepak Pathak"
+      ],
+      "year": 2023,
+      "venue": "RSS",
+      "doi": "10.15607/RSS.2023.XIX.089",
+      "openalex_id": "https://openalex.org/W4385430685",
+      "landing_page": "https://doi.org/10.15607/RSS.2023.XIX.089",
+      "source_urls": [
+        "https://doi.org/10.15607/RSS.2023.XIX.089",
+        "https://openalex.org/W4385430685"
+      ],
+      "bibtex": "@inproceedings{Shaw_2023, series={RSS2023}, title={LEAP Hand: Low-Cost, Efficient, and Anthropomorphic Hand for Robot Learning}, url={http://dx.doi.org/10.15607/rss.2023.xix.089}, DOI={10.15607/rss.2023.xix.089}, booktitle={Robotics: Science and Systems XIX}, publisher={Robotics: Science and Systems Foundation}, author={Shaw, Kenneth and Agarwal, Ananye and Pathak, Deepak}, year={2023}, month=jul, collection={RSS2023} }",
+      "relevance_tags": [
+        "hardware",
+        "robot_hand",
+        "benchmark_platform",
+        "dexterous_hand"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "leap"
+      ],
+      "relevance": "Exact hardware paper for the LEAP hand used in one of the task tests.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/TCYB.2022.3207290",
+      "title": "A Dexterous Hand-Arm Teleoperation System Based on Hand Pose Estimation and Active Vision",
+      "authors": [
+        "Shuang Li",
+        "Norman Hendrich",
+        "Hongzhuo Liang",
+        "Philipp Ruppel",
+        "Changshui Zhang",
+        "Jianwei Zhang"
+      ],
+      "year": 2024,
+      "venue": "IEEE Transactions on Cybernetics",
+      "doi": "10.1109/TCYB.2022.3207290",
+      "openalex_id": "https://openalex.org/W4298326869",
+      "landing_page": "https://doi.org/10.1109/TCYB.2022.3207290",
+      "source_urls": [
+        "https://doi.org/10.1109/TCYB.2022.3207290",
+        "https://openalex.org/W4298326869"
+      ],
+      "bibtex": "@article{Li_2024, title={A Dexterous Hand-Arm Teleoperation System Based on Hand Pose Estimation and Active Vision}, volume={54}, ISSN={2168-2275}, url={http://dx.doi.org/10.1109/TCYB.2022.3207290}, DOI={10.1109/tcyb.2022.3207290}, number={3}, journal={IEEE Transactions on Cybernetics}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Li, Shuang and Hendrich, Norman and Liang, Hongzhuo and Ruppel, Philipp and Zhang, Changshui and Zhang, Jianwei}, year={2024}, month=mar, pages={1417–1428} }",
+      "relevance_tags": [
+        "teleoperation",
+        "hand_pose_estimation",
+        "retargeting",
+        "active_vision"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant recent work on mapping vision-estimated human hand pose to dexterous hand-arm commands.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.15607/RSS.2018.XIV.043",
+      "title": "RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion",
+      "authors": [
+        "Daniel Rakita",
+        "Bilge Mutlu",
+        "Michael Gleicher"
+      ],
+      "year": 2018,
+      "venue": "RSS",
+      "doi": "10.15607/RSS.2018.XIV.043",
+      "openalex_id": "https://openalex.org/W2805114031",
+      "landing_page": "https://doi.org/10.15607/RSS.2018.XIV.043",
+      "source_urls": [
+        "https://doi.org/10.15607/RSS.2018.XIV.043",
+        "https://openalex.org/W2805114031"
+      ],
+      "bibtex": "@inproceedings{Rakita_2018, series={RSS2018}, title={RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion}, url={http://dx.doi.org/10.15607/RSS.2018.XIV.043}, DOI={10.15607/rss.2018.xiv.043}, booktitle={Robotics: Science and Systems XIV}, publisher={Robotics: Science and Systems Foundation}, author={Rakita, Daniel and Mutlu, Bilge and Gleicher, Michael}, year={2018}, month=jun, collection={RSS2018} }",
+      "relevance_tags": [
+        "inverse_kinematics",
+        "optimization",
+        "smoothness",
+        "real_time"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant IK optimization reference for objectives that trade off pose accuracy, feasibility, and trajectory smoothness.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.3390/A13100266",
+      "title": "Model-Based Real-Time Motion Tracking Using Dynamical Inverse Kinematics",
+      "authors": [
+        "Lorenzo Rapetti",
+        "Yeshasvi Tirupachuri",
+        "Kourosh Darvish",
+        "Stefano Dafarra",
+        "Gabriele Nava",
+        "Claudia Latella",
+        "Daniele Pucci"
+      ],
+      "year": 2020,
+      "venue": "Algorithms",
+      "doi": "10.3390/A13100266",
+      "openalex_id": "https://openalex.org/W3094390157",
+      "landing_page": "https://doi.org/10.3390/A13100266",
+      "source_urls": [
+        "https://doi.org/10.3390/A13100266",
+        "https://openalex.org/W3094390157"
+      ],
+      "bibtex": "@article{Rapetti_2020, title={Model-Based Real-Time Motion Tracking Using Dynamical Inverse Kinematics}, volume={13}, ISSN={1999-4893}, url={http://dx.doi.org/10.3390/A13100266}, DOI={10.3390/a13100266}, number={10}, journal={Algorithms}, publisher={MDPI AG}, author={Rapetti, Lorenzo and Tirupachuri, Yeshasvi and Darvish, Kourosh and Dafarra, Stefano and Nava, Gabriele and Latella, Claudia and Pucci, Daniele}, year={2020}, month=oct, pages={266} }",
+      "relevance_tags": [
+        "inverse_kinematics",
+        "motion_tracking",
+        "retargeting",
+        "real_time"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Directly relevant model-based IK and human-to-humanoid retargeting reference for analytical objective design.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/LRA.2020.3034067",
+      "title": "Soft-Grasping With an Anthropomorphic Robotic Hand Using Spiking Neurons",
+      "authors": [
+        "J. Camilo Vasquez Tieck",
+        "Katharina Secker",
+        "Jacques Kaiser",
+        "Arne Roennau",
+        "Rudiger Dillmann"
+      ],
+      "year": 2021,
+      "venue": "IEEE Robotics and Automation Letters",
+      "doi": "10.1109/LRA.2020.3034067",
+      "openalex_id": "https://openalex.org/W3096478903",
+      "landing_page": "https://doi.org/10.1109/LRA.2020.3034067",
+      "source_urls": [
+        "https://doi.org/10.1109/LRA.2020.3034067",
+        "https://openalex.org/W3096478903"
+      ],
+      "bibtex": "@article{Tieck_2021, title={Soft-Grasping With an Anthropomorphic Robotic Hand Using Spiking Neurons}, volume={6}, ISSN={2377-3774}, url={http://dx.doi.org/10.1109/LRA.2020.3034067}, DOI={10.1109/lra.2020.3034067}, number={2}, journal={IEEE Robotics and Automation Letters}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Tieck, J. Camilo Vasquez and Secker, Katharina and Kaiser, Jacques and Roennau, Arne and Dillmann, Rudiger}, year={2021}, month=apr, pages={2894–2901} }",
+      "relevance_tags": [
+        "hardware",
+        "schunk_svh",
+        "grasping",
+        "dexterous_hand"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "svh"
+      ],
+      "relevance": "Concrete Schunk SVH hand paper for the SVH evaluation test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/LRA.2017.2734965",
+      "title": "Covering a Robot Fingertip With uSkin: A Soft Electronic Skin With Distributed 3-Axis Force Sensitive Elements for Robot Hands",
+      "authors": [
+        "Tito Pradhono Tomo",
+        "Alexander Schmitz",
+        "Wai Keat Wong",
+        "Harris Kristanto",
+        "Sophon Somlor",
+        "Jinsun Hwang",
+        "Lorenzo Jamone",
+        "Shigeki Sugano"
+      ],
+      "year": 2018,
+      "venue": "IEEE Robotics and Automation Letters",
+      "doi": "10.1109/LRA.2017.2734965",
+      "openalex_id": "https://openalex.org/W2744653421",
+      "landing_page": "https://doi.org/10.1109/LRA.2017.2734965",
+      "source_urls": [
+        "https://doi.org/10.1109/LRA.2017.2734965",
+        "https://openalex.org/W2744653421"
+      ],
+      "bibtex": "@article{Tomo_2018, title={Covering a Robot Fingertip With uSkin: A Soft Electronic Skin With Distributed 3-Axis Force Sensitive Elements for Robot Hands}, volume={3}, ISSN={2377-3774}, url={http://dx.doi.org/10.1109/LRA.2017.2734965}, DOI={10.1109/lra.2017.2734965}, number={1}, journal={IEEE Robotics and Automation Letters}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Tomo, Tito Pradhono and Schmitz, Alexander and Wong, Wai Keat and Kristanto, Harris and Somlor, Sophon and Hwang, Jinsun and Jamone, Lorenzo and Sugano, Shigeki}, year={2018}, month=jan, pages={124–131} }",
+      "relevance_tags": [
+        "hardware",
+        "allegro_hand",
+        "tactile_sensing",
+        "dexterous_hand"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Provides a concrete paper using the Allegro Hand platform, which helps ground the Allegro evaluation test in the literature.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/ICRA.2014.6907861",
+      "title": "Learning object-level impedance control for robust grasping and dexterous manipulation",
+      "authors": [
+        "Miao Li",
+        "Hang Yin",
+        "Kenji Tahara",
+        "Aude Billard"
+      ],
+      "year": 2014,
+      "venue": "ICRA",
+      "doi": "10.1109/ICRA.2014.6907861",
+      "openalex_id": "https://openalex.org/W2025943982",
+      "landing_page": "https://doi.org/10.1109/ICRA.2014.6907861",
+      "source_urls": [
+        "https://doi.org/10.1109/ICRA.2014.6907861",
+        "https://openalex.org/W2025943982"
+      ],
+      "bibtex": "@inproceedings{Li_2014, title={Learning object-level impedance control for robust grasping and dexterous manipulation}, url={http://dx.doi.org/10.1109/ICRA.2014.6907861}, DOI={10.1109/icra.2014.6907861}, booktitle={2014 IEEE International Conference on Robotics and Automation (ICRA)}, publisher={IEEE}, author={Li, Miao and Yin, Hang and Tahara, Kenji and Billard, Aude}, year={2014}, month=may, pages={6784–6791} }",
+      "relevance_tags": [
+        "allegro_hand",
+        "control",
+        "optimization",
+        "dexterous_manipulation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "allegro"
+      ],
+      "relevance": "Concrete Allegro Hand manipulation/control reference for the Allegro evaluation setting.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/LRA.2018.2858271",
+      "title": "Grasp Stiffness Control in Robotic Hands Through Coordinated Optimization of Pose and Joint Stiffness",
+      "authors": [
+        "Virginia Ruiz Garate",
+        "Maria Pozzi",
+        "Domenico Prattichizzo",
+        "Nikos Tsagarakis",
+        "Arash Ajoudani"
+      ],
+      "year": 2018,
+      "venue": "IEEE Robotics and Automation Letters",
+      "doi": "10.1109/LRA.2018.2858271",
+      "openalex_id": "https://openalex.org/W2883002567",
+      "landing_page": "https://doi.org/10.1109/LRA.2018.2858271",
+      "source_urls": [
+        "https://doi.org/10.1109/LRA.2018.2858271",
+        "https://openalex.org/W2883002567"
+      ],
+      "bibtex": "@article{Garate_2018, title={Grasp Stiffness Control in Robotic Hands Through Coordinated Optimization of Pose and Joint Stiffness}, volume={3}, ISSN={2377-3774}, url={http://dx.doi.org/10.1109/LRA.2018.2858271}, DOI={10.1109/lra.2018.2858271}, number={4}, journal={IEEE Robotics and Automation Letters}, publisher={Institute of Electrical and Electronics Engineers (IEEE)}, author={Garate, Virginia Ruiz and Pozzi, Maria and Prattichizzo, Domenico and Tsagarakis, Nikos and Ajoudani, Arash}, year={2018}, month=oct, pages={3952–3959} }",
+      "relevance_tags": [
+        "allegro_hand",
+        "optimization",
+        "control",
+        "dexterous_hand"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "allegro"
+      ],
+      "relevance": "Another Allegro-specific optimization/control paper, relevant because this task also optimizes an analytical objective over hand joint configurations.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.3389/FNBOT.2022.843267",
+      "title": "A Survey of Multifingered Robotic Manipulation: Biological Results, Structural Evolvements, and Learning Methods",
+      "authors": [
+        "Yinlin Li",
+        "Peng Wang",
+        "Rui Li",
+        "Mo Tao",
+        "Zhiyong Liu",
+        "Hong Qiao"
+      ],
+      "year": 2022,
+      "venue": "Frontiers in Neurorobotics",
+      "doi": "10.3389/FNBOT.2022.843267",
+      "openalex_id": "https://openalex.org/W4225010547",
+      "landing_page": "https://doi.org/10.3389/FNBOT.2022.843267",
+      "source_urls": [
+        "https://doi.org/10.3389/FNBOT.2022.843267",
+        "https://openalex.org/W4225010547"
+      ],
+      "bibtex": "@article{Li_2022, title={A Survey of Multifingered Robotic Manipulation: Biological Results, Structural Evolvements, and Learning Methods}, volume={16}, ISSN={1662-5218}, url={http://dx.doi.org/10.3389/fnbot.2022.843267}, DOI={10.3389/fnbot.2022.843267}, journal={Frontiers in Neurorobotics}, publisher={Frontiers Media SA}, author={Li, Yinlin and Wang, Peng and Li, Rui and Tao, Mo and Liu, Zhiyong and Qiao, Hong}, year={2022}, month=apr }",
+      "relevance_tags": [
+        "survey",
+        "dexterous_hand",
+        "manipulation",
+        "retargeting_context"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "High-level survey grounding the task in the broader dexterous robotic manipulation literature and related hand platforms.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-ensemble-boosting",
+  "task_folder": "tasks/ml-ensemble-boosting",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-ensemble-boosting/config.json",
+      "task_description_path": "tasks/ml-ensemble-boosting/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "breast_cancer",
+      "cmd": "scripts/breast_cancer.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.0,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "diabetes",
+      "cmd": "scripts/diabetes.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.0,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "california_housing",
+      "cmd": "scripts/california_housing.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.0,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "adaboost",
+      "implementation": "edits/adaboost.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "gradient_boosting",
+      "implementation": "edits/gradient_boosting.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "xgboost_style",
+      "implementation": "edits/xgboost_style.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "hist_gradient_boosting",
+      "implementation": "edits/hist_gradient_boosting.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "rl-offline-discrete",
+  "task_folder": "tasks/rl-offline-discrete",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/rl-offline-discrete/config.json",
+      "task_description_path": "tasks/rl-offline-discrete/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "breakout",
+      "cmd": "scripts/breakout.sh",
+      "package": "d3rlpy",
+      "group": 1,
+      "compute": 0.4,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "qbert",
+      "cmd": "scripts/qbert.sh",
+      "package": "d3rlpy",
+      "group": 1,
+      "compute": 0.4,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "pong",
+      "cmd": "scripts/pong.sh",
+      "package": "d3rlpy",
+      "group": 1,
+      "compute": 0.4,
+      "time": "23:59:59",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "bc",
+      "implementation": "edits/bc.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "cql",
+      "implementation": "edits/cql.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "bcq",
+      "implementation": "edits/bcq.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dt",
+      "implementation": "edits/dt.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

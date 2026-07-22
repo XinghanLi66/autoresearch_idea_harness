@@ -1,0 +1,295 @@
+"""SlurmExecutor: submit and monitor SLURM jobs for MLS-Bench test execution."""
+
+import math
+import re
+import shlex
+import subprocess
+import tempfile
+import time
+from pathlib import Path
+
+
+class SlurmExecutor:
+    """Submit grouped container commands as SLURM jobs and wait for completion."""
+
+    def __init__(self, slurm_config: dict, project_root: Path):
+        self.partition = slurm_config.get("partition", "")
+        self.account = slurm_config.get("account", "chij")
+        self.constraint = slurm_config.get("constraint", "gpu80")
+        self.qos = slurm_config.get("qos", "")
+        self.nodelist = slurm_config.get("nodelist", "")
+        self.mail_user = slurm_config.get("mail_user", "")
+        self.logs_dir = project_root / slurm_config.get("logs_dir", "results")
+        self.project_root = project_root
+        # CPU-only overrides
+        self.no_gpu = slurm_config.get("no_gpu", False)
+        self.cpus_per_task = slurm_config.get("cpus_per_task")       # e.g. 8
+        self.mem_per_cpu = slurm_config.get("mem_per_cpu")           # e.g. "8G"
+
+    # ------------------------------------------------------------------
+    # GPU assignment
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _assign_gpus(entries: list[dict]) -> list[str]:
+        """Return list of CUDA_VISIBLE_DEVICES strings, one per entry.
+
+        Whole-GPU entries (compute >= 1) get dedicated GPUs and advance the cursor.
+        Fractional entries (compute < 1) share the current GPU without advancing.
+
+        Examples:
+          [4]                 -> total=4 -> ["0,1,2,3"]
+          [1, 1]              -> total=2 -> ["0", "1"]
+          [0.33, 0.33, 0.33]  -> total=1 -> ["0", "0", "0"]
+        """
+        total_gpus = max(1, math.ceil(sum(e["compute"] for e in entries)))
+        current = 0
+        assignments = []
+        for entry in entries:
+            compute = entry["compute"]
+            n = max(1, math.ceil(compute))
+            n = min(n, max(1, total_gpus - current))
+            start = min(current, total_gpus - 1)
+            end = min(start + n, total_gpus)
+            gpus = list(range(start, end))
+            if not gpus:
+                gpus = [total_gpus - 1]
+            assignments.append(",".join(str(g) for g in gpus))
+            # Only advance cursor for whole-GPU entries
+            if compute >= 1:
+                current = end
+        return assignments
+
+    # ------------------------------------------------------------------
+    # SLURM script generation
+    # ------------------------------------------------------------------
+
+    def _build_slurm_script(
+        self,
+        group_cmds: list[dict],
+        job_name: str,
+        out_dir: Path,
+    ) -> str:
+        """Generate a SLURM batch script for a group of commands.
+
+        Each group_cmd is: {"label": str, "apptainer_cmd": list[str], "compute": float, "time": str}
+        The "apptainer_cmd" key holds the container command regardless of backend (apptainer or docker).
+        """
+        max_time = max(group_cmds, key=lambda c: c.get("time", "1:00:00"))["time"]
+
+        if self.no_gpu:
+            # CPU-only mode
+            cpus = self.cpus_per_task or 8
+            lines = [
+                "#!/bin/bash",
+                f"#SBATCH --nodes=1",
+                f"#SBATCH --ntasks=1",
+                f"#SBATCH --cpus-per-task={cpus}",
+            ]
+            if self.mem_per_cpu:
+                lines.append(f"#SBATCH --mem-per-cpu={self.mem_per_cpu}")
+            else:
+                lines.append(f"#SBATCH --mem=32g")
+            gpu_assignments = [""] * len(group_cmds)
+        else:
+            # GPU mode (default)
+            gpu_assignments = self._assign_gpus(group_cmds)
+            all_gpu_ids = set()
+            for assignment in gpu_assignments:
+                for g in assignment.split(","):
+                    all_gpu_ids.add(int(g))
+            total_gpus = max(1, len(all_gpu_ids))
+            cpus = total_gpus * 12
+            mem = total_gpus * 100
+            lines = [
+                "#!/bin/bash",
+                f"#SBATCH --nodes=1",
+                f"#SBATCH --ntasks=1",
+                f"#SBATCH --ntasks-per-node=1",
+                f"#SBATCH --cpus-per-task={cpus}",
+                f"#SBATCH --gres=gpu:{total_gpus}",
+                f"#SBATCH --mem={mem}g",
+            ]
+
+        if self.partition:
+            lines.append(f"#SBATCH --partition={self.partition}")
+        if self.account:
+            lines.append(f"#SBATCH --account={self.account}")
+        if self.constraint and not self.no_gpu:
+            lines.append(f"#SBATCH --constraint={self.constraint}")
+        if self.qos:
+            lines.append(f"#SBATCH --qos={self.qos}")
+        if self.nodelist:
+            lines.append(f"#SBATCH --nodelist={self.nodelist}")
+        lines += [
+            f"#SBATCH --time={max_time}",
+            f"#SBATCH --job-name={job_name}",
+            f"#SBATCH --output=/dev/null",
+            f"#SBATCH --mail-type=ALL",
+            f"#SBATCH --mail-user={self.mail_user}",
+            "",
+            "source ~/.bashrc",
+            f"cd {self.project_root}",
+            "",
+        ]
+
+        if len(group_cmds) == 1:
+            # Single command: run directly (no backgrounding)
+            label = group_cmds[0]["label"]
+            cmd_str = " ".join(shlex.quote(s) for s in group_cmds[0]["apptainer_cmd"])
+            gpus = gpu_assignments[0]
+            if self.no_gpu:
+                lines.append(f"# --- {label} (CPU) ---")
+                lines.append(f"{cmd_str} > {out_dir}/{label}.out 2>&1")
+            else:
+                lines.append(f"# --- {label} (GPU: {gpus}) ---")
+                lines.append(f"CUDA_VISIBLE_DEVICES={gpus} NVIDIA_VISIBLE_DEVICES={gpus} {cmd_str} > {out_dir}/{label}.out 2>&1")
+            lines.append(f'echo "{label}:$?" >> {out_dir}/exit_codes.txt')
+        else:
+            # Multiple commands: run in parallel with & and wait
+            for i, (cmd, gpus) in enumerate(zip(group_cmds, gpu_assignments)):
+                label = cmd["label"]
+                cmd_str = " ".join(shlex.quote(s) for s in cmd["apptainer_cmd"])
+                if self.no_gpu:
+                    lines.append(f"# --- {label} (CPU) ---")
+                    lines.append(f"{cmd_str} > {out_dir}/{label}.out 2>&1 &")
+                else:
+                    lines.append(f"# --- {label} (GPU: {gpus}) ---")
+                    lines.append(f"CUDA_VISIBLE_DEVICES={gpus} NVIDIA_VISIBLE_DEVICES={gpus} {cmd_str} > {out_dir}/{label}.out 2>&1 &")
+                lines.append(f"PID_{i}=$!")
+                lines.append("")
+
+            # Wait for each PID and record exit codes
+            for i, cmd in enumerate(group_cmds):
+                label = cmd["label"]
+                lines.append(f"wait $PID_{i}; echo \"{label}:$?\" >> {out_dir}/exit_codes.txt")
+
+        lines.append("")
+        return "\n".join(lines)
+
+    # ------------------------------------------------------------------
+    # Job submission
+    # ------------------------------------------------------------------
+
+    def submit_group(
+        self,
+        group_cmds: list[dict],
+        job_name: str,
+        out_dir: Path,
+    ) -> str:
+        """Submit a SLURM job for a group of commands. Returns the job ID."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        script = self._build_slurm_script(group_cmds, job_name, out_dir)
+
+        script_path = out_dir / "submit.sh"
+        script_path.write_text(script)
+        print(f"[slurm] Script written: {script_path}")
+        print(f"[slurm] --- Script ---\n{script}[slurm] ----------------")
+
+        result = subprocess.run(
+            ["sbatch", str(script_path)],
+            capture_output=True,
+            text=True,
+            cwd=str(self.project_root),
+        )
+
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"sbatch failed (exit {result.returncode}):\n"
+                f"stdout: {result.stdout}\nstderr: {result.stderr}"
+            )
+
+        # Parse job ID from "Submitted batch job 12345"
+        match = re.search(r"Submitted batch job (\d+)", result.stdout)
+        if not match:
+            raise RuntimeError(f"Could not parse job ID from sbatch output: {result.stdout}")
+
+        job_id = match.group(1)
+        print(f"[slurm] Submitted job {job_id}: {job_name}")
+        return job_id
+
+    # ------------------------------------------------------------------
+    # Job monitoring
+    # ------------------------------------------------------------------
+
+    def wait_for_job(self, job_id: str, poll_interval: int = 15, timeout: int | None = None) -> str:
+        """Poll squeue/sacct until the job reaches a terminal state. Returns the final state.
+
+        Strategy: use squeue first (authoritative for active jobs). Only after the
+        job disappears from squeue, fall back to sacct for the final state.  This
+        avoids false 'COMPLETED' from sacct while the job is still PENDING.
+        """
+        terminal_states = {"COMPLETED", "FAILED", "CANCELLED", "TIMEOUT", "NODE_FAIL", "OUT_OF_MEMORY"}
+        start = time.time()
+
+        while True:
+            # --- Phase 1: squeue (reliable for PENDING / RUNNING) ---
+            sq = subprocess.run(
+                ["squeue", "-j", job_id, "--noheader", "-o", "%T"],
+                capture_output=True,
+                text=True,
+            )
+            if sq.returncode == 0 and sq.stdout.strip():
+                # Job is still in the queue — keep waiting
+                state = sq.stdout.strip().split("\n")[0].strip()
+                # Normalize: "CANCELLED+" -> "CANCELLED", "CANCELLED by ..." -> "CANCELLED"
+                norm_state = state.split()[0].rstrip("+")
+                if norm_state not in terminal_states:
+                    if timeout and (time.time() - start) > timeout:
+                        print(f"[slurm] Job {job_id} timed out after {timeout}s")
+                        return "TIMEOUT"
+                    time.sleep(poll_interval)
+                    continue
+                # Terminal state detected in squeue; fall through to sacct
+
+            # --- Phase 2: sacct (final state after job leaves queue) ---
+            result = subprocess.run(
+                ["sacct", "-j", job_id, "--format=State", "--noheader", "-P"],
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode == 0 and result.stdout.strip():
+                states = [s.strip() for s in result.stdout.strip().split("\n") if s.strip()]
+                for state in states:
+                    # Normalize: "CANCELLED by 224356" -> "CANCELLED", "CANCELLED+" -> "CANCELLED"
+                    norm_state = state.split()[0].rstrip("+")
+                    if norm_state in terminal_states:
+                        print(f"[slurm] Job {job_id} finished: {state}")
+                        return norm_state
+
+            # sacct may not have updated yet; keep polling
+            if timeout and (time.time() - start) > timeout:
+                print(f"[slurm] Job {job_id} timed out after {timeout}s")
+                return "TIMEOUT"
+
+            time.sleep(poll_interval)
+
+    # ------------------------------------------------------------------
+    # Output reading
+    # ------------------------------------------------------------------
+
+    def read_outputs(self, out_dir: Path, labels: list[str]) -> dict[str, str]:
+        """Read per-label output files from the output directory."""
+        outputs = {}
+        for label in labels:
+            out_file = out_dir / f"{label}.out"
+            if out_file.exists():
+                outputs[label] = out_file.read_text()
+            else:
+                outputs[label] = f"[output file not found: {out_file}]"
+        return outputs
+
+    def read_exit_codes(self, out_dir: Path) -> dict[str, int]:
+        """Read exit codes from the exit_codes.txt file."""
+        exit_codes = {}
+        exit_file = out_dir / "exit_codes.txt"
+        if exit_file.exists():
+            for line in exit_file.read_text().strip().split("\n"):
+                if ":" in line:
+                    label, code = line.rsplit(":", 1)
+                    try:
+                        exit_codes[label.strip()] = int(code.strip())
+                    except ValueError:
+                        pass
+        return exit_codes

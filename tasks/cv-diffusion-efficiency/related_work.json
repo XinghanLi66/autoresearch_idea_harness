@@ -1,0 +1,592 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-diffusion-efficiency",
+  "task_folder": "tasks/cv-diffusion-efficiency",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "efficient sampling algorithms for text-to-image latent diffusion models",
+    "research_question": "How can a sampler update rule improve text-image alignment at a fixed NFE=20 budget on Stable Diffusion-family models?",
+    "local_sources": {
+      "config_path": "tasks/cv-diffusion-efficiency/config.json",
+      "task_description_path": "tasks/cv-diffusion-efficiency/task_description.md"
+    },
+    "notes": [
+      "The task description emphasizes CLIP score, while the shipped evaluator also reports FID against COCO val2014 statistics.",
+      "Stable Diffusion v2.0 base does not have a separate canonical paper in task-local metadata, so the latent diffusion paper is used as the architectural reference for the sd20 test."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 13,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 12
+  },
+  "tests": [
+    {
+      "label": "sd15",
+      "cmd": "scripts/eval_sd15.sh",
+      "package": "CFGpp-main",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr52688.2022.01042",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1405.0312",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2103.00020",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "SD v1.5 evaluation uses a latent diffusion backbone, COCO-style prompts, CLIP score, and FID."
+    },
+    {
+      "label": "sd20",
+      "cmd": "scripts/eval_sd20.sh",
+      "package": "CFGpp-main",
+      "group": 2,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr52688.2022.01042",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1405.0312",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2103.00020",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "The sd20 test evaluates Stable Diffusion 2.0 base under the same COCO, CLIP-score, and FID protocol; the latent diffusion paper is the closest canonical architecture reference."
+    },
+    {
+      "label": "sdxl",
+      "cmd": "scripts/eval_sdxl.sh",
+      "package": "CFGpp-main",
+      "group": 2,
+      "compute": 1.0,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2307.01952",
+          "role": "architecture"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1405.0312",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2103.00020",
+          "role": "metric"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "The SDXL test links directly to the SDXL paper and uses the same COCO, CLIP-score, and FID evaluation protocol."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ddim",
+      "implementation": "edits/ddim.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2010.02502",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps directly to the DDIM sampler baseline."
+    },
+    {
+      "name": "dpm2m",
+      "implementation": "edits/dpm2m.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2211.01095",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps to the multistep DPM-Solver++ / DPM++ 2M family described in the DPM-Solver++ paper."
+    },
+    {
+      "name": "dpm2s",
+      "implementation": "edits/dpm2s.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2211.01095",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Maps to the singlestep second-order DPM-Solver++ / DPM++ 2S family described in the DPM-Solver++ paper."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.2006.11239",
+      "title": "Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Jonathan Ho",
+        "Ajay Jain",
+        "Pieter Abbeel"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2006.11239",
+      "arxiv_id": "2006.11239",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2006.11239",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2006.11239",
+        "https://arxiv.org/abs/2006.11239"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2006.11239,\n  doi = {10.48550/ARXIV.2006.11239},\n  url = {https://arxiv.org/abs/2006.11239},\n  author = {Ho, Jonathan and Jain, Ajay and Abbeel, Pieter},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Probabilistic Models},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion_models",
+        "foundations",
+        "sampling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational diffusion paper underlying DDIM, DPM-Solver++, and later latent diffusion samplers.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2010.02502",
+      "title": "Denoising Diffusion Implicit Models",
+      "authors": [
+        "Jiaming Song",
+        "Chenlin Meng",
+        "Stefano Ermon"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2010.02502",
+      "arxiv_id": "2010.02502",
+      "openalex_id": "https://openalex.org/W3092442149",
+      "landing_page": "https://arxiv.org/abs/2010.02502",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2010.02502",
+        "https://openalex.org/W3092442149"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2010.02502,\n  doi = {10.48550/ARXIV.2010.02502},\n  url = {https://arxiv.org/abs/2010.02502},\n  author = {Song, Jiaming and Meng, Chenlin and Ermon, Stefano},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Implicit Models},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "sampler",
+        "ode_solver"
+      ],
+      "baseline_links": [
+        "ddim"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the DDIM baseline used directly in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2211.01095",
+      "title": "DPM-Solver++: Fast Solver for Guided Sampling of Diffusion Probabilistic Models",
+      "authors": [
+        "Cheng Lu",
+        "Yuhao Zhou",
+        "Fan Bao",
+        "Jianfei Chen",
+        "Chongxuan Li",
+        "Jun Zhu"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2211.01095",
+      "arxiv_id": "2211.01095",
+      "openalex_id": "https://openalex.org/W4308167501",
+      "landing_page": "https://arxiv.org/abs/2211.01095",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2211.01095",
+        "https://openalex.org/W4308167501"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2211.01095,\n  doi = {10.48550/ARXIV.2211.01095},\n  url = {https://arxiv.org/abs/2211.01095},\n  author = {Lu, Cheng and Zhou, Yuhao and Bao, Fan and Chen, Jianfei and Li, Chongxuan and Zhu, Jun},\n  keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {DPM-Solver++: Fast Solver for Guided Sampling of Diffusion Probabilistic Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "baseline",
+        "sampler",
+        "guided_sampling"
+      ],
+      "baseline_links": [
+        "dpm2m",
+        "dpm2s"
+      ],
+      "test_links": [],
+      "relevance": "Primary paper for the DPM++ baseline family used by both dpm2m and dpm2s.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr52688.2022.01042",
+      "title": "High-Resolution Image Synthesis with Latent Diffusion Models",
+      "authors": [
+        "Robin Rombach",
+        "Andreas Blattmann",
+        "Dominik Lorenz",
+        "Patrick Esser",
+        "Bjorn Ommer"
+      ],
+      "year": 2022,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR52688.2022.01042",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4312933868",
+      "landing_page": "https://doi.org/10.1109/CVPR52688.2022.01042",
+      "source_urls": [
+        "https://doi.org/10.1109/CVPR52688.2022.01042",
+        "https://openalex.org/W4312933868"
+      ],
+      "bibtex": "@inproceedings{Rombach_2022, title={High-Resolution Image Synthesis with Latent Diffusion Models}, url={http://dx.doi.org/10.1109/cvpr52688.2022.01042}, DOI={10.1109/cvpr52688.2022.01042}, booktitle={2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Rombach, Robin and Blattmann, Andreas and Lorenz, Dominik and Esser, Patrick and Ommer, Bjorn}, year={2022}, month=jun, pages={10674–10685} }",
+      "relevance_tags": [
+        "architecture",
+        "latent_diffusion",
+        "text_to_image"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "sd15",
+        "sd20"
+      ],
+      "relevance": "Canonical latent diffusion architecture paper for the Stable Diffusion-family tests in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2307.01952",
+      "title": "SDXL: Improving Latent Diffusion Models for High-Resolution Image Synthesis",
+      "authors": [
+        "Dustin Podell",
+        "Zion English",
+        "Kyle Lacey",
+        "Andreas Blattmann",
+        "Tim Dockhorn",
+        "Jonas Muller",
+        "Joe Penna",
+        "Robin Rombach"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2307.01952",
+      "arxiv_id": "2307.01952",
+      "openalex_id": "https://openalex.org/W4383472654",
+      "landing_page": "https://arxiv.org/abs/2307.01952",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2307.01952",
+        "https://openalex.org/W4383472654"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2307.01952,\n  doi = {10.48550/ARXIV.2307.01952},\n  url = {https://arxiv.org/abs/2307.01952},\n  author = {Podell, Dustin and English, Zion and Lacey, Kyle and Blattmann, Andreas and Dockhorn, Tim and M\u00fcller, Jonas and Penna, Joe and Rombach, Robin},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {SDXL: Improving Latent Diffusion Models for High-Resolution Image Synthesis},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "architecture",
+        "sdxl",
+        "text_to_image"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "sdxl"
+      ],
+      "relevance": "Direct architecture reference for the SDXL evaluation test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2103.00020",
+      "title": "Learning Transferable Visual Models From Natural Language Supervision",
+      "authors": [
+        "Alec Radford",
+        "Jong Wook Kim",
+        "Chris Hallacy",
+        "Aditya Ramesh",
+        "Gabriel Goh",
+        "Sandhini Agarwal",
+        "Girish Sastry",
+        "Amanda Askell",
+        "Pamela Mishkin",
+        "Jack Clark",
+        "Gretchen Krueger",
+        "Ilya Sutskever"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2103.00020",
+      "arxiv_id": "2103.00020",
+      "openalex_id": "https://openalex.org/W3135367836",
+      "landing_page": "https://arxiv.org/abs/2103.00020",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2103.00020",
+        "https://openalex.org/W3135367836"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2103.00020,\n  doi = {10.48550/ARXIV.2103.00020},\n  url = {https://arxiv.org/abs/2103.00020},\n  author = {Radford, Alec and Kim, Jong Wook and Hallacy, Chris and Ramesh, Aditya and Goh, Gabriel and Agarwal, Sandhini and Sastry, Girish and Askell, Amanda and Mishkin, Pamela and Clark, Jack and Krueger, Gretchen and Sutskever, Ilya},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Learning Transferable Visual Models From Natural Language Supervision},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "metric",
+        "clip",
+        "vision_language"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "sd15",
+        "sd20",
+        "sdxl"
+      ],
+      "relevance": "Provides the CLIP model family used for the task's main alignment metric.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1405.0312",
+      "title": "Microsoft COCO: Common Objects in Context",
+      "authors": [
+        "Tsung-Yi Lin",
+        "Michael Maire",
+        "Serge Belongie",
+        "Lubomir Bourdev",
+        "Ross Girshick",
+        "James Hays",
+        "Pietro Perona",
+        "Deva Ramanan",
+        "C. Lawrence Zitnick",
+        "Piotr Dollar"
+      ],
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1405.0312",
+      "arxiv_id": "1405.0312",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1405.0312",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1405.0312",
+        "https://arxiv.org/abs/1405.0312"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1405.0312,\n  doi = {10.48550/ARXIV.1405.0312},\n  url = {https://arxiv.org/abs/1405.0312},\n  author = {Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Bourdev, Lubomir and Girshick, Ross and Hays, James and Perona, Pietro and Ramanan, Deva and Zitnick, C. Lawrence and Doll\u00e1r, Piotr},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Microsoft COCO: Common Objects in Context},\n  publisher = {arXiv},\n  year = {2014},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "dataset",
+        "captions"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "sd15",
+        "sd20",
+        "sdxl"
+      ],
+      "relevance": "The evaluator uses COCO captions and COCO val2014 reference statistics for benchmark evaluation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1706.08500",
+      "title": "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium",
+      "authors": [
+        "Martin Heusel",
+        "Hubert Ramsauer",
+        "Thomas Unterthiner",
+        "Bernhard Nessler",
+        "Sepp Hochreiter"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.08500",
+      "arxiv_id": "1706.08500",
+      "openalex_id": "https://openalex.org/W2963981733",
+      "landing_page": "https://arxiv.org/abs/1706.08500",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.1706.08500",
+        "https://openalex.org/W2963981733"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1706.08500,\n  doi = {10.48550/ARXIV.1706.08500},\n  url = {https://arxiv.org/abs/1706.08500},\n  author = {Heusel, Martin and Ramsauer, Hubert and Unterthiner, Thomas and Nessler, Bernhard and Hochreiter, Sepp},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "metric",
+        "fid",
+        "evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "sd15",
+        "sd20",
+        "sdxl"
+      ],
+      "relevance": "Introduces Fr\u00e9chet Inception Distance, which the shipped evaluator computes alongside CLIP score.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2202.09778",
+      "title": "Pseudo Numerical Methods for Diffusion Models on Manifolds",
+      "authors": [
+        "Luping Liu",
+        "Yi Ren",
+        "Zhijie Lin",
+        "Zhou Zhao"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2202.09778",
+      "arxiv_id": "2202.09778",
+      "openalex_id": "https://openalex.org/W4226148126",
+      "landing_page": "https://arxiv.org/abs/2202.09778",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2202.09778",
+        "https://openalex.org/W4226148126"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2202.09778,\n  doi = {10.48550/ARXIV.2202.09778},\n  url = {https://arxiv.org/abs/2202.09778},\n  author = {Liu, Luping and Ren, Yi and Lin, Zhijie and Zhao, Zhou},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), Numerical Analysis (math.NA), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Mathematics, FOS: Mathematics},\n  title = {Pseudo Numerical Methods for Diffusion Models on Manifolds},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "sampling_efficiency",
+        "numerical_methods",
+        "diffusion_solvers"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant prior work on accelerating diffusion sampling via pseudo numerical solvers.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2305.08891",
+      "title": "Common Diffusion Noise Schedules and Sample Steps are Flawed",
+      "authors": [
+        "Shanchuan Lin",
+        "Bingchen Liu",
+        "Jiashi Li",
+        "Xiao Yang"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2305.08891",
+      "arxiv_id": "2305.08891",
+      "openalex_id": "https://openalex.org/W4376988459",
+      "landing_page": "https://arxiv.org/abs/2305.08891",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2305.08891",
+        "https://openalex.org/W4376988459"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2305.08891,\n  doi = {10.48550/ARXIV.2305.08891},\n  url = {https://arxiv.org/abs/2305.08891},\n  author = {Lin, Shanchuan and Liu, Bingchen and Li, Jiashi and Yang, Xiao},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Common Diffusion Noise Schedules and Sample Steps are Flawed},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {Creative Commons Attribution Share Alike 4.0 International}\n}",
+      "relevance_tags": [
+        "sampling_efficiency",
+        "noise_schedule",
+        "stable_diffusion"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Directly relevant to sampler correctness and timestep design in Stable Diffusion-style systems.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2206.00364",
+      "title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+      "authors": [
+        "Tero Karras",
+        "Miika Aittala",
+        "Timo Aila",
+        "Samuli Laine"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.00364",
+      "arxiv_id": "2206.00364",
+      "openalex_id": "https://openalex.org/W4281969232",
+      "landing_page": "https://arxiv.org/abs/2206.00364",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2206.00364",
+        "https://openalex.org/W4281969232"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00364,\n  doi = {10.48550/ARXIV.2206.00364},\n  url = {https://arxiv.org/abs/2206.00364},\n  author = {Karras, Tero and Aittala, Miika and Aila, Timo and Laine, Samuli},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Elucidating the Design Space of Diffusion-Based Generative Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "sampling_efficiency",
+        "edm",
+        "design_space"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Strong reference on diffusion sampler design tradeoffs and efficient generation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr52729.2023.01374",
+      "title": "On Distillation of Guided Diffusion Models",
+      "authors": [
+        "Chenlin Meng",
+        "Robin Rombach",
+        "Ruiqi Gao",
+        "Diederik P. Kingma",
+        "Stefano Ermon",
+        "Jonathan Ho",
+        "Tim Salimans"
+      ],
+      "year": 2023,
+      "venue": "CVPR",
+      "doi": "10.1109/CVPR52729.2023.01374",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4386071831",
+      "landing_page": "https://doi.org/10.1109/CVPR52729.2023.01374",
+      "source_urls": [
+        "https://doi.org/10.1109/CVPR52729.2023.01374",
+        "https://openalex.org/W4386071831"
+      ],
+      "bibtex": "@inproceedings{Meng_2023, title={On Distillation of Guided Diffusion Models}, url={http://dx.doi.org/10.1109/cvpr52729.2023.01374}, DOI={10.1109/cvpr52729.2023.01374}, booktitle={2023 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Meng, Chenlin and Rombach, Robin and Gao, Ruiqi and Kingma, Diederik and Ermon, Stefano and Ho, Jonathan and Salimans, Tim}, year={2023}, month=jun, pages={14297–14306} }",
+      "relevance_tags": [
+        "sampling_efficiency",
+        "distillation",
+        "guided_diffusion"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant efficient-sampling paper for guided and latent diffusion models under low-NFE regimes.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2406.08070",
+      "title": "CFG++: Manifold-constrained Classifier Free Guidance for Diffusion Models",
+      "authors": [
+        "Hyungjin Chung",
+        "Jeongsol Kim",
+        "Geon Yeong Park",
+        "Hyelin Nam",
+        "Jong Chul Ye"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2406.08070",
+      "arxiv_id": "2406.08070",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/2406.08070",
+      "source_urls": [
+        "https://doi.org/10.48550/ARXIV.2406.08070",
+        "https://arxiv.org/abs/2406.08070"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2406.08070,\n  doi = {10.48550/ARXIV.2406.08070},\n  url = {https://arxiv.org/abs/2406.08070},\n  author = {Chung, Hyungjin and Kim, Jeongsol and Park, Geon Yeong and Nam, Hyelin and Ye, Jong Chul},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {CFG++: Manifold-constrained Classifier Free Guidance for Diffusion Models},\n  publisher = {arXiv},\n  year = {2024},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "guidance",
+        "cfgpp",
+        "text_to_image"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant to the task scaffold because the package and editable solver classes are built around CFG++ sampling.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "task_name": "meta-rl",
+  "task_folder": "tasks/meta-rl",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/meta-rl/config.json",
+      "task_description_path": "tasks/meta-rl/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 1,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "cheetah-vel",
+      "cmd": "scripts/cheetah_vel.sh",
+      "package": "oyster",
+      "group": 1,
+      "compute": 0.33,
+      "time": "1:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "sparse-point-robot",
+      "cmd": "scripts/sparse_point_robot.sh",
+      "package": "oyster",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:59:00",
+      "hidden": true,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "point-robot",
+      "cmd": "scripts/point_robot.sh",
+      "package": "oyster",
+      "group": 1,
+      "compute": 0.33,
+      "time": "0:59:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "mlp_encoder",
+      "implementation": "edits/mlp_encoder.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1903.08254",
+          "url": "https://arxiv.org/abs/1903.08254",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "PEARL context encoder variant; related to the encoder ablation in Section 6.3 / Figure 5."
+    },
+    {
+      "name": "recurrent_encoder",
+      "implementation": "edits/recurrent_encoder.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1903.08254",
+          "url": "https://arxiv.org/abs/1903.08254",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "PEARL context encoder variant; related to the encoder ablation in Section 6.3 / Figure 5."
+    },
+    {
+      "name": "attention_encoder",
+      "implementation": "edits/attention_encoder.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:1903.08254",
+          "url": "https://arxiv.org/abs/1903.08254",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "mapped",
+      "notes": "PEARL context encoder variant; related to the encoder ablation in Section 6.3 / Figure 5."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "arxiv:1903.08254",
+      "id": "arxiv:1903.08254",
+      "title": "Efficient Off-Policy Meta-Reinforcement Learning via Probabilistic Context Variables",
+      "authors": ["Kate Rakelly", "Aurick Zhou", "Chelsea Finn", "Sergey Levine", "Deirdre Quillen"],
+      "year": 2019,
+      "venue": "ICML",
+      "doi": null,
+      "arxiv_id": "1903.08254",
+      "openalex_id": null,
+      "landing_page": "https://arxiv.org/abs/1903.08254",
+      "url": "https://arxiv.org/abs/1903.08254",
+      "source_urls": ["https://arxiv.org/abs/1903.08254"],
+      "bibtex": "@inproceedings{rakelly2019efficient, title={Efficient Off-Policy Meta-Reinforcement Learning via Probabilistic Context Variables}, author={Rakelly, Kate and Zhou, Aurick and Finn, Chelsea and Levine, Sergey and Quillen, Deirdre}, booktitle={International Conference on Machine Learning}, year={2019}}",
+      "relevance_tags": ["baseline", "meta_rl", "context_encoder"],
+      "baseline_links": ["mlp_encoder", "recurrent_encoder", "attention_encoder"],
+      "test_links": [],
+      "relevance": "Defines PEARL and motivates context encoder variants for this task.",
+      "notes": "Canonical paper URL supplied by the meta-task audit orchestrator; encoder variants map to Section 6.3 / Figure 5.",
+      "verified_by": "user_provided_orchestrator_citation"
+    }
+  ]
+}

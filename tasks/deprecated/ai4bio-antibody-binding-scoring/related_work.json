@@ -1,0 +1,532 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4bio-antibody-binding-scoring",
+  "task_folder": "tasks/ai4bio-antibody-binding-scoring",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "antibody-antigen binding affinity scoring with frozen protein language model features",
+    "research_question": "Design a scoring head that predicts antibody-antigen binding affinity from pretrained protein language model features.",
+    "local_sources": {
+      "config_path": "tasks/ai4bio-antibody-binding-scoring/config.json",
+      "task_description_path": "tasks/ai4bio-antibody-binding-scoring/task_description.md"
+    },
+    "notes": [
+      "AbBiBench is the benchmark anchor for the three test splits.",
+      "All baselines and the target protocol are zero-shot likelihood over frozen ESM-2 3B (facebook/esm2_t36_3B_UR50D), matching the AbBiBench paper protocol; delta_mlp here denotes WT-normalized delta log-likelihood, not a supervised head."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 3,
+    "baseline_links_found": 6,
+    "test_entries": 3,
+    "test_links_found": 6
+  },
+  "tests": [
+    {
+      "label": "influenza",
+      "cmd": "scripts/influenza.sh",
+      "package": "AbBiBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.5281/zenodo.17517689",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1038/nature11371",
+          "role": "other"
+        }
+      ],
+      "notes": "AbBiBench influenza split plus an influenza bnAb paper."
+    },
+    {
+      "label": "sars",
+      "cmd": "scripts/sars.sh",
+      "package": "AbBiBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.5281/zenodo.17517689",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1016/j.cell.2020.08.012",
+          "role": "other"
+        }
+      ],
+      "notes": "AbBiBench benchmark split plus a SARS-CoV-2 mutational-scan paper."
+    },
+    {
+      "label": "her2",
+      "cmd": "scripts/her2.sh",
+      "package": "AbBiBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.5281/zenodo.17517689",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.1021/jm000527m",
+          "role": "other"
+        }
+      ],
+      "notes": "AbBiBench benchmark split plus an HER2/4D5 binding paper."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "esm2_pll",
+      "implementation": "edits/esm2_pll.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1101/2022.07.20.500902",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1101/2021.07.09.450648",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "ESM-2 embeddings and zero-shot mutation scoring."
+    },
+    {
+      "name": "masked_marginal",
+      "implementation": "edits/masked_marginal.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1101/2021.07.09.450648",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1101/2023.12.07.570727",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Approximate masked-marginal style mutation scoring plus benchmark context from ProteinGym."
+    },
+    {
+      "name": "delta_mlp",
+      "implementation": "edits/delta_mlp.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1038/s41592-019-0598-1",
+          "role": "baseline_method"
+        },
+        {
+          "paper_id": "doi:10.1038/s41467-021-22732-w",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Generic supervised embedding head mapped to broader protein representation learning and alignment-free design papers."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.5281/zenodo.17517689",
+      "title": "Mutant structure files for AbBiBench dataset",
+      "authors": [
+        "Yi-Ching Tang"
+      ],
+      "year": 2025,
+      "venue": "Zenodo",
+      "doi": "10.5281/zenodo.17517689",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W7104046484",
+      "landing_page": "https://zenodo.org/doi/10.5281/zenodo.17517689",
+      "source_urls": [
+        "https://zenodo.org/doi/10.5281/zenodo.17517689",
+        "https://doi.org/10.5281/zenodo.17517689"
+      ],
+      "bibtex": "@misc{https://doi.org/10.5281/zenodo.17517689, doi = {10.5281/ZENODO.17517689}, url = {https://zenodo.org/doi/10.5281/zenodo.17517689}, author = {Tang, Yi-Ching}, title = {Mutant structure files for AbBiBench dataset}, publisher = {Zenodo}, year = {2025}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "benchmark",
+        "dataset",
+        "antibody_affinity"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "influenza",
+        "sars",
+        "her2"
+      ],
+      "relevance": "AbBiBench release that anchors the benchmark data and mutant structures used by the three test splits.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2022.07.20.500902",
+      "title": "Evolutionary-scale prediction of atomic level protein structure with a language model",
+      "authors": [
+        "Zeming Lin",
+        "Halil Akin",
+        "Roshan Rao",
+        "Brian Hie",
+        "Alexander Rives"
+      ],
+      "year": 2022,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2022.07.20.500902",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4286500588",
+      "landing_page": "https://doi.org/10.1101/2022.07.20.500902",
+      "source_urls": [
+        "https://www.biorxiv.org/content/biorxiv/early/2022/10/31/2022.07.20.500902.full.pdf",
+        "https://doi.org/10.1101/2022.07.20.500902"
+      ],
+      "bibtex": "@article{Lin_2022, title={Evolutionary-scale prediction of atomic level protein structure with a language model}, url={http://dx.doi.org/10.1101/2022.07.20.500902}, DOI={10.1101/2022.07.20.500902}, publisher={openRxiv}, author={Lin, Zeming and Akin, Halil and Rao, Roshan and Hie, Brian and Zhu, Zhongkai and Lu, Wenting and Smetanin, Nikita and Verkuil, Robert and Kabeli, Ori and Shmueli, Yaniv and dos Santos Costa, Allan and Fazel-Zarandi, Maryam and Sercu, Tom and Candido, Salvatore and Rives, Alexander}, year={2022}, month=jul }",
+      "relevance_tags": [
+        "protein_language_model",
+        "esm2",
+        "representation_learning"
+      ],
+      "baseline_links": [
+        "esm2_pll"
+      ],
+      "test_links": [],
+      "relevance": "ESM-2 family paper providing the frozen embeddings used by the task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2021.07.09.450648",
+      "title": "Language models enable zero-shot prediction of the effects of mutations on protein function",
+      "authors": [
+        "Joshua Meier",
+        "Roshan Rao",
+        "Robert Verkuil",
+        "Jason Liu",
+        "Tom Sercu",
+        "Alexander Rives"
+      ],
+      "year": 2021,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2021.07.09.450648",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3179485843",
+      "landing_page": "https://doi.org/10.1101/2021.07.09.450648",
+      "source_urls": [
+        "https://www.biorxiv.org/content/biorxiv/early/2021/11/17/2021.07.09.450648.full.pdf",
+        "https://doi.org/10.1101/2021.07.09.450648"
+      ],
+      "bibtex": "@article{Meier_2021, title={Language models enable zero-shot prediction of the effects of mutations on protein function}, url={http://dx.doi.org/10.1101/2021.07.09.450648}, DOI={10.1101/2021.07.09.450648}, publisher={openRxiv}, author={Meier, Joshua and Rao, Roshan and Verkuil, Robert and Liu, Jason and Sercu, Tom and Rives, Alexander}, year={2021}, month=jul }",
+      "relevance_tags": [
+        "zero_shot",
+        "mutation_effects",
+        "protein_language_model"
+      ],
+      "baseline_links": [
+        "esm2_pll",
+        "masked_marginal"
+      ],
+      "test_links": [],
+      "relevance": "Core zero-shot mutation-scoring paper behind PLL-style baselines.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2023.12.07.570727",
+      "title": "ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction",
+      "authors": [
+        "Pascal Notin",
+        "Aaron W. Kollasch",
+        "Daniel Ritter",
+        "Lood van Niekerk",
+        "Debora S. Marks"
+      ],
+      "year": 2023,
+      "venue": "bioRxiv",
+      "doi": "10.1101/2023.12.07.570727",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4389472984",
+      "landing_page": "https://doi.org/10.1101/2023.12.07.570727",
+      "source_urls": [
+        "https://www.biorxiv.org/content/biorxiv/early/2023/12/08/2023.12.07.570727.full.pdf",
+        "https://doi.org/10.1101/2023.12.07.570727"
+      ],
+      "bibtex": "@article{Notin_2023, title={ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction}, url={http://dx.doi.org/10.1101/2023.12.07.570727}, DOI={10.1101/2023.12.07.570727}, publisher={openRxiv}, author={Notin, Pascal and Kollasch, Aaron W. and Ritter, Daniel and van Niekerk, Lood and Paul, Steffanie and Spinner, Hansen and Rollins, Nathan and Shaw, Ada and Weitzman, Ruben and Frazer, Jonathan and Dias, Mafalda and Franceschi, Dinko and Orenbuch, Rose and Gal, Yarin and Marks, Debora S.}, year={2023}, month=dec }",
+      "relevance_tags": [
+        "benchmark",
+        "fitness_prediction",
+        "mutation_effects"
+      ],
+      "baseline_links": [
+        "masked_marginal"
+      ],
+      "test_links": [],
+      "relevance": "Large benchmark suite for zero-shot and supervised fitness prediction.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41592-019-0598-1",
+      "title": "Unified rational protein engineering with sequence-based deep representation learning",
+      "authors": [
+        "Ethan C. Alley",
+        "Grigory Khimulya",
+        "Surojit Biswas",
+        "Mohammed AlQuraishi",
+        "George M. Church"
+      ],
+      "year": 2019,
+      "venue": "Nature Methods",
+      "doi": "10.1038/s41592-019-0598-1",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2980789587",
+      "landing_page": "https://doi.org/10.1038/s41592-019-0598-1",
+      "source_urls": [
+        "https://www.nature.com/articles/s41592-019-0598-1.pdf",
+        "https://doi.org/10.1038/s41592-019-0598-1"
+      ],
+      "bibtex": "@article{Alley_2019, title={Unified rational protein engineering with sequence-based deep representation learning}, volume={16}, ISSN={1548-7105}, url={http://dx.doi.org/10.1038/s41592-019-0598-1}, DOI={10.1038/s41592-019-0598-1}, number={12}, journal={Nature Methods}, publisher={Springer Science and Business Media LLC}, author={Alley, Ethan C. and Khimulya, Grigory and Biswas, Surojit and AlQuraishi, Mohammed and Church, George M.}, year={2019}, month=oct, pages={1315–1322} }",
+      "relevance_tags": [
+        "protein_language_model",
+        "representation_learning",
+        "protein_engineering"
+      ],
+      "baseline_links": [
+        "delta_mlp"
+      ],
+      "test_links": [],
+      "relevance": "Sequence-based protein representation learning paper that supports the supervised embedding-head baseline mapping.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41587-023-01763-2",
+      "title": "Efficient evolution of human antibodies from general protein language models",
+      "authors": [
+        "Brian L. Hie",
+        "Varun R. Shanker",
+        "Duo Xu",
+        "Theodora U. J. Bruun",
+        "Peter S. Kim"
+      ],
+      "year": 2023,
+      "venue": "Nature Biotechnology",
+      "doi": "10.1038/s41587-023-01763-2",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4366823175",
+      "landing_page": "https://doi.org/10.1038/s41587-023-01763-2",
+      "source_urls": [
+        "https://www.nature.com/articles/s41587-023-01763-2.pdf",
+        "https://doi.org/10.1038/s41587-023-01763-2"
+      ],
+      "bibtex": "@article{Hie_2023, title={Efficient evolution of human antibodies from general protein language models}, volume={42}, ISSN={1546-1696}, url={http://dx.doi.org/10.1038/s41587-023-01763-2}, DOI={10.1038/s41587-023-01763-2}, number={2}, journal={Nature Biotechnology}, publisher={Springer Science and Business Media LLC}, author={Hie, Brian L. and Shanker, Varun R. and Xu, Duo and Bruun, Theodora U. J. and Weidenbacher, Payton A. and Tang, Shaogeng and Wu, Wesley and Pak, John E. and Kim, Peter S.}, year={2023}, month=apr, pages={275–283} }",
+      "relevance_tags": [
+        "antibodies",
+        "protein_language_model",
+        "supervised_design"
+      ],
+      "baseline_links": [
+        "delta_mlp"
+      ],
+      "test_links": [],
+      "relevance": "Shows language-model-based antibody optimization from frozen protein representations.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41467-021-22732-w",
+      "title": "Protein design and variant prediction using autoregressive generative models",
+      "authors": [
+        "Jung-Eun Shin",
+        "Adam J. Riesselman",
+        "Aaron W. Kollasch",
+        "Debora S. Marks"
+      ],
+      "year": 2021,
+      "venue": "Nature Communications",
+      "doi": "10.1038/s41467-021-22732-w",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3154275519",
+      "landing_page": "https://doi.org/10.1038/s41467-021-22732-w",
+      "source_urls": [
+        "https://www.nature.com/articles/s41467-021-22732-w.pdf",
+        "https://doi.org/10.1038/s41467-021-22732-w"
+      ],
+      "bibtex": "@article{Shin_2021, title={Protein design and variant prediction using autoregressive generative models}, volume={12}, ISSN={2041-1723}, url={http://dx.doi.org/10.1038/s41467-021-22732-w}, DOI={10.1038/s41467-021-22732-w}, number={1}, journal={Nature Communications}, publisher={Springer Science and Business Media LLC}, author={Shin, Jung-Eun and Riesselman, Adam J. and Kollasch, Aaron W. and McMahon, Conor and Simon, Elana and Sander, Chris and Manglik, Aashish and Kruse, Andrew C. and Marks, Debora S.}, year={2021}, month=apr }",
+      "relevance_tags": [
+        "alignment_free_model",
+        "protein_design",
+        "variant_prediction"
+      ],
+      "baseline_links": [
+        "delta_mlp"
+      ],
+      "test_links": [],
+      "relevance": "Alignment-free protein design and variant prediction context for supervised heads.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/nature11371",
+      "title": "Structural and genetic basis for development of broadly neutralizing influenza antibodies",
+      "authors": [
+        "Daniel Lingwood",
+        "Patrick M. McTamney",
+        "Hadi M. Yassine",
+        "Gary J. Nabel"
+      ],
+      "year": 2012,
+      "venue": "Nature",
+      "doi": "10.1038/nature11371",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2087293737",
+      "landing_page": "https://doi.org/10.1038/nature11371",
+      "source_urls": [
+        "https://www.nature.com/articles/nature11371.pdf",
+        "https://doi.org/10.1038/nature11371"
+      ],
+      "bibtex": "@article{Lingwood_2012, title={Structural and genetic basis for development of broadly neutralizing influenza antibodies}, volume={489}, ISSN={1476-4687}, url={http://dx.doi.org/10.1038/nature11371}, DOI={10.1038/nature11371}, number={7417}, journal={Nature}, publisher={Springer Science and Business Media LLC}, author={Lingwood, Daniel and McTamney, Patrick M. and Yassine, Hadi M. and Whittle, James R. R. and Guo, Xiaoti and Boyington, Jeffrey C. and Wei, Chih-Jen and Nabel, Gary J.}, year={2012}, month=aug, pages={566–570} }",
+      "relevance_tags": [
+        "influenza",
+        "antibody_binding",
+        "hemagglutinin"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "influenza"
+      ],
+      "relevance": "Influenza H1 antibody structure paper relevant to the influenza split.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1371/journal.ppat.1004103",
+      "title": "Molecular Signatures of Hemagglutinin Stem-Directed Heterosubtypic Human Neutralizing Antibodies against Influenza A Viruses",
+      "authors": [
+        "Yuval Avnir",
+        "Aimee S. Tallarico",
+        "Quan Zhu",
+        "Wayne A. Marasco"
+      ],
+      "year": 2014,
+      "venue": "PLoS Pathogens",
+      "doi": "10.1371/journal.ppat.1004103",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2154666710",
+      "landing_page": "https://doi.org/10.1371/journal.ppat.1004103",
+      "source_urls": [
+        "https://journals.plos.org/plospathogens/article/file?id=10.1371/journal.ppat.1004103&type=printable",
+        "https://doi.org/10.1371/journal.ppat.1004103"
+      ],
+      "bibtex": "@article{Avnir_2014, title={Molecular Signatures of Hemagglutinin Stem-Directed Heterosubtypic Human Neutralizing Antibodies against Influenza A Viruses}, volume={10}, ISSN={1553-7374}, url={http://dx.doi.org/10.1371/journal.ppat.1004103}, DOI={10.1371/journal.ppat.1004103}, number={5}, journal={PLoS Pathogens}, publisher={Public Library of Science (PLoS)}, author={Avnir, Yuval and Tallarico, Aimee S. and Zhu, Quan and Bennett, Andrew S. and Connelly, Gene and Sheehan, Jared and Sui, Jianhua and Fahmy, Amr and Huang, Chiung-yu and Cadwell, Greg and Bankston, Laurie A. and McGuire, Andrew T. and Stamatatos, Leonidas and Wagner, Gerhard and Liddington, Robert C. and Marasco, Wayne A.}, editor={Palese, Peter}, year={2014}, month=may, pages={e1004103} }",
+      "relevance_tags": [
+        "influenza",
+        "antibody_binding",
+        "stem_epitope"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Influenza stem-antibody paper that provides additional biological context.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1016/j.cell.2020.08.012",
+      "title": "Deep Mutational Scanning of SARS-CoV-2 Receptor Binding Domain Reveals Constraints on Folding and ACE2 Binding",
+      "authors": [
+        "Tyler N. Starr",
+        "Allison J. Greaney",
+        "Sarah K. Hilton",
+        "Katharine H. D. Crawford",
+        "Jesse D. Bloom"
+      ],
+      "year": 2020,
+      "venue": "Cell",
+      "doi": "10.1016/j.cell.2020.08.012",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3048714202",
+      "landing_page": "https://doi.org/10.1016/j.cell.2020.08.012",
+      "source_urls": [
+        "https://doi.org/10.1016/j.cell.2020.08.012",
+        "https://doi.org/10.1016/j.cell.2020.08.012"
+      ],
+      "bibtex": "@article{Starr_2020, title={Deep Mutational Scanning of SARS-CoV-2 Receptor Binding Domain Reveals Constraints on Folding and ACE2 Binding}, volume={182}, ISSN={0092-8674}, url={http://dx.doi.org/10.1016/j.cell.2020.08.012}, DOI={10.1016/j.cell.2020.08.012}, number={5}, journal={Cell}, publisher={Elsevier BV}, author={Starr, Tyler N. and Greaney, Allison J. and Hilton, Sarah K. and Ellis, Daniel and Crawford, Katharine H.D. and Dingens, Adam S. and Navarro, Mary Jane and Bowen, John E. and Tortorici, M. Alejandra and Walls, Alexandra C. and King, Neil P. and Veesler, David and Bloom, Jesse D.}, year={2020}, month=sep, pages={1295-1310.e20} }",
+      "relevance_tags": [
+        "sars",
+        "deep_mutational_scanning",
+        "mutation_effects"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "sars"
+      ],
+      "relevance": "SARS-related DMS paper for mutation-to-affinity generalization.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1016/j.cell.2021.01.037",
+      "title": "Circulating SARS-CoV-2 spike N439K variants maintain fitness while evading antibody-mediated immunity",
+      "authors": [
+        "Emma C. Thomson",
+        "Laura E. Rosen",
+        "James G. Shepherd",
+        "Roberto Spreafico",
+        "Davide Corti"
+      ],
+      "year": 2021,
+      "venue": "Cell",
+      "doi": "10.1016/j.cell.2021.01.037",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3127277789",
+      "landing_page": "https://doi.org/10.1016/j.cell.2021.01.037",
+      "source_urls": [
+        "http://www.cell.com/article/S0092867421000805/pdf",
+        "https://doi.org/10.1016/j.cell.2021.01.037"
+      ],
+      "bibtex": "@article{Thomson_2021, title={Circulating SARS-CoV-2 spike N439K variants maintain fitness while evading antibody-mediated immunity}, volume={184}, ISSN={0092-8674}, url={http://dx.doi.org/10.1016/j.cell.2021.01.037}, DOI={10.1016/j.cell.2021.01.037}, number={5}, journal={Cell}, publisher={Elsevier BV}, author={Thomson, Emma C. and Rosen, Laura E. and Shepherd, James G. and Spreafico, Roberto and da Silva Filipe, Ana and Wojcechowskyj, Jason A. and Davis, Chris and Piccoli, Luca and Pascall, David J. and Dillen, Josh and Lytras, Spyros and Czudnochowski, Nadine and Shah, Rajiv and Meury, Marcel and Jesudason, Natasha and De Marco, Anna and Li, Kathy and Bassi, Jessica and O’Toole, Aine and Pinto, Dora and Colquhoun, Rachel M. and Culap, Katja and Jackson, Ben and Zatta, Fabrizia and Rambaut, Andrew and Jaconi, Stefano and Sreenu, Vattipally B. and Nix, Jay C. and Zhang, Ivy and Jarrett, Ruth F. and Glass, William G. and Beltramello, Martina and Nomikou, Kyriaki and Pizzuto, Matteo Samuele and Tong, L. and Cameroni, Elisabetta and Croll, Tristan I. and Johnson, Natasha and Di Iulio, Julia and Wickenhagen, Arthur and Ceschi, Alessandro and Harbison, Aoife M. and Mair, Daniel and Ferrari, Paolo and Smollett, Katherine and Sallusto, Federica and Carmichael, Stephen and Garzoni, Christian and Nichols, Jenna and Galli, Massimo and Hughes, Joseph and Riva, Agostino and Ho, Antonia and Schiuma, Marco and Semple, Malcolm G. and Openshaw, Peter J. M. and Fadda, Elisa and Baillie, J. Kenneth and Chodera, John D. and Rihn, Suzannah J. and Lycett, Samantha J. and Virgin, Herbert W. and Telenti, Amalio and Corti, Davide and Robertson, David L. and Snell, Gyorgy}, year={2021}, month=mar, pages={1171-1187.e20} }",
+      "relevance_tags": [
+        "sars",
+        "antibody_escape",
+        "viral_evolution"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "SARS-CoV-2 antibody-escape paper relevant to the SARS split.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/jm000527m",
+      "title": "Disabling ErbB Receptors with Rationally Designed Exocyclic Mimetics of Antibodies: Structure-Function Analysis",
+      "authors": [
+        "Alan Berezov",
+        "Hong-Tao Zhang",
+        "Mark I. Greene",
+        "Ramachandran Murali"
+      ],
+      "year": 2001,
+      "venue": "Journal of Medicinal Chemistry",
+      "doi": "10.1021/jm000527m",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2013645466",
+      "landing_page": "https://doi.org/10.1021/jm000527m",
+      "source_urls": [
+        "https://pubs.acs.org/doi/pdf/10.1021/jm000527m",
+        "https://doi.org/10.1021/jm000527m"
+      ],
+      "bibtex": "@article{Berezov_2001, title={Disabling ErbB Receptors with Rationally Designed Exocyclic Mimetics of Antibodies: Structure−Function Analysis}, volume={44}, ISSN={1520-4804}, url={http://dx.doi.org/10.1021/jm000527m}, DOI={10.1021/jm000527m}, number={16}, journal={Journal of Medicinal Chemistry}, publisher={American Chemical Society (ACS)}, author={Berezov, Alan and Zhang, Hong-Tao and Greene, Mark I. and Murali, Ramachandran}, year={2001}, month=jul, pages={2565–2574} }",
+      "relevance_tags": [
+        "her2",
+        "antibody_binding",
+        "receptor_targeting"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "her2"
+      ],
+      "relevance": "HER2 / 4D5-related antibody binding paper relevant to the HER2 split.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

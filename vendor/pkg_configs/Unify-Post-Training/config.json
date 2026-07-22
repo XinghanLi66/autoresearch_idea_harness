@@ -1,0 +1,46 @@
+{
+  "base_image": "verlai/verl:ngc-th2.4.0-cu124-vllm0.6.3-te1.7-v0.0.4",
+  "install_cmds": [
+    "pip uninstall -y verl",
+    "if [ -d /workspace/unify-post-training ] && [ ! -d /workspace/Unify-Post-Training ]; then mv /workspace/unify-post-training /workspace/Unify-Post-Training; fi",
+    "pip install --no-deps tensordict==0.5.0",
+    "pip install pandas pyarrow codetiming pyvers math-verify==0.6.0 latex2sympy2_extended==1.0.9",
+    "pip install --no-deps -e /workspace/Unify-Post-Training/hpt",
+    "pip install --no-deps -e /workspace/Unify-Post-Training/hpt/verl"
+  ],
+  "env": {
+    "VLLM_USE_V1": "0",
+    "WANDB_MODE": "disabled",
+    "NCCL_DEBUG": "WARN",
+    "HF_HOME": "/tmp/cache/hf",
+    "XDG_CACHE_HOME": "/tmp/cache",
+    "TRITON_CACHE_DIR": "/tmp/cache/triton",
+    "FLASHINFER_WORKSPACE_BASE": "/tmp",
+    "XDG_CONFIG_HOME": "/tmp/config"
+  },
+  "apptainer_flags": ["--contain"],
+  "data_bind": [
+    "{data_root}/models/Qwen2.5-Math-1.5B:/models/Qwen2.5-Math-1.5B",
+    "{data_root}/upt-data:/root/data"
+  ],
+  "data_deps": [
+    {
+      "name": "Qwen2.5-Math-1.5B",
+      "description": "Qwen2.5-Math-1.5B base model for small-scale hybrid post-training",
+      "host_path": "{data_root}/models/Qwen2.5-Math-1.5B",
+      "container_path": "/models/Qwen2.5-Math-1.5B",
+      "prepare": "vendor/data_scripts/Unify-Post-Training/prepare_models.py"
+    },
+    {
+      "name": "upt-data",
+      "description": "OpenR1 math post-training dataset for source-split HPT experiments",
+      "host_path": "{data_root}/upt-data",
+      "container_path": "/root/data",
+      "prepare": "vendor/data_scripts/Unify-Post-Training/prepare_data.py"
+    }
+  ],
+  "use_cuda": true,
+  "writable_tmpfs": false,
+  "no_home": true,
+  "workdir": "/workspace"
+}

@@ -1,0 +1,381 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4sci-sbdd-drug-design",
+  "task_folder": "tasks/ai4sci-sbdd-drug-design",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "pocket-conditioned 3D molecule generation for structure-based drug design",
+    "research_question": "Design a generative model for pocket-conditioned 3D molecule generation across de novo, linker, and fragment-growing scenarios on CrossDocked2020.",
+    "local_sources": {
+      "config_path": "tasks/ai4sci-sbdd-drug-design/config.json",
+      "task_description_path": "tasks/ai4sci-sbdd-drug-design/task_description.md"
+    },
+    "notes": [
+      "Task scope and baselines were taken from config.json and task_description.md.",
+      "Coverage includes de novo, linker, and fragment-growing SBDD papers plus the CrossDocked2020 benchmark dataset."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 13,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 9
+  },
+  "tests": [
+    {
+      "label": "denovo",
+      "cmd": "scripts/denovo.sh",
+      "package": "CBGBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {"paper_id": "doi:10.1021/acs.jcim.0c00411", "role": "dataset"},
+        {"paper_id": "doi:10.1021/acs.jcim.2c01355", "role": "benchmark"},
+        {"paper_id": "doi:10.48550/arxiv.2405.14925", "role": "other"}
+      ],
+      "notes": "De novo pocket-conditioned generation on the CrossDocked2020 benchmark."
+    },
+    {
+      "label": "linker",
+      "cmd": "scripts/linker.sh",
+      "package": "CBGBench",
+      "group": 2,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {"paper_id": "doi:10.1021/acs.jcim.0c00411", "role": "dataset"},
+        {"paper_id": "doi:10.1038/s42256-024-00815-9", "role": "benchmark"},
+        {"paper_id": "doi:10.1039/d1sc02436a", "role": "other"}
+      ],
+      "notes": "Linker generation over the same CrossDocked2020 substrate."
+    },
+    {
+      "label": "frag",
+      "cmd": "scripts/frag.sh",
+      "package": "CBGBench",
+      "group": 3,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {"paper_id": "doi:10.1021/acs.jcim.0c00411", "role": "dataset"},
+        {"paper_id": "doi:10.1021/acs.jcim.3c00667", "role": "benchmark"},
+        {"paper_id": "doi:10.48550/arxiv.2305.13997", "role": "other"}
+      ],
+      "notes": "Fragment-growing scenario on CrossDocked2020 pockets."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "targetdiff",
+      "implementation": "edits/targetdiff.edit.py",
+      "labels": [],
+      "paper_links": [
+        {"paper_id": "doi:10.48550/arxiv.2303.03543", "role": "baseline_method"}
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the TargetDiff baseline named in the task description."
+    },
+    {
+      "name": "diffbp",
+      "implementation": "edits/diffbp.edit.py",
+      "labels": [],
+      "paper_links": [
+        {"paper_id": "doi:10.1039/d4sc05894a", "role": "baseline_method"}
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the DiffBP baseline named in the task description."
+    },
+    {
+      "name": "pocket2mol",
+      "implementation": "edits/pocket2mol.edit.py",
+      "labels": [],
+      "paper_links": [
+        {"paper_id": "doi:10.48550/arxiv.2205.07249", "role": "baseline_method"}
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Matches the Pocket2Mol baseline named in the task description."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1021/acs.jcim.0c00411",
+      "title": "Three-Dimensional Convolutional Neural Networks and a Cross-Docked Data Set for Structure-Based Drug Design",
+      "authors": ["Paul G. Francoeur", "Tomohide Masuda", "Jocelyn Sunseri", "Andrew Jia", "Richard B. Iovanisci", "Ian Snyder", "David R. Koes"],
+      "year": 2020,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/acs.jcim.0c00411",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3082411326",
+      "landing_page": "https://doi.org/10.1021/acs.jcim.0c00411",
+      "source_urls": [
+        "https://openalex.org/W3082411326",
+        "https://doi.org/10.1021/acs.jcim.0c00411"
+      ],
+      "bibtex": "@article{Francoeur_2020, title={Three-Dimensional Convolutional Neural Networks and a Cross-Docked Data Set for Structure-Based Drug Design}, volume={60}, ISSN={1549-960X}, url={http://dx.doi.org/10.1021/acs.jcim.0c00411}, DOI={10.1021/acs.jcim.0c00411}, number={9}, journal={Journal of Chemical Information and Modeling}, publisher={American Chemical Society (ACS)}, author={Francoeur, Paul G. and Masuda, Tomohide and Sunseri, Jocelyn and Jia, Andrew and Iovanisci, Richard B. and Snyder, Ian and Koes, David R.}, year={2020}, month=aug, pages={4200–4215} }",
+      "relevance_tags": ["dataset", "benchmark", "structure_based_drug_design"],
+      "baseline_links": [],
+      "test_links": ["denovo", "linker", "frag"],
+      "relevance": "Introduces the CrossDocked2020 dataset used throughout this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2303.03543",
+      "title": "3D Equivariant Diffusion for Target-Aware Molecule Generation and Affinity Prediction",
+      "authors": ["Jiaqi Guan", "Wesley Wei Qian", "Xingang Peng", "Yufeng Su", "Jian Peng", "Jianzhu Ma"],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2303.03543",
+      "arxiv_id": "2303.03543",
+      "openalex_id": "https://openalex.org/W4323650483",
+      "landing_page": "https://doi.org/10.48550/arxiv.2303.03543",
+      "source_urls": [
+        "https://openalex.org/W4323650483",
+        "https://arxiv.org/abs/2303.03543"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2303.03543, doi = {10.48550/ARXIV.2303.03543}, url = {https://arxiv.org/abs/2303.03543}, author = {Guan, Jiaqi and Qian, Wesley Wei and Peng, Xingang and Su, Yufeng and Peng, Jian and Ma, Jianzhu}, keywords = {Biomolecules (q-bio.BM), Machine Learning (cs.LG), FOS: Biological sciences, FOS: Biological sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {3D Equivariant Diffusion for Target-Aware Molecule Generation and Affinity Prediction}, publisher = {arXiv}, year = {2023}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": ["de_novo", "diffusion", "pocket_conditioned", "baseline"],
+      "baseline_links": ["targetdiff"],
+      "test_links": ["denovo"],
+      "relevance": "Primary TargetDiff reference for pocket-conditioned 3D molecule generation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1039/d4sc05894a",
+      "title": "DiffBP: generative diffusion of 3D molecules for target protein binding",
+      "authors": ["Haitao Lin", "Yufei Huang", "Odin Zhang", "Siqi Ma", "Meng Liu", "Xuanjing Li", "Lirong Wu", "Jishui Wang", "Tingjun Hou", "Stan Z. Li"],
+      "year": 2025,
+      "venue": "Chemical Science",
+      "doi": "10.1039/d4sc05894a",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4404995526",
+      "landing_page": "https://doi.org/10.1039/d4sc05894a",
+      "source_urls": [
+        "https://openalex.org/W4404995526",
+        "https://doi.org/10.1039/d4sc05894a"
+      ],
+      "bibtex": "@article{Lin_2025, title={DiffBP: generative diffusion of 3D molecules for target protein binding}, volume={16}, ISSN={2041-6539}, url={http://dx.doi.org/10.1039/d4sc05894a}, DOI={10.1039/d4sc05894a}, number={3}, journal={Chemical Science}, publisher={Royal Society of Chemistry (RSC)}, author={Lin, Haitao and Huang, Yufei and Zhang, Odin and Ma, Siqi and Liu, Meng and Li, Xuanjing and Wu, Lirong and Wang, Jishui and Hou, Tingjun and Li, Stan Z.}, year={2025}, pages={1417–1431} }",
+      "relevance_tags": ["de_novo", "diffusion", "pocket_conditioned", "baseline"],
+      "baseline_links": ["diffbp"],
+      "test_links": ["denovo"],
+      "relevance": "Primary DiffBP reference for non-autoregressive pocket-conditioned diffusion.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2205.07249",
+      "title": "Pocket2Mol: Efficient Molecular Sampling Based on 3D Protein Pockets",
+      "authors": ["Xingang Peng", "Shitong Luo", "Jiaqi Guan", "Qi Xie", "Jian Peng", "Jianzhu Ma"],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2205.07249",
+      "arxiv_id": "2205.07249",
+      "openalex_id": "https://openalex.org/W4280535976",
+      "landing_page": "https://doi.org/10.48550/arxiv.2205.07249",
+      "source_urls": [
+        "https://openalex.org/W4280535976",
+        "https://arxiv.org/abs/2205.07249"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2205.07249, doi = {10.48550/ARXIV.2205.07249}, url = {https://arxiv.org/abs/2205.07249}, author = {Peng, Xingang and Luo, Shitong and Guan, Jiaqi and Xie, Qi and Peng, Jian and Ma, Jianzhu}, keywords = {Machine Learning (cs.LG), Biomolecules (q-bio.BM), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Biological sciences, FOS: Biological sciences}, title = {Pocket2Mol: Efficient Molecular Sampling Based on 3D Protein Pockets}, publisher = {arXiv}, year = {2022}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": ["de_novo", "autoregressive", "pocket_conditioned", "baseline"],
+      "baseline_links": ["pocket2mol"],
+      "test_links": ["denovo"],
+      "relevance": "Primary Pocket2Mol reference for efficient pocket-conditioned molecular sampling.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2210.13695",
+      "title": "Structure-based Drug Design with Equivariant Diffusion Models",
+      "authors": ["Arne Schneuing", "Charles B. Harris", "Yuanqi Du", "Kieran Didi", "Arian Jamasb", "Ilia Igashov", "Weitao Du", "Carla Gomes", "Tom Blundell", "Pietro Lio", "Max Welling", "Michael M. Bronstein", "Bruno E. Correia"],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2210.13695",
+      "arxiv_id": "2210.13695",
+      "openalex_id": "https://openalex.org/W4307416138",
+      "landing_page": "https://doi.org/10.48550/arxiv.2210.13695",
+      "source_urls": [
+        "https://openalex.org/W4307416138",
+        "https://arxiv.org/abs/2210.13695"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2210.13695, doi = {10.48550/ARXIV.2210.13695}, url = {https://arxiv.org/abs/2210.13695}, author = {Schneuing, Arne and Harris, Charles and Du, Yuanqi and Didi, Kieran and Jamasb, Arian and Igashov, Ilia and Du, Weitao and Gomes, Carla and Blundell, Tom and Lio, Pietro and Welling, Max and Bronstein, Michael and Correia, Bruno}, keywords = {Biomolecules (q-bio.BM), Machine Learning (cs.LG), FOS: Biological sciences, FOS: Biological sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Structure-based Drug Design with Equivariant Diffusion Models}, publisher = {arXiv}, year = {2022}, copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International} }",
+      "relevance_tags": ["de_novo", "diffusion", "partial_design", "benchmark"],
+      "baseline_links": [],
+      "test_links": ["denovo", "linker"],
+      "relevance": "DiffSBDD is a core structure-based diffusion reference for de novo and partial design.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2405.14925",
+      "title": "PILOT: Equivariant diffusion for pocket conditioned de novo ligand generation with multi-objective guidance via importance sampling",
+      "authors": ["Julian Cremer", "Tuan Le", "Frank Noe", "Djork-Arne Clevert", "Kristof T. Schutt"],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2405.14925",
+      "arxiv_id": "2405.14925",
+      "openalex_id": "https://openalex.org/W4399061668",
+      "landing_page": "https://doi.org/10.48550/arxiv.2405.14925",
+      "source_urls": [
+        "https://openalex.org/W4399061668",
+        "https://arxiv.org/abs/2405.14925"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2405.14925, doi = {10.48550/ARXIV.2405.14925}, url = {https://arxiv.org/abs/2405.14925}, author = {Cremer, Julian and Le, Tuan and Noé, Frank and Clevert, Djork-Arné and Schütt, Kristof T.}, keywords = {Biomolecules (q-bio.BM), Artificial Intelligence (cs.AI), Computational Engineering, Finance, and Science (cs.CE), Machine Learning (cs.LG), FOS: Biological sciences, FOS: Biological sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {PILOT: Equivariant diffusion for pocket conditioned de novo ligand generation with multi-objective guidance via importance sampling}, publisher = {arXiv}, year = {2024}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": ["de_novo", "diffusion", "benchmark", "multi_objective"],
+      "baseline_links": [],
+      "test_links": ["denovo"],
+      "relevance": "De novo pocket-conditioned diffusion method evaluated on CrossDocked2020.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41467-024-46569-1",
+      "title": "A dual diffusion model enables 3D molecule generation and lead optimization based on target pockets",
+      "authors": ["Lei Huang", "Tingyang Xu", "Yang Yu", "Peilin Zhao", "Xingjian Chen", "Jing Han", "Zhi Xie", "Hailong Li", "Wenge Zhong", "Ka-Chun Wong", "Hengtong Zhang"],
+      "year": 2024,
+      "venue": "Nature Communications",
+      "doi": "10.1038/s41467-024-46569-1",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4393181728",
+      "landing_page": "https://doi.org/10.1038/s41467-024-46569-1",
+      "source_urls": [
+        "https://openalex.org/W4393181728",
+        "https://doi.org/10.1038/s41467-024-46569-1"
+      ],
+      "bibtex": "@article{Huang_2024, title={A dual diffusion model enables 3D molecule generation and lead optimization based on target pockets}, volume={15}, ISSN={2041-1723}, url={http://dx.doi.org/10.1038/s41467-024-46569-1}, DOI={10.1038/s41467-024-46569-1}, number={1}, journal={Nature Communications}, publisher={Springer Science and Business Media LLC}, author={Huang, Lei and Xu, Tingyang and Yu, Yang and Zhao, Peilin and Chen, Xingjian and Han, Jing and Xie, Zhi and Li, Hailong and Zhong, Wenge and Wong, Ka-Chun and Zhang, Hengtong}, year={2024}, month=mar }",
+      "relevance_tags": ["de_novo", "lead_optimization", "diffusion", "pocket_conditioned"],
+      "baseline_links": [],
+      "test_links": ["denovo"],
+      "relevance": "PMDM is a strong pocket-conditioned 3D generation reference with lead optimization results.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s42256-024-00815-9",
+      "title": "Equivariant 3D-conditional diffusion model for molecular linker design",
+      "authors": ["Ilia Igashov", "Hannes Stark", "Clément Vignac", "Arne Schneuing", "Victor Garcia Satorras", "Pascal Frossard", "Max Welling", "Michael M. Bronstein", "Bruno E. Correia"],
+      "year": 2024,
+      "venue": "Nature Machine Intelligence",
+      "doi": "10.1038/s42256-024-00815-9",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4394718179",
+      "landing_page": "https://doi.org/10.1038/s42256-024-00815-9",
+      "source_urls": [
+        "https://openalex.org/W4394718179",
+        "https://doi.org/10.1038/s42256-024-00815-9"
+      ],
+      "bibtex": "@article{Igashov_2024, title={Equivariant 3D-conditional diffusion model for molecular linker design}, volume={6}, ISSN={2522-5839}, url={http://dx.doi.org/10.1038/s42256-024-00815-9}, DOI={10.1038/s42256-024-00815-9}, number={4}, journal={Nature Machine Intelligence}, publisher={Springer Science and Business Media LLC}, author={Igashov, Ilia and Stärk, Hannes and Vignac, Clément and Schneuing, Arne and Satorras, Victor Garcia and Frossard, Pascal and Welling, Max and Bronstein, Michael and Correia, Bruno}, year={2024}, month=apr, pages={417–427} }",
+      "relevance_tags": ["linker_design", "diffusion", "fragment_based"],
+      "baseline_links": [],
+      "test_links": ["linker"],
+      "relevance": "DiffLinker is a direct linker-design reference for fragment-conditioned generation.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1039/d1sc02436a",
+      "title": "Deep generative design with 3D pharmacophoric constraints",
+      "authors": ["Fergus Imrie", "Thomas E. Hadfield", "Anthony R. Bradley", "Charlotte M. Deane"],
+      "year": 2021,
+      "venue": "Chemical Science",
+      "doi": "10.1039/d1sc02436a",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3209790821",
+      "landing_page": "https://doi.org/10.1039/d1sc02436a",
+      "source_urls": [
+        "https://openalex.org/W3209790821",
+        "https://doi.org/10.1039/d1sc02436a"
+      ],
+      "bibtex": "@article{Imrie_2021, title={Deep generative design with 3D pharmacophoric constraints}, volume={12}, ISSN={2041-6539}, url={http://dx.doi.org/10.1039/d1sc02436a}, DOI={10.1039/d1sc02436a}, number={43}, journal={Chemical Science}, publisher={Royal Society of Chemistry (RSC)}, author={Imrie, Fergus and Hadfield, Thomas E. and Bradley, Anthony R. and Deane, Charlotte M.}, year={2021}, pages={14577–14589} }",
+      "relevance_tags": ["linker_design", "fragment_based", "3d_constraints"],
+      "baseline_links": [],
+      "test_links": ["linker"],
+      "relevance": "DEVELOP is a linker/R-group design method that uses 3D pharmacophoric constraints.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/acs.jcim.3c00667",
+      "title": "SILVR: Guided Diffusion for Molecule Generation",
+      "authors": ["Nicholas T. Runcie", "Antonia S. J. S. Mey"],
+      "year": 2023,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/acs.jcim.3c00667",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4386845335",
+      "landing_page": "https://doi.org/10.1021/acs.jcim.3c00667",
+      "source_urls": [
+        "https://openalex.org/W4386845335",
+        "https://doi.org/10.1021/acs.jcim.3c00667"
+      ],
+      "bibtex": "@article{Runcie_2023, title={SILVR: Guided Diffusion for Molecule Generation}, volume={63}, ISSN={1549-960X}, url={http://dx.doi.org/10.1021/acs.jcim.3c00667}, DOI={10.1021/acs.jcim.3c00667}, number={19}, journal={Journal of Chemical Information and Modeling}, publisher={American Chemical Society (ACS)}, author={Runcie, Nicholas T. and Mey, Antonia S.J.S.}, year={2023}, month=sep, pages={5996–6005} }",
+      "relevance_tags": ["fragment_growth", "guided_diffusion", "fragment_based"],
+      "baseline_links": [],
+      "test_links": ["frag"],
+      "relevance": "Fragment-conditioned guided diffusion relevant to fragment growing and inpainting.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2305.13997",
+      "title": "Learning Subpocket Prototypes for Generalizable Structure-based Drug Design",
+      "authors": ["Zaixi Zhang", "Qi Liu"],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2305.13997",
+      "arxiv_id": "2305.13997",
+      "openalex_id": "https://openalex.org/W4378508570",
+      "landing_page": "https://doi.org/10.48550/arxiv.2305.13997",
+      "source_urls": [
+        "https://openalex.org/W4378508570",
+        "https://arxiv.org/abs/2305.13997"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2305.13997, doi = {10.48550/ARXIV.2305.13997}, url = {https://arxiv.org/abs/2305.13997}, author = {Zhang, Zaixi and Liu, Qi}, keywords = {Biomolecules (q-bio.BM), Machine Learning (cs.LG), FOS: Biological sciences, FOS: Biological sciences, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Learning Subpocket Prototypes for Generalizable Structure-based Drug Design}, publisher = {arXiv}, year = {2023}, copyright = {Creative Commons Attribution Non Commercial Share Alike 4.0 International} }",
+      "relevance_tags": ["fragment_growth", "subpocket", "generalization"],
+      "baseline_links": [],
+      "test_links": ["frag"],
+      "relevance": "DrugGPS models subpocket prototypes and motif-level generation, which is highly relevant to fragment growth.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.26434/chemrxiv-2022-jjm0j-v4",
+      "title": "Uni-Mol: A Universal 3D Molecular Representation Learning Framework",
+      "authors": ["Gengmo Zhou", "Zhifeng Gao", "Qiankun Ding", "Hang Zheng", "Hongteng Xu", "Zhewei Wei", "Linfeng Zhang", "Guolin Ke"],
+      "year": 2023,
+      "venue": "ChemRxiv",
+      "doi": "10.26434/chemrxiv-2022-jjm0j-v4",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4323304388",
+      "landing_page": "https://doi.org/10.26434/chemrxiv-2022-jjm0j-v4",
+      "source_urls": [
+        "https://openalex.org/W4323304388",
+        "https://doi.org/10.26434/chemrxiv-2022-jjm0j-v4"
+      ],
+      "bibtex": "@article{Zhou_2023, title={Uni-Mol: A Universal 3D Molecular Representation Learning Framework}, url={http://dx.doi.org/10.26434/chemrxiv-2022-jjm0j-v4}, DOI={10.26434/chemrxiv-2022-jjm0j-v4}, publisher={American Chemical Society (ACS)}, author={Zhou, Gengmo and Gao, Zhifeng and Ding, Qiankun and Zheng, Hang and Xu, Hongteng and Wei, Zhewei and Zhang, Linfeng and Ke, Guolin}, year={2023}, month=mar }",
+      "relevance_tags": ["pretraining", "pocket_representation", "3d_geometry"],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant pocket and 3D representation pretraining work for protein-ligand modeling.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1021/acs.jcim.2c01355",
+      "title": "Generative Models Should at Least Be Able to Design Molecules That Dock Well: A New Benchmark",
+      "authors": ["Tobiasz Ciepliński", "Tomasz Danel", "Sabina Podlewska", "Stanisław Jastrzȩbski"],
+      "year": 2023,
+      "venue": "Journal of Chemical Information and Modeling",
+      "doi": "10.1021/acs.jcim.2c01355",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4378071155",
+      "landing_page": "https://doi.org/10.1021/acs.jcim.2c01355",
+      "source_urls": [
+        "https://openalex.org/W4378071155",
+        "https://doi.org/10.1021/acs.jcim.2c01355"
+      ],
+      "bibtex": "@article{Ciepli_ski_2023, title={Generative Models Should at Least Be Able to Design Molecules That Dock Well: A New Benchmark}, volume={63}, ISSN={1549-960X}, url={http://dx.doi.org/10.1021/acs.jcim.2c01355}, DOI={10.1021/acs.jcim.2c01355}, number={11}, journal={Journal of Chemical Information and Modeling}, publisher={American Chemical Society (ACS)}, author={Ciepliński, Tobiasz and Danel, Tomasz and Podlewska, Sabina and Jastrzȩbski, Stanisław}, year={2023}, month=may, pages={3238–3247} }",
+      "relevance_tags": ["benchmark", "docking", "de_novo"],
+      "baseline_links": [],
+      "test_links": ["denovo"],
+      "relevance": "A docking-based benchmark that is directly relevant to the de novo evaluation metric.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

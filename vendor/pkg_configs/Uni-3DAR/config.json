@@ -1,0 +1,29 @@
+{
+  "base_image": "dptechnology/unicore:2407-pytorch2.4.0-cuda12.5-rdma",
+  "install_cmds": [
+    "apt-get update && apt-get install -y git wget && rm -rf /var/lib/apt/lists/*",
+    "pip install rdkit-pypi networkx scipy lmdb tqdm torch_geometric pymatgen smact matminer ase p_tqdm absl-py",
+    "mkdir -p /data/qm9 /data/geom_drug /data/mp20",
+    "pip install huggingface_hub",
+    "python -c \"from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='dptech/Uni-3DAR', filename='qm9_data.tar.gz', local_dir='/tmp/hf_dl')\"",
+    "tar -xzf /tmp/hf_dl/qm9_data.tar.gz -C /tmp/hf_dl/ && mv /tmp/hf_dl/qm9_data/* /data/qm9/ && rm -rf /tmp/hf_dl/qm9*",
+    "python -c \"from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='dptech/Uni-3DAR', filename='drug_data.tar.gz', local_dir='/tmp/hf_dl')\"",
+    "tar -xzf /tmp/hf_dl/drug_data.tar.gz -C /tmp/hf_dl/ && mv /tmp/hf_dl/drug_data/* /data/geom_drug/ && rm -rf /tmp/hf_dl/drug*",
+    "python -c \"from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='dptech/Uni-3DAR', filename='mp20_data.tar.gz', local_dir='/tmp/hf_dl')\"",
+    "tar -xzf /tmp/hf_dl/mp20_data.tar.gz -C /tmp/hf_dl/ && mv /tmp/hf_dl/mp20_data/* /data/mp20/ && rm -rf /tmp/hf_dl/mp20*",
+    "cd /workspace/Uni-3DAR && python -c \"\nimport lmdb, gzip, pickle, torch, os, numpy as np\nfrom uni3dar.data.atom_data import atom_list\n\n# Build symbol->atomic_number mapping\nsym2z = {sym: i+1 for i, sym in enumerate(atom_list)}\n\ndef symbols_to_atomic_numbers(syms):\n    return np.array([sym2z.get(str(s).strip(), 0) for s in syms], dtype=np.int64)\n\ndef convert_lmdb_to_pt(lmdb_path, out_dir, data_type='molecule'):\n    env = lmdb.open(lmdb_path, subdir=False, readonly=True, lock=False, readahead=False, meminit=False)\n    keys = []\n    with env.begin() as txn:\n        keys = list(txn.cursor().iternext(values=False))\n    records = []\n    for key in keys:\n        with env.begin() as txn:\n            raw = txn.get(key)\n        try:\n            data = pickle.loads(gzip.decompress(raw))\n        except Exception:\n            data = pickle.loads(raw)\n        rec = {}\n        raw_atoms = data.get('atom_type', data.get('atoms', data.get('atom', [])))\n        raw_atoms_arr = np.array(raw_atoms)\n        if raw_atoms_arr.dtype.kind in ('U', 'S', 'O'):\n            atoms = symbols_to_atomic_numbers(raw_atoms_arr)\n        else:\n            atoms = np.array(raw_atoms_arr, dtype=np.int64)\n        if data_type == 'molecule':\n            pos = np.array(data.get('atom_pos', data.get('coordinates', data.get('pos', []))), dtype=np.float32)\n            rec['positions'] = torch.from_numpy(pos)\n            rec['atom_types'] = torch.from_numpy(atoms)\n            rec['num_atoms'] = len(atoms)\n        else:\n            frac = np.array(data.get('atom_pos', data.get('frac_coords', [])), dtype=np.float32)\n            lattice = np.array(data.get('lattice_matrix', data.get('cell', data.get('lattice', np.eye(3)))), dtype=np.float32)\n            rec['frac_coords'] = torch.from_numpy(frac)\n            rec['atom_types'] = torch.from_numpy(atoms)\n            rec['num_atoms'] = len(atoms)\n            rec['lattice'] = torch.from_numpy(lattice)\n        records.append(rec)\n    os.makedirs(out_dir, exist_ok=True)\n    torch.save(records, os.path.join(out_dir, f'{data_type}_data.pt'))\n    print(f'Saved {len(records)} records to {out_dir}/{data_type}_data.pt')\n\nfor split in ['train', 'valid']:\n    lmdb_file = f'/data/qm9/{split}.lmdb'\n    if os.path.exists(lmdb_file):\n        convert_lmdb_to_pt(lmdb_file, f'/data/qm9/{split}', 'molecule')\nfor split in ['train', 'valid']:\n    lmdb_file = f'/data/geom_drug/{split}.lmdb'\n    if os.path.exists(lmdb_file):\n        convert_lmdb_to_pt(lmdb_file, f'/data/geom_drug/{split}', 'molecule')\nfor split in ['train', 'valid']:\n    lmdb_file = f'/data/mp20/{split}.lmdb'\n    if os.path.exists(lmdb_file):\n        convert_lmdb_to_pt(lmdb_file, f'/data/mp20/{split}', 'crystal')\n\"",
+    "python -c \"import os; checks = ['/data/qm9/train/molecule_data.pt', '/data/geom_drug/train/molecule_data.pt', '/data/mp20/train/crystal_data.pt']; missing = [f for f in checks if not os.path.exists(f)]; assert not missing, f'Missing: {missing}'; print('All data verified')\""
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/Uni-3DAR:${PYTHONPATH}",
+    "DATA_DIR": "/data"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "workdir": "/workspace",
+  "data_bind": [
+    "{data_root}/Uni-3DAR/qm9:/data/qm9",
+    "{data_root}/Uni-3DAR/geom_drug:/data/geom_drug",
+    "{data_root}/Uni-3DAR/mp20:/data/mp20"
+  ]
+}

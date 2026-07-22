@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-pretrain-test-time-training",
+  "task_folder": "tasks/llm-pretrain-test-time-training",
+  "task_metadata": {
+    "status": "missing_config",
+    "topic_inferred_from_task_name": true,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": null,
+      "task_description_path": null
+    },
+    "notes": [
+      "Task directory has no config.json; topic must be inferred from the directory name."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 0,
+    "baseline_links_found": 0,
+    "test_entries": 0,
+    "test_links_found": 0
+  },
+  "tests": [],
+  "baselines": [],
+  "papers": []
+}

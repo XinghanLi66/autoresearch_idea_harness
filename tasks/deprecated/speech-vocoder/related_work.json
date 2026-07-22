@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "speech-vocoder",
+  "task_folder": "tasks/speech-vocoder",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/speech-vocoder/config.json",
+      "task_description_path": "tasks/speech-vocoder/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "ljspeech",
+      "cmd": "scripts/ljspeech.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "vctk-5spk",
+      "cmd": "scripts/vctk_5spk.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "aishell3-5spk",
+      "cmd": "scripts/aishell3_5spk.sh",
+      "package": "speechbrain",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "hifigan",
+      "implementation": "edits/hifigan.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "melgan",
+      "implementation": "edits/melgan.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "univnet",
+      "implementation": "edits/univnet.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

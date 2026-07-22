@@ -1,0 +1,463 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4bio-protein-function-prediction",
+  "task_folder": "tasks/ai4bio-protein-function-prediction",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "protein sequence encoder design for function prediction",
+    "research_question": "Design a novel protein sequence encoder architecture that learns effective representations for predicting protein function from amino acid sequences.",
+    "local_sources": {
+      "config_path": "tasks/ai4bio-protein-function-prediction/config.json",
+      "task_description_path": "tasks/ai4bio-protein-function-prediction/task_description.md"
+    },
+    "notes": [
+      "The task evaluates sequence encoders on beta-lactamase, fluorescence, and solubility regression benchmarks.",
+      "Baseline links are approximate architecture matches for the shared DeepProtein scaffold."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "Beta",
+      "cmd": "scripts/beta.sh",
+      "package": "DeepProtein",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1038/s41467-021-25976-8",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Closest concrete citation is ECNet, which reports TEM-1 beta-lactamase engineering results."
+    },
+    {
+      "label": "Fluorescence",
+      "cmd": "scripts/fluorescence.sh",
+      "package": "DeepProtein",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1101/676825",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Mapped to the TAPE fluorescence regression benchmark."
+    },
+    {
+      "label": "Solubility",
+      "cmd": "scripts/solubility.sh",
+      "package": "DeepProtein",
+      "group": 1,
+      "compute": 0.33,
+      "time": "02:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1186/s13321-021-00488-1",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Mapped to sequence-based protein solubility prediction literature, especially GraphSol."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "cnn",
+      "implementation": "edits/cnn.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.17863/cam.95614",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Sequence-only CNN baseline; ProteInfer is the closest concrete protein-function CNN reference."
+    },
+    {
+      "name": "transformer",
+      "implementation": "edits/transformer.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2007.06225",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Standard Transformer encoder baseline; ProtTrans is the closest concrete protein transfer-learning reference."
+    },
+    {
+      "name": "dgl_gcn",
+      "implementation": "edits/dgl_gcn.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1186/s13321-021-00488-1",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Residue-graph GCN baseline; GraphSol is the closest concrete solubility-focused reference."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.1101/676825",
+      "title": "Evaluating Protein Transfer Learning with TAPE",
+      "authors": [
+        "Roshan Rao",
+        "Nicholas Bhattacharya",
+        "Neil Thomas",
+        "Yan Duan",
+        "Xi Chen",
+        "John Canny",
+        "Pieter Abbeel",
+        "Yun S. Song"
+      ],
+      "year": 2019,
+      "venue": "openRxiv",
+      "doi": "10.1101/676825",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W2951433247",
+      "landing_page": "https://doi.org/10.1101/676825",
+      "source_urls": [
+        "https://openalex.org/W2951433247",
+        "https://doi.org/10.1101/676825"
+      ],
+      "bibtex": "@article{Rao_2019, title={Evaluating Protein Transfer Learning with TAPE}, url={http://dx.doi.org/10.1101/676825}, DOI={10.1101/676825}, publisher={openRxiv}, author={Rao, Roshan and Bhattacharya, Nicholas and Thomas, Neil and Duan, Yan and Chen, Xi and Canny, John and Abbeel, Pieter and Song, Yun S.}, year={2019}, month=jun }",
+      "relevance_tags": [
+        "benchmark",
+        "protein_function_prediction",
+        "transfer_learning"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "fluorescence"
+      ],
+      "relevance": "Defines the standard protein transfer-learning benchmark family that includes the fluorescence task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2021.07.09.450648",
+      "title": "Language models enable zero-shot prediction of the effects of mutations on protein function",
+      "authors": [
+        "Joshua Meier",
+        "Roshan Rao",
+        "Robert Verkuil",
+        "Jason Liu",
+        "Tom Sercu",
+        "Alexander Rives"
+      ],
+      "year": 2021,
+      "venue": "openRxiv",
+      "doi": "10.1101/2021.07.09.450648",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3179485843",
+      "landing_page": "https://doi.org/10.1101/2021.07.09.450648",
+      "source_urls": [
+        "https://openalex.org/W3179485843",
+        "https://doi.org/10.1101/2021.07.09.450648"
+      ],
+      "bibtex": "@article{Meier_2021, title={Language models enable zero-shot prediction of the effects of mutations on protein function}, url={http://dx.doi.org/10.1101/2021.07.09.450648}, DOI={10.1101/2021.07.09.450648}, publisher={openRxiv}, author={Meier, Joshua and Rao, Roshan and Verkuil, Robert and Liu, Jason and Sercu, Tom and Rives, Alexander}, year={2021}, month=jul }",
+      "relevance_tags": [
+        "protein_language_model",
+        "mutational_effects",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Shows zero-shot protein language models can predict mutation effects on function.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2021.02.12.430858",
+      "title": "MSA Transformer",
+      "authors": [
+        "Roshan Rao",
+        "Jason Liu",
+        "Robert Verkuil",
+        "Joshua Meier",
+        "John Canny",
+        "Pieter Abbeel",
+        "Tom Sercu",
+        "Alexander Rives"
+      ],
+      "year": 2021,
+      "venue": "openRxiv",
+      "doi": "10.1101/2021.02.12.430858",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3133458480",
+      "landing_page": "https://doi.org/10.1101/2021.02.12.430858",
+      "source_urls": [
+        "https://openalex.org/W3133458480",
+        "https://doi.org/10.1101/2021.02.12.430858"
+      ],
+      "bibtex": "@article{Rao_2021, title={MSA Transformer}, url={http://dx.doi.org/10.1101/2021.02.12.430858}, DOI={10.1101/2021.02.12.430858}, publisher={openRxiv}, author={Rao, Roshan and Liu, Jason and Verkuil, Robert and Meier, Joshua and Canny, John F. and Abbeel, Pieter and Sercu, Tom and Rives, Alexander}, year={2021}, month=feb }",
+      "relevance_tags": [
+        "protein_language_model",
+        "msa",
+        "architecture"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Canonical transformer-style protein language model over multiple sequence alignments.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1101/2020.12.15.422761",
+      "title": "Transformer protein language models are unsupervised structure learners",
+      "authors": [
+        "Roshan Rao",
+        "Joshua Meier",
+        "Tom Sercu",
+        "Sergey Ovchinnikov",
+        "Alexander Rives"
+      ],
+      "year": 2020,
+      "venue": "openRxiv",
+      "doi": "10.1101/2020.12.15.422761",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3111174583",
+      "landing_page": "https://doi.org/10.1101/2020.12.15.422761",
+      "source_urls": [
+        "https://openalex.org/W3111174583",
+        "https://doi.org/10.1101/2020.12.15.422761"
+      ],
+      "bibtex": "@article{Rao_2020, title={Transformer protein language models are unsupervised structure learners}, url={http://dx.doi.org/10.1101/2020.12.15.422761}, DOI={10.1101/2020.12.15.422761}, publisher={openRxiv}, author={Rao, Roshan and Meier, Joshua and Sercu, Tom and Ovchinnikov, Sergey and Rives, Alexander}, year={2020}, month=dec }",
+      "relevance_tags": [
+        "protein_language_model",
+        "transformer",
+        "architecture"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant transformer encoder reference for protein sequence modeling.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2007.06225",
+      "title": "ProtTrans: Towards Cracking the Language of Life's Code Through Self-Supervised Deep Learning and High Performance Computing",
+      "authors": [
+        "Ahmed Elnaggar",
+        "Michael Heinzinger",
+        "Christian Dallago",
+        "Ghalia Rihawi",
+        "Yu Wang",
+        "Llion Jones",
+        "Tom Gibbs",
+        "Tamás Fehér",
+        "Christoph Angerer",
+        "Martin Steinegger",
+        "Debsindhu Bhowmik",
+        "Burkhard Rost"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2007.06225",
+      "arxiv_id": "2007.06225",
+      "openalex_id": "https://openalex.org/W4287724045",
+      "landing_page": "https://doi.org/10.48550/arxiv.2007.06225",
+      "source_urls": [
+        "https://openalex.org/W4287724045",
+        "https://doi.org/10.48550/arxiv.2007.06225"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2007.06225, doi = {10.48550/ARXIV.2007.06225}, url = {https://arxiv.org/abs/2007.06225}, author = {Elnaggar, Ahmed and Heinzinger, Michael and Dallago, Christian and Rihawi, Ghalia and Wang, Yu and Jones, Llion and Gibbs, Tom and Feher, Tamas and Angerer, Christoph and Steinegger, Martin and Bhowmik, Debsindhu and Rost, Burkhard}, keywords = {Machine Learning (cs.LG), Computation and Language (cs.CL), Distributed, Parallel, and Cluster Computing (cs.DC), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {ProtTrans: Towards Cracking the Language of Life's Code Through Self-Supervised Deep Learning and High Performance Computing}, publisher = {arXiv}, year = {2020}, copyright = {arXiv.org perpetual, non-exclusive license} }",
+      "relevance_tags": [
+        "protein_language_model",
+        "transformer",
+        "transfer_learning"
+      ],
+      "baseline_links": [
+        "transformer"
+      ],
+      "test_links": [],
+      "relevance": "Strong protein transformer transfer-learning reference for sequence encoders.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.17863/cam.95614",
+      "title": "ProteInfer, deep neural networks for protein functional inference",
+      "authors": [
+        "Theo Sanderson",
+        "Maxwell L. Bileschi",
+        "David Belanger",
+        "Lucy J. Colwell"
+      ],
+      "year": 2023,
+      "venue": "eLife",
+      "doi": "10.17863/cam.95614",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4322494707",
+      "landing_page": "https://www.repository.cam.ac.uk/handle/1810/348195",
+      "source_urls": [
+        "https://openalex.org/W4322494707",
+        "https://www.repository.cam.ac.uk/handle/1810/348195"
+      ],
+      "bibtex": "@article{https://doi.org/10.17863/cam.95614, doi = {10.17863/CAM.95614}, url = {https://www.repository.cam.ac.uk/handle/1810/348195}, author = {Sanderson, Theo and Bileschi, Maxwell L and Belanger, David and Colwell, Lucy J}, keywords = {computational biology, function, learning, neural network, none, prediction, protein, systems biology, Algorithms, Neural Networks, Computer, Proteins, Amino Acid Sequence, Software, Computational Biology}, language = {en}, title = {ProteInfer, deep neural networks for protein functional inference.}, publisher = {eLife}, year = {2023} }",
+      "relevance_tags": [
+        "cnn",
+        "protein_function_prediction",
+        "architecture"
+      ],
+      "baseline_links": [
+        "cnn"
+      ],
+      "test_links": [],
+      "relevance": "Closest concrete CNN reference for direct protein function inference from sequence.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1186/s13321-021-00488-1",
+      "title": "Structure-aware protein solubility prediction from sequence through graph convolutional network and predicted contact map",
+      "authors": [
+        "Jianwen Chen",
+        "Shuangjia Zheng",
+        "Huiying Zhao",
+        "Yuedong Yang"
+      ],
+      "year": 2021,
+      "venue": "Journal of Cheminformatics",
+      "doi": "10.1186/s13321-021-00488-1",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3129073614",
+      "landing_page": "https://jcheminf.biomedcentral.com/track/pdf/10.1186/s13321-021-00488-1",
+      "source_urls": [
+        "https://openalex.org/W3129073614",
+        "https://jcheminf.biomedcentral.com/track/pdf/10.1186/s13321-021-00488-1"
+      ],
+      "bibtex": "@article{Chen_2021, title={Structure-aware protein solubility prediction from sequence through graph convolutional network and predicted contact map}, volume={13}, ISSN={1758-2946}, url={http://dx.doi.org/10.1186/s13321-021-00488-1}, DOI={10.1186/s13321-021-00488-1}, number={1}, journal={Journal of Cheminformatics}, publisher={Springer Science and Business Media LLC}, author={Chen, Jianwen and Zheng, Shuangjia and Zhao, Huiying and Yang, Yuedong}, year={2021}, month=feb }",
+      "relevance_tags": [
+        "graph_neural_network",
+        "protein_solubility",
+        "architecture"
+      ],
+      "baseline_links": [
+        "dgl_gcn"
+      ],
+      "test_links": [
+        "solubility"
+      ],
+      "relevance": "Directly addresses sequence-based protein solubility with graph convolution and predicted contact maps.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1038/s41467-021-25976-8",
+      "title": "ECNet is an evolutionary context-integrated deep learning framework for protein engineering",
+      "authors": [
+        "Yunan Luo",
+        "Guangde Jiang",
+        "Tianhao Yu",
+        "Yang Liu",
+        "Lam Vo",
+        "Hantian Ding",
+        "Yufeng Su",
+        "Wesley Wei Qian",
+        "Huimin Zhao",
+        "Jian Peng"
+      ],
+      "year": 2021,
+      "venue": "Nature Communications",
+      "doi": "10.1038/s41467-021-25976-8",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W3202848468",
+      "landing_page": "https://www.nature.com/articles/s41467-021-25976-8.pdf",
+      "source_urls": [
+        "https://openalex.org/W3202848468",
+        "https://www.nature.com/articles/s41467-021-25976-8.pdf"
+      ],
+      "bibtex": "@article{Luo_2021, title={ECNet is an evolutionary context-integrated deep learning framework for protein engineering}, volume={12}, ISSN={2041-1723}, url={http://dx.doi.org/10.1038/s41467-021-25976-8}, DOI={10.1038/s41467-021-25976-8}, number={1}, journal={Nature Communications}, publisher={Springer Science and Business Media LLC}, author={Luo, Yunan and Jiang, Guangde and Yu, Tianhao and Liu, Yang and Vo, Lam and Ding, Hantian and Su, Yufeng and Qian, Wesley Wei and Zhao, Huimin and Peng, Jian}, year={2021}, month=sep }",
+      "relevance_tags": [
+        "beta_lactamase",
+        "fitness_prediction",
+        "protein_engineering"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "beta"
+      ],
+      "relevance": "Reports TEM-1 beta-lactamase engineering results and broader fitness prediction benchmarks.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1093/bioinformatics/btaf165",
+      "title": "DeepProtein: deep learning library and benchmark for protein sequence learning",
+      "authors": [
+        "Jiaqing Xie",
+        "Yuqiang Li",
+        "Tianfan Fu"
+      ],
+      "year": 2025,
+      "venue": "Bioinformatics",
+      "doi": "10.1093/bioinformatics/btaf165",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4410484073",
+      "landing_page": "https://academic.oup.com/bioinformatics/advance-article-pdf/doi/10.1093/bioinformatics/btaf165/63235927/btaf165.pdf",
+      "source_urls": [
+        "https://openalex.org/W4410484073",
+        "https://academic.oup.com/bioinformatics/advance-article-pdf/doi/10.1093/bioinformatics/btaf165/63235927/btaf165.pdf"
+      ],
+      "bibtex": "@article{Xie_2025, title={DeepProtein: deep learning library and benchmark for protein sequence learning}, volume={41}, ISSN={1367-4811}, url={http://dx.doi.org/10.1093/bioinformatics/btaf165}, DOI={10.1093/bioinformatics/btaf165}, number={10}, journal={Bioinformatics}, publisher={Oxford University Press (OUP)}, author={Xie, Jiaqing and Li, Yuqiang and Fu, Tianfan}, editor={Lu, Zhiyong}, year={2025}, month=may }",
+      "relevance_tags": [
+        "benchmark",
+        "protein_sequence_learning",
+        "protein_function_prediction"
+      ],
+      "baseline_links": [
+        "cnn",
+        "transformer",
+        "dgl_gcn"
+      ],
+      "test_links": [],
+      "relevance": "Modern library and benchmark for protein sequence learning, directly aligned with this task family.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1186/s13321-024-00884-3",
+      "title": "PETA: evaluating the impact of protein transfer learning with sub-word tokenization on downstream applications",
+      "authors": [
+        "Yang Tan",
+        "Mingchen Li",
+        "Ziyi Zhou",
+        "Pan Tan",
+        "Huiqun Yu",
+        "Guisheng Fan",
+        "Hong Liang"
+      ],
+      "year": 2024,
+      "venue": "Journal of Cheminformatics",
+      "doi": "10.1186/s13321-024-00884-3",
+      "arxiv_id": null,
+      "openalex_id": "https://openalex.org/W4401254303",
+      "landing_page": "https://jcheminf.biomedcentral.com/counter/pdf/10.1186/s13321-024-00884-3",
+      "source_urls": [
+        "https://openalex.org/W4401254303",
+        "https://jcheminf.biomedcentral.com/counter/pdf/10.1186/s13321-024-00884-3"
+      ],
+      "bibtex": "@article{Tan_2024, title={PETA: evaluating the impact of protein transfer learning with sub-word tokenization on downstream applications}, volume={16}, ISSN={1758-2946}, url={http://dx.doi.org/10.1186/s13321-024-00884-3}, DOI={10.1186/s13321-024-00884-3}, number={1}, journal={Journal of Cheminformatics}, publisher={Springer Science and Business Media LLC}, author={Tan, Yang and Li, Mingchen and Zhou, Ziyi and Tan, Pan and Yu, Huiqun and Fan, Guisheng and Hong, Liang}, year={2024}, month=aug }",
+      "relevance_tags": [
+        "protein_language_model",
+        "benchmark",
+        "tokenization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Relevant for transfer-learning benchmarks and tokenization choices in protein sequence modeling.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

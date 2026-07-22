@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-evolution-strategy",
+  "task_folder": "tasks/optimization-evolution-strategy",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-evolution-strategy/config.json",
+      "task_description_path": "tasks/optimization-evolution-strategy/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 4,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "rastrigin-30d",
+      "cmd": "scripts/rastrigin_30d.sh",
+      "package": "deap",
+      "group": 1,
+      "compute": 0.25,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "rosenbrock-30d",
+      "cmd": "scripts/rosenbrock_30d.sh",
+      "package": "deap",
+      "group": 1,
+      "compute": 0.25,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "ackley-30d",
+      "cmd": "scripts/ackley_30d.sh",
+      "package": "deap",
+      "group": 1,
+      "compute": 0.25,
+      "time": "01:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "rastrigin-100d",
+      "cmd": "scripts/rastrigin_100d.sh",
+      "package": "deap",
+      "group": 1,
+      "compute": 0.25,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ga_sbx",
+      "implementation": "edits/ga_sbx.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "cmaes",
+      "implementation": "edits/cmaes.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "de",
+      "implementation": "edits/de.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "lshade",
+      "implementation": "edits/lshade.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

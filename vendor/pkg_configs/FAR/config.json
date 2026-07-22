@@ -1,0 +1,20 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y git wget ffmpeg && rm -rf /var/lib/apt/lists/*",
+    "pip install --no-cache-dir --upgrade pip packaging wheel setuptools",
+    "pip install --no-cache-dir numpy pyyaml imageio imageio-ffmpeg lpips"
+  ],
+  "env": {
+    "PYTHONPATH": "/workspace/FAR:${PYTHONPATH}",
+    "HF_HOME": "/data/huggingface",
+    "TRANSFORMERS_CACHE": "/data/huggingface/transformers",
+    "HF_DATASETS_CACHE": "/data/huggingface/datasets",
+    "TORCH_HOME": "/data/huggingface/torch",
+    "XDG_CACHE_HOME": "/data/huggingface"
+  },
+  "data_bind": "{data_root}/huggingface_cache:/data/huggingface",
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "workdir": "/workspace"
+}

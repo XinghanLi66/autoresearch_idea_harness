@@ -1,0 +1,538 @@
+{
+  "schema_version": "1.0",
+  "task_name": "cv-dbm-scheduler",
+  "task_folder": "tasks/cv-dbm-scheduler",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "low-step time discretization schedules for diffusion bridge implicit models",
+    "research_question": "Design a monotone time schedule for diffusion bridge implicit models that improves low-step FID over standard schedules on paired image translation and inpainting benchmarks.",
+    "local_sources": {
+      "config_path": "tasks/cv-dbm-scheduler/config.json",
+      "task_description_path": "tasks/cv-dbm-scheduler/task_description.md"
+    },
+    "notes": [
+      "task_description.md frames the task as NFE=5, but the current test scripts export nfe=3."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 12,
+    "baseline_entries": 4,
+    "baseline_links_found": 2,
+    "test_entries": 3,
+    "test_links_found": 11
+  },
+  "tests": [
+    {
+      "label": "edges2handbags",
+      "cmd": "scripts/run_e2h.sh",
+      "package": "dbim-codebase",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2017.632",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2309.16948",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2405.15885",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Paired edges-to-handbags translation benchmark from pix2pix, evaluated with FID and reused by diffusion-bridge work."
+    },
+    {
+      "label": "DIODE",
+      "cmd": "scripts/run_DIODE.sh",
+      "package": "dbim-codebase",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.1908.00463",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2405.15885",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "Dense depth-conditioned translation benchmark over the DIODE dataset, scored by FID."
+    },
+    {
+      "label": "Imagenet",
+      "cmd": "scripts/run_Imagenet.sh",
+      "package": "dbim-codebase",
+      "group": 1,
+      "compute": 1.0,
+      "time": "2:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1109/cvpr.2009.5206848",
+          "role": "dataset"
+        },
+        {
+          "paper_id": "doi:10.1109/cvpr52688.2022.01117",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.2309.16948",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arxiv.1706.08500",
+          "role": "metric"
+        }
+      ],
+      "notes": "ImageNet center-inpainting evaluation, linked to the ImageNet dataset, diffusion inpainting literature, and FID."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "karras",
+      "implementation": "edits/karras.py",
+      "labels": [
+        "power_law",
+        "rho_7"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2206.00364",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "The edit explicitly cites Karras et al. (2022) and implements the EDM power-law sigma schedule with rho=7."
+    },
+    {
+      "name": "uniform",
+      "implementation": "edits/uniform.py",
+      "labels": [
+        "linear",
+        "time_uniform"
+      ],
+      "paper_links": [],
+      "status": "no_explicit_paper",
+      "notes": "Generic linear interpolation in sigma/time; I did not find a single canonical paper that exactly defines this baseline in the same form."
+    },
+    {
+      "name": "cosine",
+      "implementation": "edits/cosine.py",
+      "labels": [
+        "cosine",
+        "nichol_dhariwal"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2102.09672",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "The edit file explicitly maps this baseline to Nichol and Dhariwal's cosine schedule."
+    },
+    {
+      "name": "loglinear",
+      "implementation": "edits/loglinear.py",
+      "labels": [
+        "geometric",
+        "log_space"
+      ],
+      "paper_links": [],
+      "status": "no_explicit_paper",
+      "notes": "Geometric spacing in log-sigma space is a common discretization heuristic, but I did not locate a single exact source paper for this baseline as implemented here."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.2206.00364",
+      "title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+      "authors": [
+        "Tero Karras",
+        "Miika Aittala",
+        "Timo Aila",
+        "Samuli Laine"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.00364",
+      "landing_page": "https://doi.org/10.48550/arXiv.2206.00364",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2206.00364"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00364,\n  doi = {10.48550/ARXIV.2206.00364},\n  url = {https://arxiv.org/abs/2206.00364},\n  author = {Karras, Tero and Aittala, Miika and Aila, Timo and Laine, Samuli},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Elucidating the Design Space of Diffusion-Based Generative Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion",
+        "sampling_schedule",
+        "baseline",
+        "few_step_sampling"
+      ],
+      "baseline_links": [
+        "karras"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the EDM power-law sigma schedule used by the karras baseline and is directly relevant to low-step sampler design.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "2206.00364"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2102.09672",
+      "title": "Improved Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Alex Nichol",
+        "Prafulla Dhariwal"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2102.09672",
+      "landing_page": "https://doi.org/10.48550/arXiv.2102.09672",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2102.09672"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2102.09672,\n  doi = {10.48550/ARXIV.2102.09672},\n  url = {https://arxiv.org/abs/2102.09672},\n  author = {Nichol, Alex and Dhariwal, Prafulla},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Improved Denoising Diffusion Probabilistic Models},\n  publisher = {arXiv},\n  year = {2021},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion",
+        "cosine_schedule",
+        "baseline",
+        "few_step_sampling"
+      ],
+      "baseline_links": [
+        "cosine"
+      ],
+      "test_links": [],
+      "relevance": "Introduces the cosine noise schedule that this task's cosine baseline is derived from.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "2102.09672"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2006.11239",
+      "title": "Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Jonathan Ho",
+        "Ajay Jain",
+        "Pieter Abbeel"
+      ],
+      "year": 2020,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2006.11239",
+      "landing_page": "https://doi.org/10.48550/arXiv.2006.11239",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2006.11239"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2006.11239,\n  doi = {10.48550/ARXIV.2006.11239},\n  url = {https://arxiv.org/abs/2006.11239},\n  author = {Ho, Jonathan and Jain, Ajay and Abbeel, Pieter},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Probabilistic Models},\n  publisher = {arXiv},\n  year = {2020},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion",
+        "foundational",
+        "sampling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational DDPM paper for diffusion-based sampling and discretization choices underlying later schedule work.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "2006.11239"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2206.00927",
+      "title": "DPM-Solver: A Fast ODE Solver for Diffusion Probabilistic Model Sampling in Around 10 Steps",
+      "authors": [
+        "Cheng Lu",
+        "Yuhao Zhou",
+        "Fan Bao",
+        "Jianfei Chen",
+        "Chongxuan Li",
+        "Jun Zhu"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2206.00927",
+      "landing_page": "https://doi.org/10.48550/arXiv.2206.00927",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2206.00927"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2206.00927,\n  doi = {10.48550/ARXIV.2206.00927},\n  url = {https://arxiv.org/abs/2206.00927},\n  author = {Lu, Cheng and Zhou, Yuhao and Bao, Fan and Chen, Jianfei and Li, Chongxuan and Zhu, Jun},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {DPM-Solver: A Fast ODE Solver for Diffusion Probabilistic Model Sampling in Around 10 Steps},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion",
+        "few_step_sampling",
+        "solver",
+        "ode"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Highly relevant fast-sampling reference for designing better schedules when the evaluation budget is only a few function evaluations.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "2206.00927"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2202.00512",
+      "title": "Progressive Distillation for Fast Sampling of Diffusion Models",
+      "authors": [
+        "Tim Salimans",
+        "Jonathan Ho"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2202.00512",
+      "landing_page": "https://doi.org/10.48550/arXiv.2202.00512",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2202.00512"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2202.00512,\n  doi = {10.48550/ARXIV.2202.00512},\n  url = {https://arxiv.org/abs/2202.00512},\n  author = {Salimans, Tim and Ho, Jonathan},\n  keywords = {Machine Learning (cs.LG), Artificial Intelligence (cs.AI), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Progressive Distillation for Fast Sampling of Diffusion Models},\n  publisher = {arXiv},\n  year = {2022},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "diffusion",
+        "few_step_sampling",
+        "distillation"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Direct evidence that low-step diffusion performance is a first-class research problem; useful related work for the task's NFE-constrained objective.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "2202.00512"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2309.16948",
+      "title": "Denoising Diffusion Bridge Models",
+      "authors": [
+        "Linqi Zhou",
+        "Aaron Lou",
+        "Samar Khanna",
+        "Stefano Ermon"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2309.16948",
+      "landing_page": "https://doi.org/10.48550/arXiv.2309.16948",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2309.16948"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2309.16948,\n  doi = {10.48550/ARXIV.2309.16948},\n  url = {https://arxiv.org/abs/2309.16948},\n  author = {Zhou, Linqi and Lou, Aaron and Khanna, Samar and Ermon, Stefano},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Denoising Diffusion Bridge Models},\n  publisher = {arXiv},\n  year = {2023},\n  copyright = {Creative Commons Attribution 4.0 International}\n}",
+      "relevance_tags": [
+        "bridge_models",
+        "diffusion_bridge",
+        "image_translation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "edges2handbags",
+        "DIODE",
+        "Imagenet"
+      ],
+      "relevance": "Core diffusion-bridge reference for the task family; directly studies paired endpoint diffusion bridges for image translation.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "2309.16948"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2405.15885",
+      "title": "Diffusion Bridge Implicit Models",
+      "authors": [
+        "Kaiwen Zheng",
+        "Guande He",
+        "Jianfei Chen",
+        "Fan Bao",
+        "Jun Zhu"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.2405.15885",
+      "landing_page": "https://doi.org/10.48550/arXiv.2405.15885",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.2405.15885"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2405.15885,\n  doi = {10.48550/ARXIV.2405.15885},\n  url = {https://arxiv.org/abs/2405.15885},\n  author = {Zheng, Kaiwen and He, Guande and Chen, Jianfei and Bao, Fan and Zhu, Jun},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {Diffusion Bridge Implicit Models},\n  publisher = {arXiv},\n  year = {2024},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "bridge_models",
+        "dbim",
+        "few_step_sampling",
+        "ode"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "edges2handbags",
+        "DIODE",
+        "Imagenet"
+      ],
+      "relevance": "Most directly aligned paper for the package family used by this task; studies fast sampling of diffusion bridge implicit models.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "2405.15885"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr52688.2022.01117",
+      "title": "RePaint: Inpainting using Denoising Diffusion Probabilistic Models",
+      "authors": [
+        "Andreas Lugmayr",
+        "Martin Danelljan",
+        "Andres Romero",
+        "Fisher Yu",
+        "Radu Timofte",
+        "Luc Van Gool"
+      ],
+      "year": 2022,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr52688.2022.01117",
+      "landing_page": "https://doi.org/10.1109/CVPR52688.2022.01117",
+      "source_urls": [
+        "https://doi.org/10.1109/CVPR52688.2022.01117"
+      ],
+      "bibtex": "@inproceedings{Lugmayr_2022, title={RePaint: Inpainting using Denoising Diffusion Probabilistic Models}, url={http://dx.doi.org/10.1109/CVPR52688.2022.01117}, DOI={10.1109/cvpr52688.2022.01117}, booktitle={2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Lugmayr, Andreas and Danelljan, Martin and Romero, Andres and Yu, Fisher and Timofte, Radu and Van Gool, Luc}, year={2022}, month=jun, pages={11451--11461} }",
+      "relevance_tags": [
+        "inpainting",
+        "diffusion",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "Imagenet"
+      ],
+      "relevance": "Concrete diffusion inpainting benchmark paper relevant to the ImageNet center-inpainting test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2017.632",
+      "title": "Image-to-Image Translation with Conditional Adversarial Networks",
+      "authors": [
+        "Phillip Isola",
+        "Jun-Yan Zhu",
+        "Tinghui Zhou",
+        "Alexei A. Efros"
+      ],
+      "year": 2017,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2017.632",
+      "landing_page": "https://doi.org/10.1109/CVPR.2017.632",
+      "source_urls": [
+        "https://doi.org/10.1109/CVPR.2017.632"
+      ],
+      "bibtex": "@inproceedings{Isola_2017, title={Image-to-Image Translation with Conditional Adversarial Networks}, url={http://dx.doi.org/10.1109/CVPR.2017.632}, DOI={10.1109/cvpr.2017.632}, booktitle={2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, publisher={IEEE}, author={Isola, Phillip and Zhu, Jun-Yan and Zhou, Tinghui and Efros, Alexei A.}, year={2017}, month=jul, pages={5967--5976} }",
+      "relevance_tags": [
+        "dataset",
+        "benchmark",
+        "image_translation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "edges2handbags"
+      ],
+      "relevance": "Canonical paired image-translation benchmark paper that introduced the edges2handbags setup used by this task.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "1611.07004"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1908.00463",
+      "title": "DIODE: A Dense Indoor and Outdoor DEpth Dataset",
+      "authors": [
+        "Igor Vasiljevic",
+        "Nick Kolkin",
+        "Shanyi Zhang",
+        "Ruotian Luo",
+        "Haochen Wang",
+        "Falcon Z. Dai",
+        "Andrea F. Daniele",
+        "Mohammadreza Mostajabi",
+        "Steven Basart",
+        "Matthew R. Walter",
+        "Gregory Shakhnarovich"
+      ],
+      "year": 2019,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1908.00463",
+      "landing_page": "https://doi.org/10.48550/arXiv.1908.00463",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.1908.00463"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.1908.00463,\n  doi = {10.48550/ARXIV.1908.00463},\n  url = {https://arxiv.org/abs/1908.00463},\n  author = {Vasiljevic, Igor and Kolkin, Nick and Zhang, Shanyi and Luo, Ruotian and Wang, Haochen and Dai, Falcon Z. and Daniele, Andrea F. and Mostajabi, Mohammadreza and Basart, Steven and Walter, Matthew R. and Shakhnarovich, Gregory},\n  keywords = {Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {DIODE: A Dense Indoor and Outdoor DEpth Dataset},\n  publisher = {arXiv},\n  year = {2019},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "dataset",
+        "depth",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "DIODE"
+      ],
+      "relevance": "Dataset paper for the DIODE evaluation split used in one of the task tests.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "1908.00463"
+    },
+    {
+      "paper_id": "doi:10.1109/cvpr.2009.5206848",
+      "title": "ImageNet: A large-scale hierarchical image database",
+      "authors": [
+        "Jia Deng",
+        "Wei Dong",
+        "Richard Socher",
+        "Li-Jia Li",
+        "Kai Li",
+        "Li Fei-Fei"
+      ],
+      "year": 2009,
+      "venue": "CVPR",
+      "doi": "10.1109/cvpr.2009.5206848",
+      "landing_page": "https://doi.org/10.1109/CVPR.2009.5206848",
+      "source_urls": [
+        "https://doi.org/10.1109/CVPR.2009.5206848"
+      ],
+      "bibtex": "@inproceedings{Deng_2009, title={ImageNet: A large-scale hierarchical image database}, url={http://dx.doi.org/10.1109/CVPR.2009.5206848}, DOI={10.1109/cvpr.2009.5206848}, booktitle={2009 IEEE Conference on Computer Vision and Pattern Recognition}, publisher={IEEE}, author={Deng, Jia and Dong, Wei and Socher, Richard and Li, Li-Jia and Kai Li and Li Fei-Fei}, year={2009}, month=jun, pages={248--255} }",
+      "relevance_tags": [
+        "dataset",
+        "imagenet",
+        "benchmark"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "Imagenet"
+      ],
+      "relevance": "Dataset paper for the ImageNet-based center-inpainting benchmark in this task.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.1706.08500",
+      "title": "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium",
+      "authors": [
+        "Martin Heusel",
+        "Hubert Ramsauer",
+        "Thomas Unterthiner",
+        "Bernhard Nessler",
+        "Sepp Hochreiter"
+      ],
+      "year": 2017,
+      "venue": "arXiv",
+      "doi": "10.48550/ARXIV.1706.08500",
+      "landing_page": "https://doi.org/10.48550/arXiv.1706.08500",
+      "source_urls": [
+        "https://doi.org/10.48550/arXiv.1706.08500"
+      ],
+      "bibtex": "@article{https://doi.org/10.48550/arxiv.1706.08500,\n  doi = {10.48550/ARXIV.1706.08500},\n  url = {https://arxiv.org/abs/1706.08500},\n  author = {Heusel, Martin and Ramsauer, Hubert and Unterthiner, Thomas and Nessler, Bernhard and Hochreiter, Sepp},\n  keywords = {Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},\n  title = {GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium},\n  publisher = {arXiv},\n  year = {2017},\n  copyright = {arXiv.org perpetual, non-exclusive license}\n}",
+      "relevance_tags": [
+        "metric",
+        "fid",
+        "evaluation"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "edges2handbags",
+        "DIODE",
+        "Imagenet"
+      ],
+      "relevance": "Introduces FID, the metric explicitly optimized by all tests in this task.",
+      "verified_by": "paper_cite_mcp",
+      "arxiv_id": "1706.08500"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "mid_edit": "edits/mid_edit.py",
+  "test_cmds": [
+    {
+      "cmd": "scripts/train_small.sh",
+      "label": "train_small",
+      "group": 1,
+      "compute": 0.3,
+      "time": "10:00:00",
+      "package": "flow-maps"
+    },
+    {
+      "cmd": "scripts/train_medium.sh",
+      "label": "train_medium",
+      "group": 2,
+      "compute": 0.35,
+      "time": "12:00:00",
+      "package": "flow-maps"
+    },
+    {
+      "cmd": "scripts/train_large.sh",
+      "label": "train_large",
+      "group": 3,
+      "compute": 0.5,
+      "time": "14:00:00",
+      "package": "flow-maps",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "lsd": {
+      "edit_ops": "edits/lsd.edit.py"
+    },
+    "psd_uniform": {
+      "edit_ops": "edits/psd_uniform.edit.py"
+    },
+    "psd_midpoint": {
+      "edit_ops": "edits/psd_midpoint.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "flow-maps/py/common/losses.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 36,
+          "end": 178
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

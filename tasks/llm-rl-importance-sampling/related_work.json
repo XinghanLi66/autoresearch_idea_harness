@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-rl-importance-sampling",
+  "task_folder": "tasks/llm-rl-importance-sampling",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "importance-sampling granularity and clipping in LLM online RL (PPO/GRPO/GSPO family)",
+    "research_question": "What granularity of the importance-sampling ratio (token-level, sequence-level, first-k truncated, CISPO-style, geometric-mean, ...) minimises gradient variance while preserving policy-gradient fidelity, and yields the best math-reasoning accuracy after 250 PPO steps on DeepMath-103K (lv3-5)?",
+    "local_sources": {
+      "config_path": "tasks/llm-rl-importance-sampling/config.json",
+      "task_description_path": "tasks/llm-rl-importance-sampling/task_description.md"
+    },
+    "notes": [
+      "Task mirrors the rigorous_codebase pattern of llm-rl-advantage.",
+      "The editable registry entry is verl's @register_policy_loss('custom').",
+      "Reference functions in verl core_algos.py: compute_policy_loss_vanilla, compute_policy_loss_gspo, compute_policy_loss_clip_cov, compute_policy_loss_dppo_kl, compute_policy_loss_sapo."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 5,
+    "paper_count": 5,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 1,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "deepmath-3bench",
+      "cmd": "scripts/train.sh",
+      "package": "verl",
+      "group": 1,
+      "compute": 1,
+      "time": "4:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": "Trains Qwen3-1.7B for 250 PPO steps on DeepMath lv3-5, evaluates on GSM8K / MATH-500 / AIME-2024."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "token_level",
+      "implementation": "baselines/token_level.edit.py",
+      "labels": ["PPO", "GRPO"],
+      "paper_links": [
+        "https://arxiv.org/abs/1707.06347"
+      ],
+      "status": "mapped",
+      "notes": "Vanilla per-token ratio + per-token clip. Control baseline."
+    },
+    {
+      "name": "sequence_level",
+      "implementation": "baselines/sequence_level.edit.py",
+      "labels": ["GSPO"],
+      "paper_links": [
+        "https://arxiv.org/abs/2507.18071"
+      ],
+      "status": "mapped",
+      "notes": "Single scalar ratio per sequence = exp(mean_t(log_prob_new - log_prob_old)), broadcast to all tokens."
+    },
+    {
+      "name": "first_k_tokens",
+      "implementation": "baselines/first_k_tokens.edit.py",
+      "labels": ["truncated-IS", "DAPO-style"],
+      "paper_links": [
+        "https://arxiv.org/abs/2503.14476"
+      ],
+      "status": "mapped",
+      "notes": "Per-token ratio for first 64 tokens; ratio detached for later tokens (reduces variance, small bias)."
+    }
+  ],
+  "papers": [
+    {
+      "key": "ppo_schulman_2017",
+      "title": "Proximal Policy Optimization Algorithms",
+      "authors": "Schulman, Wolski, Dhariwal, Radford, Klimov",
+      "year": 2017,
+      "arxiv": "https://arxiv.org/abs/1707.06347",
+      "relevance": "Introduces the clipped surrogate objective with per-token importance ratios used as the vanilla PPO baseline."
+    },
+    {
+      "key": "grpo_shao_2024",
+      "title": "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models",
+      "authors": "Shao et al.",
+      "year": 2024,
+      "arxiv": "https://arxiv.org/abs/2402.03300",
+      "relevance": "Introduces GRPO (group-relative PPO), the advantage estimator used in this task (the policy loss is the variable)."
+    },
+    {
+      "key": "gspo_zheng_2025",
+      "title": "Group Sequence Policy Optimization",
+      "authors": "Zheng et al. (Alibaba Qwen team)",
+      "year": 2025,
+      "arxiv": "https://arxiv.org/abs/2507.18071",
+      "relevance": "Proposes sequence-level importance sampling: one ratio per response, shown to stabilize training on long MoE models. Directly motivates the sequence_level baseline."
+    },
+    {
+      "key": "dapo_yu_2025",
+      "title": "DAPO: An Open-Source LLM Reinforcement Learning System at Scale",
+      "authors": "Yu et al. (ByteDance)",
+      "year": 2025,
+      "arxiv": "https://arxiv.org/abs/2503.14476",
+      "relevance": "Proposes decoupled high/low clipping and dynamic sampling; motivates truncated / length-aware IS schemes (first_k_tokens baseline)."
+    },
+    {
+      "key": "cispo_minimax_2025",
+      "title": "MiniMax-M1: Scaling Test-Time Compute Efficiently with Lightning Attention",
+      "authors": "MiniMax team",
+      "year": 2025,
+      "arxiv": "https://arxiv.org/abs/2506.13585",
+      "relevance": "Introduces CISPO: clipped IS with stop-gradient, recovering a REINFORCE-like gradient even on clipped tokens. Reference for alternative IS strategies."
+    }
+  ]
+}

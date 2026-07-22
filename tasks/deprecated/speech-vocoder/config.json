@@ -1,0 +1,66 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/ljspeech.sh",
+      "label": "ljspeech",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "package": "speechbrain"
+    },
+    {
+      "cmd": "scripts/vctk_5spk.sh",
+      "label": "vctk-5spk",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "package": "speechbrain"
+    },
+    {
+      "cmd": "scripts/aishell3_5spk.sh",
+      "label": "aishell3-5spk",
+      "group": 1,
+      "compute": 1.0,
+      "time": "04:00:00",
+      "package": "speechbrain",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "hifigan": {
+      "edit_ops": "edits/hifigan.edit.py"
+    },
+    "melgan": {
+      "edit_ops": "edits/melgan.edit.py"
+    },
+    "univnet": {
+      "edit_ops": "edits/univnet.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "speechbrain/custom_vocoder.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 54,
+          "end": 124
+        },
+        {
+          "start": 358,
+          "end": 358
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

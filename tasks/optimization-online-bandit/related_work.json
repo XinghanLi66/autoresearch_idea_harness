@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-online-bandit",
+  "task_folder": "tasks/optimization-online-bandit",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-online-bandit/config.json",
+      "task_description_path": "tasks/optimization-online-bandit/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "stochastic-mab",
+      "cmd": "scripts/stochastic_mab.sh",
+      "package": "SMPyBandits",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "contextual",
+      "cmd": "scripts/contextual.sh",
+      "package": "SMPyBandits",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "nonstationary",
+      "cmd": "scripts/nonstationary.sh",
+      "package": "SMPyBandits",
+      "group": 1,
+      "compute": 0.33,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "ucb1",
+      "implementation": "edits/ucb1.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "thompson_sampling",
+      "implementation": "edits/thompson_sampling.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "kl_ucb",
+      "implementation": "edits/kl_ucb.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

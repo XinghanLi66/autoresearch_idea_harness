@@ -1,0 +1,533 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-kv-adaptive-quantization",
+  "task_folder": "tasks/llm-kv-adaptive-quantization",
+  "task_metadata": {
+    "status": "reviewed",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/llm-kv-adaptive-quantization/config.json",
+      "task_description_path": "tasks/llm-kv-adaptive-quantization/task_description.md"
+    },
+    "notes": [
+      "2026-04-22 review: tests aligned to final-score LongBench/NeedleBench/GSM8K workloads; canonical baselines remain paper-linked 4-bit open-source configurations or adaptations that fit the tensor-replay surface.",
+      "2026-04-23 SQuat update: SQuat is the fourth canonical source-backed baseline.",
+      "2026-04-30 hook redesign: the editable surface is now AdaptiveKVQuantizer; baselines implement their tensor quantization, residual policy, observer, and bit accounting directly rather than selecting fixed algorithms."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 11,
+    "baseline_entries": 4,
+    "baseline_links_found": 4,
+    "test_entries": 5,
+    "test_links_found": 5
+  },
+  "tests": [
+    {
+      "label": "longbench-hotpotqa",
+      "cmd": "scripts/longbench_hotpotqa.sh",
+      "package": "transformers-kv-lab",
+      "group": 1,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2308.14508",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "LongBench-E hotpotqa_e with upstream QA F1 scoring, aligned with llm-kv-selection-budgeting."
+    },
+    {
+      "label": "longbench-passage-retrieval",
+      "cmd": "scripts/longbench_passage_retrieval.sh",
+      "package": "transformers-kv-lab",
+      "group": 2,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2308.14508",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "LongBench-E passage_retrieval_en_e with upstream paragraph-retrieval scoring, aligned with llm-kv-selection-budgeting."
+    },
+    {
+      "label": "longbench-repobench",
+      "cmd": "scripts/longbench_repobench.sh",
+      "package": "transformers-kv-lab",
+      "group": 3,
+      "compute": 1.0,
+      "time": "03:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2308.14508",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "LongBench-E repobench-p_e with upstream code-similarity scoring, aligned with llm-kv-selection-budgeting."
+    },
+    {
+      "label": "needlebench-niah",
+      "cmd": "scripts/needlebench_niah.sh",
+      "package": "transformers-kv-lab",
+      "group": 4,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "url:paul-graham-essays",
+          "role": "dataset_source"
+        }
+      ],
+      "notes": "Public Paul Graham essay haystacks with the shared RULER/NeedleBench-style NIAH probe, aligned with llm-kv-selection-budgeting."
+    },
+    {
+      "label": "gsm8k",
+      "cmd": "scripts/gsm8k.sh",
+      "package": "transformers-kv-lab",
+      "group": 5,
+      "compute": 1.0,
+      "time": "09:00:00",
+      "hidden": true,
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2110.14168",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "openai/gsm8k main-test exact final-answer accuracy with numeric normalization, aligned with llm-kv-selection-budgeting."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "kivi_overlap_4bit",
+      "implementation": "edits/kivi_overlap_4bit.edit.py",
+      "labels": [
+        "published",
+        "strong-baseline",
+        "4bit"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2402.02750",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "KIVI-style K4/V4 adaptation with key per-channel, value per-token, group size 32, key block-modulo residual blocks, and value tail residual length 128."
+    },
+    {
+      "name": "kvtuner4_pertoken_qwen25_3b",
+      "implementation": "edits/kvtuner4_pertoken_qwen25_3b.edit.py",
+      "labels": [
+        "published",
+        "strong-baseline",
+        "4bit-budget"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "openreview:zDwipF6h06",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "KVTuner official Qwen2.5-3B-Instruct_pertoken_KVTuner4_0 per-layer preset implemented in AdaptiveKVQuantizer with the signed-asymmetric vanilla formula, axis_key=0, axis_value=0, q_group_size=-1, residual_length=0."
+    },
+    {
+      "name": "kvtuner4_kivi_qwen25_3b",
+      "implementation": "edits/kvtuner4_kivi_qwen25_3b.edit.py",
+      "labels": [
+        "published",
+        "strong-baseline",
+        "4bit-budget"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "openreview:zDwipF6h06",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "KVTuner official Qwen2.5-3B-Instruct_kivi_KVTuner4_0 per-layer preset implemented in AdaptiveKVQuantizer with the signed-asymmetric vanilla formula, axis_key=1, axis_value=0, q_group_size=32, residual_length=32 with block-modulo residuals."
+    },
+    {
+      "name": "squat_subspace_4bit",
+      "implementation": "edits/squat_subspace_4bit.edit.py",
+      "labels": [
+        "published",
+        "strong-baseline",
+        "4bit"
+      ],
+      "paper_links": [
+        {
+          "paper_id": "arxiv:2503.24358",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "SQuat LongBench-style 4-bit configuration implemented in AdaptiveKVQuantizer with prefill query SVD, future-dimension key correction, subspace_dim=60, squat_lambda=0.001, quant_group_size=64, shared_svd=true, K/V group size 32, and residual block length 32."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "arxiv:2402.02750",
+      "title": "KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache",
+      "authors": [
+        "Yilong Liu",
+        "Xinyu Yang",
+        "Yuan Yao",
+        "Beidi Chen"
+      ],
+      "year": 2024,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2402.02750",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/2402.02750",
+      "source_urls": [
+        "https://arxiv.org/abs/2402.02750"
+      ],
+      "bibtex": "@misc{arxiv_2402_02750,\n  title = {KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache},\n  author = {Yilong Liu and Xinyu Yang and Yuan Yao and Beidi Chen},\n  year = {2024},\n  eprint = {2402.02750},\n  archivePrefix = {arXiv}\n}",
+      "relevance_tags": [
+        "kv-cache",
+        "quantization",
+        "baseline"
+      ],
+      "baseline_links": [
+        "kivi_overlap_4bit"
+      ],
+      "test_links": [],
+      "relevance": "Reference KIVI asymmetric KV-cache quantization baseline.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "openreview:zDwipF6h06",
+      "title": "KVTuner: Sensitivity-Aware Layer-Wise Mixed-Precision KV Cache Quantization for Efficient and Nearly Lossless LLM Inference",
+      "authors": [
+        "Xing Li",
+        "Zeyu Xing",
+        "Yiming Li",
+        "Linping Qu",
+        "Hui-Ling Zhen",
+        "Yiwu Yao",
+        "Wulong Liu",
+        "Sinno Jialin Pan",
+        "Mingxuan Yuan"
+      ],
+      "year": 2025,
+      "venue": "ICML 2025",
+      "doi": "",
+      "arxiv_id": "",
+      "openalex_id": "",
+      "landing_page": "https://openreview.net/forum?id=zDwipF6h06",
+      "source_urls": [
+        "https://github.com/cmd2001/KVTuner"
+      ],
+      "bibtex": "@inproceedings{li2025kvtuner,\n  title={{KVT}uner: Sensitivity-Aware Layer-Wise Mixed-Precision {KV} Cache Quantization for Efficient and Nearly Lossless {LLM} Inference},\n  author={Xing Li and Zeyu Xing and Yiming Li and Linping Qu and Hui-Ling Zhen and Yiwu Yao and Wulong Liu and Sinno Jialin Pan and Mingxuan Yuan},\n  booktitle={Forty-second International Conference on Machine Learning},\n  year={2025},\n  url={https://openreview.net/forum?id=zDwipF6h06}\n}",
+      "relevance_tags": [
+        "kv-cache",
+        "quantization",
+        "baseline"
+      ],
+      "baseline_links": [
+        "kvtuner4_pertoken_qwen25_3b",
+        "kvtuner4_kivi_qwen25_3b"
+      ],
+      "test_links": [],
+      "relevance": "Official KVTuner repository provides Qwen2.5-3B-Instruct KVTuner4 per-layer presets used as 4-bit-budget baselines under the tensor-replay contract.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "arxiv:2401.18079",
+      "title": "KVQuant: Towards 10 Million Context Length LLM Inference with KV Cache Quantization",
+      "authors": [
+        "Jiaming Liu",
+        "Aamir Shafi",
+        "Nilesh Jain",
+        "Hao Zhang"
+      ],
+      "year": 2024,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2401.18079",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/2401.18079",
+      "source_urls": [
+        "https://arxiv.org/abs/2401.18079"
+      ],
+      "bibtex": "@misc{arxiv_2401_18079,\n  title = {KVQuant: Towards 10 Million Context Length LLM Inference with KV Cache Quantization},\n  author = {Jiaming Liu and Aamir Shafi and Nilesh Jain and Hao Zhang},\n  year = {2024},\n  eprint = {2401.18079},\n  archivePrefix = {arXiv}\n}",
+      "relevance_tags": [
+        "kv-cache",
+        "quantization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational KV-cache quantization reference.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "arxiv:2501.19392",
+      "title": "Cache Me If You Must: Adaptive Key-Value Quantization for Large Language Models",
+      "authors": [
+        "João Bravo",
+        "David Atienza",
+        "Nikolay Malkin"
+      ],
+      "year": 2025,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2501.19392",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/2501.19392",
+      "source_urls": [
+        "https://arxiv.org/abs/2501.19392"
+      ],
+      "bibtex": "@misc{arxiv_2501_19392,\n  title = {Cache Me If You Must: Adaptive Key-Value Quantization for Large Language Models},\n  author = {João Bravo and David Atienza and Nikolay Malkin},\n  year = {2025},\n  eprint = {2501.19392},\n  archivePrefix = {arXiv}\n}",
+      "relevance_tags": [
+        "kv-cache",
+        "adaptive-quantization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Adaptive KV quantization reference for score design context.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "arxiv:2502.15075",
+      "title": "More for Keys, Less for Values: Adaptive KV Cache Quantization",
+      "authors": [
+        "Zheng Lin",
+        "Mingyu Jin",
+        "Xiaorui Liu"
+      ],
+      "year": 2025,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2502.15075",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/2502.15075",
+      "source_urls": [
+        "https://arxiv.org/abs/2502.15075"
+      ],
+      "bibtex": "@misc{arxiv_2502_15075,\n  title = {More for Keys, Less for Values: Adaptive KV Cache Quantization},\n  author = {Zheng Lin and Mingyu Jin and Xiaorui Liu},\n  year = {2025},\n  eprint = {2502.15075},\n  archivePrefix = {arXiv}\n}",
+      "relevance_tags": [
+        "kv-cache",
+        "adaptive-quantization"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Recent adaptive key/value bit allocation reference.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "arxiv:2503.24358",
+      "title": "SQuat: Subspace-orthogonal KV Cache Quantization",
+      "authors": [
+        "Hao Wang",
+        "Ligong Han",
+        "Kai Xu",
+        "Akash Srivastava"
+      ],
+      "year": 2025,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2503.24358",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/2503.24358",
+      "source_urls": [
+        "https://arxiv.org/abs/2503.24358",
+        "https://github.com/Red-Hat-AI-Innovation-Team/SQuat"
+      ],
+      "bibtex": "@article{wang2025squat,\n  title={SQuat: Subspace-orthogonal KV Cache Quantization},\n  author={Wang, Hao and Han, Ligong and Xu, Kai and Srivastava, Akash},\n  journal={arXiv preprint arXiv:2503.24358},\n  year={2025}\n}",
+      "relevance_tags": [
+        "kv-cache",
+        "quantization",
+        "baseline"
+      ],
+      "baseline_links": [
+        "squat_subspace_4bit"
+      ],
+      "test_links": [],
+      "relevance": "Official SQuat repository provides a training-free subspace-orthogonal KV-cache quantizer that fits the shared tensor replay contract after exposing query-subspace capture.",
+      "verified_by": "codex-review-2026-04-23"
+    },
+    {
+      "paper_id": "arxiv:2211.10438",
+      "title": "SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models",
+      "authors": [
+        "Guangxuan Xiao",
+        "Ji Lin",
+        "Mickael Seznec",
+        "Hao Wu",
+        "Julien Demouth",
+        "Song Han"
+      ],
+      "year": 2022,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2211.10438",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/2211.10438",
+      "source_urls": [
+        "https://arxiv.org/abs/2211.10438"
+      ],
+      "bibtex": "@misc{arxiv_2211_10438,\n  title = {SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models},\n  author = {Guangxuan Xiao and Ji Lin and Mickael Seznec and Hao Wu and Julien Demouth and Song Han},\n  year = {2022},\n  eprint = {2211.10438},\n  archivePrefix = {arXiv}\n}",
+      "relevance_tags": [
+        "quantization",
+        "post-training"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "General LLM quantization background.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "url:paul-graham-essays",
+      "title": "Paul Graham Essays",
+      "authors": [
+        "Paul Graham"
+      ],
+      "year": 2026,
+      "venue": "Web corpus",
+      "doi": "",
+      "arxiv_id": "",
+      "openalex_id": "",
+      "landing_page": "https://paulgraham.com/articles.html",
+      "source_urls": [
+        "https://paulgraham.com/articles.html"
+      ],
+      "bibtex": "@misc{paul_graham_essays,\n  title = {Paul Graham Essays},\n  author = {Paul Graham},\n  year = {2026},\n  url = {https://paulgraham.com/articles.html}\n}",
+      "relevance_tags": [
+        "dataset",
+        "needle-retrieval",
+        "long-context"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "needlebench-niah"
+      ],
+      "relevance": "Essay corpus source for the FastKV-packaged needle-style retrieval slice.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "arxiv:2308.14508",
+      "title": "LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding",
+      "authors": [
+        "Yushi Bai",
+        "Xin Lv",
+        "Jiajie Zhang",
+        "Hongchang Lyu",
+        "Jiankai Tang",
+        "Zhidian Huang",
+        "Zhengxiao Du",
+        "Xiao Liu",
+        "Aohan Zeng",
+        "Lei Hou",
+        "Yuxiao Dong",
+        "Jie Tang",
+        "Juanzi Li"
+      ],
+      "year": 2023,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2308.14508",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/2308.14508",
+      "source_urls": [
+        "https://arxiv.org/abs/2308.14508"
+      ],
+      "bibtex": "@misc{arxiv_2308_14508,\n  title = {LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding},\n  author = {Yushi Bai and Xin Lv and Jiajie Zhang and Hongchang Lyu and Jiankai Tang and Zhidian Huang and Zhengxiao Du and Xiao Liu and Aohan Zeng and Lei Hou and Yuxiao Dong and Jie Tang and Juanzi Li},\n  year = {2023},\n  eprint = {2308.14508},\n  archivePrefix = {arXiv}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "long-context"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "longbench-hotpotqa",
+        "longbench-passage-retrieval",
+        "longbench-repobench"
+      ],
+      "relevance": "Benchmark source for the LongBench long-context quantization slice.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "arxiv:2110.14168",
+      "title": "Training Verifiers to Solve Math Word Problems",
+      "authors": [
+        "Karl Cobbe",
+        "Vineet Kosaraju",
+        "Mohammad Bavarian",
+        "Mark Chen",
+        "Heewoo Jun",
+        "Lukasz Kaiser",
+        "Matthias Plappert",
+        "Jerry Tworek",
+        "Jacob Hilton",
+        "Reiichiro Nakano",
+        "Christopher Hesse",
+        "John Schulman"
+      ],
+      "year": 2021,
+      "venue": "arXiv preprint",
+      "doi": "",
+      "arxiv_id": "2110.14168",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/2110.14168",
+      "source_urls": [
+        "https://arxiv.org/abs/2110.14168"
+      ],
+      "bibtex": "@misc{arxiv_2110_14168,\n  title = {Training Verifiers to Solve Math Word Problems},\n  author = {Karl Cobbe and Vineet Kosaraju and Mohammad Bavarian and Mark Chen and Heewoo Jun and Lukasz Kaiser and Matthias Plappert and Jerry Tworek and Jacob Hilton and Reiichiro Nakano and Christopher Hesse and John Schulman},\n  year = {2021},\n  eprint = {2110.14168},\n  archivePrefix = {arXiv}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "math"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "gsm8k"
+      ],
+      "relevance": "GSM8K-style reasoning benchmark source for the visible math workload.",
+      "verified_by": "codex-review-2026-04-21"
+    },
+    {
+      "paper_id": "arxiv:1706.03762",
+      "title": "Attention Is All You Need",
+      "authors": [
+        "Ashish Vaswani",
+        "Noam Shazeer",
+        "Niki Parmar",
+        "Jakob Uszkoreit",
+        "Llion Jones",
+        "Aidan N. Gomez",
+        "Lukasz Kaiser",
+        "Illia Polosukhin"
+      ],
+      "year": 2017,
+      "venue": "NeurIPS 2017",
+      "doi": "",
+      "arxiv_id": "1706.03762",
+      "openalex_id": "",
+      "landing_page": "https://arxiv.org/abs/1706.03762",
+      "source_urls": [
+        "https://arxiv.org/abs/1706.03762"
+      ],
+      "bibtex": "@misc{arxiv_1706_03762,\n  title = {Attention Is All You Need},\n  author = {Ashish Vaswani and Noam Shazeer and Niki Parmar and Jakob Uszkoreit and Llion Jones and Aidan N. Gomez and Lukasz Kaiser and Illia Polosukhin},\n  year = {2017},\n  eprint = {1706.03762},\n  archivePrefix = {arXiv}\n}",
+      "relevance_tags": [
+        "transformer",
+        "attention"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Transformer attention background for KV quantization.",
+      "verified_by": "codex-review-2026-04-21"
+    }
+  ]
+}

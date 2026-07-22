@@ -1,0 +1,125 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/denovo.sh",
+      "label": "denovo",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "CBGBench"
+    },
+    {
+      "cmd": "scripts/linker.sh",
+      "label": "linker",
+      "group": 2,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "CBGBench"
+    },
+    {
+      "cmd": "scripts/frag.sh",
+      "label": "frag",
+      "group": 3,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "package": "CBGBench",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "targetdiff": {
+      "edit_ops": "edits/targetdiff.edit.py"
+    },
+    "diffbp": {
+      "edit_ops": "edits/diffbp.edit.py"
+    },
+    "pocket2mol": {
+      "edit_ops": "edits/pocket2mol.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "CBGBench/repo/models/custom_sbdd.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 42,
+          "end": 298
+        }
+      ]
+    },
+    {
+      "filename": "CBGBench/repo/models/diffusion/_base.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "CBGBench/repo/models/diffusion/diffusion_scheduler.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "CBGBench/repo/modules/common.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "CBGBench/repo/modules/e3nn/__init__.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "CBGBench/repo/modules/e3nn/unitransformer.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "CBGBench/repo/modules/context_emb.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "CBGBench/repo/utils/molecule/constants.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-active-learning",
+  "task_folder": "tasks/ml-active-learning",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-active-learning/config.json",
+      "task_description_path": "tasks/ml-active-learning/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "letter",
+      "cmd": "scripts/letter.sh",
+      "package": "badge",
+      "group": 1,
+      "compute": 0.33,
+      "time": "10:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "spambase",
+      "cmd": "scripts/spambase.sh",
+      "package": "badge",
+      "group": 1,
+      "compute": 0.33,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "splice",
+      "cmd": "scripts/splice.sh",
+      "package": "badge",
+      "group": 1,
+      "compute": 0.33,
+      "time": "04:00:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "random",
+      "implementation": "edits/random.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "least_confidence",
+      "implementation": "edits/least_confidence.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "entropy",
+      "implementation": "edits/entropy.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "badge",
+      "implementation": "edits/badge.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "bait",
+      "implementation": "edits/bait.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "bald",
+      "implementation": "edits/bald.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

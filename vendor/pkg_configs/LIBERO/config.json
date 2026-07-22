@@ -1,0 +1,25 @@
+{
+  "base_image": "nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04",
+  "install_cmds": [
+    "apt-get update && apt-get install -y --no-install-recommends git wget curl build-essential cmake libgl1-mesa-glx libgl1-mesa-dev libosmesa6-dev libglew-dev patchelf software-properties-common && rm -rf /var/lib/apt/lists/*",
+    "mkdir -p /root/.mujoco && wget -q https://github.com/deepmind/mujoco/releases/download/2.1.0/mujoco210-linux-x86_64.tar.gz -O /tmp/mujoco.tar.gz && tar xzf /tmp/mujoco.tar.gz -C /root/.mujoco/ && rm /tmp/mujoco.tar.gz",
+    "export MUJOCO_PY_MUJOCO_PATH=/root/.mujoco/mujoco210 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/.mujoco/mujoco210/bin && pip install mujoco-py==2.1.2.14",
+    "pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113",
+    "cd /workspace/LIBERO && pip install -e .",
+    "pip install hydra-core==1.2.0 numpy==1.22.4 easydict==1.9 transformers==4.21.1 wandb==0.13.1 robomimic==0.2.0 einops==0.4.1 thop==0.1.1.post2209072238 robosuite==1.4.0 bddl==1.0.1 opencv-python==4.6.0.66 matplotlib==3.5.3 cloudpickle==2.1.0 gym==0.25.2 future==0.18.2",
+    "python3 -c \"from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('bert-base-uncased'); AutoModel.from_pretrained('bert-base-uncased'); print('BERT cached OK')\"",
+    "python3 -c \"from libero.libero.benchmark import get_benchmark; b = get_benchmark('LIBERO_SPATIAL')(0); print(f'LIBERO_SPATIAL loaded: {b.n_tasks} tasks')\"",
+    "python3 <<'DLEOF'\nimport os\nfrom huggingface_hub import snapshot_download\ndata_dir = '/data/libero'\nos.makedirs(data_dir, exist_ok=True)\nsnapshot_download(\n    repo_id='Lifelong-Robot-Learning/LIBERO',\n    repo_type='dataset',\n    local_dir=data_dir,\n    allow_patterns=['libero_spatial/*'],\n)\nprint('LIBERO-Spatial datasets downloaded OK')\nDLEOF"
+  ],
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace",
+  "env": {
+    "MUJOCO_GL": "egl",
+    "MUJOCO_PY_MUJOCO_PATH": "/root/.mujoco/mujoco210",
+    "LD_LIBRARY_PATH": "/root/.mujoco/mujoco210/bin:${LD_LIBRARY_PATH}",
+    "WANDB_MODE": "disabled",
+    "PYTHONPATH": "/workspace/LIBERO:${PYTHONPATH}"
+  }
+}

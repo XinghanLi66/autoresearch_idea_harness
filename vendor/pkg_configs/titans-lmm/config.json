@@ -1,0 +1,26 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-runtime",
+  "install_cmds": [
+    "pip install numpy tqdm pandas pyarrow tiktoken",
+    "pip install --no-deps titans-pytorch==0.5.3 accelerated-scan assoc-scan einops einx hyper-connections rotary-embedding-torch tensordict x-transformers axial-positional-embedding loguru"
+  ],
+  "data_deps": [
+    {
+      "name": "titans_lmm_wikitext103",
+      "host_path": "{data_root}/titans-lmm/wikitext103",
+      "container_path": "/data/titans-lmm/wikitext103",
+      "prepare": "vendor/data_scripts/titans-lmm/prepare_data.py",
+      "description": "WikiText-103 pre-tokenized (GPT-2 BPE) for Titans Table 1/5 word-LM ablations."
+    }
+  ],
+  "data_bind": "{data_root}:/data",
+  "env": {
+    "WT103_TRAIN_PATH": "/data/titans-lmm/wikitext103/train.bin",
+    "WT103_VALID_PATH": "/data/titans-lmm/wikitext103/valid.bin",
+    "WT103_TEST_PATH": "/data/titans-lmm/wikitext103/test.bin"
+  },
+  "use_cuda": true,
+  "writable_tmpfs": false,
+  "no_home": false,
+  "workdir": "/workspace"
+}

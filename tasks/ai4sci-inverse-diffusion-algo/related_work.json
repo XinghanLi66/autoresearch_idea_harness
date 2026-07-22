@@ -1,0 +1,528 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ai4sci-inverse-diffusion-algo",
+  "task_folder": "tasks/ai4sci-inverse-diffusion-algo",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "inverse problems with diffusion priors for scientific imaging",
+    "research_question": "Design a novel algorithm for solving scientific inverse problems using pre-trained diffusion model priors.",
+    "local_sources": {
+      "config_path": "tasks/ai4sci-inverse-diffusion-algo/config.json",
+      "task_description_path": "tasks/ai4sci-inverse-diffusion-algo/task_description.md"
+    },
+    "notes": [
+      "Baselines map to DPG, REDDiff, and LGD/MCGDiff from the task description and config.",
+      "Evaluation tests cover inverse scattering, Navier-Stokes reconstruction, and black-hole imaging."
+    ]
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 13,
+    "baseline_entries": 3,
+    "baseline_links_found": 3,
+    "test_entries": 3,
+    "test_links_found": 3
+  },
+  "tests": [
+    {
+      "label": "inv-scatter",
+      "cmd": "scripts/inv_scatter.sh",
+      "package": "InverseBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1364/prj.416551",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Inverse scattering benchmark linked to physics-informed optical imaging."
+    },
+    {
+      "label": "navier-stokes",
+      "cmd": "scripts/navier_stokes.sh",
+      "package": "InverseBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.1016/j.jcp.2020.109951",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Navier-Stokes reconstruction benchmark linked to NSFnets."
+    },
+    {
+      "label": "blackhole",
+      "cmd": "scripts/blackhole.sh",
+      "package": "InverseBench",
+      "group": 1,
+      "compute": 1.0,
+      "time": "23:59:59",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.3390/universe6090154",
+          "role": "benchmark"
+        }
+      ],
+      "notes": "Black-hole imaging benchmark linked to M87*/Sgr A* shadow imaging."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "dpg",
+      "implementation": "edits/dpg.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2403.10585",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Exact paper for Diffusion Policy Gradient."
+    },
+    {
+      "name": "reddiff",
+      "implementation": "edits/reddiff.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2305.04391",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "REDDiff is the method proposed in the variational diffusion inverse-problems paper."
+    },
+    {
+      "name": "lgd",
+      "implementation": "edits/lgd.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arxiv.2308.07983",
+          "role": "baseline_method"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "LGD aligns with Monte Carlo guided diffusion for Bayesian linear inverse problems."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arxiv.2403.10585",
+      "title": "Solving General Noisy Inverse Problem via Posterior Sampling: A Policy Gradient Viewpoint",
+      "authors": [
+        "Haoyue Tang",
+        "Tian Xie",
+        "Aosong Feng",
+        "Hanyu Wang",
+        "Chenyang Zhang",
+        "Yang Bai"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2403.10585",
+      "arxiv_id": "2403.10585",
+      "openalex_id": "https://openalex.org/W4392971877",
+      "landing_page": "https://arxiv.org/abs/2403.10585",
+      "source_urls": [
+        "https://api.openalex.org/works/W4392971877",
+        "https://arxiv.org/abs/2403.10585"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2403.10585, doi = {10.48550/ARXIV.2403.10585}, url = {https://arxiv.org/abs/2403.10585}, author = {Tang, Haoyue and Xie, Tian and Feng, Aosong and Wang, Hanyu and Zhang, Chenyang and Bai, Yang}, keywords = {Image and Video Processing (eess.IV), Artificial Intelligence (cs.AI), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Solving General Noisy Inverse Problem via Posterior Sampling: A Policy Gradient Viewpoint}, publisher = {arXiv}, year = {2024}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "baseline",
+        "diffusion_prior",
+        "posterior_sampling",
+        "inverse_problems"
+      ],
+      "baseline_links": [
+        "dpg"
+      ],
+      "test_links": [],
+      "relevance": "Exact source paper for the DPG baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2209.14687",
+      "title": "Diffusion Posterior Sampling for General Noisy Inverse Problems",
+      "authors": [
+        "Hyungjin Chung",
+        "Jeongsol Kim",
+        "Michael T. McCann",
+        "Marc Klasky",
+        "Jong Chul Ye"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2209.14687",
+      "arxiv_id": "2209.14687",
+      "openalex_id": "https://openalex.org/W4298184813",
+      "landing_page": "https://arxiv.org/abs/2209.14687",
+      "source_urls": [
+        "https://api.openalex.org/works/W4298184813",
+        "https://arxiv.org/abs/2209.14687"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2209.14687, doi = {10.48550/ARXIV.2209.14687}, url = {https://arxiv.org/abs/2209.14687}, author = {Chung, Hyungjin and Kim, Jeongsol and Mccann, Michael T. and Klasky, Marc L. and Ye, Jong Chul}, keywords = {Machine Learning (stat.ML), Artificial Intelligence (cs.AI), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Diffusion Posterior Sampling for General Noisy Inverse Problems}, publisher = {arXiv}, year = {2022}, copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International}}",
+      "relevance_tags": [
+        "diffusion_prior",
+        "posterior_sampling",
+        "inverse_problems"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Foundational score-guided diffusion inverse-problem method.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2305.04391",
+      "title": "A Variational Perspective on Solving Inverse Problems with Diffusion Models",
+      "authors": [
+        "Morteza Mardani",
+        "Jiaming Song",
+        "Jan Kautz",
+        "Arash Vahdat"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2305.04391",
+      "arxiv_id": "2305.04391",
+      "openalex_id": "https://openalex.org/W4375958814",
+      "landing_page": "https://arxiv.org/abs/2305.04391",
+      "source_urls": [
+        "https://api.openalex.org/works/W4375958814",
+        "https://arxiv.org/abs/2305.04391"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2305.04391, doi = {10.48550/ARXIV.2305.04391}, url = {https://arxiv.org/abs/2305.04391}, author = {Mardani, Morteza and Song, Jiaming and Kautz, Jan and Vahdat, Arash}, keywords = {Machine Learning (cs.LG), Computer Vision and Pattern Recognition (cs.CV), Numerical Analysis (math.NA), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Mathematics, FOS: Mathematics}, title = {A Variational Perspective on Solving Inverse Problems with Diffusion Models}, publisher = {arXiv}, year = {2023}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "baseline",
+        "diffusion_prior",
+        "optimization",
+        "inverse_problems"
+      ],
+      "baseline_links": [
+        "reddiff"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the REDDiff baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2306.11719",
+      "title": "Diffusion with Forward Models: Solving Stochastic Inverse Problems Without Direct Supervision",
+      "authors": [
+        "Ayush Tewari",
+        "Tianwei Yin",
+        "George Cazenavette",
+        "Semon Rezchikov",
+        "Joshua B. Tenenbaum",
+        "Frédo Durand",
+        "William T. Freeman",
+        "Vincent Sitzmann"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2306.11719",
+      "arxiv_id": "2306.11719",
+      "openalex_id": "https://openalex.org/W4381586948",
+      "landing_page": "https://arxiv.org/abs/2306.11719",
+      "source_urls": [
+        "https://api.openalex.org/works/W4381586948",
+        "https://arxiv.org/abs/2306.11719"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2306.11719, doi = {10.48550/ARXIV.2306.11719}, url = {https://arxiv.org/abs/2306.11719}, author = {Tewari, Ayush and Yin, Tianwei and Cazenavette, George and Rezchikov, Semon and Tenenbaum, Joshua B. and Durand, Frédo and Freeman, William T. and Sitzmann, Vincent}, keywords = {Computer Vision and Pattern Recognition (cs.CV), Graphics (cs.GR), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Diffusion with Forward Models: Solving Stochastic Inverse Problems Without Direct Supervision}, publisher = {arXiv}, year = {2023}, copyright = {arXiv.org perpetual, non-exclusive license}}",
+      "relevance_tags": [
+        "diffusion_prior",
+        "forward_model",
+        "inverse_problems"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Forward-model-conditioned diffusion method closely related to the task setup.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2308.07983",
+      "title": "Monte Carlo guided Diffusion for Bayesian linear inverse problems",
+      "authors": [
+        "Gabriel Lopes Cardoso",
+        "Yazid Janati El Idrissi",
+        "Sylvain Le Corff",
+        "Éric Moulines"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2308.07983",
+      "arxiv_id": "2308.07983",
+      "openalex_id": "https://openalex.org/W4385965509",
+      "landing_page": "https://arxiv.org/abs/2308.07983",
+      "source_urls": [
+        "https://api.openalex.org/works/W4385965509",
+        "https://arxiv.org/abs/2308.07983"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2308.07983, doi = {10.48550/ARXIV.2308.07983}, url = {https://arxiv.org/abs/2308.07983}, author = {Cardoso, Gabriel and Idrissi, Yazid Janati El and Corff, Sylvain Le and Moulines, Eric}, keywords = {Machine Learning (stat.ML), Machine Learning (cs.LG), Methodology (stat.ME), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Monte Carlo guided Diffusion for Bayesian linear inverse problems}, publisher = {arXiv}, year = {2023}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "baseline",
+        "diffusion_prior",
+        "monte_carlo",
+        "inverse_problems"
+      ],
+      "baseline_links": [
+        "lgd"
+      ],
+      "test_links": [],
+      "relevance": "Exact paper for the LGD/MCGDiff baseline.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2201.11793",
+      "title": "Denoising Diffusion Restoration Models",
+      "authors": [
+        "Bahjat Kawar",
+        "Michael Elad",
+        "Stefano Ermon",
+        "Jiaming Song"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2201.11793",
+      "arxiv_id": "2201.11793",
+      "openalex_id": "https://openalex.org/W4225759859",
+      "landing_page": "https://arxiv.org/abs/2201.11793",
+      "source_urls": [
+        "https://api.openalex.org/works/W4225759859",
+        "https://arxiv.org/abs/2201.11793"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2201.11793, doi = {10.48550/ARXIV.2201.11793}, url = {https://arxiv.org/abs/2201.11793}, author = {Kawar, Bahjat and Elad, Michael and Ermon, Stefano and Song, Jiaming}, keywords = {Image and Video Processing (eess.IV), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Denoising Diffusion Restoration Models}, publisher = {arXiv}, year = {2022}, copyright = {arXiv.org perpetual, non-exclusive license}}",
+      "relevance_tags": [
+        "diffusion_prior",
+        "linear_inverse_problems",
+        "image_restoration"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Efficient unsupervised posterior sampling for linear inverse problems.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2102.07364",
+      "title": "Intermediate Layer Optimization for Inverse Problems using Deep Generative Models",
+      "authors": [
+        "Giannis Daras",
+        "Joseph Dean",
+        "Ajil Jalal",
+        "Alexandros G. Dimakis"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2102.07364",
+      "arxiv_id": "2102.07364",
+      "openalex_id": "https://openalex.org/W3110868588",
+      "landing_page": "https://arxiv.org/abs/2102.07364",
+      "source_urls": [
+        "https://api.openalex.org/works/W3110868588",
+        "https://arxiv.org/abs/2102.07364"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2102.07364, doi = {10.48550/ARXIV.2102.07364}, url = {https://arxiv.org/abs/2102.07364}, author = {Daras, Giannis and Dean, Joseph and Jalal, Ajil and Dimakis, Alexandros G.}, keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Intermediate Layer Optimization for Inverse Problems using Deep Generative Models}, publisher = {arXiv}, year = {2021}, copyright = {Creative Commons Attribution Non Commercial Share Alike 4.0 International}}",
+      "relevance_tags": [
+        "optimization",
+        "generative_prior",
+        "inverse_problems"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Early optimization-based inverse-problem method with deep generative priors.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2403.17042",
+      "title": "Provably Robust Score-Based Diffusion Posterior Sampling for Plug-and-Play Image Reconstruction",
+      "authors": [
+        "Xingyu Xu",
+        "Yuejie Chi"
+      ],
+      "year": 2024,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2403.17042",
+      "arxiv_id": "2403.17042",
+      "openalex_id": "https://openalex.org/W4393247798",
+      "landing_page": "https://arxiv.org/abs/2403.17042",
+      "source_urls": [
+        "https://api.openalex.org/works/W4393247798",
+        "https://arxiv.org/abs/2403.17042"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2403.17042, doi = {10.48550/ARXIV.2403.17042}, url = {https://arxiv.org/abs/2403.17042}, author = {Xu, Xingyu and Chi, Yuejie}, keywords = {Image and Video Processing (eess.IV), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), Signal Processing (eess.SP), Optimization and Control (math.OC), Machine Learning (stat.ML), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Mathematics, FOS: Mathematics}, title = {Provably Robust Score-Based Diffusion Posterior Sampling for Plug-and-Play Image Reconstruction}, publisher = {arXiv}, year = {2024}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "diffusion_prior",
+        "provable_guarantees",
+        "posterior_sampling"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Robust plug-and-play diffusion posterior sampling for general inverse problems.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2111.08005",
+      "title": "Solving Inverse Problems in Medical Imaging with Score-Based Generative Models",
+      "authors": [
+        "Yang Song",
+        "Liyue Shen",
+        "Lei Xing",
+        "Stefano Ermon"
+      ],
+      "year": 2021,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2111.08005",
+      "arxiv_id": "2111.08005",
+      "openalex_id": "https://openalex.org/W3207575373",
+      "landing_page": "https://arxiv.org/abs/2111.08005",
+      "source_urls": [
+        "https://api.openalex.org/works/W3207575373",
+        "https://arxiv.org/abs/2111.08005"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2111.08005, doi = {10.48550/ARXIV.2111.08005}, url = {https://arxiv.org/abs/2111.08005}, author = {Song, Yang and Shen, Liyue and Xing, Lei and Ermon, Stefano}, keywords = {Image and Video Processing (eess.IV), Computer Vision and Pattern Recognition (cs.CV), Machine Learning (cs.LG), Machine Learning (stat.ML), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Solving Inverse Problems in Medical Imaging with Score-Based Generative Models}, publisher = {arXiv}, year = {2021}, copyright = {arXiv.org perpetual, non-exclusive license}}",
+      "relevance_tags": [
+        "diffusion_prior",
+        "medical_imaging",
+        "inverse_problems"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Canonical score-based inverse-problem formulation in medical imaging.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.48550/arxiv.2310.06721",
+      "title": "Tweedie Moment Projected Diffusions For Inverse Problems",
+      "authors": [
+        "Benjamin Boys",
+        "Mark Girolami",
+        "Jakiw Pidstrigach",
+        "Sebastian Reich",
+        "Alan Mosca",
+        "Omer Deniz Akyildiz"
+      ],
+      "year": 2023,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.2310.06721",
+      "arxiv_id": "2310.06721",
+      "openalex_id": "https://openalex.org/W4387561384",
+      "landing_page": "https://arxiv.org/abs/2310.06721",
+      "source_urls": [
+        "https://api.openalex.org/works/W4387561384",
+        "https://arxiv.org/abs/2310.06721"
+      ],
+      "bibtex": "@misc{https://doi.org/10.48550/arxiv.2310.06721, doi = {10.48550/ARXIV.2310.06721}, url = {https://arxiv.org/abs/2310.06721}, author = {Boys, Benjamin and Girolami, Mark and Pidstrigach, Jakiw and Reich, Sebastian and Mosca, Alan and Akyildiz, O. Deniz}, keywords = {Computation (stat.CO), FOS: Computer and information sciences, FOS: Computer and information sciences}, title = {Tweedie Moment Projected Diffusions For Inverse Problems}, publisher = {arXiv}, year = {2023}, copyright = {Creative Commons Attribution 4.0 International}}",
+      "relevance_tags": [
+        "diffusion_prior",
+        "tweedie_formula",
+        "inverse_problems"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Stabilizes diffusion-based inverse solving via Tweedie-based projection.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1364/prj.416551",
+      "title": "Imaging through unknown scattering media based on physics-informed learning",
+      "authors": [
+        "Shuo Zhu",
+        "Enlai Guo",
+        "Jie Gu",
+        "Lianfa Bai",
+        "Jing Han"
+      ],
+      "year": 2021,
+      "venue": "Photonics Research",
+      "doi": "10.1364/prj.416551",
+      "openalex_id": "https://openalex.org/W3131488404",
+      "landing_page": "https://doi.org/10.1364/prj.416551",
+      "source_urls": [
+        "https://api.openalex.org/works/W3131488404",
+        "https://doi.org/10.1364/prj.416551"
+      ],
+      "bibtex": "@article{Zhu_2021, title={Imaging through unknown scattering media based on physics-informed learning}, volume={9}, ISSN={2327-9125}, url={http://dx.doi.org/10.1364/prj.416551}, DOI={10.1364/prj.416551}, number={5}, journal={Photonics Research}, publisher={Optica Publishing Group}, author={Zhu, Shuo and Guo, Enlai and Gu, Jie and Bai, Lianfa and Han, Jing}, year={2021}, month=apr, pages={B210} }",
+      "relevance_tags": [
+        "benchmark",
+        "inverse_scattering",
+        "physics_informed"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "inv-scatter"
+      ],
+      "relevance": "Direct benchmark paper for the inverse-scattering test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.1016/j.jcp.2020.109951",
+      "title": "NSFnets (Navier-Stokes flow nets): Physics-informed neural networks for the incompressible Navier-Stokes equations",
+      "authors": [
+        "Xiaowei Jin",
+        "Shengze Cai",
+        "Hui Li",
+        "George Em Karniadakis"
+      ],
+      "year": 2021,
+      "venue": "Journal of Computational Physics",
+      "doi": "10.1016/j.jcp.2020.109951",
+      "openalex_id": "https://openalex.org/W3010839048",
+      "landing_page": "https://doi.org/10.1016/j.jcp.2020.109951",
+      "source_urls": [
+        "https://api.openalex.org/works/W3010839048",
+        "https://doi.org/10.1016/j.jcp.2020.109951"
+      ],
+      "bibtex": "@article{Jin_2021, title={NSFnets (Navier-Stokes flow nets): Physics-informed neural networks for the incompressible Navier-Stokes equations}, volume={426}, ISSN={0021-9991}, url={http://dx.doi.org/10.1016/j.jcp.2020.109951}, DOI={10.1016/j.jcp.2020.109951}, journal={Journal of Computational Physics}, publisher={Elsevier BV}, author={Jin, Xiaowei and Cai, Shengze and Li, Hui and Karniadakis, George Em}, year={2021}, month=feb, pages={109951} }",
+      "relevance_tags": [
+        "benchmark",
+        "navier_stokes",
+        "physics_informed"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "navier-stokes"
+      ],
+      "relevance": "Direct benchmark paper for the Navier-Stokes test.",
+      "verified_by": "paper_cite_mcp"
+    },
+    {
+      "paper_id": "doi:10.3390/universe6090154",
+      "title": "Visible Shapes of Black Holes M87* and SgrA*",
+      "authors": [
+        "Vyacheslav I. Dokuchaev",
+        "Natalia O. Nazarova"
+      ],
+      "year": 2020,
+      "venue": "Universe",
+      "doi": "10.3390/universe6090154",
+      "openalex_id": "https://openalex.org/W3088573456",
+      "landing_page": "https://doi.org/10.3390/universe6090154",
+      "source_urls": [
+        "https://api.openalex.org/works/W3088573456",
+        "https://doi.org/10.3390/universe6090154"
+      ],
+      "bibtex": "@article{Dokuchaev_2020, title={Visible Shapes of Black Holes M87* and SgrA*}, volume={6}, ISSN={2218-1997}, url={http://dx.doi.org/10.3390/universe6090154}, DOI={10.3390/universe6090154}, number={9}, journal={Universe}, publisher={MDPI AG}, author={Dokuchaev, Vyacheslav I. and Nazarova, Natalia O.}, year={2020}, month=sep, pages={154} }",
+      "relevance_tags": [
+        "benchmark",
+        "black_hole_imaging",
+        "event_horizon_telescope"
+      ],
+      "baseline_links": [],
+      "test_links": [
+        "blackhole"
+      ],
+      "relevance": "Compact review of M87* and Sgr A* shadow imaging for the black-hole benchmark.",
+      "verified_by": "paper_cite_mcp"
+    }
+  ]
+}

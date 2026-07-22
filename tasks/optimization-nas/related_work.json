@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "task_name": "optimization-nas",
+  "task_folder": "tasks/optimization-nas",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/optimization-nas/config.json",
+      "task_description_path": "tasks/optimization-nas/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 3,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "CIFAR-10",
+      "cmd": "scripts/cifar10.sh",
+      "package": "naslib",
+      "group": 1,
+      "compute": 0.01,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "CIFAR-100",
+      "cmd": "scripts/cifar100.sh",
+      "package": "naslib",
+      "group": 1,
+      "compute": 0.01,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "ImageNet16-120",
+      "cmd": "scripts/imagenet16.sh",
+      "package": "naslib",
+      "group": 1,
+      "compute": 0.01,
+      "time": "00:30:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "random_search",
+      "implementation": "edits/random_search.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "rea",
+      "implementation": "edits/rea.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "darts",
+      "implementation": "edits/darts.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

@@ -1,0 +1,61 @@
+{
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/influenza.sh",
+      "label": "influenza",
+      "group": 1,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "package": "AbBiBench"
+    },
+    {
+      "cmd": "scripts/sars.sh",
+      "label": "sars",
+      "group": 1,
+      "compute": 1.0,
+      "time": "06:00:00",
+      "package": "AbBiBench"
+    },
+    {
+      "cmd": "scripts/her2.sh",
+      "label": "her2",
+      "group": 1,
+      "compute": 1.0,
+      "time": "02:00:00",
+      "package": "AbBiBench",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "esm2_pll": {
+      "edit_ops": "edits/esm2_pll.edit.py"
+    },
+    "masked_marginal": {
+      "edit_ops": "edits/masked_marginal.edit.py"
+    },
+    "delta_mlp": {
+      "edit_ops": "edits/delta_mlp.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "AbBiBench/custom_abscore.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 133,
+          "end": 167
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

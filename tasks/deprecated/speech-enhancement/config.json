@@ -1,0 +1,75 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/voicebank_demand.sh",
+      "label": "voicebank-demand",
+      "group": 1,
+      "compute": 1.0,
+      "time": "16:00:00",
+      "package": "speechbrain"
+    },
+    {
+      "cmd": "scripts/noisy_vctk_56spk.sh",
+      "label": "noisy-vctk-56spk",
+      "group": 1,
+      "compute": 1.0,
+      "time": "16:00:00",
+      "package": "speechbrain"
+    },
+    {
+      "cmd": "scripts/librimix_2spk.sh",
+      "label": "librimix-2spk",
+      "group": 1,
+      "compute": 1.0,
+      "time": "16:00:00",
+      "package": "speechbrain",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "conv_tasnet": {
+      "edit_ops": "edits/conv_tasnet.edit.py"
+    },
+    "dccrn": {
+      "edit_ops": "edits/dccrn.edit.py"
+    },
+    "dptnet": {
+      "edit_ops": "edits/dptnet.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "speechbrain/custom_speech_enhancement.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 56,
+          "end": 140
+        },
+        {
+          "start": 313,
+          "end": 313
+        }
+      ]
+    },
+    {
+      "filename": "speechbrain/speechbrain/nnet/losses.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

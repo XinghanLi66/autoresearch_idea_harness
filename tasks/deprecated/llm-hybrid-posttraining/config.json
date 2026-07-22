@@ -1,0 +1,157 @@
+{
+  "allow_create": false,
+  "rigorous_codebase": true,
+  "test_cmds": [
+    {
+      "cmd": "scripts/train_shared_hpt.sh",
+      "label": "AIME24",
+      "group": 1,
+      "compute": 1,
+      "time": "12:00:00",
+      "package": "Unify-Post-Training"
+    },
+    {
+      "cmd": "scripts/relay_final_metric.sh",
+      "label": "AMC23",
+      "group": 2,
+      "compute": 0.0,
+      "use_cuda": false,
+      "time": "00:30:00",
+      "package": "Unify-Post-Training"
+    },
+    {
+      "cmd": "scripts/relay_final_metric.sh",
+      "label": "MATH-500",
+      "group": 2,
+      "compute": 0.0,
+      "use_cuda": false,
+      "time": "00:30:00",
+      "package": "Unify-Post-Training",
+      "hidden": true
+    }
+  ],
+  "baselines": {
+    "sft": {
+      "edit_ops": "edits/sft.edit.py"
+    },
+    "grpo": {
+      "edit_ops": "edits/grpo.edit.py"
+    },
+    "hpt": {
+      "edit_ops": "edits/hpt.edit.py"
+    }
+  },
+  "files": [
+    {
+      "filename": "Unify-Post-Training/hpt/verl/verl/mix_src/mix_trainer.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ],
+      "edit": [
+        {
+          "start": 394,
+          "end": 414
+        },
+        {
+          "start": 599,
+          "end": 620
+        },
+        {
+          "start": 759,
+          "end": 799
+        },
+        {
+          "start": 942,
+          "end": 963
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/hpt/verl/verl/mix_src/mix_actor.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/hpt/verl/verl/mix_src/mix_core_alg.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/hpt/verl/verl/mix_src/mix_vllm_rollout.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/hpt/verl/verl/mix_src/mix_hf_rollout.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/hpt/verl/verl/mix_src/mix_fsdp_worker.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/hpt/verl/verl/mix_src/rl_dataset_with_target.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/hpt/verl/verl/mix_src/main_mix_ppo.py",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/exp_scripts/train.sh",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    },
+    {
+      "filename": "Unify-Post-Training/exp_scripts/train_luffy.sh",
+      "read": [
+        {
+          "start": -1,
+          "end": -1
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    42
+  ]
+}

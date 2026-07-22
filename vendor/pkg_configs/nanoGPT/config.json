@@ -1,0 +1,63 @@
+{
+  "base_image": "pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel",
+  "install_cmds": [
+    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y git wget unzip && rm -rf /var/lib/apt/lists/*",
+    "pip install tiktoken numpy einops safetensors huggingface_hub transformers accelerate",
+    "pip install flash-linear-attention",
+    "pip install --no-cache-dir 'datasets<3.0'",
+    "pip install --no-cache-dir 'lm-eval>=0.4.0'",
+    "pip install --no-cache-dir torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124",
+    "pip install --no-cache-dir --force-reinstall triton==3.2.0",
+    "CUDA_HOME=/usr/local/cuda TORCH_CUDA_ARCH_LIST='8.0;9.0' CXXFLAGS='-D_GLIBCXX_USE_CXX11_ABI=0' pip install --no-build-isolation causal-conv1d",
+    "CUDA_HOME=/usr/local/cuda TORCH_CUDA_ARCH_LIST='8.0;9.0' CXXFLAGS='-D_GLIBCXX_USE_CXX11_ABI=0' pip install --no-build-isolation mamba-ssm",
+    "python -c \"from causal_conv1d import causal_conv1d_fn; print('causal_conv1d OK')\"",
+    "python -c \"import triton; assert triton.__version__ == '3.2.0', f'Expected triton 3.2.0 but got {triton.__version__}'\"",
+    "python -c \"import fla; print('FLA imported successfully')\"",
+    "python -c \"import tiktoken; tiktoken.get_encoding('gpt2')\"",
+    "mkdir -p /data/climbmix /data/eval /data/lm-eval-datasets"
+  ],
+  "local_install_cmds": [
+    "pip install tiktoken numpy einops safetensors huggingface_hub 'transformers==4.48.3' accelerate",
+    "pip install --no-build-isolation --no-deps {project_root}/vendor/external_packages/flash-linear-attention",
+    "pip install --no-cache-dir 'datasets<3.0'",
+    "pip install --no-cache-dir 'lm-eval>=0.4.0'",
+    "pip install --no-cache-dir --force-reinstall triton==3.1.0",
+    "python -c \"import triton; assert triton.__version__ == '3.1.0', f'Expected triton 3.2.0 but got {triton.__version__}'\"",
+    "python -c \"import fla; print('FLA imported successfully')\"",
+    "python -c \"import tiktoken; tiktoken.get_encoding('gpt2')\"",
+    "mkdir -p {data_root}/climbmix {data_root}/eval {data_root}/lm-eval-datasets"
+  ],
+  "env": {
+    "DATA_DIR": "/data/climbmix",
+    "EVAL_DIR": "/data/eval",
+    "PYTHONPATH": "/workspace/nanoGPT:${PYTHONPATH}",
+    "TRITON_CACHE_DIR": "/tmp/triton_cache"
+  },
+  "data_deps": [
+    {
+      "name": "climbmix",
+      "description": "ClimbMix tokenized training data (~58GB)",
+      "host_path": "{data_root}/climbmix",
+      "container_path": "/data/climbmix",
+      "prepare": "vendor/data_scripts/nanoGPT/prepare_climbmix.py"
+    },
+    {
+      "name": "eval",
+      "description": "Evaluation datasets: WikiText-2/103, LAMBADA (~2MB)",
+      "host_path": "{data_root}/eval",
+      "container_path": "/data/eval",
+      "prepare": "vendor/data_scripts/nanoGPT/prepare_eval.py"
+    },
+    {
+      "name": "lm-eval-datasets",
+      "description": "Pre-downloaded HF datasets for lm-eval (hellaswag, arc, piqa, winogrande, ~200MB)",
+      "host_path": "{data_root}/lm-eval-datasets",
+      "container_path": "/data/lm-eval-datasets",
+      "prepare": "vendor/data_scripts/lm-evaluation-harness/prepare_datasets.py"
+    }
+  ],
+  "use_cuda": true,
+  "writable_tmpfs": true,
+  "no_home": true,
+  "workdir": "/workspace"
+}

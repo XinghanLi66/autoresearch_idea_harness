@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "task_name": "llm-scaling-law-discovery",
+  "task_folder": "tasks/llm-scaling-law-discovery",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/llm-scaling-law-discovery/config.json",
+      "task_description_path": "tasks/llm-scaling-law-discovery/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 4,
+    "baseline_links_found": 0,
+    "test_entries": 3,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "sld-parallel",
+      "cmd": "scripts/sld_parallel.sh",
+      "package": "scaling-law-lab",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:15:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "sld-moe",
+      "cmd": "scripts/sld_moe.sh",
+      "package": "scaling-law-lab",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:15:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "sld-sft",
+      "cmd": "scripts/sld_sft.sh",
+      "package": "scaling-law-lab",
+      "group": 1,
+      "compute": 1.0,
+      "time": "00:15:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "human_exact",
+      "implementation": "edits/human_exact.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "sldagent_style",
+      "implementation": "edits/sldagent_style.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "kernel_ridge",
+      "implementation": "edits/kernel_ridge.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "xgboost",
+      "implementation": "edits/xgboost.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

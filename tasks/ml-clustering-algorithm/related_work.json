@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "task_name": "ml-clustering-algorithm",
+  "task_folder": "tasks/ml-clustering-algorithm",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": null,
+    "research_question": null,
+    "local_sources": {
+      "config_path": "tasks/ml-clustering-algorithm/config.json",
+      "task_description_path": "tasks/ml-clustering-algorithm/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 0,
+    "baseline_entries": 6,
+    "baseline_links_found": 0,
+    "test_entries": 4,
+    "test_links_found": 0
+  },
+  "tests": [
+    {
+      "label": "blobs",
+      "cmd": "scripts/blobs.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:10:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "moons",
+      "cmd": "scripts/moons.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:10:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "varied_density",
+      "cmd": "scripts/varied_density.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:10:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    },
+    {
+      "label": "digits",
+      "cmd": "scripts/digits.sh",
+      "package": "scikit-learn",
+      "group": 1,
+      "compute": 0.25,
+      "time": "00:15:00",
+      "hidden": false,
+      "paper_links": [],
+      "notes": ""
+    }
+  ],
+  "baselines": [
+    {
+      "name": "kmeans",
+      "implementation": "edits/kmeans.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dbscan",
+      "implementation": "edits/dbscan.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "agglomerative",
+      "implementation": "edits/agglomerative.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "hdbscan",
+      "implementation": "edits/hdbscan.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "spectral",
+      "implementation": "edits/spectral.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    },
+    {
+      "name": "dpc",
+      "implementation": "edits/dpc.edit.py",
+      "labels": [],
+      "paper_links": [],
+      "status": "unmapped",
+      "notes": ""
+    }
+  ],
+  "papers": []
+}

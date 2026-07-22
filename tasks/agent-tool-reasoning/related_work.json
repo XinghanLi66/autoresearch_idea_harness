@@ -1,0 +1,491 @@
+{
+  "schema_version": "1.0",
+  "task_name": "agent-tool-reasoning",
+  "task_folder": "tasks/agent-tool-reasoning",
+  "task_metadata": {
+    "status": "ready_for_research",
+    "topic_inferred_from_task_name": false,
+    "research_topic": "LLM agent tool-use reasoning strategies and search policies",
+    "research_question": "How can search and backtracking strategies improve the success and efficiency of tool-using LLM agents?",
+    "local_sources": {
+      "config_path": "tasks/agent-tool-reasoning/config.json",
+      "task_description_path": "tasks/agent-tool-reasoning/task_description.md"
+    },
+    "notes": []
+  },
+  "coverage": {
+    "minimum_papers": 10,
+    "paper_count": 10,
+    "baseline_entries": 3,
+    "baseline_links_found": 6,
+    "test_entries": 3,
+    "test_links_found": 6
+  },
+  "tests": [
+    {
+      "label": "I1-instruction-deepseek",
+      "cmd": "scripts/run_I1_deepseek.sh",
+      "package": "stabletoolbench",
+      "group": 1,
+      "compute": 0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2403.07714",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.2307.16789",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "StableToolBench I1-instruction subset; agent backend = deepseek-chat via DeepSeek official API."
+    },
+    {
+      "label": "I1-instruction-qwen72b",
+      "cmd": "scripts/run_I1_qwen72b.sh",
+      "package": "stabletoolbench",
+      "group": 2,
+      "compute": 0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2403.07714",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.2307.16789",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "StableToolBench I1-instruction subset; agent backend = qwen2.5-72b-instruct via Dashscope."
+    },
+    {
+      "label": "I1-instruction-qwen7b",
+      "cmd": "scripts/run_I1_qwen7b.sh",
+      "package": "stabletoolbench",
+      "group": 3,
+      "compute": 0,
+      "time": "6:00:00",
+      "hidden": false,
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2403.07714",
+          "role": "benchmark"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.2307.16789",
+          "role": "training_recipe"
+        }
+      ],
+      "notes": "StableToolBench I1-instruction subset; agent backend = qwen2.5-7b-instruct via Dashscope."
+    }
+  ],
+  "baselines": [
+    {
+      "name": "greedy_chain",
+      "implementation": "edits/greedy_chain.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2201.11903",
+          "role": "other"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.2210.03629",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_approx",
+      "notes": "Sequential CoT-style rollout with no backtracking; the task scaffold notes this is CoT@1-like."
+    },
+    {
+      "name": "dfs_ranked",
+      "implementation": "edits/dfs_ranked.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2305.10601",
+          "role": "other"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.2307.16789",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Best-first DFS with LLM ranking and backtracking, matching the task's StableToolBench-style DFS-with-filter variant."
+    },
+    {
+      "name": "dfsdt",
+      "implementation": "edits/dfsdt.edit.py",
+      "labels": [],
+      "paper_links": [
+        {
+          "paper_id": "doi:10.48550/arXiv.2403.07714",
+          "role": "other"
+        },
+        {
+          "paper_id": "doi:10.48550/arXiv.2307.16789",
+          "role": "other"
+        }
+      ],
+      "status": "paper_linked_exact",
+      "notes": "Depth-first tree search without ranking; the task scaffold calls this DFSDT / with_filter=False."
+    }
+  ],
+  "papers": [
+    {
+      "paper_id": "doi:10.48550/arXiv.2201.11903",
+      "title": "Chain of Thought Prompting Elicits Reasoning in Large Language Models",
+      "authors": [
+        "Jason Wei",
+        "Xuezhi Wang",
+        "Dale Schuurmans",
+        "Maarten Bosma",
+        "Ed H. Chi",
+        "Quoc Le",
+        "Denny Zhou"
+      ],
+      "year": 2022,
+      "venue": "CoRR",
+      "doi": "10.48550/ARXIV.2201.11903",
+      "arxiv_id": "2201.11903",
+      "landing_page": "https://doi.org/10.48550/arXiv.2201.11903",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2201-11903",
+        "https://arxiv.org/abs/2201.11903"
+      ],
+      "bibtex": "@article{DBLP:journals/corr/abs-2201-11903,\n  author = {Jason Wei and Xuezhi Wang and Dale Schuurmans and Maarten Bosma and Ed H. Chi and Quoc Le and Denny Zhou},\n  title = {Chain of Thought Prompting Elicits Reasoning in Large Language Models},\n  journal = {CoRR},\n  volume = {abs/2201.11903},\n  year = {2022},\n  url = {https://doi.org/10.48550/arXiv.2201.11903},\n  doi = {10.48550/ARXIV.2201.11903},\n  eprinttype = {arXiv},\n  eprint = {2201.11903}\n}",
+      "relevance_tags": [
+        "reasoning",
+        "chain-of-thought",
+        "greedy-decoding"
+      ],
+      "baseline_links": [
+        "greedy_chain"
+      ],
+      "test_links": [],
+      "relevance": "Foundational greedy reasoning baseline for sequential LLM decision making.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2210.03629",
+      "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+      "authors": [
+        "Shunyu Yao",
+        "Jeffrey Zhao",
+        "Dian Yu",
+        "Nan Du",
+        "Izhak Shafran",
+        "Karthik Narasimhan",
+        "Yuan Cao"
+      ],
+      "year": 2022,
+      "venue": "CoRR",
+      "doi": "10.48550/ARXIV.2210.03629",
+      "arxiv_id": "2210.03629",
+      "landing_page": "https://doi.org/10.48550/arXiv.2210.03629",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2210-03629",
+        "https://arxiv.org/abs/2210.03629"
+      ],
+      "bibtex": "@article{DBLP:journals/corr/abs-2210-03629,\n  author = {Shunyu Yao and Jeffrey Zhao and Dian Yu and Nan Du and Izhak Shafran and Karthik Narasimhan and Yuan Cao},\n  title = {ReAct: Synergizing Reasoning and Acting in Language Models},\n  journal = {CoRR},\n  volume = {abs/2210.03629},\n  year = {2022},\n  url = {https://doi.org/10.48550/arXiv.2210.03629},\n  doi = {10.48550/ARXIV.2210.03629},\n  eprinttype = {arXiv},\n  eprint = {2210.03629}\n}",
+      "relevance_tags": [
+        "reasoning",
+        "acting",
+        "tool-use"
+      ],
+      "baseline_links": [
+        "greedy_chain"
+      ],
+      "test_links": [],
+      "relevance": "Classic reasoning-plus-action agent loop that motivates sequential tool use.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2203.11171",
+      "title": "Self-Consistency Improves Chain of Thought Reasoning in Language Models",
+      "authors": [
+        "Xuezhi Wang",
+        "Jason Wei",
+        "Dale Schuurmans",
+        "Quoc V. Le",
+        "Ed H. Chi",
+        "Denny Zhou"
+      ],
+      "year": 2022,
+      "venue": "CoRR",
+      "doi": "10.48550/ARXIV.2203.11171",
+      "arxiv_id": "2203.11171",
+      "landing_page": "https://doi.org/10.48550/arXiv.2203.11171",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2203-11171",
+        "https://arxiv.org/abs/2203.11171"
+      ],
+      "bibtex": "@article{DBLP:journals/corr/abs-2203-11171,\n  author = {Xuezhi Wang and Jason Wei and Dale Schuurmans and Quoc V. Le and Ed H. Chi and Denny Zhou},\n  title = {Self-Consistency Improves Chain of Thought Reasoning in Language Models},\n  journal = {CoRR},\n  volume = {abs/2203.11171},\n  year = {2022},\n  url = {https://doi.org/10.48550/arXiv.2203.11171},\n  doi = {10.48550/ARXIV.2203.11171},\n  eprinttype = {arXiv},\n  eprint = {2203.11171}\n}",
+      "relevance_tags": [
+        "sampling",
+        "reasoning",
+        "consensus"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Sampling-based aggregation that improves greedy reasoning by voting over trajectories.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2305.10601",
+      "title": "Tree of Thoughts: Deliberate Problem Solving with Large Language Models",
+      "authors": [
+        "Shunyu Yao",
+        "Dian Yu",
+        "Jeffrey Zhao",
+        "Izhak Shafran",
+        "Thomas L. Griffiths",
+        "Yuan Cao",
+        "Karthik Narasimhan"
+      ],
+      "year": 2023,
+      "venue": "CoRR",
+      "doi": "10.48550/ARXIV.2305.10601",
+      "arxiv_id": "2305.10601",
+      "landing_page": "https://doi.org/10.48550/arXiv.2305.10601",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2305-10601",
+        "https://arxiv.org/abs/2305.10601"
+      ],
+      "bibtex": "@article{DBLP:journals/corr/abs-2305-10601,\n  author = {Shunyu Yao and Dian Yu and Jeffrey Zhao and Izhak Shafran and Thomas L. Griffiths and Yuan Cao and Karthik Narasimhan},\n  title = {Tree of Thoughts: Deliberate Problem Solving with Large Language Models},\n  journal = {CoRR},\n  volume = {abs/2305.10601},\n  year = {2023},\n  url = {https://doi.org/10.48550/arXiv.2305.10601},\n  doi = {10.48550/ARXIV.2305.10601},\n  eprinttype = {arXiv},\n  eprint = {2305.10601}\n}",
+      "relevance_tags": [
+        "tree-search",
+        "backtracking",
+        "planning"
+      ],
+      "baseline_links": [
+        "dfs_ranked"
+      ],
+      "test_links": [],
+      "relevance": "Canonical tree-search prompting method with branching, scoring, and backtracking.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2403.07714",
+      "title": "StableToolBench: Towards Stable Large-Scale Benchmarking on Tool Learning of Large Language Models",
+      "authors": [
+        "Zhicheng Guo",
+        "Sijie Cheng",
+        "Hao Wang",
+        "Shihao Liang",
+        "Yujia Qin",
+        "Peng Li",
+        "Zhiyuan Liu",
+        "Maosong Sun",
+        "Yang Liu"
+      ],
+      "year": 2024,
+      "venue": "CoRR",
+      "doi": "10.48550/ARXIV.2403.07714",
+      "arxiv_id": "2403.07714",
+      "landing_page": "https://doi.org/10.48550/arXiv.2403.07714",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2403-07714",
+        "https://arxiv.org/abs/2403.07714"
+      ],
+      "bibtex": "@article{DBLP:journals/corr/abs-2403-07714,\n  author = {Zhicheng Guo and Sijie Cheng and Hao Wang and Shihao Liang and Yujia Qin and Peng Li and Zhiyuan Liu and Maosong Sun and Yang Liu},\n  title = {StableToolBench: Towards Stable Large-Scale Benchmarking on Tool Learning of Large Language Models},\n  journal = {CoRR},\n  volume = {abs/2403.07714},\n  year = {2024},\n  url = {https://doi.org/10.48550/arXiv.2403.07714},\n  doi = {10.48550/ARXIV.2403.07714},\n  eprinttype = {arXiv},\n  eprint = {2403.07714}\n}",
+      "relevance_tags": [
+        "benchmark",
+        "tool-learning",
+        "evaluation"
+      ],
+      "baseline_links": [
+        "greedy_chain",
+        "dfs_ranked",
+        "dfsdt"
+      ],
+      "test_links": [
+        "I1-instruction-deepseek",
+        "I1-instruction-qwen72b",
+        "I1-instruction-qwen7b"
+      ],
+      "relevance": "Benchmark and stable evaluation setup underlying this task's package.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2307.16789",
+      "title": "ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs",
+      "authors": [
+        "Yujia Qin",
+        "Shihao Liang",
+        "Yining Ye",
+        "Kunlun Zhu",
+        "Lan Yan",
+        "Yaxi Lu",
+        "Yankai Lin",
+        "Xin Cong",
+        "Xiangru Tang",
+        "Bill Qian",
+        "Sihan Zhao",
+        "Runchu Tian",
+        "Ruobing Xie",
+        "Jie Zhou",
+        "Mark Gerstein",
+        "Dahai Li",
+        "Zhiyuan Liu",
+        "Maosong Sun"
+      ],
+      "year": 2023,
+      "venue": "CoRR",
+      "doi": "10.48550/ARXIV.2307.16789",
+      "arxiv_id": "2307.16789",
+      "landing_page": "https://doi.org/10.48550/arXiv.2307.16789",
+      "source_urls": [
+        "https://dblp.org/rec/journals/corr/abs-2307-16789",
+        "https://arxiv.org/abs/2307.16789"
+      ],
+      "bibtex": "@article{DBLP:journals/corr/abs-2307-16789,\n  author = {Yujia Qin and Shihao Liang and Yining Ye and Kunlun Zhu and Lan Yan and Yaxi Lu and Yankai Lin and Xin Cong and Xiangru Tang and Bill Qian and Sihan Zhao and Runchu Tian and Ruobing Xie and Jie Zhou and Mark Gerstein and Dahai Li and Zhiyuan Liu and Maosong Sun},\n  title = {ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs},\n  journal = {CoRR},\n  volume = {abs/2307.16789},\n  year = {2023},\n  url = {https://doi.org/10.48550/arXiv.2307.16789},\n  doi = {10.48550/ARXIV.2307.16789},\n  eprinttype = {arXiv},\n  eprint = {2307.16789}\n}",
+      "relevance_tags": [
+        "tool-use",
+        "planning",
+        "api-retrieval"
+      ],
+      "baseline_links": [
+        "dfs_ranked",
+        "dfsdt"
+      ],
+      "test_links": [
+        "I1-instruction-deepseek",
+        "I1-instruction-qwen72b",
+        "I1-instruction-qwen7b"
+      ],
+      "relevance": "Tool-use framework with decision-tree planning and retrieval for large API spaces.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2303.11366",
+      "title": "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      "authors": [
+        "Noah Shinn",
+        "Federico Cassano",
+        "Ashwin Gopinath",
+        "Karthik Narasimhan",
+        "Shunyu Yao"
+      ],
+      "year": 2023,
+      "venue": "NeurIPS 2023",
+      "doi": "10.48550/ARXIV.2303.11366",
+      "arxiv_id": "2303.11366",
+      "landing_page": "https://doi.org/10.48550/arXiv.2303.11366",
+      "source_urls": [
+        "https://dblp.org/rec/conf/nips/ShinnCGNY23",
+        "https://arxiv.org/abs/2303.11366"
+      ],
+      "bibtex": "@inproceedings{DBLP:conf/nips/ShinnCGNY23,\n  author = {Noah Shinn and Federico Cassano and Ashwin Gopinath and Karthik Narasimhan and Shunyu Yao},\n  title = {Reflexion: language agents with verbal reinforcement learning},\n  booktitle = {Advances in Neural Information Processing Systems 36: Annual Conference on Neural Information Processing Systems 2023, NeurIPS 2023, New Orleans, LA, USA, December 10 - 16, 2023},\n  year = {2023},\n  url = {http://papers.nips.cc/paper_files/paper/2023/hash/1b44b878bb782e6954cd888628510e90-Abstract-Conference.html}\n}",
+      "relevance_tags": [
+        "reflection",
+        "memory",
+        "agent-learning"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Trial-and-error agent improvement through verbal feedback and episodic memory.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2201.07207",
+      "title": "Language Models as Zero-Shot Planners: Extracting Actionable Knowledge for Embodied Agents",
+      "authors": [
+        "Wenlong Huang",
+        "Pieter Abbeel",
+        "Deepak Pathak",
+        "Igor Mordatch"
+      ],
+      "year": 2022,
+      "venue": "ICML 2022",
+      "doi": "10.48550/ARXIV.2201.07207",
+      "arxiv_id": "2201.07207",
+      "landing_page": "https://proceedings.mlr.press/v162/huang22a.html",
+      "source_urls": [
+        "https://dblp.org/rec/conf/icml/HuangAPM22",
+        "https://proceedings.mlr.press/v162/huang22a.html"
+      ],
+      "bibtex": "@inproceedings{DBLP:conf/icml/HuangAPM22,\n  author = {Wenlong Huang and Pieter Abbeel and Deepak Pathak and Igor Mordatch},\n  title = {Language Models as Zero-Shot Planners: Extracting Actionable Knowledge for Embodied Agents},\n  booktitle = {International Conference on Machine Learning, ICML 2022, 17-23 July 2022, Baltimore, Maryland, USA},\n  series = {Proceedings of Machine Learning Research},\n  volume = {162},\n  pages = {9118--9147},\n  publisher = {PMLR},\n  year = {2022},\n  url = {https://proceedings.mlr.press/v162/huang22a.html}\n}",
+      "relevance_tags": [
+        "planning",
+        "action",
+        "embodied-agents"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Shows how language models can produce actionable plans for embodied environments.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.18653/v1/2023.acl-long.147",
+      "title": "Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models",
+      "authors": [
+        "Lei Wang",
+        "Wanyu Xu",
+        "Yihuai Lan",
+        "Zhiqiang Hu",
+        "Yunshi Lan",
+        "Roy Ka-Wei Lee",
+        "Ee-Peng Lim"
+      ],
+      "year": 2023,
+      "venue": "ACL 2023",
+      "doi": "10.18653/V1/2023.ACL-LONG.147",
+      "arxiv_id": "2305.04091",
+      "landing_page": "https://doi.org/10.18653/v1/2023.acl-long.147",
+      "source_urls": [
+        "https://dblp.org/rec/conf/acl/WangXLHLLL23",
+        "https://aclanthology.org/2023.acl-long.147/"
+      ],
+      "bibtex": "@inproceedings{DBLP:conf/acl/WangXLHLLL23,\n  author = {Lei Wang and Wanyu Xu and Yihuai Lan and Zhiqiang Hu and Yunshi Lan and Roy Ka-Wei Lee and Ee-Peng Lim},\n  title = {Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models},\n  booktitle = {Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), ACL 2023, Toronto, Canada, July 9-14, 2023},\n  pages = {2609--2634},\n  publisher = {Association for Computational Linguistics},\n  year = {2023},\n  url = {https://doi.org/10.18653/v1/2023.acl-long.147},\n  doi = {10.18653/V1/2023.ACL-LONG.147}\n}",
+      "relevance_tags": [
+        "planning",
+        "chain-of-thought",
+        "prompting"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Two-stage plan-then-solve prompting is a direct antecedent to structured reasoning policies.",
+      "verified_by": "dblp_bibtex"
+    },
+    {
+      "paper_id": "doi:10.48550/arXiv.2302.04761",
+      "title": "Toolformer: Language Models Can Teach Themselves to Use Tools",
+      "authors": [
+        "Timo Schick",
+        "Jane Dwivedi-Yu",
+        "Roberto Dessi",
+        "Roberta Raileanu",
+        "Maria Lomeli",
+        "Eric Hambro",
+        "Luke Zettlemoyer",
+        "Nicola Cancedda",
+        "Thomas Scialom"
+      ],
+      "year": 2023,
+      "venue": "NeurIPS 2023",
+      "doi": "10.48550/ARXIV.2302.04761",
+      "arxiv_id": "2302.04761",
+      "landing_page": "https://doi.org/10.48550/arXiv.2302.04761",
+      "source_urls": [
+        "https://dblp.org/rec/conf/nips/SchickDDRLHZCS23",
+        "https://arxiv.org/abs/2302.04761"
+      ],
+      "bibtex": "@inproceedings{DBLP:conf/nips/SchickDDRLHZCS23,\n  author = {Timo Schick and Jane Dwivedi-Yu and Roberto Dessi and Roberta Raileanu and Maria Lomeli and Eric Hambro and Luke Zettlemoyer and Nicola Cancedda and Thomas Scialom},\n  title = {Toolformer: Language Models Can Teach Themselves to Use Tools},\n  booktitle = {Advances in Neural Information Processing Systems 36: Annual Conference on Neural Information Processing Systems 2023, NeurIPS 2023, New Orleans, LA, USA, December 10 - 16, 2023},\n  year = {2023},\n  url = {http://papers.nips.cc/paper_files/paper/2023/hash/d842425e4bf79ba039352da0f658a906-Abstract-Conference.html}\n}",
+      "relevance_tags": [
+        "tool-use",
+        "api-calling",
+        "self-supervised"
+      ],
+      "baseline_links": [],
+      "test_links": [],
+      "relevance": "Self-supervised tool-call selection and integration for large language models.",
+      "verified_by": "dblp_bibtex"
+    }
+  ]
+}
