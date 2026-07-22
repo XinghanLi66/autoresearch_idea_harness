@@ -1,0 +1,3 @@
+Core idea: Introduce a **cardinality-aware Bayesian conditional independence test** using Dirichlet priors to stabilize low-sample/high-cardinality scenarios, replacing traditional chi-square tests. This test dynamically adjusts to variable cardinalities by computing posterior probabilities of independence via Bayesian Dirichlet equivalence (BDe) scores, avoiding spurious dependencies in sparse discrete data.
+
+Non-trivial crux: Designing a scalable approximation for Bayesian conditional independence that maintains computational feasibility during the PC algorithm’s dense phase while preserving sensitivity to true dependencies in networks with mixed-cardinality variables.

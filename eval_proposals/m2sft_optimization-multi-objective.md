@@ -1,0 +1,3 @@
+**Core idea:** Combine mechanisms across paradigms: tournament selection biased toward reference points for convergence + adaptive mutation rate + decomposition-based survival (non-dominated sorting with Tchebycheff scalarization over nearest reference lines and an adaptive reference-set shrinkage) - rather than inventing a new algorithm.
+
+**Non-trivial crux:** The hybrid must be validated against classic variants via convergence/diversity metrics (HV/IGD) on standard benchmarks; if it doesn't clearly dominate, the simpler monolithic algorithm should be kept, since adaptive combination adds complexity and parameters that can overfit.

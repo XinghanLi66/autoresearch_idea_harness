@@ -1,0 +1,3 @@
+Core idea: Use a hybrid clustering strategy that first applies a density-based method to detect natural cluster boundaries and then refines cluster centers using K-Means on the detected cluster cores — enabling a single method to handle both density-separated and density-uniform clusters.
+
+Non-trivial crux: The density-based step must identify cluster cores robustly across varied density scales without over-splitting, and the K-Means refinement must only reassign boundary points to avoid distorting the original density structure.

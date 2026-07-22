@@ -1,0 +1,4 @@
+Core idea: Introduce a **Learnable Hybrid Activation (LHA)** that combines the smoothness of Mish with adaptive negative-domain behavior via learnable parameters. The function is defined as:  
+`f(x) = x * tanh(α * softplus(x) + β * x)`, where `α` and `β` are layer-specific learnable parameters. This allows the network to dynamically adjust the balance between softplus-based nonlinearity and linear components, optimizing for task-specific gradient flow and representation capacity.
+
+Non-trivial crux: Ensuring the learnable parameters (`α`, `β`) generalize across architectures by constraining their interaction to preserve smoothness while avoiding overfitting, achieved through careful initialization (e.g., `α ≈ 1`, `β ≈ 0`) and implicit regularization via weight decay.

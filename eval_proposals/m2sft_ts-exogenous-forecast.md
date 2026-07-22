@@ -1,0 +1,3 @@
+Core idea: Borrow the cross-attention bottleneck from vision — compress the high-dimensional input into a small latent representation focused on the target variable via a feature-wise linear projection, then decode only the target, saving capacity and cutting the quadratic feature-dimension cost.
+
+Non-trivial crux: The transfer only works if the compression is explicitly across the variable dimension (a cheap 1×1 convolution/linear projection that preserves the time axis) rather than across the sequence dimension, so it retains temporal structure while forcing relevance to the single target; a bottleneck that's too small can discard useful information, so the compression ratio must be validated against a simpler encoder-decoder baseline.

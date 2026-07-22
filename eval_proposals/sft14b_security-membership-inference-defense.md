@@ -1,0 +1,21 @@
+**Mocking:** World-class AI researcher
+
+Let me start from the thing that actually leaks, not from a recipe. What leaks is the model's *predictive confidence* - train examples are overconfident, non-train are underconfident, and an attacker reads that off the softmax. So the whole class of defenses (label smoothing, confidence penalty, relaxloss) is trying to *flatten* that confidence gap, which is exactly what I want to attack.
+
+But I'm an ML researcher, not an information-theorist. I'll reason about the objective, not about the loss. The standard regularizer is (cross-entropy) + (privacy penalty). But in practice the privacy penalty is often too weak, too noisy, or it fights against the main objective. That's the wrong abstraction. I want to make one loss that both trains well AND hides membership. So the real unit isn't "another term" - the unit is: *how much does one extra bit of membership knowledge actually cost the model's ability to be right on test data?*
+
+Let me be precise about what I'm optimizing. The privacy penalty is a *constraint* on the *output distribution*, but it's not directly a constraint on the *decision* that the attacker reads off. That's a decoupling. My intuition is: if the model's decision is already close to the true label, then it can afford to be slightly overconfident and still be correct on test data. So I want to regularize *only the overconfidence beyond the point where the decision is already decided*. That's a decision-boundary-aware regularizer.
+
+Here's where I borrow a mechanism from a related field - information theory. The mutual information I(Y; Z) between the model's output Z and the membership label Y quantifies the amount of membership knowledge the model leaks. And I know that I(Y; Z) = H(Y) - H(Y|Z) = H(Y) - H(Y|Z). So maximizing the entropy of the posterior over Y given Z minimizes the information leakage - I should maximize H(Y|Z), which is exactly what my intuition said: keep the decision as noisy as possible.
+
+Now the transfer, and this is the part that needs to be honest: the decision Y is discrete, so H(Y|Z) is the conditional entropy of the discrete decision given Z, and I can estimate it from the softmax probabilities. So I don't need a separate confidence penalty - I can *construct* the regularizer directly from the distribution the model already outputs, with no extra hyperparameter. That's the transfer, and it's only valid because the decision is discrete; if the decision were continuous, this form wouldn't hold. The decision boundary is the whole story, and the information-theoretic form is just a re-expression of that.
+
+Why does this cut against the consensus? The consensus in the field is to slap on a penalty term to "reduce overconfidence" and treat privacy as a second-order concern. My claim is that you can design one loss that does both. That's the bet.
+
+Now the honest edge I won't claim: this only works when Y is discrete, and the entropy estimate is an approximation. I have to be careful with the exact form and validate it empirically. And I shouldn't expect a free lunch - information-theoretic regularizers usually have a higher cost to accuracy than simpler methods like label smoothing. The point is to move the frontier, not to win every AUC.
+
+So the design is: replace any ad-hoc confidence penalty with a single term that maximizes H(Y|Z) - i.e., a decision-boundary-aware entropy regularization - constructed directly from the model's own output distribution. And I'll keep a small hyperparameter to balance the tradeoff, because I'm an ML researcher and I don't want to trust my intuition over an ablation.
+
+**Core idea:** Replace ad-hoc confidence penalties with a decision-boundary-aware regularizer that maximizes the conditional entropy H(Y|Z) over the discrete decision Y given the model's output, constructed directly from the softmax probabilities and estimated without extra parameters.
+
+**Non-trivial crux:** The entropy form I(Y;Z) = H(Y) - H(Y|Z) only cleanly transfers because Y is discrete; for continuous decisions it would not hold, and the entropy estimate is an approximation that must be validated empirically, not assumed to be free of accuracy cost.

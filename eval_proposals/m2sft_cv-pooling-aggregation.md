@@ -1,0 +1,3 @@
+Core idea: Use a data-driven, parameter-free attention derived from the local spatial gradient (finite-difference/Sobel magnitude) to reweight the global average, plus a single learnable trade-off parameter between the weighted and plain average.
+
+Non-trivial crux: The gradient-based weight is hand-crafted and parameter-free — the only learnable thing is the trade-off scalar; but at tiny spatial sizes (1×1) the finite-difference kernel degenerates, so plain average must be recovered there to stay well-defined.

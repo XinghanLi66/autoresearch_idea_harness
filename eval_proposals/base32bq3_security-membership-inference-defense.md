@@ -1,0 +1,3 @@
+Core idea: Introduce a batch-wise variance regularization term that penalizes the model when its per-example cross-entropy losses vary widely, forcing more uniform loss distribution across examples and reducing the train-test leakage signal.
+
+Non-trivial crux: Balancing the variance penalty strength to avoid conflicting with accuracy objectives while ensuring the model can't exploit per-example loss patterns for membership inference.

@@ -1,0 +1,19 @@
+**Mocking:** A world-class AI researcher with a background in causal inference and discrete Bayesian networks
+
+Let me start from what must be true about the data, not from what current algorithms do. The data I'm given is a fixed sample from a discrete Bayesian network with a known ground-truth DAG. Under faithfulness, the MEC is the set of DAGs with the same observational distribution. So any correct answer is one of those MEC members, and the MEC is the best I can ever recover from observational data alone.
+
+Now the honest constraint: I have no interventions, no control over the data-generating process, and I must work entirely from the sample. That rules out the clean, elegant solutions from the intervention setting (do-calculus, back-door adjustment). What remains is a search over DAGs with a scoring function, because that's precisely what faithfulness gives me — an equivalence class I can enumerate.
+
+But there's a hidden invariant I must exploit. The true network is a DAG over a fixed variable set; the MEC is a finite set of DAGs. So the search space is finite. This is a discrete combinatorial search with a finite target. And here is the leap I want to make: in discrete combinatorial search, the *best* algorithm is not the cleverest one — it's the one that systematically covers the finite space with the fewest samples. That's the whole point of a finite search: the algorithm is the sample.
+
+So I want to map this onto the well-studied field of **combinatorial search** and **covering codes**, not onto causal discovery. In covering code theory, you want the smallest set of points that guarantees a solution within distance d of any target. That's exactly my situation: I want the smallest set of DAGs such that, for any true DAG in the MEC, at least one DAG in my set is within some distance of it. This is a covering problem, not a scoring problem.
+
+Why does this cut against the grain of the causal-discovery literature? Because the field treats the MEC as a hard constraint and searches DAGs while enforcing it. I treat the MEC as a *finite* constraint and search the *entire* DAG space, since the MEC is just a subset of it. I'm allowed to generate non-MEC DAGs, because the scoring function will reject them. The MEC is the target, not the search space.
+
+Now the honest trade-off I must reason through, not assume away. The covering-code approach guarantees a correct solution, but it is not efficient per sample. For a network of N variables, the number of DAGs is on the order of N! — factorial growth. That means the size of the covering set grows *extremely fast*, so the algorithm is only tractable for small N. This is my non-trivial crux: the covering-code guarantee is strong but *only* useful for small networks; for larger N I need to fall back to a scoring-based search, because the covering set becomes too large to construct.
+
+How do I keep myself honest rather than optimistic? I'll validate the decision rule, not the algorithm: I'll generate the smallest possible covering set and verify that for the true MEC the solution is within it. If the covering set is intractably large, I'll fall back to a scoring search and report the trade-off as a decision rule rather than as a guaranteed property.
+
+**Core idea:** Treat the MEC as a finite constraint and search the entire DAG space using a covering-code strategy — generate the smallest set of DAGs such that at least one is within a fixed distance of any true DAG in the MEC — because the search space is discrete and finite, so the algorithm is the sample.
+
+**Non-trivial crux:** The covering-code guarantee is strong but only tractable for small N; for larger networks the covering set grows too large and the algorithm becomes infeasible, so a scoring-based search must be used as a fallback — the decision rule is whether the covering set remains tractable, not whether the guarantee holds.

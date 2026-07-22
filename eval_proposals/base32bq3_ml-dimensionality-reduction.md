@@ -1,0 +1,3 @@
+Core idea: Introduce density-adaptive kernel scaling in affinity matrix construction, where each point's local kernel bandwidth is inversely proportional to its density estimate. This dynamically adjusts the balance between local and global structure preservation by narrowing kernels in dense regions (emphasizing local neighborhoods) and widening them in sparse regions (capturing global relationships).
+
+Non-trivial crux: Designing a robust density estimation strategy that works across varying data types (images vs. text) and integrating it with a differentiable loss function to maintain computational efficiency during embedding optimization.

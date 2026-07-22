@@ -1,0 +1,3 @@
+Core idea: Use the model's own past predictions as a self-reference by adding a KL-divergence penalty between current and past predicted distributions, forcing predictions to stay stable across epochs so train and non-train samples become harder to distinguish.
+
+Non-trivial crux: The target distribution must be the model's *own* past outputs rather than an external data-distribution estimate, because regularizing toward an external (possibly noisy) target risks reinforcing exactly the signal an attacker exploits; and the penalty weight must be tuned so it doesn't degrade accuracy or destabilize training.

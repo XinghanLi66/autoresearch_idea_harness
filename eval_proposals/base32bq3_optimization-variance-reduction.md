@@ -1,0 +1,3 @@
+Core idea: Introduce a hybrid recursive correction mechanism that combines SVRG's snapshot-based control variate with SARAH-style recursive gradient estimation. At each step, maintain a running variance-reduced gradient estimate by recursively updating it with the difference between the current stochastic gradient and a delayed snapshot gradient, while leveraging a single full-gradient computation per epoch to anchor the correction term.
+
+Non-trivial crux: Ensuring the recursive correction remains unbiased by periodically reanchoring it to the full gradient snapshot and carefully balancing the trade-off between the recursive noise cancellation of SARAH and the stability of SVRG's fixed reference point.

@@ -1,0 +1,3 @@
+Core idea: Combine t-SNE's local structure preservation with a global covariance constraint by optimizing a hybrid loss function that includes both KL divergence and a Frobenius norm term matching original and embedded covariance matrices. This ensures local neighborhoods are maintained while globally preserving variance structure.
+
+Non-trivial crux: Balancing the relative contributions of local and global terms in the loss function without introducing excessive computational overhead, while maintaining the non-convex optimization stability of t-SNE.

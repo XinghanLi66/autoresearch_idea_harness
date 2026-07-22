@@ -1,0 +1,2 @@
+Core idea: Combine local neighborhood preservation with global structure alignment via a hybrid kernel that blends local Gaussian kernels (for nearby points) with global polynomial kernels (for overall data distribution), then apply spectral embedding to capture both scales in the 2D space.  
+Non-trivial crux: Designing a kernel that balances local and global influence without introducing computational intractability, while ensuring efficient spectral decomposition for large datasets.

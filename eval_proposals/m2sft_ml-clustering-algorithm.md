@@ -1,0 +1,3 @@
+Core idea: Build a meta-learner that recognizes the dataset's geometry (convex blob, non-convex shape, varied density, high-dimensional) via a small set of computed features, then routes to the most suitable clustering method instead of inventing a new one.
+
+Non-trivial crux: The router's success hinges entirely on the geometry classifier being accurate and lightweight — if the classifier mislabels the shape or is computationally heavy, the whole meta-approach fails, and it still needs strong base methods underneath.

@@ -1,0 +1,3 @@
+Core idea: Introduce a temporal graph neural network (TGNN) that dynamically models interactions between all variables (including exogenous) as a graph, where edge weights are learned to represent time-dependent dependencies. This allows the model to capture both local variable relationships and global temporal patterns in a unified framework.  
+
+Non-trivial crux: Designing a differentiable graph structure that evolves over time steps while maintaining computational efficiency, and ensuring the graph's edge weights effectively encode the complex, non-linear interactions between exogenous variables and the target.

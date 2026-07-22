@@ -1,0 +1,3 @@
+Core idea: Use a dynamic distance metric that adjusts based on local density and geometric curvature, combined with a hierarchical clustering framework that identifies clusters via adaptive density peaks and curvature-aware connectivity.
+
+Non-trivial crux: Balancing the trade-off between density-based clustering and curvature-aware connectivity to avoid overfitting to local structures while preserving global cluster boundaries in high-dimensional spaces.

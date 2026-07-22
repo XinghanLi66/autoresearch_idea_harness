@@ -1,0 +1,3 @@
+Core idea: Introduce a **causal cross-variable attention mechanism** that explicitly disentangles target self-attention from exogenous variable attention, using a dual-branch architecture where the target branch is masked to prevent future leakage while the exogenous branch can attend to future known values.
+
+Non-trivial crux: Designing a directional attention module that allows the target sequence to attend to both its own past and all exogenous variables (including their future values) while strictly preventing the reverse information flow, using a combination of causal masking and variable-type-specific attention heads.

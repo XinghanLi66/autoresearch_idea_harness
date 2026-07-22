@@ -1,0 +1,20 @@
+**Mocking:** A world-class AI researcher, thinking through the problem with a focus on the underlying mechanism rather than tuning a known method.
+
+**Step 1: Understand the decision boundary of pooling**  
+GAP and GMP are deterministic functions that reduce a spatial map to a scalar per channel. My intuition is that a *fixed* scalar is too low-dimensional to represent a whole spatial map — it throws away most of the information. The real decision boundary is not between average vs max; it's between a pointwise scalar and a *learnable distribution summary*. So I should ask: what is the lowest-dimensional representation that still carries the full spatial statistics of the feature map?
+
+**Step 2: Characterize what spatial statistics are actually useful**  
+A spatial map carries three natural statistics: the *mean* (GAP), the *maximum* (GMP), and the *spread* (standard deviation, variance, or kurtosis). These are orthogonal in the information space — mean tells you where the signal is, max tells you where it's strongest, spread tells you about its consistency. If I drop any of these, I'm throwing away a dimension of information. That's the leap: don't pick between average and max — include *all three* as learnable components.
+
+**Step 3: Find the minimal, learnable representation that preserves the statistics**  
+If I must reduce a spatial map to a single scalar per channel, I should ask: what is the minimal object that can carry all three statistics? A scalar carries only one statistic. A *pair* (mean + max) carries two. A *triple* (mean, max, spread) carries three — and it's still just a vector of length 3 per channel. That's the key: the representation size grows linearly with the number of statistics, not exponentially. So I should let the network learn a *weighted combination of mean, max, and spread* per channel. I'll call it a *statistical mixture pooling* — a weighted sum of the three statistics. The weights are learnable per channel and normalized to ensure they are a convex combination.
+
+**Step 4: Match the representation to the network's output shape**  
+The final feature map after pooling must be exactly [B, C]. If the pooling layer produces more than C elements, the output shape would be wrong. The triple-statistics vector is exactly length 3 per channel — and 3 is a small constant, not a function of the input spatial size. So I need to map it back to length C, and there I can borrow from the *softmax* mechanism. I'll project the three statistics through a small network (a 3×3 FC layer) and then apply *softmax* over the channels to get a per-channel weighting. This keeps the output size exactly [B, C] while letting the weights adapt to the channels — a channel-wise attention over statistics.
+
+**Step 5: Keep the design simple and principled**  
+I must be careful not to over-parametrize. The learnable part is only the three statistics and the final channel-wise softmax weights — nothing more. The intuition is that the statistics are information-dense and should not be replaced with a large network. I'll compare this against the simpler (mean + max) combination and against a pure max or average, and I'll keep only the statistically-motivated triple if it clearly wins.
+
+**Core idea:** Replace fixed average/max pooling with *statistical mixture pooling*: learn a convex combination of mean, max, and spread statistics per channel, then project through a small FC layer and apply softmax over the channels to produce the [B, C] output — so each channel gets a learned, low-dimensional summary of the spatial map.
+
+**Non-trivial crux:** The three-statistic representation is only valid because it grows linearly with the number of statistics, not exponentially — but this only holds as long as the statistics are orthogonal; if the statistics are redundant, the gain disappears, so the choice of which statistics to include must be guided by the information content, not by aesthetics.

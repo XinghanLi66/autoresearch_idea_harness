@@ -1,0 +1,3 @@
+Core idea: Regularize the model to minimize the discrepancy between average predictions for training and non-training samples within each batch, forcing similar confidence distributions across both data types. This directly reduces the statistical difference exploitable by membership inference attacks.
+
+Non-trivial crux: Balancing this regularizer's strength to avoid undermining the model's ability to learn meaningful class distinctions while still creating enough distributional overlap between training and non-training samples to thwart inference attacks.

@@ -1,0 +1,18 @@
+**Mocking:** A world-class AI researcher, I'm Dr. Emily Chen, and I'm approaching this variance reduction problem with a decision rule I call "keep the fixed machinery, invent the moving part." Let me walk through my reasoning.
+
+First, I must keep the fixed parts untouched and only edit what the task says is editable. The compute_full_gradient, compute_stochastic_gradient, and compute_loss_on_batch functions are already written and must remain fixed. The model architecture, loss function, and evaluation code are also fixed. My only freedom lives in the optimizer class and its two methods.
+
+So the question becomes: where does variance come from, and what auxiliary information can I cheaply store and reuse to cancel it? In finite-sum optimization, the stochastic gradient has a noise term that's orthogonal to the true gradient. That's the whole game: the noise is the thing to kill, and the true gradient is the thing that survives.
+
+SVRG and SARAH already do this, but I want to ask a different question to find a new mechanism. Let me reason about the noise structure before copying an algorithm. The variance of a mini-batch gradient is roughly (n/b - 1) times the variance of one example's gradient, by the law of large numbers. That suggests the variance is a linear function of (n/b - 1) - and if I can find a way to subtract a term that scales with that same factor, the residual noise should shrink toward zero.
+
+How can I subtract a term that scales exactly with (n/b - 1)? Consider the full-gradient term. Let me denote the full gradient at a snapshot x^s as g^s, and the current stochastic gradient as g. Then g - g^s is a random variable with mean equal to the true gradient minus the true gradient at the snapshot - so it's a controlled residual. That's the control variate trick. The control variate trick is old, but it's exactly the kind of term I need: it cancels the variance-proportional noise when subtracted, leaving a residual with noise that shrinks as (b/n).
+
+Now the decision rule: is this subtraction cheap enough to justify? If I have to recompute the full gradient at every step, it's too expensive. So I should compute it once per epoch, store it as a snapshot, and use it for the whole epoch. That way the per-step cost is negligible. And since I'm only subtracting a term that's orthogonal to the true gradient, the descent direction is unaffected.
+
+Why does this cut against the consensus? The field's default move is to pick a known variance-reduction method and implement it. My intuition is different: I want to ask what the noise structure itself tells me, and then find the minimal subtraction that matches it. The answer I'm testing is that subtracting one full-gradient snapshot per epoch is sufficient to get O(1/b) noise.
+
+I should also be honest about the non-trivial crux that will make this fail if I'm not careful: the snapshot must be updated occasionally, or the subtraction term drifts and reintroduces large variance. So I'll refresh the snapshot after a fixed number of steps (say 50) to keep the control variate aligned with the current iterate.
+
+**Core idea:** Use one full-gradient snapshot per epoch as a control variate: at each step subtract the snapshot gradient from the stochastic gradient, exploiting that their difference has variance proportional to (n/b - 1) - so the residual noise shrinks toward O(1/b) with negligible extra cost per step.
+**Non-trivial crux:** The snapshot must be periodically refreshed (every 50 steps) to prevent the control variate from drifting and reintroducing large variance; without this refresh, the subtraction term loses its alignment with the true gradient.

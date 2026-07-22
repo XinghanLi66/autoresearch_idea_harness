@@ -1,0 +1,3 @@
+Core idea: Turn t-SNE's asymmetric heavy-tailed objective into a symmetric Gaussian-Gaussian objective, sparsify the high-D similarity to only nearest neighbors, and add negative sampling to recover global structure — a sparse, symmetric, neighbor-only objective with repelling non-neighbors.
+
+Non-trivial crux: The high-D similarity must be kept sparse (nearest neighbors only) to let clusters separate and keep the objective tractable; the trade-off is that global structure is only recovered via negative sampling, so the method is best suited to data where local structure dominates and the large-scale layout isn't the main concern.

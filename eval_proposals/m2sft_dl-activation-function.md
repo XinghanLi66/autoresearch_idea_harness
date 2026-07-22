@@ -1,0 +1,3 @@
+Core idea: Combine ReLU sparsity with a Swish self-gating term and make the activation per-channel adaptive by giving each channel its own learnable scalar scale — turning a fixed activation into a shape- and channel-adaptive drop-in.
+
+Non-trivial crux: The self-gating term must be validated against a matched ReLU baseline (keep the simpler form if it doesn't clearly win), and the per-channel scale must be regularized and kept numerically stable to avoid overfitting and ill-conditioning; the activation should stay a clean drop-in that plays nicely with batch normalization rather than becoming a fragile component.

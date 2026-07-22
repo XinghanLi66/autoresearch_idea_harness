@@ -1,0 +1,3 @@
+Core idea: Integrate a dynamically learned graph structure into the temporal modeling to capture cross-variable dependencies, allowing the model to propagate imputation signals across correlated variables through temporal graph diffusion.  
+
+Non-trivial crux: Efficiently learning a graph topology that adapts to both variable correlations and temporal dynamics without sacrificing computational efficiency, especially for high-dimensional datasets like ECL with 321 variables.

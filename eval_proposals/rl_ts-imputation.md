@@ -1,0 +1,19 @@
+Let me start from what I trust most: the numbers. I'd run the baseline DLinear on ETTh1 with 25% masking and observe its MSE and MAE. That gives me a concrete anchor — say, baseline MSE of 0.45 and MAE of 0.28. Now I'll ask myself a pointed question: what property of time series data is DLinear failing to exploit here? Two things stand out:
+
+1. **Temporal autocorrelation:** DLinear treats each time step independently; it doesn't explicitly model how values at one time point depend on nearby past/future points. This is a strong prior that should be built into the model.
+
+2. **Inter-variable correlation:** ETTh1 has 7 variables — the model needs to leverage information across variables to impute any one variable's missing values. DLinear does this implicitly via its shared weights, but there's no explicit cross-variable attention mechanism.
+
+I want to attack both, but I won't try to invent a new architecture. Instead, I'll borrow a proven mechanism and adapt it. My inspiration: the success of transformers in sequence modeling comes from their self-attention layer, which exactly captures temporal dependencies (and can be extended to cross-variable dependencies).
+
+Here's where I'd be careful. Copying a vanilla transformer wholesale would be naive — it's designed for discrete tokens, and my input is continuous multivariate time series. So the crux isn't "use transformers," it's "how do I make a transformer work for continuous multivariate time series?"
+
+First, temporal dependencies: I keep the transformer's self-attention over time steps — that's precisely what I need. But I'll add a twist. The standard transformer uses additive positional encoding, which is good for ordered sequences but doesn't encode relative distances well. For time series, I want the model to learn *how far back* it should look. So I replace additive positional encoding with **learnable relative positional encodings**: a small matrix whose entries represent the learned importance of looking k steps back or forward. This lets the model dynamically weight past/future context rather than using a fixed scheme.
+
+Second, inter-variable dependencies: a single transformer encoder can attend across both time steps and variables, but that's a uniform treatment. I'd argue that some variables may be more informative for imputing others than for themselves — so a uniform cross-variable attention might dilute signal. My move: **variable-specific attention**. Keep a shared transformer block, but add a variable-level gating mechanism: a small MLP that computes per-variable attention weights over other variables before feeding them into the shared block. This way, each variable gets to control how much it borrows from others, letting the model adaptively focus.
+
+Now, a decision rule: I won't assert this is better without evidence. I'll build the modified transformer, train it on ETTh1 with the same 25% masking, and compare MSE/MAE against the DLinear baseline. If the transformer doesn't clearly beat DLinear on both metrics, I'd drop it and fall back to the simpler baseline. No mechanism stays unless it earns its place.
+
+**Core idea:** Adapt a transformer with learnable relative positional encodings for temporal dependencies and variable-specific attention for cross-variable dependencies, turning it into a custom imputation model for multivariate time series.
+
+**Non-trivial crux:** The key is not just "use a transformer" — it's replacing additive positional encoding with learnable relative positions (to capture distance-aware temporal dependencies) and adding a variable-level gating MLP (to let each variable adaptively borrow from others), while retaining the shared transformer block to keep the parameter count manageable.

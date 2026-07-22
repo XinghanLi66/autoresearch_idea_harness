@@ -1,0 +1,3 @@
+Core idea: Integrate dynamic reference vectors with adaptive geometry estimation, where reference points evolve based on the population's distribution to guide selection and survival, balancing convergence and diversity through a hybrid of NSGA-II's crowding and RVEA's angle-penalized distance.  
+
+Non-trivial crux: Designing a robust mechanism to update reference vectors in real-time that avoids overfitting to transient population structures while maintaining global diversity, requiring careful coupling with survival selection criteria.

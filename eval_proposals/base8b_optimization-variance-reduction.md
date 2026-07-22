@@ -1,0 +1,3 @@
+Core idea: Use a dynamically updated moving average of stochastic gradients as a control variate, combined with momentum to accelerate convergence. This reduces variance by subtracting the moving average from each stochastic gradient estimate, while momentum ensures the moving average tracks the true gradient more effectively than static control variates.
+
+Non-trivial crux: Balancing the momentum decay rate and moving average update rate to ensure the control variate remains unbiased while maintaining sufficient variance reduction for accelerated convergence.

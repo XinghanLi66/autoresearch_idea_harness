@@ -1,0 +1,2 @@
+Core idea: Introduce a learnable parameter that dynamically modulates the nonlinearity's strength based on input magnitude, combining self-gated behavior with adaptive scaling to balance expressiveness and stability.  
+Non-trivial crux: Ensuring the learnable parameter doesn't destabilize training while maintaining smoothness and avoiding vanishing/exploding gradients across layers.

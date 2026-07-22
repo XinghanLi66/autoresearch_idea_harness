@@ -1,0 +1,5 @@
+Core idea: Introduce a noise-robustness regularizer that penalizes the model's sensitivity to small perturbations in logits, making predictions less discriminative between train and non-train examples.
+
+Non-trivial crux: Determining the optimal noise scale and regularization strength to balance privacy gains with task performance, ensuring the model remains accurate while reducing membership inference leakage through perturbation invariance.
+
+The approach leverages the observation that membership inference attacks exploit subtle differences in confidence between train and non-train examples. By adding noise to logits during training and penalizing changes in predictions caused by this noise, the model learns to produce more stable outputs. This reduces the signal that attackers rely on while preserving accuracy through adaptive noise scaling that decreases as training progresses. The regularizer encourages the model to treat individual examples as part of a continuous distribution rather than memorizing specific data points.

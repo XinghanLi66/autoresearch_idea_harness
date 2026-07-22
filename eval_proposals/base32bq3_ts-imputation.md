@@ -1,0 +1,3 @@
+Core idea: Introduce a Cross-Variable Attention Mechanism (CVAM) that dynamically models inter-variable dependencies during imputation by allowing each variable to attend to others' temporal representations, enhancing context propagation through a learned variable relationship graph.
+
+Non-trivial crux: Balancing computational efficiency with expressive power in high-dimensional spaces (e.g., ECL's 321 variables) by using sparse attention heads that adaptively focus on top-k relevant variables per time step, while maintaining temporal coherence through hybrid attention (time-wise + variable-wise).

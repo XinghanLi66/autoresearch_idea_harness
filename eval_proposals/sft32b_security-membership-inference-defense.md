@@ -1,0 +1,3 @@
+**Core idea:** Combine a margin-aware confidence penalty with a dynamic, epoch-dependent weight that prioritizes privacy (low overconfidence) early and gradually reweights toward utility (good classification) later, instead of using a fixed penalty or no penalty.
+
+**Non-trivial crux:** The dynamic weight must be a smooth, monotonic schedule that transfers budget from privacy to accuracy as training progresses — too early and the model underfits, too late and privacy is never enforced — so I'll derive a cosine-decay weight that interpolates between a privacy-first and accuracy-first objective, scaled by the remaining privacy budget at each epoch.

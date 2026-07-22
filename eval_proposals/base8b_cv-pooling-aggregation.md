@@ -1,0 +1,2 @@
+Core idea: Use a learnable combination of channel-wise mean and variance statistics, capturing both central tendency and distribution spread, which are underexplored in global pooling.  
+Non-trivial crux: Balancing the relative importance of mean vs variance across heterogeneous spatial dimensions while maintaining computational efficiency.
