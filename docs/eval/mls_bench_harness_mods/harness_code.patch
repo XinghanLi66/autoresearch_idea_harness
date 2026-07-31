@@ -1,0 +1,730 @@
+diff --git a/scripts/run_set4_agent1.sh b/scripts/run_set4_agent1.sh
+index e05f1e720..6c1e2567b 100755
+--- a/scripts/run_set4_agent1.sh
++++ b/scripts/run_set4_agent1.sh
+@@ -1,26 +1,22 @@
+ #!/bin/bash
+ # Setting 4 — lxh_agent_1
+-# Train tasks: cv-sample-weighting, optimization-bilevel (parallel)
++# Train tasks: optimization-bilevel, optimization-variance-reduction (parallel)
++# Val tasks (eval-only): ml-clustering-algorithm, ml-feature-selection
++# Workspace isolation fixed in discover_agent.py (_pool_exp_name uses PID suffix)
+ set -uo pipefail
+ 
+ cd "$(dirname "$0")/.."
+ 
+-ALL="cv-sample-weighting,optimization-bilevel,optimization-variance-reduction,graph-signal-propagation,causal-treatment-effect,optimization-parity,ts-anomaly-detection,ml-clustering-algorithm,ml-feature-selection,ml-symbolic-regression"
+-
+-val_for() {
+-    local train="$1"
+-    echo "$ALL" | tr ',' '\n' | grep -v "^${train}$" | tr '\n' ',' | sed 's/,$//'
+-}
+-
+ export TINKER_API_KEY="tml-7j4RSiJ2i0VudMP5hA51ywJFXpN3WjpiSvNrvfuBefecGVfK5Ds0Id1cCuBXXM6lLAAAA"
+ export RUNTIME_CFG="configs/config.discover-setting4.yaml"
+ 
+ LOGDIR="logs/_experiments"
+ mkdir -p "$LOGDIR"
+ 
++VAL="ml-clustering-algorithm,ml-feature-selection"
++
+ pids=()
+-for TRAIN in cv-sample-weighting optimization-bilevel; do
+-    VAL="$(val_for $TRAIN)"
++for TRAIN in optimization-bilevel optimization-variance-reduction; do
+     TS=$(date +%Y%m%d_%H%M%S)
+     LOG="$LOGDIR/${TRAIN}_set4_discover_${TS}.log"
+     echo "[$(date +%T)] Starting train=$TRAIN (parallel)"
+diff --git a/scripts/run_set4_agent2.sh b/scripts/run_set4_agent2.sh
+index 3aff82c68..80d1618e0 100755
+--- a/scripts/run_set4_agent2.sh
++++ b/scripts/run_set4_agent2.sh
+@@ -1,17 +1,11 @@
+ #!/bin/bash
+ # Setting 4 — lxh_agent_2
+-# Train tasks: optimization-variance-reduction, graph-signal-propagation (parallel)
++# Train task: graph-signal-propagation (single)
++# optimization-bilevel excluded from val set (runs unbounded as eval)
+ set -uo pipefail
+ 
+ cd "$(dirname "$0")/.."
+ 
+-ALL="cv-sample-weighting,optimization-bilevel,optimization-variance-reduction,graph-signal-propagation,causal-treatment-effect,optimization-parity,ts-anomaly-detection,ml-clustering-algorithm,ml-feature-selection,ml-symbolic-regression"
+-
+-val_for() {
+-    local train="$1"
+-    echo "$ALL" | tr ',' '\n' | grep -v "^${train}$" | tr '\n' ',' | sed 's/,$//'
+-}
+-
+ export TINKER_API_KEY="tml-7j4RSiJ2i0VudMP5hA51ywJFXpN3WjpiSvNrvfuBefecGVfK5Ds0Id1cCuBXXM6lLAAAA"
+ export RUNTIME_CFG="configs/config.discover-setting4.yaml"
+ 
+@@ -19,8 +13,8 @@ LOGDIR="logs/_experiments"
+ mkdir -p "$LOGDIR"
+ 
+ pids=()
+-for TRAIN in optimization-variance-reduction graph-signal-propagation; do
+-    VAL="$(val_for $TRAIN)"
++for TRAIN in graph-signal-propagation; do
++    VAL="optimization-variance-reduction,causal-treatment-effect,ml-clustering-algorithm,ml-feature-selection"
+     TS=$(date +%Y%m%d_%H%M%S)
+     LOG="$LOGDIR/${TRAIN}_set4_discover_${TS}.log"
+     echo "[$(date +%T)] Starting train=$TRAIN (parallel)"
+diff --git a/scripts/run_set4_agent3.sh b/scripts/run_set4_agent3.sh
+index d9a3d2ad9..8b9ecf708 100755
+--- a/scripts/run_set4_agent3.sh
++++ b/scripts/run_set4_agent3.sh
+@@ -1,20 +1,13 @@
+ #!/bin/bash
+ # Setting 4 — lxh_agent_3 (uses conda base python)
+ # Train task: causal-treatment-effect
+-# Uses run_discover_multi_eval.sh defaults: Qwen/Qwen3.5-35B-A3B + discover.smoke.qwen.yaml
++# optimization-bilevel excluded from val set (runs unbounded as eval)
+ source /newcpfs/lxh/miniconda3/etc/profile.d/conda.sh
+ conda activate base
+ set -uo pipefail
+ 
+ cd "$(dirname "$0")/.."
+ 
+-ALL="cv-sample-weighting,optimization-bilevel,optimization-variance-reduction,graph-signal-propagation,causal-treatment-effect,optimization-parity,ts-anomaly-detection,ml-clustering-algorithm,ml-feature-selection,ml-symbolic-regression"
+-
+-val_for() {
+-    local train="$1"
+-    echo "$ALL" | tr ',' '\n' | grep -v "^${train}$" | tr '\n' ',' | sed 's/,$//'
+-}
+-
+ export TINKER_API_KEY="tml-7j4RSiJ2i0VudMP5hA51ywJFXpN3WjpiSvNrvfuBefecGVfK5Ds0Id1cCuBXXM6lLAAAA"
+ export RUNTIME_CFG="configs/config.discover-setting4.yaml"
+ 
+@@ -22,7 +15,7 @@ LOGDIR="logs/_experiments"
+ mkdir -p "$LOGDIR"
+ 
+ for TRAIN in causal-treatment-effect; do
+-    VAL="$(val_for $TRAIN)"
++    VAL="optimization-variance-reduction,graph-signal-propagation,ml-clustering-algorithm,ml-feature-selection"
+     TS=$(date +%Y%m%d_%H%M%S)
+     LOG="$LOGDIR/${TRAIN}_set4_discover_${TS}.log"
+     echo "[$(date +%T)] Starting train=$TRAIN"
+diff --git a/src/mlsbench/agent/base.py b/src/mlsbench/agent/base.py
+index b7c99c4f8..8a60237f5 100755
+--- a/src/mlsbench/agent/base.py
++++ b/src/mlsbench/agent/base.py
+@@ -100,6 +100,17 @@ class BaseAgent(ABC):
+                 )
+             self._extra_context_text = ctx_path.read_text()
+             self.tools.extra_context = self._extra_context_request
++        elif self._extra_context_request:
++            # Any other value is treated as a path to a caller-provided context
++            # file (e.g. a research proposal the agent should implement).
++            ctx_path = Path(self._extra_context_request).expanduser()
++            if not ctx_path.is_file():
++                raise FileNotFoundError(
++                    f"--extra-context {self._extra_context_request!r} is neither "
++                    f"'baseline'/'theory' nor an existing file"
++                )
++            self._extra_context_text = ctx_path.read_text()
++            self.tools.extra_context = "proposal"
+ 
+         self.max_steps: int = global_config.get("max_steps", 20)
+         self.verbose: bool = global_config.get("verbose", False)
+@@ -342,13 +353,15 @@ class BaseAgent(ABC):
+ 
+         sections = []
+         if self._extra_context_text:
+-            kind_label = (
+-                "Baseline derivations"
+-                if self._extra_context_request == "baseline"
+-                else "Deep theoretical context"
+-            )
++            if self._extra_context_request == "baseline":
++                kind_label = "Baseline derivations (reference material)"
++            elif self._extra_context_request == "theory":
++                kind_label = "Deep theoretical context (reference material)"
++            else:
++                kind_label = ("Research proposal — implement THIS idea "
++                              "(provided by the caller)")
+             sections.append(
+-                f"# {kind_label} (reference material)\n\n"
++                f"# {kind_label}\n\n"
+                 f"{self._extra_context_text.rstrip()}\n"
+             )
+         sections.append(f"# Task: {self.task_name}\n\n{task_desc}")
+@@ -1385,6 +1398,7 @@ class BaseAgent(ABC):
+             print(f"{D}  (total {len(prompt_lines)} lines, {len(initial_prompt)} chars){RST}\n")
+ 
+         consecutive_failed_submits = 0
++        consecutive_edits_without_test = 0
+         while True:
+             # Check step limit
+             if self.tools.step_count >= self.max_steps:
+@@ -1495,6 +1509,30 @@ class BaseAgent(ABC):
+                 ],
+             })
+ 
++            # Track consecutive edits without a test() call and remind the
++            # model to call test() after 3 straight edits.
++            if tool_name == "edit":
++                consecutive_edits_without_test += 1
++            elif tool_name in ("test", "submit"):
++                consecutive_edits_without_test = 0
++            if (consecutive_edits_without_test >= 3
++                    and self.tools.test_count < self.tools.max_tests
++                    and not getattr(self, f"_edit_reminder_{consecutive_edits_without_test}", False)):
++                remaining_tests = self.tools.max_tests - self.tools.test_count
++                remaining_steps = self.max_steps - self.tools.step_count
++                edit_reminder = (
++                    f"[REMINDER] You have made {consecutive_edits_without_test} edits "
++                    f"without calling test(). You have {remaining_tests} test(s) and "
++                    f"{remaining_steps} action(s) remaining. Call test() now to evaluate "
++                    f"your current implementation — more edits without testing wastes "
++                    f"your step budget and produces no leaderboard result."
++                )
++                messages.append({"role": "user", "content": edit_reminder})
++                self.logger.log_user_message(edit_reminder)
++                setattr(self, f"_edit_reminder_{consecutive_edits_without_test}", True)
++                print(f"[agent] Injected edit-without-test reminder "
++                      f"({consecutive_edits_without_test} consecutive edits)")
++
+             # Reminder: if action budget is almost exhausted and no test()
+             # has run yet, nudge the model to call test() before it loses
+             # the chance to record any result. Fires at most once per run.
+diff --git a/src/mlsbench/agent/discover_agent.py b/src/mlsbench/agent/discover_agent.py
+index 8b94b0916..b0be2336d 100644
+--- a/src/mlsbench/agent/discover_agent.py
++++ b/src/mlsbench/agent/discover_agent.py
+@@ -595,7 +595,7 @@ class DiscoverAgent(BaseAgent):
+     def _pool_exp_name(self, task_name: str, pool_label: str, slot_index: int) -> str:
+         base_model_name = self.global_config.get("model", "openai/gpt-oss-20b")
+         sanitized = base_model_name.replace("/", "_").replace(":", "_").replace(" ", "_")
+-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
++        ts = datetime.now().strftime("%Y%m%d_%H%M%S") + f"_{os.getpid()}"
+         if pool_label == "train":
+             return f"{sanitized}_{ts}_pool{slot_index}"
+         safe_task = task_name.replace("/", "_").replace(":", "_").replace(" ", "_")
+diff --git a/src/mlsbench/agent/leaderboard.py b/src/mlsbench/agent/leaderboard.py
+index 2f8a02a92..01b5d9310 100755
+--- a/src/mlsbench/agent/leaderboard.py
++++ b/src/mlsbench/agent/leaderboard.py
+@@ -36,17 +36,36 @@ class Leaderboard:
+ 
+     @staticmethod
+     def _build_lock_path(path: Path) -> Path:
+-        # Keep lock files out of task directories so leaderboard reads/writes do not
+-        # pollute the repo working tree. Hashing the resolved CSV path prevents
+-        # collisions across checkouts and worktrees that share task names.
++        # The lock (and the WAL next to it) MUST live on the SHARED filesystem so
++        # flock serializes writers ACROSS farm pods — the CSV is on /newcpfs but the
++        # old /tmp lock dir was pod-local, so concurrent pods raced open("w") and
++        # NUL-corrupted the CSV (round-3). Keep it OUT of the repo working tree.
++        # Hashing the resolved CSV path prevents collisions across checkouts/worktrees.
+         resolved = path.resolve(strict=False)
+         digest = hashlib.sha256(str(resolved).encode("utf-8")).hexdigest()[:16]
+         safe_parent = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in path.parent.name)
+         safe_name = safe_parent or "task"
+         import os
+-        lock_dir = Path(tempfile.gettempdir()) / f"mlsbench-leaderboard-locks-{os.getuid()}"
++        # Default to a shared-FS lock dir (env-overridable). Fall back to the pod-local
++        # tmp dir only if the shared dir can't be created (keeps single-machine setups working).
++        shared_default = "/newcpfs/lxh/.mls_leaderboard_locks"
++        lock_root = os.environ.get("MLSBENCH_LOCK_DIR", shared_default)
++        lock_dir = Path(lock_root) / f"u{os.getuid()}"
++        try:
++            lock_dir.mkdir(parents=True, exist_ok=True)
++        except OSError:
++            lock_dir = Path(tempfile.gettempdir()) / f"mlsbench-leaderboard-locks-{os.getuid()}"
+         return lock_dir / f"{safe_name}-{path.stem}-{digest}.lock"
+ 
++    @staticmethod
++    def _row_key(d: dict) -> tuple[str, str, str]:
++        """Dedup identity for a row/entry. str()-normalized because values come from
++        two sources with different types: in-memory entries (seed may be int) and
++        CSV reads (everything str). Without normalization int 0 != str "0", so the
++        WAL replay never matches the CSV and re-adds every entry each write -> the
++        CSV explodes with duplicates (worse now that the WAL is shared across pods)."""
++        return (str(d.get("timestamp", "")), str(d.get("model", "")), str(d.get("seed", "")))
++
+     @contextmanager
+     def _locked(self, lock_type: int):
+         with self._lock:
+@@ -98,12 +117,12 @@ class Leaderboard:
+         # Build set of existing (timestamp, model, seed) for dedup
+         existing = set()
+         for r in rows:
+-            key = (r.get("timestamp", ""), r.get("model", ""), r.get("seed", ""))
++            key = self._row_key(r)
+             existing.add(key)
+ 
+         recovered = 0
+         for entry in wal_records:
+-            key = (entry.get("timestamp", ""), entry.get("model", ""), entry.get("seed", ""))
++            key = self._row_key(entry)
+             if key not in existing:
+                 for k in entry:
+                     if k not in fieldnames:
+@@ -144,12 +163,12 @@ class Leaderboard:
+         if self.path.exists():
+             with open(self.path, newline="") as f:
+                 for r in csv.DictReader(f):
+-                    csv_keys.add((r.get("timestamp", ""), r.get("model", ""), r.get("seed", "")))
++                    csv_keys.add(self._row_key(r))
+ 
+         kept: list[dict] = []
+         dropped = 0
+         for entry in wal_records:
+-            key = (entry.get("timestamp", ""), entry.get("model", ""), entry.get("seed", ""))
++            key = self._row_key(entry)
+             if removed_keys and key in removed_keys:
+                 dropped += 1
+                 continue
+@@ -193,19 +212,34 @@ class Leaderboard:
+                 if k not in fieldnames:
+                     fieldnames.append(k)
+             # Dedup: don't re-add if WAL replay already included this entry
+-            entry_key = (entry.get("timestamp", ""), entry.get("model", ""), entry.get("seed", ""))
++            entry_key = self._row_key(entry)
+             already_present = any(
+-                (r.get("timestamp", ""), r.get("model", ""), r.get("seed", "")) == entry_key
++                self._row_key(r) == entry_key
+                 for r in rows
+             )
+             if not already_present:
+                 rows.append(entry)
+-            # Rewrite entire CSV with updated fieldnames
+-            with open(self.path, "w", newline="") as f:
+-                writer = csv.DictWriter(f, fieldnames=fieldnames)
+-                writer.writeheader()
+-                for row in rows:
+-                    writer.writerow(row)
++            # Rewrite the CSV ATOMICALLY (temp in the same dir + os.replace) so a
++            # concurrent or interrupted writer can never leave a half-written /
++            # NUL-holed file (the round-3 corruption mode). The flock above
++            # serializes the full read-modify-write across processes AND pods (the
++            # lock lives on the shared FS), so no rows are lost either.
++            fd, tmp_name = tempfile.mkstemp(dir=str(self.path.parent), prefix=".lb_", suffix=".tmp")
++            try:
++                with os.fdopen(fd, "w", newline="") as f:
++                    writer = csv.DictWriter(f, fieldnames=fieldnames)
++                    writer.writeheader()
++                    for row in rows:
++                        writer.writerow(row)
++                    f.flush()
++                    os.fsync(f.fileno())
++                os.replace(tmp_name, self.path)
++            except BaseException:
++                try:
++                    os.unlink(tmp_name)
++                except OSError:
++                    pass
++                raise
+ 
+     def all_records(self) -> list[dict]:
+         """Return all leaderboard records."""
+diff --git a/src/mlsbench/agent/tools.py b/src/mlsbench/agent/tools.py
+index c471937cb..f71477a37 100755
+--- a/src/mlsbench/agent/tools.py
++++ b/src/mlsbench/agent/tools.py
+@@ -1213,6 +1213,10 @@ class WorkspaceTools:
+             path_map.setdefault("/root", real_home)
+ 
+         run_env = os.environ.copy()
++        # Suppress "setlocale: LC_ALL: cannot change locale" warnings that
++        # flood stdout on machines where en_US.UTF-8 is not installed,
++        # causing infinite output loops in task subprocesses.
++        run_env.pop("LC_ALL", None)
+         run_env["DATA_ROOT"] = resolved_data_root
+         merged_env = dict(pkg_config.get("env", {}))
+         merged_env.update(pkg_config.get("local_env", {}))
+@@ -1882,8 +1886,28 @@ class WorkspaceTools:
+             _local_cmd, cwd, run_env = self._build_local_exec_spec(cmd_entry, seed, gpu_devices=gpu_devices)
+             pkg = cmd_entry.get("package")
+             global_cfg = self._effective_global_config()
++            # Use the EXPLICIT env python (not bare "python") so `conda run` cannot resolve
++            # it to a system interpreter — on farm pods bare "python" leaks to system py3.12
++            # torch -> ImportError "undefined symbol _PyThreadState_GetCurrent" (fatal esp.
++            # for py3.8 envs like humanoid-gym; burned 22.3h of humanoid runs, 2026-07-26).
++            # Still wrap in conda run so the env's activate.d (LD_LIBRARY_PATH) is applied.
++            # Also drop any leaked PYTHONPATH (system site-packages).
++            budget_py = "python"
++            if pkg:
++                try:
++                    from mlsbench.cli import find_conda_exe
++                    _cexe = find_conda_exe()
++                    if _cexe:
++                        _cbase = os.path.dirname(os.path.dirname(_cexe))
++                        _cand = os.path.join(_cbase, "envs", f"mlsbench-{pkg}", "bin", "python")
++                        if os.path.exists(_cand):
++                            budget_py = _cand
++                except Exception:
++                    pass
++            run_env = dict(run_env)
++            run_env.pop("PYTHONPATH", None)
+             budget_cmd = self._wrap_local_command(
+-                ["python", str(budget_script.resolve())],
++                [budget_py, str(budget_script.resolve())],
+                 global_cfg,
+                 pkg_name=pkg,
+             )
+@@ -1893,14 +1917,14 @@ class WorkspaceTools:
+                     capture_output=True,
+                     text=True,
+                     cwd=cwd,
+-                    timeout=120,
++                    timeout=int(os.environ.get("MLSBENCH_BUDGET_CHECK_TIMEOUT", "600")),
+                     env=run_env,
+                 )
+                 output = (result.stdout or "") + (result.stderr or "")
+                 if result.returncode != 0:
+                     return f"[BUDGET CHECK FAILED]\n{output}"
+             except subprocess.TimeoutExpired:
+-                return "[BUDGET CHECK TIMEOUT] budget_check.py took >120s"
++                return "[BUDGET CHECK TIMEOUT] budget_check.py took >budget"
+             except Exception as e:
+                 return f"[BUDGET CHECK ERROR] {e}"
+             return None
+diff --git a/src/mlsbench/cli.py b/src/mlsbench/cli.py
+index d15bb1eac..a46f29ae7 100755
+--- a/src/mlsbench/cli.py
++++ b/src/mlsbench/cli.py
+@@ -2111,12 +2111,12 @@ def main():
+              "Has no effect unless --allow-web-search is also passed.",
+     )
+     p_agent.add_argument(
+-        "--extra-context", choices=["baseline", "theory"], default=None,
+-        help="Inject a domain-specific context file at the top of the initial prompt. "
+-             "Looks up context_packs/science_priors_10tasks_v3/contexts/"
+-             "<task>__baseline_derivation_context.md (for 'baseline') or "
+-             "<task>__deep_theory_context.md (for 'theory'). Errors out if the "
+-             "file does not exist for this task.",
++        "--extra-context", default=None,
++        help="Inject extra context at the top of the initial prompt. Either "
++             "'baseline'/'theory' (looks up context_packs/science_priors_10tasks_v3/"
++             "contexts/<task>__{baseline_derivation,deep_theory}_context.md and "
++             "errors out if missing), or a path to any context file (e.g. a "
++             "research proposal the agent should implement).",
+     )
+     p_agent.add_argument(
+         "--disable-budget-check", action="store_true",
+diff --git a/vendor/data_scripts/lm-evaluation-harness/prepare_datasets.py b/vendor/data_scripts/lm-evaluation-harness/prepare_datasets.py
+index 1591b8824..d30869286 100755
+--- a/vendor/data_scripts/lm-evaluation-harness/prepare_datasets.py
++++ b/vendor/data_scripts/lm-evaluation-harness/prepare_datasets.py
+@@ -1,36 +1,57 @@
+ #!/usr/bin/env python3
+ """Prepare HuggingFace datasets for lm-evaluation-harness offline evaluation.
+ 
+-Downloads datasets used by lm-eval benchmarks (hellaswag, arc_easy, piqa,
+-winogrande) under all known name variants so offline cache lookup succeeds
+-regardless of HF Hub redirects.
++Ensures the datasets used by lm-eval benchmarks (hellaswag, arc_easy, piqa,
++winogrande) are present in the offline HF cache, keyed by the EXACT
++(dataset_path, dataset_name) that lm-eval's task YAMLs resolve — so that
++`datasets.load_dataset(...)` finds them under HF_DATASETS_OFFLINE=1:
+ 
+-Output: {data_root}/lm-eval-datasets/  (~200 MB)
++    hellaswag  -> Rowan/hellaswag        (config default)   -> Rowan___hellaswag
++    piqa       -> baber/piqa             (config default)   -> baber___piqa
++    arc_easy   -> allenai/ai2_arc        (config ARC-Easy)  -> allenai___ai2_arc/ARC-Easy
++    winogrande -> allenai/winogrande     (config winogrande_xl) -> allenai___winogrande/winogrande_xl
++
++The previous version also listed BARE legacy names ("piqa", "hellaswag",
++"winogrande").  Those are script-based / trust_remote_code datasets that lm-eval
++does NOT use; loading "piqa" offline raises
++    "Couldn't find a dataset script at .../piqa/piqa.py"
++and (online, non-interactive) raises
++    "The repository for piqa contains custom code which must be executed",
++which aborted this prepare step.  Only the namespaced names above are needed.
++
++This script defaults to OFFLINE and loads from the vendored cache
++({data_root}/lm-eval-datasets), because it is re-run on every baseline on the
++(offline) eval farm.  To (re)populate the cache from the Hub on a machine with
++internet, run:
++    HF_HUB_OFFLINE=0 HF_DATASETS_OFFLINE=0 \
++        python vendor/data_scripts/lm-evaluation-harness/prepare_datasets.py --data-root vendor/data
+ 
+-Usage:
+-    python vendor/data_scripts/lm-evaluation-harness/prepare_datasets.py --data-root vendor/data
+-    # or via mlsbench:
+-    mlsbench data lm-evaluation-harness
++Output: {data_root}/lm-eval-datasets/  (~200 MB)
+ """
+ 
+ import argparse
++import os
+ import sys
+ from pathlib import Path
+ 
++# Default to offline so the vendored cache is used (and no Hub round-trip / no
++# "custom code must be executed" prompt).  setdefault lets an explicit
++# HF_HUB_OFFLINE=0 in the environment re-enable downloads for (re)population.
++os.environ.setdefault("HF_DATASETS_OFFLINE", "1")
++os.environ.setdefault("HF_HUB_OFFLINE", "1")
++
+ 
++# (dataset_path, dataset_name) exactly as lm-eval's task YAMLs resolve them.
+ DATASETS = [
+-    ("hellaswag", None),
+     ("Rowan/hellaswag", None),
+-    ("piqa", None),
+     ("baber/piqa", None),
+     ("allenai/ai2_arc", "ARC-Easy"),
+-    ("allenai/ai2_arc", "ARC-Challenge"),
+-    ("winogrande", "winogrande_xl"),
++    ("allenai/winogrande", "winogrande_xl"),
+ ]
+ 
+ 
+ def main():
+-    parser = argparse.ArgumentParser(description="Download lm-eval datasets")
++    parser = argparse.ArgumentParser(description="Prepare lm-eval datasets")
+     parser.add_argument(
+         "--data-root", type=str, default="vendor/data",
+         help="Root directory for data storage",
+@@ -39,20 +60,21 @@ def main():
+ 
+     cache_dir = Path(args.data_root) / "lm-eval-datasets"
+     cache_dir.mkdir(parents=True, exist_ok=True)
+-    print(f"Downloading datasets to: {cache_dir}")
++    offline = os.environ.get("HF_HUB_OFFLINE", "0") == "1"
++    print(f"Preparing datasets in: {cache_dir} (offline={offline})")
+ 
+     from datasets import load_dataset
+ 
+     for name, config in DATASETS:
+         try:
+             print(f"  Loading {name} (config={config})...")
+-            load_dataset(name, config, cache_dir=str(cache_dir))
++            load_dataset(name, config, cache_dir=str(cache_dir), trust_remote_code=True)
+             print(f"  OK: {name}")
+         except Exception as e:
+             print(f"  FAIL: {name}: {e}", file=sys.stderr)
+             sys.exit(1)
+ 
+-    print(f"\nAll datasets downloaded to {cache_dir}")
++    print(f"\nAll datasets ready at {cache_dir}")
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/vendor/pkg_configs/LLaDA/config.json b/vendor/pkg_configs/LLaDA/config.json
+index de9296870..bedfae1a9 100644
+--- a/vendor/pkg_configs/LLaDA/config.json
++++ b/vendor/pkg_configs/LLaDA/config.json
+@@ -4,9 +4,11 @@
+     "apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*",
+     "pip install --no-cache-dir 'transformers>=4.46,<4.49' accelerate sentencepiece protobuf",
+     "pip install --no-cache-dir sympy regex",
++    "pip install --no-cache-dir mauve-text faiss-cpu scikit-learn",
+     "mkdir -p /opt/huggingface /data/llada-instruct",
+     "HF_HOME=/opt/huggingface python -c \"from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('GSAI-ML/LLaDA-8B-Base', trust_remote_code=True); AutoModel.from_pretrained('GSAI-ML/LLaDA-8B-Base', trust_remote_code=True, torch_dtype='auto')\"",
+-    "HF_HOME=/opt/huggingface python -c \"from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('Dream-org/Dream-v0-Instruct-7B', trust_remote_code=True); AutoModel.from_pretrained('Dream-org/Dream-v0-Instruct-7B', trust_remote_code=True, torch_dtype='auto')\""
++    "HF_HOME=/opt/huggingface python -c \"from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('Dream-org/Dream-v0-Instruct-7B', trust_remote_code=True); AutoModel.from_pretrained('Dream-org/Dream-v0-Instruct-7B', trust_remote_code=True, torch_dtype='auto')\"",
++    "HF_HOME=/opt/huggingface python -c \"from transformers import AutoModelForCausalLM, AutoTokenizer; AutoTokenizer.from_pretrained('openai-community/gpt2-large'); AutoModelForCausalLM.from_pretrained('openai-community/gpt2-large')\""
+   ],
+   "env": {
+     "HF_HOME": "/opt/huggingface",
+@@ -27,5 +29,15 @@
+   "use_cuda": true,
+   "writable_tmpfs": true,
+   "no_home": true,
+-  "workdir": "/workspace"
+-}
++  "workdir": "/workspace",
++  "local_install_cmds": [
++    "apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*",
++    "pip install --no-cache-dir 'transformers>=4.46,<4.49' accelerate sentencepiece protobuf",
++    "pip install --no-cache-dir sympy regex",
++    "pip install --no-cache-dir mauve-text faiss-cpu scikit-learn",
++    "mkdir -p /opt/huggingface /data/llada-instruct",
++    "HF_HOME=/newcpfs/lxh/hf_home python -c \"from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('GSAI-ML/LLaDA-8B-Base', trust_remote_code=True); AutoModel.from_pretrained('GSAI-ML/LLaDA-8B-Base', trust_remote_code=True, torch_dtype='auto')\"",
++    "HF_HOME=/newcpfs/lxh/hf_home python -c \"from transformers import AutoModel, AutoTokenizer; AutoTokenizer.from_pretrained('Dream-org/Dream-v0-Instruct-7B', trust_remote_code=True); AutoModel.from_pretrained('Dream-org/Dream-v0-Instruct-7B', trust_remote_code=True, torch_dtype='auto')\"",
++    "HF_HOME=/newcpfs/lxh/hf_home python -c \"from transformers import AutoModelForCausalLM, AutoTokenizer; AutoTokenizer.from_pretrained('openai-community/gpt2-large'); AutoModelForCausalLM.from_pretrained('openai-community/gpt2-large')\""
++  ]
++}
+\ No newline at end of file
+diff --git a/vendor/pkg_configs/dbim-codebase/pre_edit.py b/vendor/pkg_configs/dbim-codebase/pre_edit.py
+index 8aa4e3030..0b369593a 100755
+--- a/vendor/pkg_configs/dbim-codebase/pre_edit.py
++++ b/vendor/pkg_configs/dbim-codebase/pre_edit.py
+@@ -5,6 +5,27 @@ Keeps the upstream repo unmodified (vendor/external_packages/ is read-only).
+ """
+ 
+ OPS = [
++    # 0. Single-GPU launch. Upstream sample.sh hardcodes an 8-GPU cluster
++    #    launch (CUDA_VISIBLE_DEVICES=0..7, torchrun --nproc_per_node 8). On the
++    #    MLS-Bench eval pods there is exactly ONE GPU, so ranks 1..7 crash in
++    #    ddbm/dist_util.setup_dist() at torch.cuda.set_device(LOCAL_RANK) with
++    #    "invalid device ordinal" (exit 1, traceback masked by torch.elastic) ->
++    #    no samples written -> evaluator finds nothing -> "Could not find FID
++    #    score". Pin to a single process/GPU (still overridable via env for
++    #    multi-GPU hosts). This replace targets the pristine upstream lines
++    #    11-13 (CUDA_VISIBLE_DEVICES + run_args) and preserves the line count
++    #    (delta 0) so later sample.sh ops keep their original line numbers.
++    {
++        "op": "replace",
++        "file": "dbim-codebase/scripts/sample.sh",
++        "start_line": 11,
++        "end_line": 13,
++        "content": (
++            "export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}\n"
++            'run_args="--nproc_per_node ${NPROC_PER_NODE:-1} \\\n'
++            '          --master_port ${MASTER_PORT:-29511}"\n'
++        ),
++    },
+     # 1. Make Inception model path absolute relative to the repo's assets dir.
+     {
+         "op": "replace",
+diff --git a/vendor/pkg_configs/humanoid-gym/config.json b/vendor/pkg_configs/humanoid-gym/config.json
+index 47fc555e5..e0e85cac6 100644
+--- a/vendor/pkg_configs/humanoid-gym/config.json
++++ b/vendor/pkg_configs/humanoid-gym/config.json
+@@ -37,5 +37,23 @@
+     "PYTORCH_JIT": "0"
+   },
+   "use_cuda": true,
+-  "workdir": "/workspace"
+-}
++  "workdir": "/workspace",
++  "local_install_cmds": [
++    "apt-get -o APT::Sandbox::User=root update -q && DEBIAN_FRONTEND=noninteractive apt-get -o APT::Sandbox::User=root install -y git wget unzip libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libx11-6 libxcursor1 libxinerama1 libxrandr2 libxi6 libxxf86vm1 libvulkan1 vulkan-tools mesa-vulkan-drivers gdb strace && apt-get clean && rm -rf /var/lib/apt/lists/*",
++    "rm -f /usr/share/vulkan/icd.d/intel_icd.x86_64.json /usr/share/vulkan/icd.d/lvp_icd.x86_64.json /usr/share/vulkan/icd.d/radeon_icd.x86_64.json && mkdir -p /usr/share/vulkan/icd.d && printf '%s\\n' '{' '    \"file_format_version\" : \"1.0.0\",' '    \"ICD\": {' '        \"library_path\": \"libGLX_nvidia.so.0\",' '        \"api_version\" : \"1.2.155\"' '    }' '}' > /usr/share/vulkan/icd.d/nvidia_icd.json",
++    "pip install numpy==1.23.5",
++    "cd {data_root}/isaacgym/python && pip install -e .",
++    "pip install mujoco==2.3.6 mujoco-python-viewer",
++    "pip install wandb DateTime tensorboard tqdm matplotlib",
++    "cd /workspace/humanoid-gym && pip install -e .",
++    "pip uninstall -y opencv-python opencv-python-headless || true",
++    "pip install --no-deps 'opencv-python-headless==4.5.5.64'"
++  ],
++  "local_env": {
++    "PYTHONPATH": "/workspace/humanoid-gym:${PYTHONPATH}",
++    "LD_LIBRARY_PATH": "/newcpfs/lxh/miniconda3/envs/mlsbench-humanoid-gym/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}",
++    "PYTORCH_JIT": "0",
++    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/nvidia_icd.json",
++    "NVIDIA_DRIVER_CAPABILITIES": "all"
++  }
++}
+\ No newline at end of file
+diff --git a/vendor/pkg_configs/nanoGPT/config.json b/vendor/pkg_configs/nanoGPT/config.json
+index 906761bc6..77e574596 100755
+--- a/vendor/pkg_configs/nanoGPT/config.json
++++ b/vendor/pkg_configs/nanoGPT/config.json
+@@ -17,12 +17,12 @@
+     "mkdir -p /data/climbmix /data/eval /data/lm-eval-datasets"
+   ],
+   "local_install_cmds": [
+-    "pip install tiktoken numpy einops safetensors huggingface_hub transformers accelerate",
++    "pip install tiktoken numpy einops safetensors huggingface_hub 'transformers==4.48.3' accelerate",
+     "pip install --no-build-isolation --no-deps {project_root}/vendor/external_packages/flash-linear-attention",
+     "pip install --no-cache-dir 'datasets<3.0'",
+     "pip install --no-cache-dir 'lm-eval>=0.4.0'",
+-    "pip install --no-cache-dir --force-reinstall triton==3.2.0",
+-    "python -c \"import triton; assert triton.__version__ == '3.2.0', f'Expected triton 3.2.0 but got {triton.__version__}'\"",
++    "pip install --no-cache-dir --force-reinstall triton==3.1.0",
++    "python -c \"import triton; assert triton.__version__ == '3.1.0', f'Expected triton 3.2.0 but got {triton.__version__}'\"",
+     "python -c \"import fla; print('FLA imported successfully')\"",
+     "python -c \"import tiktoken; tiktoken.get_encoding('gpt2')\"",
+     "mkdir -p {data_root}/climbmix {data_root}/eval {data_root}/lm-eval-datasets"
+@@ -60,4 +60,4 @@
+   "writable_tmpfs": true,
+   "no_home": true,
+   "workdir": "/workspace"
+-}
++}
+\ No newline at end of file
+diff --git a/vendor/pkg_configs/pytorch-vision/config.json b/vendor/pkg_configs/pytorch-vision/config.json
+index 7585649d1..b560d642a 100755
+--- a/vendor/pkg_configs/pytorch-vision/config.json
++++ b/vendor/pkg_configs/pytorch-vision/config.json
+@@ -8,6 +8,10 @@
+     "python -c \"import torchvision; torchvision.datasets.FashionMNIST('/data/fmnist', download=True)\"",
+     "python -c \"import torchvision; d10=torchvision.datasets.CIFAR10('/data/cifar', train=True); d100=torchvision.datasets.CIFAR100('/data/cifar', train=True); dfm=torchvision.datasets.FashionMNIST('/data/fmnist', train=True); print(f'CIFAR-10: {len(d10)}, CIFAR-100: {len(d100)}, FashionMNIST: {len(dfm)}')\""
+   ],
++  "local_install_cmds": [
++    "pip install torchvision==0.20.1",
++    "python -c \"import torchvision; d10=torchvision.datasets.CIFAR10('/data/cifar', train=True); d100=torchvision.datasets.CIFAR100('/data/cifar', train=True); dfm=torchvision.datasets.FashionMNIST('/data/fmnist', train=True); print(f'CIFAR-10: {len(d10)}, CIFAR-100: {len(d100)}, FashionMNIST: {len(dfm)}')\""
++  ],
+   "env": {
+     "PYTHONPATH": "/workspace/pytorch-vision:${PYTHONPATH}"
+   },
+diff --git a/vendor/pkg_configs/robomimic/config.json b/vendor/pkg_configs/robomimic/config.json
+index b483c601c..153966bc2 100755
+--- a/vendor/pkg_configs/robomimic/config.json
++++ b/vendor/pkg_configs/robomimic/config.json
+@@ -8,13 +8,16 @@
+   ],
+   "install_cmds": [
+     "apt-get update -q && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential patchelf curl git libgl1-mesa-dev libgl1-mesa-glx libglew-dev libosmesa6-dev software-properties-common wget && apt-get clean && rm -rf /var/lib/apt/lists/*",
+-    "pip install h5py psutil tqdm termcolor tensorboard imageio imageio-ffmpeg matplotlib numpy mujoco robosuite==1.5.1",
++    "pip install h5py psutil tqdm termcolor tensorboard imageio imageio-ffmpeg matplotlib numpy 'mujoco==3.2.3' robosuite==1.5.1 hf_transfer",
+     "cd /workspace/robomimic && pip install -e .",
+     "export MUJOCO_GL=osmesa",
++    "${CONDA_EXE:-conda} install -y -p \"${CONDA_PREFIX:-$CONDA_DEFAULT_ENV}\" -c conda-forge mesalib=25.0.5 libglvnd libgl libegl libglx libglu",
++    "mkdir -p \"$CONDA_PREFIX/etc/conda/activate.d\" && GLF=\"$CONDA_PREFIX/etc/conda/activate.d/zz_mlsbench_fix.sh\" && { grep -q 'headless-GL fix' \"$GLF\" 2>/dev/null || printf '%s\\n' '# MLS-Bench env-local headless-GL fix: pure-CPU OSMesa software render (no GPU/EGL/X needed).' 'export LD_LIBRARY_PATH=\"${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}\"' 'export MUJOCO_GL=osmesa' 'export PYOPENGL_PLATFORM=osmesa' >> \"$GLF\"; }",
+     "python3 /workspace/download_datasets.py"
+   ],
+   "env": {
+     "MUJOCO_GL": "osmesa",
++    "PYOPENGL_PLATFORM": "osmesa",
+     "PYTHONPATH": "/workspace/robomimic:${PYTHONPATH}",
+     "DATASET_ROOT": "/data/datasets"
+   },
+diff --git a/vendor/pkg_configs/verl/config.json b/vendor/pkg_configs/verl/config.json
+index d6fb96d43..4c1d77f3f 100755
+--- a/vendor/pkg_configs/verl/config.json
++++ b/vendor/pkg_configs/verl/config.json
+@@ -1,7 +1,8 @@
+ {
+   "base_image": "verlai/verl:vllm017.latest",
+   "install_cmds": [
+-    "pip uninstall -y verl && pip install --no-deps -e ."
++    "pip uninstall -y verl && pip install --no-deps -e .",
++    "pip install 'numpy<2'"
+   ],
+   "env": {
+     "VLLM_USE_V1": "1",
+@@ -13,7 +14,9 @@
+     "FLASHINFER_WORKSPACE_BASE": "/tmp",
+     "XDG_CONFIG_HOME": "/tmp/config"
+   },
+-  "apptainer_flags": ["--contain"],
++  "apptainer_flags": [
++    "--contain"
++  ],
+   "data_deps": [
+     {
+       "name": "Qwen3-1.7B",
+@@ -48,4 +51,4 @@
+   "writable_tmpfs": false,
+   "no_home": true,
+   "workdir": "/workspace"
+-}
++}
+\ No newline at end of file
+diff --git a/vendor/pkg_configs/verl/pre_edit.py b/vendor/pkg_configs/verl/pre_edit.py
+index d4da44818..82decdfbe 100755
+--- a/vendor/pkg_configs/verl/pre_edit.py
++++ b/vendor/pkg_configs/verl/pre_edit.py
+@@ -199,4 +199,24 @@ OPS = [
+             "                            pass  # silently skip conflicting non-list meta_info\n"
+         ),
+     },
++    # Declare `seed` on RolloutConfig + SamplingConfig. The task's
++    # scripts/train_1gpu.sh passes +actor_rollout_ref.rollout.seed and
++    # +actor_rollout_ref.rollout.val_kwargs.seed, but this verl commit's
++    # dataclasses omit the field, so omega_conf_to_dataclass -> hydra
++    # instantiate() raises TypeError("... unexpected keyword argument 'seed'").
++    # verl DOES consume rollout.seed (vllm_async_server.py: config.get("seed", 0)).
++    # Ordered bottom-to-top (RolloutConfig line 146 before SamplingConfig line 43)
++    # so the first insert does not shift the second anchor.
++    {
++        "op": "insert",
++        "file": "verl/verl/workers/config/rollout.py",
++        "after_line": 146,
++        "content": "    seed: Optional[int] = None",
++    },
++    {
++        "op": "insert",
++        "file": "verl/verl/workers/config/rollout.py",
++        "after_line": 43,
++        "content": "    seed: Optional[int] = None",
++    },
+ ]

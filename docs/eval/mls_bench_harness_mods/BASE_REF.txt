@@ -1,0 +1,2 @@
+base commit: 7f7bc846f59bff13a44565036360da36efd45e16  branch: reward-hacking-analysis
+upstream: git@github.com:Imbernoulli/MLS-Bench.git

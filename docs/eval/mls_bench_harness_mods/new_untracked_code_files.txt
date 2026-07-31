@@ -1,0 +1,2 @@
+scripts/launch_qwen_all.sh
+scripts/relaunch_qwen_set1.sh
