@@ -60,11 +60,13 @@ apply` the MLS-Bench patch (or clone `mlsbench-qs-code`).
 
 ## 7. BENCHMARK HARNESS
 - **MLS-Bench mods** ✅ — eval-fix patch (17 files) + base ref at `autoresearch_idea_harness/docs/eval/mls_bench_harness_mods/`.
-- **`mlsbench-qs-code`** ⏳ — QS-ported modified MLS-Bench at `/mnt/3fs/lxh/mlsbench` (1.9G, 72k files; not a git repo). cc000 bundling as tar.gz → private `coder66/mlsbench-qs-code` (GitHub would need LFS for 1.9G). URL pending.
+- **`mlsbench-qs-code`** ✅ — full QS-ported modified MLS-Bench working tree (1.9G) bundled as `mlsbench-qs-code.tar.gz` → `coder66/mlsbench-qs-code` (private, verified live; extract with `tar xzf`).
 - MLAgentBench — upstream `snap-stanford/MLAgentBench` (re-clonable); our adapter is in the harness repo (`scripts/mab_*.py`).
 
-## Status — everything confirmed except one QS bundle
-All D0-side artifacts ✅ uploaded & verified. All 9 QS model repos ✅ verified live (private).
-`qwen3-30b-a3b` ✅ confirmed trained & uploaded. **Only remaining:** the `mlsbench-qs-code`
-tar.gz bundle → `coder66/mlsbench-qs-code` (cc000 finishing; URL to be appended here).
-_(Per lixinghan, QS/PAI infra itself is not needed going forward — only these artifacts.)_
+## Status — ✅ TRANSFER COMPLETE (2026-07-31)
+Every goal item uploaded & verified: 4 GitHub repos in sync; V1/V2 (public) + all V3 models
+(4 dense on D0 + 9 QS incl. qwen3-30b-a3b, all private) + 3 private datasets (data/env, eval,
+sessions) + complete eval traces + 108 RedDoc MD + Claude sessions + agent-memory + env specs +
+mlsbench-qs-code bundle. Nothing outstanding.
+⚠️ Security cleanup: a staged HF token remains at `/mnt/3fs/lxh/.hf_token` (QS side) — delete it
+(that filesystem is going away regardless, but good hygiene).
