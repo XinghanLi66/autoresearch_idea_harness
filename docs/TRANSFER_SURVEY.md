@@ -30,13 +30,15 @@ apply` the MLS-Bench patch (or clone `mlsbench-qs-code`).
 - `coder66/proposal-qwen3-32b-v3-sft` — `sft32b` (S3; base for `qwen3-32b-rl`)
 - `coder66/proposal-qwen2.5-32b-v3-dpo` — `rl` arm (SFT parent = qwen25sft)
 
-### V3 QS-3FS-only — cc000 uploading (private) ⏳
-- `d1sft` (DeepSeek-R1-8B full, flagship) · `d1rl` (LoRA→d1sft)
-- `m2sft` (235B LoRA adapter, 813MB) · `m2rl` (235B LoRA→m2sft) — 438G merged blobs intentionally skipped
-- `qwen3-8b-rl` / `qwen3-14b-rl` / `qwen3-32b-rl` (LoRAs → S1/S2/S3)
-- `qwen25sft` (V3 full SFT Qwen2.5-32B, the `rl` arm's SFT parent)
-- ⚠️ `qwen3-30b-a3b`: not on /newcpfs and not a final eval arm — cc000 confirming whether a 30B-A3B MoE was trained on 3FS.
-- Base models (DeepSeek-R1-0528-Qwen3-8B, Qwen3-235B-A22B, Qwen3-8B/14B/32B, Qwen2.5-32B-Instruct) are public HF → reference, not uploaded.
+### V3 QS-3FS-only — uploaded by cc000 (private) ✅ (verified live 2026-07-31)
+- `coder66/idea-proposal-training-d1sft` — DeepSeek-R1-8B full (flagship), 17 files
+- `coder66/idea-proposal-training-qwen25sft` — V3 full SFT Qwen2.5-32B (`rl` arm's SFT parent), 41 files
+- `coder66/idea-proposal-training-d1rl-lora` — LoRA → d1sft
+- `coder66/idea-proposal-training-m2sft-lora` — 235B LoRA adapter (813MB) → Qwen3-235B-A22B
+- `coder66/idea-proposal-training-m2rl-lora` — 235B RL LoRA (53G) → m2sft
+- `coder66/idea-proposal-training-qwen3-8b-rl-lora` / `-14b-rl-lora` / `-32b-rl-lora` — LoRAs → S1/S2/S3
+- `coder66/idea-proposal-training-m1-qwen3-30b-a3b-sft-lora` — **Qwen3-30B-A3B MoE SFT LoRA** (M1, ckpt-814, base Qwen3-30B-A3B) — the "qwen3 30b" arm, confirmed trained & uploaded
+- (438G merged 235B blobs intentionally skipped — adapter+base+recipe instead. Base models are public HF → reference, not uploaded. LoRA cards carry valid public `base_model` + lineage in body.)
 
 ## 3. DATA — HF (private under `coder66`)
 - `coder66/idea-proposal-training-v3-data` ✅ — V3 researcher-CoT SFT datasets (4 variants) + 31 conda env specs (`mab` + 30 `mlsbench-*`, incl. `mab.environment.yml`)
@@ -58,11 +60,11 @@ apply` the MLS-Bench patch (or clone `mlsbench-qs-code`).
 
 ## 7. BENCHMARK HARNESS
 - **MLS-Bench mods** ✅ — eval-fix patch (17 files) + base ref at `autoresearch_idea_harness/docs/eval/mls_bench_harness_mods/`.
-- **`mlsbench-qs-code`** ⏳ — QS-ported modified MLS-Bench at `/mnt/3fs/lxh/mlsbench`; cc000 to confirm/push the branch to GitHub.
+- **`mlsbench-qs-code`** ⏳ — QS-ported modified MLS-Bench at `/mnt/3fs/lxh/mlsbench` (1.9G, 72k files; not a git repo). cc000 bundling as tar.gz → private `coder66/mlsbench-qs-code` (GitHub would need LFS for 1.9G). URL pending.
 - MLAgentBench — upstream `snap-stanford/MLAgentBench` (re-clonable); our adapter is in the harness repo (`scripts/mab_*.py`).
 
-## Open QS-side items (cc000) — the only things not yet confirmed
-1. Upload the 9 QS-3FS weights/adapters (§2) → private HF; report URLs.
-2. Confirm/upload `qwen3-30b-a3b` (or confirm it was never trained).
-3. Push `mlsbench-qs-code` to GitHub.
+## Status — everything confirmed except one QS bundle
+All D0-side artifacts ✅ uploaded & verified. All 9 QS model repos ✅ verified live (private).
+`qwen3-30b-a3b` ✅ confirmed trained & uploaded. **Only remaining:** the `mlsbench-qs-code`
+tar.gz bundle → `coder66/mlsbench-qs-code` (cc000 finishing; URL to be appended here).
 _(Per lixinghan, QS/PAI infra itself is not needed going forward — only these artifacts.)_
