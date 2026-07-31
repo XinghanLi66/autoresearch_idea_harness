@@ -18,6 +18,9 @@ import httpx
 DEFAULT_RUNWAY_BASE = "https://runway.devops.rednote.life"
 DEFAULT_RAW_PREDICT_PATH = "/openai/google/anthropic/v1:rawPredict"
 DEFAULT_BEDROCK_INVOKE_PATH = "/openai/bedrock_runtime/model/invoke"
+DEFAULT_MAAS_STREAM_RAW_PREDICT_URL = (
+    "https://maas.devops.rednote.life/openai/openai/google/anthropic/v1:streamRawPredict"
+)
 CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"
 
 
@@ -37,7 +40,14 @@ def _json_bytes(obj: Any) -> bytes:
 
 
 def _models_response() -> dict[str, Any]:
+    fable5_model = os.environ.get("RUNWAY_FABLE5_MODEL", "claude-fable-5")
     models = [
+        {
+            "type": "model",
+            "id": fable5_model,
+            "display_name": "Claude Fable 5",
+            "created_at": "2026-01-01T00:00:00Z",
+        },
         {
             "type": "model",
             "id": "claude-sonnet-4-6[1m]",
@@ -90,17 +100,26 @@ def _normalize_model(model: str | None) -> str:
 
 def _route_for_model(model: str | None) -> tuple[str, str]:
     normalized = _normalize_model(model)
+    fable5_model = _normalize_model(os.environ.get("RUNWAY_FABLE5_MODEL", "claude-fable-5"))
     if not normalized or normalized in {"opus", "opusplan"}:
-        return "google", "RUNWAY_OPUS48_API_KEY"
+        return _opus48_route()
+    if normalized == "fable" or "fable-5" in normalized or (fable5_model and normalized == fable5_model):
+        return "maas_google_stream_fable5", "RUNWAY_FABLE5_API_KEY"
     if normalized == "sonnet" or "sonnet-4-6" in normalized:
         return "bedrock", "RUNWAY_SONNET46_API_KEY"
     if "opus-4-8" in normalized or "opus-48" in normalized:
-        return "google", "RUNWAY_OPUS48_API_KEY"
+        return _opus48_route()
     if "opus-4-7" in normalized or "opus-47" in normalized:
         return "google", "RUNWAY_OPUS47_API_KEY"
     if "opus-4-6" in normalized or "opus-46" in normalized:
         return "google", "RUNWAY_OPUS46_API_KEY"
     raise ValueError(f"unsupported model for Runway Claude proxy: {model!r}")
+
+
+def _opus48_route() -> tuple[str, str]:
+    if os.environ.get("RUNWAY_OPUS48_MAAS_MODEL") or os.environ.get("RUNWAY_OPUS48_MAAS_URL"):
+        return "maas_google_stream_opus48", "RUNWAY_OPUS48_API_KEY"
+    return "google", "RUNWAY_OPUS48_API_KEY"
 
 
 def _split_beta_header(value: str | None) -> list[str]:
@@ -169,6 +188,117 @@ def _anthropic_to_bedrock(req: dict[str, Any], betas: list[str]) -> dict[str, An
     if bedrock_betas:
         payload["anthropic_beta"] = bedrock_betas
     return payload
+
+
+def _maas_google_model_env(provider: str) -> tuple[str, str]:
+    if provider == "maas_google_stream_opus48":
+        return "RUNWAY_OPUS48_MAAS_MODEL", "claude opus 4.8"
+    return "RUNWAY_FABLE5_MAAS_MODEL", "Claude Fable 5"
+
+
+def _maas_google_api_key_env(provider: str, fallback_key_env: str) -> str:
+    if provider == "maas_google_stream_opus48":
+        return "RUNWAY_OPUS48_MAAS_API_KEY"
+    if provider == "maas_google_stream_fable5":
+        return "RUNWAY_FABLE5_MAAS_API_KEY"
+    return fallback_key_env
+
+
+def _anthropic_to_maas_google_stream(req: dict[str, Any], provider: str) -> dict[str, Any]:
+    payload = _anthropic_to_raw_predict(req)
+    model_env, default_model = _maas_google_model_env(provider)
+    payload["model"] = os.environ.get(model_env, default_model)
+    payload["stream"] = True
+    return payload
+
+
+def _merge_usage(base: dict[str, Any], delta: dict[str, Any] | None) -> dict[str, Any]:
+    if not delta:
+        return base
+    out = dict(base)
+    for key, value in delta.items():
+        if isinstance(value, int) and isinstance(out.get(key), int):
+            out[key] = max(out[key], value)
+        else:
+            out[key] = value
+    return out
+
+
+def _message_from_anthropic_sse(lines: list[str]) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        "id": f"msg_proxy_{int(time.time() * 1000)}",
+        "type": "message",
+        "role": "assistant",
+        "model": os.environ.get("RUNWAY_FABLE5_MODEL", "claude-fable-5"),
+        "content": [],
+        "stop_reason": "end_turn",
+        "stop_sequence": None,
+        "usage": {},
+    }
+    blocks: dict[int, dict[str, Any]] = {}
+    tool_json_parts: dict[int, list[str]] = {}
+
+    for line in lines:
+        if not line.startswith("data:"):
+            continue
+        raw = line[len("data:") :].strip()
+        if not raw or raw == "[DONE]":
+            continue
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+
+        etype = event.get("type")
+        if etype == "message_start":
+            start_message = event.get("message") or {}
+            for key in ("id", "type", "role", "model", "stop_reason", "stop_sequence"):
+                if start_message.get(key) is not None:
+                    message[key] = start_message[key]
+            message["usage"] = _merge_usage(message.get("usage") or {}, start_message.get("usage"))
+        elif etype == "content_block_start":
+            idx = int(event.get("index", len(blocks)))
+            block = dict(event.get("content_block") or {})
+            blocks[idx] = block
+            if block.get("type") == "tool_use":
+                tool_json_parts[idx] = []
+        elif etype == "content_block_delta":
+            idx = int(event.get("index", len(blocks)))
+            delta = event.get("delta") or {}
+            block = blocks.setdefault(idx, {"type": "text", "text": ""})
+            dtype = delta.get("type")
+            if dtype == "text_delta":
+                block["text"] = str(block.get("text") or "") + str(delta.get("text") or "")
+            elif dtype == "thinking_delta":
+                block["type"] = "thinking"
+                block["thinking"] = str(block.get("thinking") or "") + str(delta.get("thinking") or "")
+            elif dtype == "signature_delta":
+                block["signature"] = str(delta.get("signature") or "")
+            elif dtype == "input_json_delta":
+                tool_json_parts.setdefault(idx, []).append(str(delta.get("partial_json") or ""))
+        elif etype == "message_delta":
+            delta = event.get("delta") or {}
+            if delta.get("stop_reason") is not None:
+                message["stop_reason"] = delta.get("stop_reason")
+            if delta.get("stop_sequence") is not None:
+                message["stop_sequence"] = delta.get("stop_sequence")
+            message["usage"] = _merge_usage(message.get("usage") or {}, event.get("usage"))
+
+    content: list[dict[str, Any]] = []
+    for idx in sorted(blocks):
+        block = blocks[idx]
+        if block.get("type") == "tool_use":
+            raw_input = "".join(tool_json_parts.get(idx) or [])
+            if raw_input:
+                try:
+                    block["input"] = json.loads(raw_input)
+                except json.JSONDecodeError:
+                    block["input"] = {}
+            else:
+                block["input"] = block.get("input") or {}
+        content.append(block)
+    message["content"] = content
+    return message
 
 
 def _message_for_start(data: dict[str, Any]) -> dict[str, Any]:
@@ -340,6 +470,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
             if provider == "bedrock":
                 payload = _anthropic_to_bedrock(req, betas)
                 data = self._call_runway_bedrock(payload, key_env)
+            elif provider.startswith("maas_google_stream"):
+                payload = _anthropic_to_maas_google_stream(req, provider)
+                data = self._call_maas_google_stream(payload, key_env, provider)
             else:
                 payload = _anthropic_to_raw_predict(req)
                 data = self._call_runway_google(payload, key_env)
@@ -348,6 +481,11 @@ class ProxyHandler(BaseHTTPRequestHandler):
             else:
                 self._send_json(data)
         except Exception as exc:
+            try:
+                sys.stderr.write(f"proxy_error model={req.get('model') if 'req' in locals() else '<unparsed>'}: {exc}\n")
+                sys.stderr.flush()
+            except Exception:
+                pass
             self._send_json(
                 {"type": "error", "error": {"type": "proxy_error", "message": str(exc)}},
                 status=500,
@@ -393,6 +531,43 @@ class ProxyHandler(BaseHTTPRequestHandler):
             raise RuntimeError(str(data.get("Error")))
         return data
 
+    def _call_maas_google_stream(self, payload: dict[str, Any], key_env: str, provider: str) -> dict[str, Any]:
+        maas_key_env = _maas_google_api_key_env(provider, key_env)
+        api_key = os.environ.get(maas_key_env) or os.environ.get(key_env)
+        if not api_key:
+            raise RuntimeError(f"{maas_key_env} or {key_env} is not set")
+        url_env = "RUNWAY_OPUS48_MAAS_URL" if provider == "maas_google_stream_opus48" else "RUNWAY_FABLE5_MAAS_URL"
+        url = os.environ.get(url_env, os.environ.get("RUNWAY_FABLE5_MAAS_URL", DEFAULT_MAAS_STREAM_RAW_PREDICT_URL))
+        headers = {
+            "api-key": api_key,
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
+        }
+        timeout = float(os.environ.get("RUNWAY_PROXY_TIMEOUT", "600"))
+        lines: list[str] = []
+        with httpx.Client(timeout=timeout) as client:
+            with client.stream("POST", url, headers=headers, json=payload) as resp:
+                resp.raise_for_status()
+                ctype = resp.headers.get("content-type", "")
+                if "text/event-stream" not in ctype:
+                    body = resp.read().decode("utf-8", errors="replace")
+                    try:
+                        data = json.loads(body)
+                    except json.JSONDecodeError:
+                        raise RuntimeError(f"MaaS streamRawPredict returned non-SSE response: {body[:300]}")
+                    if "Code" in data and "Error" in data:
+                        raise RuntimeError(str(data.get("Error")))
+                    if data.get("error"):
+                        raise RuntimeError(str(data.get("error")))
+                    raise RuntimeError(f"MaaS streamRawPredict returned non-SSE response: {body[:300]}")
+                for line in resp.iter_lines():
+                    if isinstance(line, bytes):
+                        line = line.decode("utf-8", errors="replace")
+                    if line:
+                        lines.append(line)
+        data = _message_from_anthropic_sse(lines)
+        return data
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -410,7 +585,10 @@ def main() -> None:
     server = ThreadingHTTPServer((args.host, args.port), ProxyHandler)
     server.verbose = args.verbose  # type: ignore[attr-defined]
     print(f"runway anthropic proxy listening on http://{args.host}:{args.port}", flush=True)
-    print("model router enabled: opus->google rawPredict, sonnet->amazon bedrock invoke", flush=True)
+    print(
+        "model router enabled: fable/opus48(if configured)->maas google streamRawPredict, other opus->google rawPredict, sonnet->amazon bedrock invoke",
+        flush=True,
+    )
     server.serve_forever()
 
 

@@ -1,0 +1,123 @@
+{
+  "packages_union": {
+    "ProteinGym": 1,
+    "InverseBench": 1,
+    "EHIGN_PLA": 1,
+    "causal-bnlearn": 1,
+    "pytorch-geometric": 1,
+    "gsplat": 1,
+    "dbim-codebase": 1,
+    "diffusers-main": 1,
+    "pytorch-vision": 3,
+    "eb_jepa": 1,
+    "CleanDiffuser": 2,
+    "humanoid-gym": 1,
+    "robomimic": 1,
+    "LLaDA": 1,
+    "lm-evaluation-harness": 1,
+    "nanoGPT": 1,
+    "verl": 1,
+    "gptq": 1,
+    "llm-qat-runtime": 1,
+    "sparse-attn-eval": 1,
+    "scikit-learn": 2,
+    "deap": 1,
+    "opt-vr-bench": 1,
+    "qlib": 1,
+    "Time-Series-Library": 2,
+    "cleanrl": 1
+  },
+  "per_task": {
+    "ai4bio-mutation-effect-prediction": [
+      "ProteinGym"
+    ],
+    "ai4sci-inverse-diffusion-algo": [
+      "InverseBench"
+    ],
+    "ai4sci-pla-binding-affinity": [
+      "EHIGN_PLA"
+    ],
+    "causal-discovery-discrete": [
+      "causal-bnlearn"
+    ],
+    "graph-generation": [
+      "pytorch-geometric"
+    ],
+    "cv-3dgs-densification": [
+      "gsplat"
+    ],
+    "cv-dbm-scheduler": [
+      "dbim-codebase"
+    ],
+    "cv-vae-loss": [
+      "diffusers-main"
+    ],
+    "cv-pooling-aggregation": [
+      "pytorch-vision"
+    ],
+    "dl-activation-function": [
+      "pytorch-vision"
+    ],
+    "jepa-planning": [
+      "eb_jepa"
+    ],
+    "robo-diffusion-guidance": [
+      "CleanDiffuser"
+    ],
+    "robo-diffusion-policy": [
+      "CleanDiffuser"
+    ],
+    "robo-humanoid-sim2real-algo": [
+      "humanoid-gym"
+    ],
+    "robomimic-bc-loss": [
+      "robomimic"
+    ],
+    "llm-dllm-demask-strategy": [
+      "LLaDA"
+    ],
+    "llm-pretrain-optimizer": [
+      "lm-evaluation-harness",
+      "nanoGPT"
+    ],
+    "llm-rl-importance-sampling": [
+      "verl"
+    ],
+    "llm-ptq-algorithm": [
+      "gptq"
+    ],
+    "llm-qat-algorithm": [
+      "llm-qat-runtime"
+    ],
+    "mlsys-sparse-attention-inference": [
+      "sparse-attn-eval"
+    ],
+    "ml-clustering-algorithm": [
+      "scikit-learn"
+    ],
+    "ml-dimensionality-reduction": [
+      "scikit-learn"
+    ],
+    "optimization-multi-objective": [
+      "deap"
+    ],
+    "optimization-variance-reduction": [
+      "opt-vr-bench"
+    ],
+    "quant-concept-drift": [
+      "qlib"
+    ],
+    "ts-exogenous-forecast": [
+      "Time-Series-Library"
+    ],
+    "ts-imputation": [
+      "Time-Series-Library"
+    ],
+    "rl-value-discrete": [
+      "cleanrl"
+    ],
+    "security-membership-inference-defense": [
+      "pytorch-vision"
+    ]
+  }
+}

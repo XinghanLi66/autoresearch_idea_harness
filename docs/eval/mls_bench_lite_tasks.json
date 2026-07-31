@@ -1,0 +1,182 @@
+{
+ "_provenance": "Official MLS-Bench-Lite 30-task subset, provided verbatim by user 2026-07-17 (canonical paper list). Source of truth = github.com/Imbernoulli/MLS-Bench (local clone /newcpfs/lxh/MLS-Bench); all 30 slugs verified present under tasks/. Do NOT use the HuggingFace dataset Bohan22/MLS-Bench-Tasks (no longer maintained). Name->slug mapping resolved from task_description.md; two siblings disambiguated: cv-dbm-scheduler (Low-Step, NFE=5) and robo-diffusion-guidance (Guided Sampling). Supersedes the earlier heuristic docs/eval/mls_lite_selection.json (NOT authoritative). | 2026-07-19: DROPPED 'robo-humanoid-sim2real-algo' then 2026-07-25: RE-ADDED (working set now 30, full scope for open-model alignment). The earlier drop was because IsaacGym Preview 4 GPU-PhysX segfaults on Ada/sm_89 (L20Z) — RESOLVED by running physics on CPU (train.sh --sim_device cpu --pipeline cpu --rl_device cpu) while the 3 scored evals are MuJoCo/CPU (arch-independent). Validated end-to-end on D0 (train CPU-physics no-segfault -> export policy -> 3 MuJoCo evals emit real success_rate -> mlsbench score non-None). Farm dispatch recipe: HUMANOID_NUM_ENVS=1024 HUMANOID_MAX_ITER=3000 (~15h wall, full official 3000-iter schedule at 1/4 batch).",
+ "n": 30,
+ "domains": {
+  "AI for Science": [
+   {
+    "slug": "ai4bio-mutation-effect-prediction",
+    "name": "Mutation Fitness Predictor"
+   },
+   {
+    "slug": "ai4sci-inverse-diffusion-algo",
+    "name": "Diffusion-Prior Inverse Solver"
+   },
+   {
+    "slug": "ai4sci-pla-binding-affinity",
+    "name": "Protein-Ligand Interaction Model"
+   }
+  ],
+  "Structured & Causal Reasoning": [
+   {
+    "slug": "causal-discovery-discrete",
+    "name": "Discrete Causal Graph Discovery"
+   },
+   {
+    "slug": "graph-generation",
+    "name": "Unconditional Graph Generator Architecture"
+   }
+  ],
+  "Vision & Generation": [
+   {
+    "slug": "cv-3dgs-densification",
+    "name": "3D Scene Densification Strategy"
+   },
+   {
+    "slug": "cv-dbm-scheduler",
+    "name": "Low-Step Diffusion Bridge Sampling"
+   },
+   {
+    "slug": "cv-vae-loss",
+    "name": "Frequency-Aware Autoencoding Loss"
+   }
+  ],
+  "Deep Learning": [
+   {
+    "slug": "cv-pooling-aggregation",
+    "name": "Spatial Feature Aggregation"
+   },
+   {
+    "slug": "dl-activation-function",
+    "name": "Convolutional Activation Nonlinearity"
+   }
+  ],
+  "Robotics": [
+   {
+    "slug": "jepa-planning",
+    "name": "Latent World-Model Planner"
+   },
+   {
+    "slug": "robo-diffusion-guidance",
+    "name": "Guided Diffusion Sampling for Robot Actions"
+   },
+   {
+    "slug": "robo-diffusion-policy",
+    "name": "Diffusion Policy Learning for Robot Control"
+   },
+   {
+    "slug": "robomimic-bc-loss",
+    "name": "Behavioral Cloning Loss for Manipulation"
+   },
+   {
+    "slug": "robo-humanoid-sim2real-algo",
+    "name": "Humanoid Transfer Policy Learning"
+   }
+  ],
+  "Language Models": [
+   {
+    "slug": "llm-dllm-demask-strategy",
+    "name": "Masked Diffusion Demasking Policy"
+   },
+   {
+    "slug": "llm-pretrain-optimizer",
+    "name": "Pretraining Optimizer Design"
+   },
+   {
+    "slug": "llm-rl-importance-sampling",
+    "name": "Reasoning RL Importance-Sampling Granularity"
+   }
+  ],
+  "ML Systems & Efficient ML": [
+   {
+    "slug": "llm-ptq-algorithm",
+    "name": "Post-Training Weight Quantization"
+   },
+   {
+    "slug": "llm-qat-algorithm",
+    "name": "Quantization-Aware Language-Model Training"
+   },
+   {
+    "slug": "mlsys-sparse-attention-inference",
+    "name": "Long-Context Inference-Time Sparse Attention"
+   }
+  ],
+  "Classical & Adaptive Learning": [
+   {
+    "slug": "ml-clustering-algorithm",
+    "name": "Geometry-Robust Clustering Algorithm"
+   },
+   {
+    "slug": "ml-dimensionality-reduction",
+    "name": "Nonlinear 2D Structure-Preserving Embedding"
+   }
+  ],
+  "Optimization & Theory": [
+   {
+    "slug": "optimization-multi-objective",
+    "name": "Multi-Objective Evolutionary Survival and Variation"
+   },
+   {
+    "slug": "optimization-variance-reduction",
+    "name": "Variance-Reduced Stochastic Optimization"
+   }
+  ],
+  "Time Series & Forecasting": [
+   {
+    "slug": "quant-concept-drift",
+    "name": "Concept-Drift-Aware Quantitative Forecasting"
+   },
+   {
+    "slug": "ts-exogenous-forecast",
+    "name": "Exogenous-Variable Target Forecasting Model"
+   },
+   {
+    "slug": "ts-imputation",
+    "name": "Masked Multivariate Time-Series Imputation"
+   }
+  ],
+  "Reinforcement Learning": [
+   {
+    "slug": "rl-value-discrete",
+    "name": "Value-Based Discrete Control"
+   }
+  ],
+  "Trustworthy Learning": [
+   {
+    "slug": "security-membership-inference-defense",
+    "name": "Training Regularization for Membership Privacy"
+   }
+  ]
+ },
+ "slugs": [
+  "ai4bio-mutation-effect-prediction",
+  "ai4sci-inverse-diffusion-algo",
+  "ai4sci-pla-binding-affinity",
+  "causal-discovery-discrete",
+  "graph-generation",
+  "cv-3dgs-densification",
+  "cv-dbm-scheduler",
+  "cv-vae-loss",
+  "cv-pooling-aggregation",
+  "dl-activation-function",
+  "jepa-planning",
+  "robo-diffusion-guidance",
+  "robo-diffusion-policy",
+  "robomimic-bc-loss",
+  "llm-dllm-demask-strategy",
+  "llm-pretrain-optimizer",
+  "llm-rl-importance-sampling",
+  "llm-ptq-algorithm",
+  "llm-qat-algorithm",
+  "mlsys-sparse-attention-inference",
+  "ml-clustering-algorithm",
+  "ml-dimensionality-reduction",
+  "optimization-multi-objective",
+  "optimization-variance-reduction",
+  "quant-concept-drift",
+  "ts-exogenous-forecast",
+  "ts-imputation",
+  "rl-value-discrete",
+  "security-membership-inference-defense",
+  "robo-humanoid-sim2real-algo"
+ ]
+}

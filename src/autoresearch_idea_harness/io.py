@@ -35,16 +35,6 @@ def load_config(path: str | Path | None = None) -> dict[str, Any]:
     cfg_path = Path(path) if path else project_root() / "configs" / "default.yaml"
     with cfg_path.open() as f:
         cfg = yaml.safe_load(f)
-    threshold_path = cfg_path.parent / "v2_3_thresholds.json"
-    if threshold_path.exists():
-        try:
-            thresholds = json.loads(threshold_path.read_text())
-            cfg.setdefault("v2_3", {})
-            cfg["v2_3"].setdefault("task_thresholds", {})
-            cfg["v2_3"]["task_thresholds"].update(thresholds.get("task_thresholds", thresholds))
-            cfg["v2_3"]["thresholds_path"] = str(threshold_path)
-        except Exception:
-            pass
     cfg["_config_path"] = str(cfg_path)
     return cfg
 

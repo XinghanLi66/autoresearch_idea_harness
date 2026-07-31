@@ -1,0 +1,21 @@
+{
+  "n": 5,
+  "note": "MLAgentBench (MAB) starter subset: auto-download, single-file train.py edits, no Kaggle creds. Metric direction: house-price=MAE lower-is-better; others accuracy higher-is-better.",
+  "domains": {
+    "Image Classification": [{"slug": "cifar10", "name": "CIFAR-10 (conv net)"}],
+    "Graph": [{"slug": "ogbn-arxiv", "name": "OGBN-arxiv node classification"}],
+    "NLP": [{"slug": "imdb", "name": "IMDb sentiment (DistilBERT)"}],
+    "Tabular": [
+      {"slug": "house-price", "name": "House Prices regression (MAE)"},
+      {"slug": "spaceship-titanic", "name": "Spaceship Titanic classification"}
+    ]
+  },
+  "slugs": ["cifar10", "ogbn-arxiv", "imdb", "house-price", "spaceship-titanic"],
+  "tasks": {
+    "cifar10":          {"edit_file": "train.py", "metric": "accuracy",  "lower_is_better": false, "baseline_mode": "run"},
+    "ogbn-arxiv":       {"edit_file": "train.py", "metric": "test_acc",  "lower_is_better": false, "baseline_mode": "run"},
+    "imdb":             {"edit_file": "train.py", "metric": "accuracy",  "lower_is_better": false, "baseline_mode": "worker_fill"},
+    "house-price":      {"edit_file": "train.py", "metric": "mae",       "lower_is_better": true,  "baseline_mode": "worker_fill"},
+    "spaceship-titanic":{"edit_file": "train.py", "metric": "accuracy",  "lower_is_better": false, "baseline_mode": "worker_fill"}
+  }
+}

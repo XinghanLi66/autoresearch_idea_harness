@@ -45,14 +45,16 @@ def _command_text(run_id: str, qs_cfg: dict[str, Any], harness_repo: dict[str, A
     remote_run_dir = f"{remote_root}/qs_multinode_nccl_smoke/{run_id}"
     repo_url = str(harness_repo["url"])
     repo_ref = str(harness_repo.get("ref") or "V3")
-    clone_dir = f"{remote_run_dir}/src/autoresearch_idea_harness"
+    # Multi-pod jobs share /mnt/3fs -> every pod cloning into the same dir races and clobbers.
+    # Clone to node-local /tmp (per-pod, unique) instead; keep per-pod logs on shared 3fs.
     return f"""#!/usr/bin/env bash
 set -uo pipefail
 export RUN_ID={shlex.quote(run_id)}
 export REMOTE_RUN_DIR={shlex.quote(remote_run_dir)}
-mkdir -p "$REMOTE_RUN_DIR/src"; cd "$REMOTE_RUN_DIR"
+mkdir -p "$REMOTE_RUN_DIR"; cd "$REMOTE_RUN_DIR"
 HOST="$(hostname)"
 LOG="$REMOTE_RUN_DIR/nccl_${{HOST}}.log"
+CLONE="/tmp/aih_${{RUN_ID}}"   # node-local per-pod clone (avoids shared-3fs race across pods)
 # --- NCCL over InfiniBand (Phase-0: HCAs mlx5_0/1/4/5 active). Image sets NCCL_SOCKET_IFNAME to a
 #     literal $(...) string, so evaluate the helper ourselves. ---
 export NCCL_DEBUG=INFO
@@ -60,10 +62,10 @@ export NCCL_IB_HCA="${{NCCL_IB_HCA:-mlx5_0,mlx5_1,mlx5_4,mlx5_5}}"
 export TORCH_NCCL_ASYNC_ERROR_HANDLING=1
 if [ -x /workspace/get_socket_name.sh ]; then export NCCL_SOCKET_IFNAME="$(/workspace/get_socket_name.sh)"; fi
 echo "[nccl-smoke] host=$HOST PET_NNODES=${{PET_NNODES:-?}} PET_NODE_RANK=${{PET_NODE_RANK:-?}} MASTER_ADDR=${{MASTER_ADDR:-?}} MASTER_PORT=${{MASTER_PORT:-?}} PET_MASTER_PORT=${{PET_MASTER_PORT:-?}} NCCL_SOCKET_IFNAME=${{NCCL_SOCKET_IFNAME:-unset}} NCCL_IB_HCA=$NCCL_IB_HCA" | tee "$LOG"
-rm -rf {shlex.quote(clone_dir)}
-git clone --depth 1 --branch {shlex.quote(repo_ref)} {shlex.quote(repo_url)} {shlex.quote(clone_dir)} 2>&1 | tee -a "$LOG"
-cd {shlex.quote(clone_dir)}
-git rev-parse HEAD | tee "$REMOTE_RUN_DIR/git_head.txt"
+rm -rf "$CLONE"
+git clone --depth 1 --branch {shlex.quote(repo_ref)} {shlex.quote(repo_url)} "$CLONE" 2>&1 | tee -a "$LOG"
+cd "$CLONE"
+git rev-parse HEAD | tee "$REMOTE_RUN_DIR/git_head_${{HOST}}.txt"
 python3 -m py_compile scripts/qs_multinode_nccl_smoke.py 2>&1 | tee -a "$LOG"
 # torchrun reads PET_NNODES/PET_NODE_RANK/PET_MASTER_ADDR/PET_MASTER_PORT natively; override nproc only.
 torchrun --nproc-per-node=4 scripts/qs_multinode_nccl_smoke.py 2>&1 | tee -a "$LOG"
